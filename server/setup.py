@@ -7,6 +7,7 @@ reqs = [
     'gunicorn',
     'pandas',
     'psycopg2',
+    'requests',
     'uuid'
 ]
 

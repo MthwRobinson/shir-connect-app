@@ -1,12 +1,19 @@
 """ Connects to the Eventbrite API """
-import requests
+import json
+import logging
 import urllib
+
+import daiquiri
+import requests
 
 import trs_dashboard.configuration as conf
 
 class Eventbrite(object):
     """ Makes Eventbrite REST calls using an OAUTH token """
     def __init__(self):
+        daiquiri.setup(level=logging.INFO)
+        self.logger = daiquiri.getLogger(__name__)
+
         self.token = conf.EVENTBRITE_OAUTH
         self.url = 'https://www.eventbriteapi.com/v3'
 
@@ -16,3 +23,27 @@ class Eventbrite(object):
         url = self.url + '/users/me/?' + params
         response = requests.get(url)
         return response
+
+    def get_events(self, org_id=1358538665, start=None):
+        """ Pulls a list of events basd on id """
+        url = self.url + '/organizers/%s/events/'%(org_id)
+
+        # Add the query parameters
+        param_dict = {'token': self.token}
+        if start:
+            date = start + 'T0:00:00'
+            param_dict['start_date.range_start'] = date
+        params = urllib.parse.urlencode(param_dict)
+        url += '?' + params
+        
+        # Make and parse the request
+        print(url)
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            events = json.loads(response.text)
+            return events 

@@ -11,3 +11,13 @@ def test_events():
     assert type(events['events']) == list
     event = events['events'][0]
     assert event['start']['local'] >= '2018-07-01'
+
+def test_event():
+    eventbrite = Eventbrite()
+    event = eventbrite.get_event(40146904472)
+    assert event['id'] == '40146904472'
+
+def test_attendees():
+    eventbrite = Eventbrite()
+    event = eventbrite.get_attendees(1059379633)
+    assert len(event['attendees']) > 0

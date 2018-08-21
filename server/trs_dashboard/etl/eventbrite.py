@@ -37,7 +37,6 @@ class Eventbrite(object):
         url += '?' + params
         
         # Make and parse the request
-        print(url)
         response = requests.get(url)
         if response.status_code != 200:
             code = response.status_code
@@ -47,3 +46,33 @@ class Eventbrite(object):
         else:
             events = json.loads(response.text)
             return events 
+
+    def get_event(self, event_id):
+        """ Returns an event based on an id """
+        params = urllib.parse.urlencode({'token': self.token})
+        url = self.url + '/events/%s'%(event_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            event = json.loads(response.text)
+            return event
+    
+    def get_attendees(self, event_id):
+        """ Returns the attendees of an event based on an id """
+        params = urllib.parse.urlencode({'token': self.token})
+        url = self.url + '/events/%s/attendees'%(event_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            attendees = json.loads(response.text)
+            return attendees

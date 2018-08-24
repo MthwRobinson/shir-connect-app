@@ -76,3 +76,18 @@ class Eventbrite(object):
         else:
             attendees = json.loads(response.text)
             return attendees
+
+    def get_order(self, order_id, page=1):
+        """ Returns metadata about an order """
+        params = urllib.parse.urlencode({'token': self.token, 'page': page})
+        url = self.url + '/orders/%s'%(order_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            order = json.loads(response.text)
+            return order

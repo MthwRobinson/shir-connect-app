@@ -1,0 +1,30 @@
+""" Command line interface for server side functions """
+import logging
+
+import click
+import daiquiri
+
+from trs_dashboard.database.database import Database
+
+# Configure logging
+daiquiri.setup(level=logging.INFO)
+LOGGER = daiquiri.getLogger(__name__)
+
+@click.group()
+def main():
+    """
+    Welcome to the TRS Dashboard CLI!
+    To learn more about a command, use the --help flag
+    """
+    pass
+
+@click.command()
+def initialize():
+    """ Initializes the tables for the dashboard """
+    database = Database()
+    LOGGER.info('Initializing the database ...')
+    database.initialize()
+main.add_command(initialize)
+
+main()
+

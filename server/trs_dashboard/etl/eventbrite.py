@@ -24,12 +24,12 @@ class Eventbrite(object):
         response = requests.get(url)
         return response
 
-    def get_events(self, org_id=1358538665, start=None):
+    def get_events(self, org_id=1358538665, start=None, page=1):
         """ Pulls a list of events basd on id """
         url = self.url + '/organizers/%s/events/'%(org_id)
 
         # Add the query parameters
-        param_dict = {'token': self.token}
+        param_dict = {'token': self.token, 'page': 1}
         if start:
             date = start + 'T0:00:00'
             param_dict['start_date.range_start'] = date
@@ -47,9 +47,9 @@ class Eventbrite(object):
             events = json.loads(response.text)
             return events 
 
-    def get_event(self, event_id):
+    def get_event(self, event_id, page=1):
         """ Returns an event based on an id """
-        params = urllib.parse.urlencode({'token': self.token})
+        params = urllib.parse.urlencode({'token': self.token, 'page': page})
         url = self.url + '/events/%s'%(event_id)
         url += '?' + params
         response = requests.get(url)
@@ -62,9 +62,9 @@ class Eventbrite(object):
             event = json.loads(response.text)
             return event
     
-    def get_attendees(self, event_id):
+    def get_attendees(self, event_id, page=1):
         """ Returns the attendees of an event based on an id """
-        params = urllib.parse.urlencode({'token': self.token})
+        params = urllib.parse.urlencode({'token': self.token, 'page': page})
         url = self.url + '/events/%s/attendees'%(event_id)
         url += '?' + params
         response = requests.get(url)

@@ -20,7 +20,18 @@ To connect to the Eventbrite API, you will need to obtain an OAUTH token.
 You can get one from the website linked above.
 After you obtain your OAUTH key, run `export EVENTBRITE_OAUTH="{token}", replacing {token} with your OAUTH token.
 
+To connect to Postgres, you need to add the user name and password to a `~/.pgpass` file.
+The formate of the file is:
+```
+{host}:{port}:*:{user}:{password}
+```
+
 After the setup steps are done, you can start the unit tests by running `py.test --cov=trs\_dashboard` from the `/server` folder.
+
+The Postgres database, which includes both schema and table definitions, can be initialized using the following CLI command:
+```
+trs_dashboard initialize
+```
 
 ### UI
 

@@ -21,3 +21,8 @@ def test_attendees():
     eventbrite = Eventbrite()
     event = eventbrite.get_attendees(1059379633)
     assert len(event['attendees']) > 0
+
+def test_order():
+    eventbrite = Eventbrite()
+    order = eventbrite.get_order(705451451)
+    assert type(order) == dict

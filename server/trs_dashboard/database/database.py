@@ -1,4 +1,5 @@
 """ Connects to the Postgres database """
+from copy import deepcopy
 import logging
 import os
 
@@ -23,6 +24,7 @@ class Database(object):
         self.path = os.path.dirname(os.path.realpath(__file__))
 
         # Database connection and configurations
+        self.columns = {}
         self.schema = conf.PG_SCHEMA
         self.database = conf.PG_DATABASE
         self.connection = psycopg2.connect(
@@ -81,3 +83,33 @@ class Database(object):
         df = pd.read_sql(sql, self.connection)
         columns = [x for x in df['column_name']]
         return columns
+
+    def load_item(self, item, table):
+        """ Load items from a dictionary into a Postgres table """
+        # Find the columns for the table
+        if table not in self.columns:
+            self.columns[table] = self.get_columns(table)
+        columns = self.columns[table]
+
+        # Determine which columns in the item are valid
+        item_copy = deepcopy(item)
+        for key in item:
+            if key not in columns:
+                del item_copy[key]
+
+        # Construct the insert statement
+        n = len(item_copy)
+        row = "(" + ', '.join(['%s' for i in n]) + ")"
+        cols = "(" + ', '.join([x for x in item_copy]) + ")"
+        sql = """
+            INSERT INTO {schema}.{table}
+            {cols}
+            VALUES
+            {row}
+        """.format(schema=self.schema, table=table, cols=cols, row=row)
+
+        # Inser the data
+        values = tuple([item_copy[x] for x in item_copy])
+        with self.connection.cursor() as cursor:
+            cursor.execute(sql, values)
+        self.connection.commit()

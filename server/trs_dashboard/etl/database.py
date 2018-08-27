@@ -3,6 +3,7 @@ import logging
 import os
 
 import daiquiri
+import pandas as pd
 import psycopg2
 
 import trs_dashboard.configuration as conf
@@ -68,3 +69,15 @@ class Database(object):
                 with open(filename, 'r') as f:
                     sql = f.read().format(schema=self.schema)
                 self.run_query(sql)
+
+    def get_columns(self, table):
+        """ Pulls the column names for a table """
+        sql = """
+            SELECT DISTINCT column_name
+            FROM information_schema.columns
+            WHERE table_schema='{schema}'
+            AND table_name='{table}'
+        """.format(schema=self.schema, table=table)
+        df = pd.read_sql(sql, self.connection)
+        columns = [x for x in df['column_name']]
+        return columns

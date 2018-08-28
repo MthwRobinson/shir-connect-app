@@ -21,8 +21,12 @@ class DataLoader(object):
     def run(self, test=False):
         """ Runs the data load process """
         last_event_date = self.database.last_event_date()
-        self.logger.info('Loading events starting at %s'%(last_event_date))
-        start = str(last_event_date)[:10]
+        if last_event_date:
+            self.logger.info('Loading events starting at %s'%(last_event_date))
+            start = str(last_event_date)[:10]
+        else:
+            self.logger.info('Loading events from the first available event')
+            start = None
         events = self.eventbrite.get_events(start=start, page=1)
 
         num_events = events['pagination']['object_count']

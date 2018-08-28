@@ -153,6 +153,8 @@ class Database(object):
         df = pd.read_sql(sql, self.connection)
 
         if len(df) > 0:
-            return df.loc[0]['max_start'].to_pydatetime()
-        else:
-            return None
+            time = df.loc[0]['max_start']
+            if time:
+                return time.to_pydatetime()
+            else:
+                return None

@@ -1,10 +1,12 @@
 """ Command line interface for server side functions """
+import datetime
 import logging
 
 import click
 import daiquiri
 
 from trs_dashboard.database.database import Database
+from trs_dashboard.etl.data_loader import DataLoader
 
 # Configure logging
 daiquiri.setup(level=logging.INFO)
@@ -26,5 +28,15 @@ def initialize():
     database.initialize()
 main.add_command(initialize)
 
-main()
+@click.command()
+def load_eventbrite():
+    """ Loads Eventbrite data into postgres """
+    start = datetime.datetime.now()
+    LOGGER.info('Starting Eventbrite dataload at %s'%(start))
+    data_loader = DataLoader()
+    data_loader.run()
+    end = datetime.datetime.now()
+    LOGGER.info('Finished Eventbrite dataload at %s'%(end))
+main.add_command(load_eventbrite)
 
+main()

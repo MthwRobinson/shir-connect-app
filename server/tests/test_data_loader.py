@@ -1,4 +1,10 @@
+import datetime
+
 from trs_dashboard.etl.data_loader import DataLoader
+
+def test_data_loader():
+    data_loader = DataLoader()
+    data_loader.run(test=True)
 
 def test_load_event():
     data_loader = DataLoader()
@@ -9,6 +15,8 @@ def test_load_event():
     data_loader.load_event(event)
     test_event = data_loader.database.get_item('events', 'test_event')
     assert test_event['id'] == 'test_event'
+    last_event_date = data_loader.database.last_event_date()
+    assert isinstance(last_event_date, datetime.datetime)
 
     data_loader.database.delete_item('events', 'test_event')
     test_event = data_loader.database.get_item('events', 'test_event')

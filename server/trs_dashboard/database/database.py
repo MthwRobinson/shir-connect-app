@@ -142,3 +142,17 @@ class Database(object):
             return dict(df.loc[0])
         else:
             return None
+
+    def last_event_date(self):
+        """ Pulls the most recent event start date from the database """
+        sql = """
+            SELECT max(start_datetime) as max_start 
+            FROM {schema}.events
+            WHERE start_datetime IS NOT NULL
+        """.format(schema=self.schema)
+        df = pd.read_sql(sql, self.connection)
+
+        if len(df) > 0:
+            return df.loc[0]['max_start'].to_pydatetime()
+        else:
+            return None

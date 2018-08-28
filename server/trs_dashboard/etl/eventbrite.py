@@ -29,7 +29,7 @@ class Eventbrite(object):
         url = self.url + '/organizers/%s/events/'%(org_id)
 
         # Add the query parameters
-        param_dict = {'token': self.token, 'page': 1}
+        param_dict = {'token': self.token, 'page': page}
         if start:
             date = start + 'T0:00:00'
             param_dict['start_date.range_start'] = date

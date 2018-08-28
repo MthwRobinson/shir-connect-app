@@ -27,7 +27,7 @@ class DataLoader(object):
         else:
             self.logger.info('Loading events from the first available event')
             start = None
-        events = self.eventbrite.get_events(start=start, page=1)
+        events = self.eventbrite.get_events(start=start)
 
         num_events = events['pagination']['object_count']
         if num_events > 0:

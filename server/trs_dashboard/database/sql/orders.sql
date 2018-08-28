@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS {schema}.orders (
   first_name text,
   last_name text,
   name text,
-  status text
+  status text,
+  load_datetime timestamp
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_index ON {schema}.orders (id);

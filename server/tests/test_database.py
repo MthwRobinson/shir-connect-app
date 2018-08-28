@@ -1,4 +1,4 @@
-from trs_dashboard.etl.database import Database
+from trs_dashboard.database.database import Database
 
 def test_initialize():
     database = Database()

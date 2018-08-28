@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS {schema}.events (
   status text,
   url text,
   vanity_url text,
-  venue_id text
+  venue_id text,
+  load_datetime text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS event_index ON {schema}.events (id);

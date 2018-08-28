@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS {schema}.attendees (
   quantity integer,
   refunded boolean,
   ticket_class_id text,
-  ticket_class_name text
+  ticket_class_name text,
+  load_datetime timestamp
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS attendee_index ON {schema}.attendees (id);

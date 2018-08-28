@@ -92,15 +92,15 @@ class Database(object):
         columns = self.columns[table]
 
         # Determine which columns in the item are valid
-        item_copy = deepcopy(item)
+        item_ = deepcopy(item)
         for key in item:
             if key not in columns:
-                del item_copy[key]
+                del item_[key]
 
         # Construct the insert statement
-        n = len(item_copy)
-        row = "(" + ', '.join(['%s' for i in n]) + ")"
-        cols = "(" + ', '.join([x for x in item_copy]) + ")"
+        n = len(item_)
+        row = "(" + ', '.join(['%s' for i in range(n)]) + ")"
+        cols = "(" + ', '.join([x for x in item_]) + ")"
         sql = """
             INSERT INTO {schema}.{table}
             {cols}
@@ -109,7 +109,30 @@ class Database(object):
         """.format(schema=self.schema, table=table, cols=cols, row=row)
 
         # Inser the data
-        values = tuple([item_copy[x] for x in item_copy])
+        values = tuple([item_[x] for x in item_])
         with self.connection.cursor() as cursor:
             cursor.execute(sql, values)
         self.connection.commit()
+
+    def delete_item(self, item_id, table):
+        """ Deletes an item from a table """
+        sql = "DELETE FROM {schema}.{table} WHERE id='{item_id}'".format(
+            schema=self.schema,
+            table=table,
+            item_id=item_id
+        )
+        self.run_query(sql)
+
+    def get_item(self, item_id, table):
+        """ Fetches an item from the database """
+        sql = "SELECT * FROM {schema}.{table} WHERE id='{item_id}'".format(
+            schema=self.schema,
+            table=table,
+            item_id=item_id
+        )
+        df = pd.read_sql(sql, self.connection)
+
+        if len(df) > 0:
+            return dict(df.loc[0])
+        else:
+            return None

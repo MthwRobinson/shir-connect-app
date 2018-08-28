@@ -18,5 +18,3 @@ CREATE TABLE IF NOT EXISTS {schema}.attendees (
   ticket_class_name text,
   load_datetime timestamp
 );
-
-CREATE UNIQUE INDEX IF NOT EXISTS attendee_index ON {schema}.attendees (id);

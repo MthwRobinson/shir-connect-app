@@ -114,16 +114,19 @@ class Database(object):
             cursor.execute(sql, values)
         self.connection.commit()
 
-    def delete_item(self, item_id, table):
+    def delete_item(self, table, item_id, secondary=None):
         """ Deletes an item from a table """
         sql = "DELETE FROM {schema}.{table} WHERE id='{item_id}'".format(
             schema=self.schema,
             table=table,
             item_id=item_id
         )
+        if secondary:
+            for key in secondary:
+                sql += " AND %s='%s'"%(key, secondary[key])
         self.run_query(sql)
 
-    def get_item(self, item_id, table):
+    def get_item(self, table, item_id, secondary=None):
         """ Fetches an item from the database """
         sql = "SELECT * FROM {schema}.{table} WHERE id='{item_id}'".format(
             schema=self.schema,
@@ -131,6 +134,9 @@ class Database(object):
             item_id=item_id
         )
         df = pd.read_sql(sql, self.connection)
+        if secondary:
+            for key in secondary:
+                sql += " AND %s='%s'"%(key, secondary[key])
 
         if len(df) > 0:
             return dict(df.loc[0])

@@ -37,5 +37,31 @@ class DataLoader(object):
         event_['load_datetime'] = datetime.datetime.utcnow()
         self.database.load_item(event_, 'events')
 
+    def load_attendee(self, attendee):
+        """ Loads an attendee into the database """
+        attendee_ = deepcopy(attendee)
+
+        profile = attendee_['profile']
+        attendee_['name'] = profile['name']
+        attendee_['first_name'] = profile['first_name']
+        attendee_['last_name'] = profile['last_name']
+        attendee_['email'] = profile['email']
+
+        cost = attendee_['costs']['gross']['major_value']
+        attendee_['cost'] = float(cost)
+
+        attendee_['load_datetime'] = datetime.datetime.utcnow()
+        self.database.load_item(attendee_, 'attendees')
+
+    def load_order(self, order):
+        """ Loads an order into the database """
+        order_ = deepcopy(order)
+
+        cost = order_['costs']['gross']['major_value']
+        order_['cost'] = float(cost)
+
+        order_['load_datetime'] = datetime.datetime.utcnow()
+        self.database.load_item(order_, 'orders')
+
 
 

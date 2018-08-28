@@ -89,7 +89,8 @@ class DataLoader(object):
                 break
             else:
                 page = events['pagination']['page_number'] + 1
-                self.logger.info('\n Process pages %s of events \n'%(page))
+                msg = 'Will process page %s after sleeping 30 mins'%(page)
+                self.logger.info(msg)
                 # Sleep to avoid the Eventbrite rate limit
                 time.sleep(1800)
                 events = self.eventbrite.get_attendees(event_id, page)

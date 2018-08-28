@@ -85,7 +85,7 @@ class Eventbrite(object):
         response = requests.get(url)
         if response.status_code != 200:
             code = response.status_code
-            msg = 'Response had status code: %s'(code)
+            msg = 'Response had status code: %s'%(code)
             self.logger.warning(msg)
             return None
         else:

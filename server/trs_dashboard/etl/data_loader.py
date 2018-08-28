@@ -81,14 +81,14 @@ class DataLoader(object):
                         more_attendees = False
                         break
                     else:
-                        page = attendees['pagination']['page_count'] + 1
+                        page = attendees['pagination']['page_number'] + 1
                         attendees = self.eventbrite.get_attendees(event_id, page)
     
             if test or not events['pagination']['has_more_items']:
                 more_events = False
                 break
             else:
-                page = events['pagination']['page_count'] + 1
+                page = events['pagination']['page_number'] + 1
                 self.logger.info('\n Process pages %s of events \n'%(page))
                 events = self.eventbrite.get_attendees(event_id, page)
 

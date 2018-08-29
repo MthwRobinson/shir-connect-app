@@ -2,6 +2,7 @@
 from copy import deepcopy
 import datetime
 import logging
+import time
 
 import arrow
 import daiquiri
@@ -27,7 +28,7 @@ class DataLoader(object):
         else:
             self.logger.info('Loading events from the first available event')
             start = None
-        events = self.eventbrite.get_events(start=start)
+        events = self.get_events(start=start, page=1)
 
         num_events = events['pagination']['object_count']
         if num_events > 0:
@@ -50,8 +51,7 @@ class DataLoader(object):
                     self.database.delete_item('events', event_id)
                     self.load_event(event)
 
-                # Load the attendee and order infomation
-                attendees = self.eventbrite.get_attendees(event_id)
+                attendees = self.get_attendees(event_id, page=1)
                 more_attendees = True
                 while more_attendees:
                     if not attendees:
@@ -67,33 +67,49 @@ class DataLoader(object):
                             )
                             self.load_attendee(attendee)
 
-                        # Load the order information
-                        order_id = attendee['order_id']
-                        order = self.eventbrite.get_order(order_id)
-                        if not test:
-                            self.database.delete_item('orders', order_id)
-                            if order:
-                                self.load_order(order)
-                        else:
-                            break
-                    
                     if test or not attendees['pagination']['has_more_items']:
                         more_attendees = False
                         break
                     else:
                         page = attendees['pagination']['page_number'] + 1
-                        attendees = self.eventbrite.get_attendees(event_id, page)
+                        attendees = self.get_attendees(event_id, page)
+                # Sleep to avoid the Eventbrite rate limit
+                time.sleep(60)
     
             if test or not events['pagination']['has_more_items']:
                 more_events = False
                 break
             else:
                 page = events['pagination']['page_number'] + 1
-                msg = 'Will process page %s after sleeping 30 mins'%(page)
+                msg = 'Pulling events on page %s'%(page)
                 self.logger.info(msg)
-                # Sleep to avoid the Eventbrite rate limit
-                time.sleep(1800)
-                events = self.eventbrite.get_attendees(event_id, page)
+                events = self.get_events(start, page)
+
+    def get_events(self, start, page=1):
+        """ 
+        Pulls events from eventbrite and sleeps if the rate limit
+        has been exceeded
+        """
+        events = self.eventbrite.get_events(start=start, page=page)
+        if not events:
+            # Sleep until eventbrite resets
+            self.logger.info('Rate limit exceed. Sleeping 30 mins')
+            time.sleep(3600)
+            events = self.eventbrite.get_events(start=start, page=page)
+        return events
+
+    def get_attendees(self, event_id, page=1):
+        """
+        Pulls attendees from eventbrite and sleeps if the rate limit
+        has been exceeded
+        """
+        attendees = self.eventbrite.get_attendees(event_id, page)
+        if not attendees:
+            # If events comes back as none, sleep until the 
+            # Eventbrite rate limit resets
+            self.logger.info('Rate limit exceed. Sleeping 30 mins')
+            time.sleep(3600)
+            attendees = self.eventbrite.get_attendees(event_id, page)
 
     def load_event(self, event):
         """ Loads an event into the database """
@@ -120,12 +136,12 @@ class DataLoader(object):
 
         profile = attendee_['profile']
         attendee_['name'] = profile['name']
-        attendee_['first_name'] = profile['first_name']
-        attendee_['last_name'] = profile['last_name']
+        if 'first_name' in profile:
+            attendee_['first_name'] = profile['first_name']
+        if 'last_name' in profile:
+            attendee_['last_name'] = profile['last_name']
         if 'email' in profile:
             attendee_['email'] = profile['email']
-        else:
-            attendee_['email'] = None
 
         cost = attendee_['costs']['gross']['major_value']
         attendee_['cost'] = float(cost)

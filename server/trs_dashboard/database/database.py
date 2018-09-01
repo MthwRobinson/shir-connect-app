@@ -75,6 +75,23 @@ class Database(object):
                 with open(filename, 'r') as f:
                     sql = f.read().format(schema=self.schema)
                 self.run_query(sql)
+    
+    def refresh_view(self, view):
+        """ Refrshes a materialized view """
+        sql = "REFRESH MATERIALIZED VIEW %s.%s"%(self.schema, view)
+        self.run_query(sql)
+
+    def refresh_views(self, test=False):
+        """ Refreshes all materialized views """
+        path = self.path + '/views/'
+        files = os.listdir(path)
+        for file_ in files:
+            if file_.endswith('.sql'):
+                view = file_.split('.')[0]
+                msg = 'Refreshing materialized view %s'%(view)
+                self.logger.info(msg)
+                if not test:
+                    self.refresh_view(view)
 
     def get_columns(self, table):
         """ Pulls the column names for a table """

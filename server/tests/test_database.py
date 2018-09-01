@@ -9,3 +9,7 @@ def test_get_columns():
     database = Database()
     columns = database.get_columns('events')
     assert len(columns) > 0
+
+def test_refresh_views():
+    database = Database()
+    database.refresh_views(test=True)

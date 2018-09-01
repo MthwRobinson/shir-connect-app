@@ -29,6 +29,14 @@ def initialize():
 main.add_command(initialize)
 
 @click.command()
+def refresh_views():
+    """ Refrshes the materialized views for the dashboard """
+    database = Database()
+    LOGGER.info('Refreshing materialized views ...')
+    database.refresh_views()
+main.add_command(refresh_views)
+
+@click.command()
 def load_eventbrite():
     """ Loads Eventbrite data into postgres """
     start = datetime.datetime.now()

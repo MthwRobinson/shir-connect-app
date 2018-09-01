@@ -94,6 +94,9 @@ class DataLoader(object):
                 self.logger.info(msg)
                 events = self.get_events(start, page)
 
+        # Refresh the materialized views with the new data
+        self.database.refresh_views()
+
     def get_events(self, start, page=1):
         """ 
         Pulls events from eventbrite and sleeps if the rate limit

@@ -49,7 +49,10 @@ class Eventbrite(object):
 
     def get_event(self, event_id, page=1):
         """ Returns an event based on an id """
-        params = urllib.parse.urlencode({'token': self.token, 'page': page})
+        params = urllib.parse.urlencode({
+            'token': self.token, 
+            'page': page
+        })
         url = self.url + '/events/%s'%(event_id)
         url += '?' + params
         response = requests.get(url)
@@ -64,7 +67,10 @@ class Eventbrite(object):
     
     def get_attendees(self, event_id, page=1):
         """ Returns the attendees of an event based on an id """
-        params = urllib.parse.urlencode({'token': self.token, 'page': page})
+        params = urllib.parse.urlencode({
+            'token': self.token, 
+            'page': page
+        })
         url = self.url + '/events/%s/attendees'%(event_id)
         url += '?' + params
         response = requests.get(url)
@@ -79,7 +85,10 @@ class Eventbrite(object):
 
     def get_order(self, order_id, page=1):
         """ Returns metadata about an order """
-        params = urllib.parse.urlencode({'token': self.token, 'page': page})
+        params = urllib.parse.urlencode({
+            'token': self.token, 
+            'page': page
+        })
         url = self.url + '/orders/%s'%(order_id)
         url += '?' + params
         response = requests.get(url)
@@ -91,3 +100,21 @@ class Eventbrite(object):
         else:
             order = json.loads(response.text)
             return order
+
+    def get_venue(self, venue_id, page=1):
+        """ Returns the metadata for a venue """
+        params = urllib.parse.urlencode({
+            'token': self.token, 
+            'page': page
+        })
+        url = self.url + '/venues/%s'%(venue_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            venue = json.loads(response.text)
+            return venue

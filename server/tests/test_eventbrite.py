@@ -26,3 +26,8 @@ def test_order():
     eventbrite = Eventbrite()
     order = eventbrite.get_order(705451451)
     assert type(order) == dict
+
+def test_venue():
+    eventbrite = Eventbrite()
+    venue = eventbrite.get_venue(26449992)
+    assert type(venue) == dict

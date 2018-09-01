@@ -51,6 +51,15 @@ class DataLoader(object):
                     self.database.delete_item('events', event_id)
                     self.load_event(event)
 
+                # Load the venue, if it does not already
+                # appear in the database
+                venue_id = event['venue_id']
+                venue_ = self.database.get_item('venues', venue_id)
+                if venue_id and not venue_:
+                    venue = self.get_venue(venue_id)
+                    if not test:
+                        self.load_venue(venue)
+
                 attendees = self.get_attendees(event_id, page=1)
                 more_attendees = True
                 while more_attendees:
@@ -110,6 +119,19 @@ class DataLoader(object):
             self.logger.info('Rate limit exceed. Sleeping 30 mins')
             time.sleep(3600)
             attendees = self.eventbrite.get_attendees(event_id, page)
+        return attendees
+
+    def get_venue(self, venue_id, page=1):
+        """
+        Pull a venue and sleeps if the rate limit
+        has been exceeded
+        """
+        venue = self.eventbrite.get_venue(venue_id, page)
+        if not venue:
+            self.logger.info('Rate limit exceed. Sleeping 30 mins')
+            time.sleep(3600)
+            venue = self.eventbrite.get_venue(event_id, page)
+        return venue
 
     def load_event(self, event):
         """ Loads an event into the database """
@@ -158,6 +180,18 @@ class DataLoader(object):
 
         order_['load_datetime'] = datetime.datetime.utcnow()
         self.database.load_item(order_, 'orders')
+
+    def load_venue(self, venue):
+        """ Loads a venue into the database """
+        venue_ = deepcopy(venue)
+
+        for key in venue_['address']:
+            val = venue_['address'][key]
+            venue_[key] = val
+
+        venue_['latitude'] = float(venue_['latitude'])
+        venue_['longitude'] = float(venue_['longitude'])
+        self.database.load_item(venue_, 'venues')
 
 
 

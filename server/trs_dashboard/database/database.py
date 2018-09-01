@@ -35,8 +35,12 @@ class Database(object):
 
     def initialize(self):
         """ Initializes the database """
+        self.logger.info('Initializing schema')
         self.initialize_schema()
-        self.initialize_tables()
+        self.logger.info('Initializing tables')
+        self.initialize_tables('sql')
+        self.logger.info('Initializing views')
+        self.initialize_tables('views')
         
     def run_query(self, sql, commit=True):
         """ Runs a query against the postgres database """
@@ -55,16 +59,16 @@ class Database(object):
         sql = "CREATE SCHEMA IF NOT EXISTS %s"%(self.schema)
         self.run_query(sql)
 
-    def initialize_tables(self):
+    def initialize_tables(self, folder='sql'):
         """ Creates the tables for the dashboard data """
-        path = self.path + '/sql/'
+        path = self.path + '/%s/'%(folder)
         files = os.listdir(path)
         for file_ in files:
             if file_.endswith('.sql'):
                 table = file_.split('.')[0]
-                msg = 'Creating table {table} in schema {schema}'.format(
-                    table=table,
-                    schema=self.schema
+                msg = 'Creating table or view %s in schema %s'%(
+                    table,
+                    self.schema
                 )
                 self.logger.info(msg)
                 filename = path + file_

@@ -35,8 +35,8 @@ class Database(object):
 
     def initialize(self):
         """ Initializes the database """
-        self.logger.info('Initializing schema')
-        self.initialize_schema()
+        # self.logger.info('Initializing schema')
+        # self.initialize_schema()
         self.logger.info('Initializing tables')
         self.initialize_tables('sql')
         self.logger.info('Initializing views')

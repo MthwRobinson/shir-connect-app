@@ -5,6 +5,7 @@ if [ -f $LOCK ]; then
   exit 6
 fi
 touch $LOCK
+echo Eventbrite load is starting
 source /home/trs_dashboard/.bashrc
 /home/trs_dashboard/anaconda3/bin/trs_dashboard load_eventbrite
 rm $LOCK

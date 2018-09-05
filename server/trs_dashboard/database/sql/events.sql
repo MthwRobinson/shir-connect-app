@@ -18,4 +18,4 @@ CREATE TABLE IF NOT EXISTS {schema}.events (
   load_datetime text
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS event_index ON {schema}.events (id);
+--CREATE UNIQUE INDEX IF NOT EXISTS event_index ON {schema}.events (id);

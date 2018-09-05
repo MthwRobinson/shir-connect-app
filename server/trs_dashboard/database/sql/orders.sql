@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS {schema}.orders (
   load_datetime timestamp
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS attendee_index ON {schema}.orders (id);
+--CREATE UNIQUE INDEX IF NOT EXISTS attendee_index ON {schema}.orders (id);

@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS {schema}.venues (
   name text
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS venue_index ON {schema}.venues (id);
+--CREATE UNIQUE INDEX IF NOT EXISTS venue_index ON {schema}.venues (id);

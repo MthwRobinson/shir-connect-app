@@ -4,9 +4,11 @@ import logging
 
 import click
 import daiquiri
+from flask.cli import FlaskGroup
 
 from trs_dashboard.database.database import Database
 from trs_dashboard.etl.data_loader import DataLoader
+from trs_dashboard.services.app import app
 
 # Configure logging
 daiquiri.setup(level=logging.INFO)
@@ -20,7 +22,7 @@ def main():
     """
     pass
 
-@click.command()
+@click.command('initialize', help='Creates the db tables')
 def initialize():
     """ Initializes the tables for the dashboard """
     database = Database()
@@ -28,7 +30,7 @@ def initialize():
     database.initialize()
 main.add_command(initialize)
 
-@click.command()
+@click.command('refresh_views', help='Refreshes materialized views')
 def refresh_views():
     """ Refrshes the materialized views for the dashboard """
     database = Database()
@@ -36,7 +38,7 @@ def refresh_views():
     database.refresh_views()
 main.add_command(refresh_views)
 
-@click.command()
+@click.command('load_eventbrite', help='Loads data from Eventbrite')
 def load_eventbrite():
     """ Loads Eventbrite data into postgres """
     start = datetime.datetime.now()
@@ -46,5 +48,12 @@ def load_eventbrite():
     end = datetime.datetime.now()
     LOGGER.info('Finished Eventbrite dataload at %s'%(end))
 main.add_command(load_eventbrite)
+
+@click.command('launch_api', help='Runs the Flask development server')
+@click.option('--debug', is_flag=True, help='Runs in debug mode')
+def launch_api(debug):
+    """ Launches the Flask app """
+    app.run(debug=debug)
+main.add_command(launch_api)
 
 main()

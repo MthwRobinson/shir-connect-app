@@ -1,10 +1,12 @@
 """ Command line interface for server side functions """
 import datetime
 import logging
+import os
 
 import click
 import daiquiri
 from flask.cli import FlaskGroup
+from gunicorn.app.wsgiapp import WSGIApplication
 
 from trs_dashboard.database.database import Database
 from trs_dashboard.etl.data_loader import DataLoader
@@ -50,10 +52,17 @@ def load_eventbrite():
 main.add_command(load_eventbrite)
 
 @click.command('launch_api', help='Runs the Flask development server')
+@click.option('--prod', is_flag=True, help='Runs the WSGI prod server')
 @click.option('--debug', is_flag=True, help='Runs in debug mode')
-def launch_api(debug):
+def launch_api(prod, debug):
     """ Launches the Flask app """
-    app.run(debug=debug)
+    if prod:
+        path = os.path.dirname(os.path.realpath(__file__))
+        filename = path + '/../../scripts/run_flask.sh'
+        os.system('sh %s'%(filename))
+    else:
+        app.run(debug=debug)
+
 main.add_command(launch_api)
 
 main()

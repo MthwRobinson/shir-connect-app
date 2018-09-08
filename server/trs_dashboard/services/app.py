@@ -1,10 +1,14 @@
 """ Flask app for the TRS Dashboard backend """
 from flask import Flask, jsonify
+from flask_jwt_simple import JWTManager
 
+import trs_dashboard.configuration as conf
 from trs_dashboard.services.user_management import user_management
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = conf.JWT_SECRET_KEY
 app.register_blueprint(user_management)
+jwt = JWTManager(app)
 
 @app.route('/service/test', methods=['GET'])
 def test():

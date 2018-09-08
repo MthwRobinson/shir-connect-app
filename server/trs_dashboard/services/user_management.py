@@ -9,6 +9,7 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
+from flask_jwt_simple import create_jwt
 import pandas as pd
 
 from trs_dashboard.database.database import Database
@@ -57,7 +58,10 @@ def user_authenticate():
     )
     if authorized:
         msg = 'user %s authenticated'%(auth_user['username'])
-        response = {'message': msg}
+        response = {
+            'message': msg,
+            'jwt': create_jwt(identity=auth_user['username'])
+        }
         return jsonify(response), 200
     else:
         msg = 'authentication failed for user %s'%(auth_user['username'])

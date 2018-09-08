@@ -54,6 +54,7 @@ def test_user_register():
         password='testpassword'
     ))
     assert response.status_code == 200
+    assert type(response.json['jwt']) == str
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',

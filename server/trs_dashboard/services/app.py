@@ -35,3 +35,29 @@ def user_register():
     else:
         response = {'message': 'user already exists'}
         return jsonify(response), 409
+
+@app.route('/service/user/authenticate', methods=['POST'])
+def user_authenticate():
+    """ Authenticates a user and returns a json web token """
+    if not request.json:
+        response = {'message': 'no post body'}
+        return jsonify(response), 400
+
+    auth_user = request.json
+    if 'username' not in auth_user  or 'password' not in auth_user:
+        response = {'message': 'missing key in post body'}
+        return jsonify(response), 400
+
+    user_management = UserManagement()
+    authorized = user_management.authenticate_user(
+        username=auth_user['username'],
+        password=auth_user['password']
+    )
+    if authorized:
+        msg = 'user %s authenticated'%(auth_user['username'])
+        response = {'message': msg}
+        return jsonify(response), 200
+    else:
+        msg = 'authentication failed for user %s'%(auth_user['username'])
+        response = {'message': msg}
+        return jsonify(response), 404

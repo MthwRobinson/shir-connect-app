@@ -19,6 +19,22 @@ class UserManagement(object):
         """ Fetches a user from the database """
         return self.database.get_item('users', username)
 
+    def authenticate_user(self, username, password):
+        """
+        Checks the password of the user
+        Returns True if the user is authorized
+        """
+        user = self.get_user(username)
+        if not user:
+            return False
+
+        pw = password.encode('utf-8')
+        pw_hash = hashlib.sha512(pw).hexdigest()
+        if user['password'] == pw_hash:
+            return True
+        else:
+            return False
+
     def add_user(self, username, password):
         """ Adds a new user to the database """
         # Check to see if the user already exists

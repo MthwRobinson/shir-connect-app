@@ -163,7 +163,8 @@ class DataLoader(object):
         attendee_ = deepcopy(attendee)
 
         profile = attendee_['profile']
-        attendee_['name'] = profile['name']
+        if 'name' in profile:
+            attendee_['name'] = profile['name']
         if 'first_name' in profile:
             attendee_['first_name'] = profile['first_name']
         if 'last_name' in profile:

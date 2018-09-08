@@ -23,7 +23,7 @@ class UserManagement(object):
         """ Adds a new user to the database """
         # Check to see if the user already exists
         user = self.get_user(username)
-        if not user:
+        if user:
             return False
         else:
             pw = password.encode('utf-8')
@@ -34,4 +34,8 @@ class UserManagement(object):
             }
             self.database.load_item(item, 'users')
             return True
+
+    def delete_user(self, username):
+        """ Deletes a user from the database """
+        self.database.delete_item('users', username)
 

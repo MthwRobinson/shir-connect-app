@@ -1,5 +1,5 @@
 """ Flask app for the TRS Dashboard backend """
-from flask import Flask, abort, jsonify, request
+from flask import Flask, jsonify
 
 from trs_dashboard.services.user_management import user_management
 

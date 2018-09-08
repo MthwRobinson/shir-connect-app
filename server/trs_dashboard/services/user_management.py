@@ -1,4 +1,9 @@
-""" Operations for user authentication endpoints """
+""" 
+REST endpoints for operations pertaining to users
+Includes:
+    1. Flask routes with /user path
+    2. UserManagment class for database calls
+"""
 import hashlib
 import logging
 

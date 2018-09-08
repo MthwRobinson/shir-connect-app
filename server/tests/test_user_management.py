@@ -59,7 +59,7 @@ def test_user_register():
         username='unittestuser',
         password='badpassword'
     ))
-    assert response.status_code == 404
+    assert response.status_code == 401
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

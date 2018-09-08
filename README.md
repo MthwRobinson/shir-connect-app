@@ -52,4 +52,27 @@ When new data is uploaded, it overwrites the current record.
 Information for upcoming events will be updated until the event takes place.
 All datetimes will be stored in the database as UTC.
 
+### Running the Flask App
 
+The REST API is a Flask app that can be launched from the CLI.
+By default, the app runs on port 5000.
+To start the REST API in development mode, run the following command:
+```
+trs_dashboard launch_api --debug
+```
+After that, the Flask app will be running on port 5000.
+You should be able to navigate to `http://localhost:5000/service/test` and see the following output:
+```
+{
+  "status": "success",
+  "message": "Hello, friend!"
+}
+```
+
+The production Flask app runs a WSGI server using gunicorn.
+You can start the production app using the following command.
+```
+trs_dashboard launch_api --prod
+```
+Note that the WSGI server will run in the context of the terminal session where it is launched.
+For production, the Flask app should be launched using `init.d`, `systemctl` or similar.

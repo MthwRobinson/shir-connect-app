@@ -61,7 +61,12 @@ To start the REST API in development mode, run the following command:
 trs_dashboard launch_api --debug
 ```
 After that, the Flask app will be running on port 5000.
-You should be able to navigate to `http://localhost:5000/service/test` and see the following output:
+The Flask app using JSON web tokens (JWT) for authentication.
+Before running the app, you'll need a user name and password.
+Once you have a username and password, you can obtain a JWT using the following call: `curl -H "Content-Type: application/json" -X POST -d '{"username":"password"}' http://localhost:5000/service/user/authenticate`
+
+After that you should be able to run `curl -H "Authorization: Bearer {JWT}" http://localhost:5000/service/test1` replacing `{JWT}` with your web token.
+That will return the following output.
 ```
 {
   "status": "success",

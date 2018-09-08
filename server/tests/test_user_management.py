@@ -49,12 +49,22 @@ def test_user_register():
     ))
     assert response.status_code == 201
     
+    response = CLIENT.get('/service/test')
+    assert response.status_code == 401
+    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testpassword'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+
+    response = CLIENT.get('/service/test', headers={
+        'Authorization': 'Bearer %s'%(jwt)
+    })
+    assert response.status_code == 200
+    assert 'unittestuser' in response.json['message']
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',

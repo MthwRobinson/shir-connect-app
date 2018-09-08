@@ -83,9 +83,12 @@ class DataLoader(object):
                         page = attendees['pagination']['page_number'] + 1
                         attendees = self.get_attendees(event_id, page)
                 # Sleep to avoid the Eventbrite rate limit
-                time.sleep(60)
-    
-            if test or not events['pagination']['has_more_items']:
+                if test:
+                    break
+                else:
+                    time.sleep(60)
+
+            if events['pagination']['has_more_items']:
                 more_events = False
                 break
             else:

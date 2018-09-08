@@ -5,6 +5,7 @@ reqs = [
     'click',
     'daiquiri',
     'flask',
+    'flask_jwt_simple',
     'gunicorn',
     'pandas',
     'psycopg2',

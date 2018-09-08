@@ -35,8 +35,3 @@ def user_register():
     else:
         response = {'message': 'user already exists'}
         return jsonify(response), 409
-
-@app.route('/service/user/authenticate', method=['POST']):
-    """ Authenticates the user """
-    pass
-

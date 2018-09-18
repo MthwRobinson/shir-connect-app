@@ -6,34 +6,52 @@ CLIENT = app.test_client()
 def test_user_register():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
+    user_management.delete_user('unittestadmin')
+    user_management.add_user('unittestadmin', 'testpassword')
     
-    response = CLIENT.post('/service/user/register')
-    assert response.status_code == 400
-    
-    response = CLIENT.post('/service/user/register', json=dict(
-        username='unittestuser'
-    ))
-    assert response.status_code == 400
-
-    response = CLIENT.post('/service/user/register', json=dict(
-        username='unittestuser',
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
         password='testpassword'
     ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+
+    response = CLIENT.post('/service/user/register',
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    response = CLIENT.post('/service/user/register', 
+        json=dict(username='unittestuser'),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+
+    response = CLIENT.post('/service/user/register', 
+        json=dict(username='unittestuser', password='testpassword'),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
     assert response.status_code == 201
 
-    response = CLIENT.post('/service/user/register', json=dict(
-        username='unittestuser',
-        password='testpassword'
-    ))
+    response = CLIENT.post('/service/user/register', 
+        json=dict(username='unittestuser', password='testpassword'),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
     assert response.status_code == 409
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+    
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
+    assert user == None
 
-def test_user_register():
+def test_user_authenticate():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
     
     response = CLIENT.post('/service/user/authenticate')
     assert response.status_code == 400
@@ -43,12 +61,6 @@ def test_user_register():
     ))
     assert response.status_code == 400
 
-    response = CLIENT.post('/service/user/register', json=dict(
-        username='unittestuser',
-        password='testpassword'
-    ))
-    assert response.status_code == 201
-    
     response = CLIENT.get('/service/test')
     assert response.status_code == 401
     

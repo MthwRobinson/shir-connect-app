@@ -1,5 +1,6 @@
 """ 
 REST endpoints for operations pertaining to users
+A user must be authenticated to register a new user
 Includes:
     1. Flask routes with /user path
     2. UserManagment class for database calls
@@ -9,7 +10,7 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_simple import create_jwt
+from flask_jwt_simple import create_jwt, jwt_required
 import pandas as pd
 
 from trs_dashboard.database.database import Database
@@ -17,6 +18,7 @@ from trs_dashboard.database.database import Database
 user_management = Blueprint('user_management', __name__)
 
 @user_management.route('/service/user/register', methods=['POST'])
+@jwt_required
 def user_register():
     """ Registers a new user """
     if not request.json:

@@ -13,3 +13,8 @@ def test_get_columns():
 def test_refresh_views():
     database = Database()
     database.refresh_views(test=True)
+
+def test_read_table():
+    database = Database()
+    df = database.read_table('event_aggregates', limit=10)
+    assert len(df) == 10

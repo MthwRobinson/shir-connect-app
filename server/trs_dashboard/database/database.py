@@ -179,3 +179,15 @@ class Database(object):
                 return time.to_pydatetime()
             else:
                 return None
+
+    def read_table(self, table, limit=None):
+        """ Reads a table into a dataframe """
+        sql = """
+            SELECT *
+            FROM {schema}.{table}
+        """.format(schema=self.schema, table=table)
+        if limit:
+            sql += " LIMIT %s"%(limit)
+        df = pd.read_sql(sql, self.connection)
+        return df
+

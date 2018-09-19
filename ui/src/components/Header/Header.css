@@ -2,12 +2,6 @@
 
 }
 
-.menu-icon {
-  font-size: 20px;
-  color: white;
-  cursor: pointer;
-}
-
 .navbar {
   margin-bottom: 5px;
 }
@@ -31,7 +25,8 @@
 
 .navbar-default .navbar-brand {
   /* Set the color for the brand section */
-  color: white; 
+  color: white;
+  font-size: 28px;
 }
 
 .navbar-default .navbar-brand:hover {
@@ -59,5 +54,10 @@
 .navbar-default .navbar-nav > li > a:hover, 
 .navbar-default .navbar-nav > li > a:focus {
   color: #030033;
+  cursor: pointer;
+}
+
+.header-star {
+  padding-right: 15px;
   cursor: pointer;
 }

@@ -13,12 +13,14 @@ class Header extends Component {
                 <a 
                   href="#home"
                   className='pull-left'>
-                    TRS Dashboard
+                    <img
+                      className="header-star"
+                      src="./Star_of_David.svg"
+                      height="40px"
+                    />
+                    <b>TRS Dashboard</b>
                 </a>
               </Navbar.Brand>
-            <Navbar.Form className='pull-right menu-icon'>
-              <i className="fa fa-bars" onClick={this.props.clickMenu}></i>
-            </Navbar.Form>
             </Navbar.Header>
           </Navbar>
         </div>

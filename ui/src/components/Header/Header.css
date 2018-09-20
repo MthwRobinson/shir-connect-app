@@ -1,5 +1,4 @@
 .Header {
-
 }
 
 .navbar {
@@ -30,7 +29,7 @@
 }
 
 .navbar-default .navbar-brand:hover {
-  color: #e5e5d8;
+  color: white;
 }
 
 .navbar-default .navbar-nav > .active > a, 

@@ -1,3 +1,4 @@
+// Renders the component for the Login screen
 import React, { Component } from 'react';
 import { 
   Button, 

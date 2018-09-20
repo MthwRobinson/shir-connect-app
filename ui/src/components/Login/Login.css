@@ -1,0 +1,10 @@
+.Login {
+  width: 500px;
+  text-align: left;
+  margin: 0 auto;
+  margin-top: 10%;
+}
+
+.login-button {
+  background-color: #0038b8;
+}

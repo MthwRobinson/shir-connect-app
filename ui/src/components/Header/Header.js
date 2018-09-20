@@ -17,6 +17,7 @@ class Header extends Component {
                       className="header-star"
                       src="./Star_of_David.svg"
                       height="40px"
+                      alt=""
                     />
                     <b>TRS Dashboard</b>
                 </a>

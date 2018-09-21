@@ -8,12 +8,17 @@ import {
   FormGroup 
 } from 'react-bootstrap';
 import { Field, reduxForm } from 'redux-form';
+import axios from 'axios';
 
 import './Login.css';
 
 
 class Login extends Component {
     submit = (values) => {
+      axios.post('/service/user/authenticate', {
+        username: values.userName, 
+        password: values.password
+      }).then(res => console.log(res.data))
       console.log(values);
     }
 

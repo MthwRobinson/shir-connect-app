@@ -13,46 +13,38 @@ import './Login.css';
 
 
 class Login extends Component {
+    submit = (values) => {
+      console.log(values);
+    }
+
     render() {
-      const userName = () => {
-        return(
-          <div>
-            <ControlLabel>User Name</ControlLabel>
-            <FormControl type="text"></FormControl>
-          </div>
-
-        )
-      }
-
-      const password = () => {
-        return(
-          <div>
-            <ControlLabel>Password</ControlLabel>
-            <FormControl type="text"></FormControl>
-          </div>
-        )
-      }
-
+      const { handleSubmit } = this.props
       return (
         <div className="Login pullLeft">
           <h2>Login</h2>
-          <Form horizontal>
+          <form onSubmit={ handleSubmit(this.submit) }>
             <FormGroup className="pullLeft">
+              <ControlLabel>User Name</ControlLabel><br/>
               <Field
                 name="userName"
                 type="text"
-                component={userName}
+                component="input"
               />
             </FormGroup>
             <FormGroup>
+              <ControlLabel>Password</ControlLabel><br/>
               <Field
                 name="password"
                 type="text"
-                component={password}
+                component="input"
               />
             </FormGroup>
-            <Button className="login-button"  bsStyle="primary">Submit</Button>
-          </Form>
+            <Button 
+              className="login-button"  
+              bsStyle="primary" 
+              type="submit"
+            >Submit</Button>
+          </form>
         </div>
       );
     }

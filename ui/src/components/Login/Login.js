@@ -13,13 +13,14 @@ import axios from 'axios';
 
 import './Login.css';
 
-
 class Login extends Component {
     constructor(props){
       super(props);
       this.state = {
         userName: '',
-        password: ''
+        password: '',
+        authenticated: false,
+        attempted: false
       }
 
       // Bindings for the login form
@@ -28,12 +29,21 @@ class Login extends Component {
 
     }
 
-    submit = (event) => {
-      // axios.post('/service/user/authenticate', {
-      //   username: values.userName, 
-      //   password: values.password
-      // }).then(res => console.log(res.data))
-      console.log(this.state);
+    handleSubmit = (event) => {
+      // Authenticates with the service and stores the JWT
+      // in local storage if authentication is successful
+      axios.post('/service/user/authenticate', {
+        username: this.state.userName, 
+        password: this.state.password
+      })
+        .then(res => {
+          localStorage.setItem('trsToken', res.data.jwt);
+          this.setState({authenticated: true});
+        })
+        .catch(err => {
+          this.setState({attempted: true});
+        })
+      // Prevents the app from refreshing on submit
       event.preventDefault();
     }
 
@@ -47,11 +57,28 @@ class Login extends Component {
       this.setState({password: event.target.value});
     }
 
+    renderError = () => {
+      // Displays an error message if authentication is not successful
+      if(this.state.attempted && !this.state.authenticated){
+        return(
+          <div className='error-msg'>
+            <p className='error-msg'>
+              User name or password is incorrect.
+            </p>
+          </div>
+        );
+      } else {
+        return null;
+      }
+    }
+
     render() {
+      let errorMsg = this.renderError();
+
       return (
         <div className="Login pullLeft">
           <h2>Login</h2>
-          <Form onSubmit={this.submit} horizontal >
+          <Form onSubmit={this.handleSubmit} horizontal >
             <FormGroup className="pullLeft">
               <ControlLabel>User Name</ControlLabel>
               <FormControl
@@ -65,9 +92,10 @@ class Login extends Component {
               <FormControl
                 value={this.state.password}
                 onChange={this.handlePassword}
-                type="text" 
+                type="password" 
               />
             </FormGroup>
+            {errorMsg}
             <Button 
               className="login-button"  
               bsStyle="primary" 

@@ -1,3 +1,5 @@
+// Header component for the app
+// The header is persistent in all views
 import React, { Component } from 'react';
 import { Navbar } from 'react-bootstrap';
 

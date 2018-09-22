@@ -8,3 +8,8 @@
 .login-button {
   background-color: #0038b8;
 }
+
+.error-msg {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: red;
+}

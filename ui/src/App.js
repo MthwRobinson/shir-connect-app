@@ -1,5 +1,11 @@
+// Main app component. Includes routing logic
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { 
+  BrowserRouter as Router, 
+  Redirect,
+  Route 
+} from 'react-router-dom';
+import axios from 'axios';
 
 import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
@@ -12,12 +18,23 @@ import Login from './components/Login/Login';
 
 class App extends Component {
   render() {
+    // PrivateRoute ensures that there is a token
+    // present in local storage before rendering
+    // a component
+    const PrivateRoute = ({ component: Component, ...rest }) => (
+      <Route {...rest} render={(props) => (
+        localStorage.getItem('trsToken') === null
+        ? <Redirect to='/login' />
+        : <Component {...props} />
+      )} />
+    )
+
     return (
       <div className="App">
         <Header></Header>
         <Router>
           <div>
-            <Route exact path="/" component={Home} />
+            <PrivateRoute exact path="/" component={Home} />
             <Route path="/login" component={Login} />
           </div>
         </Router>

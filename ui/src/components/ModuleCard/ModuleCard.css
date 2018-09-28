@@ -1,0 +1,30 @@
+.ModuleCard {
+  border-width: medium;
+  border-style: solid;
+  border-color: #666666;
+  width: 95%;
+  min-height: 150px;
+  font-family: 'Source Sans Pro', sans-serif;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.ModuleCard:hover {
+  background-color: #e5e5d8;
+  border-color: black;
+}
+
+.module-image {
+  font-size: 100px;
+  width: 120px;
+  float: left;
+  margin-bottom: 10%;
+}
+
+.module-info {
+  margin-top: 10px;
+  font-size: 15px;
+  margin-left: 20px;
+  text-align: left;
+}
+

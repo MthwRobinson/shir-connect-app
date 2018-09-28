@@ -8,6 +8,7 @@ from trs_dashboard.services.user_management import user_management
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = conf.JWT_SECRET_KEY
+app.config['JWT_EXPIRATION_DELTA'] = conf.JWT_EXPIRATION_DELTA
 app.register_blueprint(user_management)
 app.register_blueprint(file_export)
 jwt = JWTManager(app)

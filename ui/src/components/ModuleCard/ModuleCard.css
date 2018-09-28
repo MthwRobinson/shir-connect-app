@@ -2,11 +2,10 @@
   border-width: medium;
   border-style: solid;
   border-color: #666666;
-  width: 95%;
+  width: 100%;
   min-height: 150px;
   font-family: 'Source Sans Pro', sans-serif;
   cursor: pointer;
-  margin-top: 12px;
 }
 
 .ModuleCard:hover {
@@ -18,7 +17,7 @@
   font-size: 100px;
   width: 120px;
   float: left;
-  margin-bottom: 10%;
+  margin-left: 5%;
 }
 
 .module-info {

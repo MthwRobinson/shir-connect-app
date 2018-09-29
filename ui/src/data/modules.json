@@ -6,7 +6,7 @@
       "View upcoming events from Eventbrite.",
       "Export event information as a .csv file."
     ],
-    "link": "/upcoming-events"
+    "link": "/events"
   },
   {
     "title": "Upload Member Data",
@@ -14,7 +14,7 @@
     "bullets": [
       "Upload a .csv file with member ship data into the dashboard database."
     ],
-    "link": "/upload-members"
+    "link": "/members"
   },
   {
     "title": "Event Trends",

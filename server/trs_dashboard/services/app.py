@@ -21,5 +21,6 @@ def test():
         'status': 'success',
         'message': 'Hello, friend! My name is %s :)'%(
             get_jwt_identity()
-        )
+        ),
+        'name': get_jwt_identity()
     })

@@ -13,7 +13,7 @@ class Header extends Component {
             <Navbar.Header>
               <Navbar.Brand>
                 <a 
-                  href="#home"
+                  href=""
                   className='pull-left'>
                     <img
                       className="header-star"

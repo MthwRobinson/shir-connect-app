@@ -12,9 +12,13 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../node_modules/font-awesome/css/font-awesome.min.css';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 
+import Events from './components/Events/Events';
+import EventMap from './components/EventMap/EventMap';
 import Header from './components/Header/Header';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
+import Members from './components/Members/Members';
+import Trends from './components/Trends/Trends';
 
 class App extends Component {
   render() {
@@ -35,6 +39,10 @@ class App extends Component {
         <Router>
           <div>
             <PrivateRoute exact path="/" component={Home} />
+            <PrivateRoute path="/events" component={Events} />
+            <PrivateRoute path="/members" component={Members} />
+            <PrivateRoute path="/trends" component={Trends} />
+            <PrivateRoute path="/map" component={EventMap} />
             <Route path="/login" component={Login} />
           </div>
         </Router>

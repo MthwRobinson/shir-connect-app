@@ -27,11 +27,22 @@ class Events extends Component {
     render() {
       return (
         <div className="Events">
-          <h2>Welcome to Events!</h2><hr/>
-          <i 
-            className="fa fa-download"
-            onClick={()=>this.downloadCSV()}
-          ></i>
+          <div className='events-header'>
+            <h2>
+              Upcoming Events
+              <i 
+                className="fa fa-times pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              >
+              </i>
+            </h2><hr/>
+            <h4>
+              <i 
+                className="fa fa-download pull-left event-icons"
+                onClick={()=>this.downloadCSV()}
+              ></i>
+            </h4>
+          </div>
         </div>
       );
     }

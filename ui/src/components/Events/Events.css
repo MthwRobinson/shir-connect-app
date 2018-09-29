@@ -1,1 +1,29 @@
-.Events {}
+.Events {
+  padding-left: 5%;
+  padding-right: 5%;
+  overflow-y: scroll;
+  padding-bottom: 30px;
+  text-align: left;
+}
+
+.events-header {
+  margin-bottom: 40px;
+  margin-top: 15px;
+}
+
+.event-icons:hover{
+  cursor: pointer;
+}
+
+h2 {
+  line-height: 80%;
+}
+
+h4 {
+  line-height: 5%;
+  padding-left: 20px;
+}
+
+hr {
+  border-color: black;
+} 

@@ -5,12 +5,13 @@ Includes:
     1. Flask routes with /export path
     2. Export class to manage exports
 """
+import csv
 import datetime
 from io import StringIO
 import logging
 
 import daiquiri
-from flask import Blueprint, send_file
+from flask import Blueprint, make_response
 from flask_jwt_simple import jwt_required
 import pandas as pd
 
@@ -34,10 +35,8 @@ def export_event_aggregates():
     filename = 'event_aggregates_%s.csv'%(today)
 
     buffer = StringIO()
-    df.to_csv(buffer, encoding='utf-8')
-    buffer.seek(0)
-    return send_file(
-        buffer,
-        attachment_filename=filename,
-        mimetype='text/csv'
-    )
+    df.to_csv(buffer, encoding='utf-8', index=False)
+    output = make_response(buffer.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output

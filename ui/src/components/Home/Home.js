@@ -33,8 +33,10 @@ class Home extends Component {
           .then(res => {
             this.setState({name: res.data.name});
           })
-          .catch( res => {
-            this.navigate('/login');
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
           })
       }
     }

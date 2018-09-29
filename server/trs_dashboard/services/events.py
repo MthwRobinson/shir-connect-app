@@ -6,6 +6,7 @@ Includes:
     2. Flask routes with /events path
     3. Events class to manage database calls
 """
+import json
 import logging
 
 import daiquiri
@@ -40,6 +41,6 @@ class Events(object):
     def get_events(self, limit=25):
         """ Fetches the most recent events from the database """
         df = self.database.read_table('event_aggregates', limit=limit)
-        response = [df.loc[i].to_json() for i in df.index]
+        response = [json.loads(df.loc[i].to_json()) for i in df.index]
         return response
 

@@ -43,10 +43,19 @@ class Events extends Component {
       // Downloads the events information csv
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token);
-      axios.get('/service/export/event_aggregates',
-        { headers: { Authorization: auth }})
+      let url = '/service/events/export';
+      if(this.state.query.trim().length>0){
+        url += '?q='+this.state.query;
+      }
+      axios.get(url, {headers: {Authorization: auth}})
         .then(res => {
-          FileDownload(res.data, 'event_aggregates.csv');
+          let filename = 'trs_events';
+          if(this.state.query.trim().length>0){
+             filename += '_'+this.state.query;
+          }
+          const today = moment().format('YYYYMMDD');
+          filename += '_'+ today + '.csv';
+          FileDownload(res.data, filename);
         })
         .catch(err => {
           if(err.response.status===401){
@@ -87,8 +96,8 @@ class Events extends Component {
 
           this.setState({
             events: events,
-            count: parseInt(res.data.count),
-            pages: parseInt(res.data.pages),
+            count: parseInt(res.data.count, 10),
+            pages: parseInt(res.data.pages, 10),
             loading: false
           });
         })

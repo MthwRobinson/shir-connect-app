@@ -25,9 +25,27 @@ def get_events():
     limit = request.args.get('limit')
     if not limit:
         limit = 25
-    
+    else:
+        limit = int(limit)
+    page = request.args.get('page')
+    if not page:
+        page = 1
+    else:
+        page = int(page)
+    order = request.args.get('order')
+    if not order:
+        order = 'desc'
+    sort = request.args.get('sort')
+    if not sort:
+        sort = 'start_datetime'
+
     event_manager = Events()
-    response = event_manager.get_events(limit=limit)
+    response = event_manager.get_events(
+        limit=limit,
+        page=page,
+        order=order,
+        sort=sort
+    )
     return jsonify(response)
     
 class Events(object):
@@ -38,9 +56,20 @@ class Events(object):
 
         self.database = Database()
 
-    def get_events(self, limit=25):
+    def get_events(self, limit=None, page=None, order=None, sort=None):
         """ Fetches the most recent events from the database """
-        df = self.database.read_table('event_aggregates', limit=limit)
-        response = [json.loads(df.loc[i].to_json()) for i in df.index]
+        df = self.database.read_table(
+            'event_aggregates', 
+            limit=limit,
+            page=page,
+            order=order,
+            sort=sort
+        )
+        count = self.database.count_rows(
+            'event_aggregates', 
+        )
+        pages = int((count/limit)) + 1
+        events = [json.loads(df.loc[i].to_json()) for i in df.index]
+        response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 

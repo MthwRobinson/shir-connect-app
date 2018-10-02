@@ -21,15 +21,16 @@ def test_events():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
-    response = CLIENT.get('/service/events?limit=25')
+    url = '/service/events?limit=25&page=2&sort=start_datetime&order=desc'
+    response = CLIENT.get(url)
     assert response.status_code == 401
 
-    response = CLIENT.get('/service/events?limit=25', headers={
-        'Authorization': 'Bearer %s'%(jwt)
-    })
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
-    assert type(response.json) == list
-    assert len(response.json) == 25
+    assert type(response.json['results']) == list
+    assert len(response.json['results']) == 25
+    assert 'count' in response.json
+    assert 'pages' in response.json
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import {
   Button,
-  Col,
   Form,
   FormControl,
   FormGroup,
@@ -18,9 +17,14 @@ import Loading from './../Loading/Loading';
 
 import './Events.css';
 
+const LIMIT = 25
+
 class Events extends Component {
     state = {
       events: [],
+      pages: 1,
+      page: 1,
+      count: 0,
       loading: true
     }
   
@@ -46,23 +50,25 @@ class Events extends Component {
 
     getEvents = () => {
       // Pulls events to display in a table
+      this.setState({loading: true});
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token)
-      axios.get('/service/events?limit=25',
-        { headers: { Authorization: auth }})
+      const url = '/service/events?limit='+LIMIT+'&page='+this.state.page
+      axios.get(url, { headers: { Authorization: auth }})
         .then(res => {
           let events = [];
-          for(var i=0; i<res.data.length; i++){
-            let event = res.data[i];
+          for(var i=0; i<res.data.results.length; i++){
+            let event = res.data.results[i];
             var start = moment(event.start_datetime);
             event.start = start.format('MM/DD/YY, h:mm a');
             var end = moment(event.end_datetime);
-            event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
 
           this.setState({
             events: events,
+            count: parseInt(res.data.count),
+            pages: parseInt(res.data.pages),
             loading: false
           });
         })
@@ -73,26 +79,58 @@ class Events extends Component {
         })
     }
 
+    incrementPage = (direction) => {
+      // Increments the page number
+      if (direction==='up'){
+        if(this.state.page<this.state.pages){
+          const page = this.state.page + 1;
+          this.setState({page:page});
+        }
+      } else if(direction==='down') {
+        if(this.state.page>1){
+          const page = this.state.page - 1;
+          this.setState({page:page});
+        }
+      }
+      this.getEvents();
+    }
+
+    renderPageCount = () => {
+      // Renders the page count at the top of the table
+      let leftCaret = null
+      if (this.state.page>1){
+        leftCaret = (
+          <i 
+            className='fa fa-caret-left paging-arrows'
+            onClick={()=>this.incrementPage('down')}
+          >
+          </i>
+        );
+      }
+      let rightCaret = null
+      if (this.state.page<this.state.pages){
+        rightCaret = (
+          <i 
+            className='fa fa-caret-right paging-arrows'
+            onClick={()=>this.incrementPage('up')}
+          >
+          </i>
+        );
+      }
+
+      return(
+        <div className='paging pull-left'>
+            {leftCaret}
+            {this.state.page}/{this.state.pages}
+            {rightCaret}
+        </div>
+      )
+    }
+
     renderTable = () => {
       // Creates the table with event information
       return(
         <div>
-          <div className='event-header'>
-            <div className='paging pull-left'>
-                Page:
-                <i className='fa fa-caret-left paging-arrows'></i>
-                  3/42
-                <i className='fa fa-caret-right paging-arrows'></i>
-              </div>
-              <div className='pull-right'>
-                <Form inline>
-                  <FormGroup>
-                    <FormControl type="text" />
-                  </FormGroup>
-                  <Button className='search-button'>Search</Button>
-                </Form>
-              </div>
-          </div>
           <Row className='event-table'>
             <Table responsive header hover>
               <thead>
@@ -114,7 +152,7 @@ class Events extends Component {
                       <th>{event.name}</th>
                       <th>{event.start}</th>
                       <th>{event.end}</th>
-                      <th>${event.total_fees.toFixed(2)}</th>
+                      <th>${event.total_fees != null ? event.total_fees.toFixed(2) : 0.00}</th>
                       <th>{event.attendee_count}</th>
                     </tr>
                   )
@@ -127,7 +165,6 @@ class Events extends Component {
     }
 
     render() {
-
       let table = null
       if(this.state.loading){
         table = (
@@ -139,11 +176,13 @@ class Events extends Component {
         table = this.renderTable();
       }
 
+      let pageCount = this.renderPageCount();
+
       return (
         <div className="Events">
           <div className='events-header'>
             <h2>
-              Upcoming Events
+              Events ({this.state.count})
               <i 
                 className="fa fa-times pull-right event-icons"
                 onClick={()=>this.props.history.push('/')}
@@ -154,6 +193,17 @@ class Events extends Component {
                 onClick={()=>this.downloadCSV()}
               ></i>
             </h2><hr/>
+          </div>
+          <div className='event-header'>
+            {pageCount}
+            <div className='pull-right'>
+              <Form inline>
+                <FormGroup>
+                  <FormControl type="text" />
+                </FormGroup>
+                <Button className='search-button'>Search</Button>
+              </Form>
+            </div>
           </div>
             {table}
         </div>

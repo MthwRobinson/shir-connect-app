@@ -5,7 +5,6 @@ import {
   Redirect,
   Route 
 } from 'react-router-dom';
-import axios from 'axios';
 
 import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';

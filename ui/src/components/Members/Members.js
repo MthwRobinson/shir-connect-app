@@ -1,8 +1,6 @@
 // Renders the component for the Members screen
 import React, { Component } from 'react';
-import { Col, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
 
 import './Members.css';
 

@@ -6,7 +6,7 @@
 }
 
 .events-header {
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   margin-top: 15px;
 }
 
@@ -20,6 +20,29 @@
   padding-left: 3%;
   padding-right: 3%;
   overflow-y: scroll;
+}
+
+.event-header {
+  padding-bottom: 60px;
+  padding-right: 6%;
+  padding-left: 2%;
+}
+
+.search-button {
+  margin-left: 5px;
+}
+
+.paging {
+  font-size: 24px;
+}
+
+.paging-arrows {
+  margin-left: 5px;
+  margin-right: 3px;
+}
+
+.paging-arrows:hover {
+  cursor: pointer;
 }
 
 .event-loading {

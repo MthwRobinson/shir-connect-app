@@ -1,7 +1,11 @@
 // Renders the component for the Events screen
 import React, { Component } from 'react';
-import { 
-  Col, 
+import {
+  Button,
+  Col,
+  Form,
+  FormControl,
+  FormGroup,
   Row,
   Table
 } from 'react-bootstrap';
@@ -67,13 +71,28 @@ class Events extends Component {
             this.props.history.push('/login');
           }
         })
-
     }
 
     renderTable = () => {
       // Creates the table with event information
       return(
         <div>
+          <div className='event-header'>
+            <div className='paging pull-left'>
+                Page:
+                <i className='fa fa-caret-left paging-arrows'></i>
+                  3/42
+                <i className='fa fa-caret-right paging-arrows'></i>
+              </div>
+              <div className='pull-right'>
+                <Form inline>
+                  <FormGroup>
+                    <FormControl type="text" />
+                  </FormGroup>
+                  <Button className='search-button'>Search</Button>
+                </Form>
+              </div>
+          </div>
           <Row className='event-table'>
             <Table responsive header hover>
               <thead>
@@ -81,7 +100,6 @@ class Events extends Component {
                   <th>Event</th>
                   <th>Start</th>
                   <th>End</th>
-                  <th>Zip</th>
                   <th>Fees</th>
                   <th>Attendees</th>
                 </tr>
@@ -93,7 +111,6 @@ class Events extends Component {
                       <th>{event.name}</th>
                       <th>{event.start}</th>
                       <th>{event.end}</th>
-                      <th>{event.postal_code}</th>
                       <th>${event.total_fees.toFixed(2)}</th>
                       <th>{event.attendee_count}</th>
                     </tr>
@@ -104,10 +121,10 @@ class Events extends Component {
           </Row>
         </div>
       )
-
     }
 
     render() {
+
       let table = null
       if(this.state.loading){
         table = (

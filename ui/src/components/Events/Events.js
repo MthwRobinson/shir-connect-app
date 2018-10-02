@@ -61,10 +61,14 @@ class Events extends Component {
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token)
       let url = '/service/events?limit='+LIMIT;
-      if(fetchType==='standard'){
-        url += '&page='+this.state.page;
-      } else if(fetchType==='search'){
+      if(fetchType==='search'){
         url += '&page=1'
+      } else if(fetchType==='up'){
+        url += '&page='+(this.state.page+1); 
+      } else if(fetchType==='down') {
+        url += '&page='+(this.state.page+1); 
+      } else {
+        url += '&page='+this.state.page;
       }
       if(this.state.query.trim().length>0){
         url += '&q='+this.state.query;
@@ -77,6 +81,7 @@ class Events extends Component {
             var start = moment(event.start_datetime);
             event.start = start.format('MM/DD/YY, h:mm a');
             var end = moment(event.end_datetime);
+            event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
 
@@ -100,14 +105,15 @@ class Events extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
+          this.getEvents('up');
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
+          this.getEvents('down');
         }
       }
-      this.getEvents('standard');
     }
 
     handleSubmit = (event) => {

@@ -20,12 +20,19 @@ import './Events.css';
 const LIMIT = 25
 
 class Events extends Component {
-    state = {
-      events: [],
-      pages: 1,
-      page: 1,
-      count: 0,
-      loading: true
+    constructor(props){
+      super(props);
+      this.state = {
+        events: [],
+        pages: 1,
+        page: 1,
+        count: 0,
+        loading: true,
+        query: ''
+      }
+
+      // Bindings for search bar
+      this.handleQuery = this.handleQuery.bind(this)
     }
   
     componentDidMount(){
@@ -48,12 +55,20 @@ class Events extends Component {
         })
     }
 
-    getEvents = () => {
+    getEvents = (fetchType) => {
       // Pulls events to display in a table
       this.setState({loading: true});
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token)
-      const url = '/service/events?limit='+LIMIT+'&page='+this.state.page
+      let url = '/service/events?limit='+LIMIT;
+      if(fetchType==='standard'){
+        url += '&page='+this.state.page;
+      } else if(fetchType==='search'){
+        url += '&page=1'
+      }
+      if(this.state.query.trim().length>0){
+        url += '&q='+this.state.query;
+      }
       axios.get(url, { headers: { Authorization: auth }})
         .then(res => {
           let events = [];
@@ -92,7 +107,21 @@ class Events extends Component {
           this.setState({page:page});
         }
       }
-      this.getEvents();
+      this.getEvents('standard');
+    }
+
+    handleSubmit = (event) => {
+      // Handles the submit action in the search bar
+      event.preventDefault();
+      this.setState({page: 1});
+      this.getEvents('search');
+    }
+
+    handleQuery(event){
+      // Updates the query value in the state
+      this.setState({
+        query: event.target.value
+      });
     }
 
     renderPageCount = () => {
@@ -197,11 +226,18 @@ class Events extends Component {
           <div className='event-header'>
             {pageCount}
             <div className='pull-right'>
-              <Form inline>
+              <Form onSubmit={this.handleSubmit} inline>
                 <FormGroup>
-                  <FormControl type="text" />
+                  <FormControl 
+                    value={this.state.query}
+                    onChange={this.handleQuery}
+                    type="text" 
+                  />
                 </FormGroup>
-                <Button className='search-button'>Search</Button>
+                <Button 
+                  className='search-button'
+                  type="submit"
+                >Search</Button>
               </Form>
             </div>
           </div>

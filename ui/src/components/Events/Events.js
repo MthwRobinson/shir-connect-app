@@ -47,8 +47,18 @@ class Events extends Component {
       axios.get('/service/events?limit=25',
         { headers: { Authorization: auth }})
         .then(res => {
+          let events = [];
+          for(var i=0; i<res.data.length; i++){
+            let event = res.data[i];
+            var start = moment(event.start_datetime);
+            event.start = start.format('MM/DD/YY, h:mm a');
+            var end = moment(event.end_datetime);
+            event.end = end.format('MM/DD/YY, h:mm a');
+            events.push(event);
+          }
+
           this.setState({
-            events: res.data,
+            events: events,
             loading: false
           });
         })
@@ -71,8 +81,8 @@ class Events extends Component {
                   <th>Event</th>
                   <th>Start</th>
                   <th>End</th>
-                  <th>Zip Code</th>
-                  <th>Total Fees</th>
+                  <th>Zip</th>
+                  <th>Fees</th>
                   <th>Attendees</th>
                 </tr>
               </thead>
@@ -81,10 +91,10 @@ class Events extends Component {
                   return(
                     <tr className='table-row' key={index}>
                       <th>{event.name}</th>
-                      <th>{event.start_datetime}</th>
-                      <th>{event.end_datetime}</th>
+                      <th>{event.start}</th>
+                      <th>{event.end}</th>
                       <th>{event.postal_code}</th>
-                      <th>${event.total_fees}</th>
+                      <th>${event.total_fees.toFixed(2)}</th>
                       <th>{event.attendee_count}</th>
                     </tr>
                   )

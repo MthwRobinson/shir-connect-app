@@ -10,11 +10,14 @@ import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
 
+import Loading from './../Loading/Loading';
+
 import './Events.css';
 
 class Events extends Component {
     state = {
-      events: []
+      events: [],
+      loading: true
     }
   
     componentDidMount(){
@@ -44,7 +47,10 @@ class Events extends Component {
       axios.get('/service/events?limit=25',
         { headers: { Authorization: auth }})
         .then(res => {
-          this.setState({events: res.data});
+          this.setState({
+            events: res.data,
+            loading: false
+          });
         })
         .catch(err => {
           if(err.response.status===401){
@@ -58,40 +64,50 @@ class Events extends Component {
       // Creates the table with event information
       return(
         <div>
-          <Table responsive header hover>
-            <thead>
-              <tr>
-                <th>Event</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Zip Code</th>
-                <th>Total Fees</th>
-                <th>Attendees</th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.events.map((event, index) => {
-                return(
-                  <tr className='table-row' key={index}>
-                    <th>{event.name}</th>
-                    <th>{event.start_datetime}</th>
-                    <th>{event.end_datetime}</th>
-                    <th>{event.postal_code}</th>
-                    <th>{event.total_fees}</th>
-                    <th>{event.attendee_count}</th>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </Table>
+          <Row className='event-table'>
+            <Table responsive header hover>
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Zip Code</th>
+                  <th>Total Fees</th>
+                  <th>Attendees</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.events.map((event, index) => {
+                  return(
+                    <tr className='table-row' key={index}>
+                      <th>{event.name}</th>
+                      <th>{event.start_datetime}</th>
+                      <th>{event.end_datetime}</th>
+                      <th>{event.postal_code}</th>
+                      <th>${event.total_fees}</th>
+                      <th>{event.attendee_count}</th>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </Row>
         </div>
       )
 
     }
 
-    
-   render() {
-      let table = this.renderTable();
+    render() {
+      let table = null
+      if(this.state.loading){
+        table = (
+          <div className='event-loading'>
+            <Loading/>
+          </div>
+        );
+      } else {
+        table = this.renderTable();
+      }
 
       return (
         <div className="Events">
@@ -109,9 +125,7 @@ class Events extends Component {
               ></i>
             </h2><hr/>
           </div>
-          <Row className='event-table'>
             {table}
-          </Row>
         </div>
       );
     }

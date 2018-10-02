@@ -6,11 +6,14 @@ Includes:
     2. Flask routes with /events path
     3. Events class to manage database calls
 """
+import csv
+import datetime
+from io import StringIO
 import json
 import logging
 
 import daiquiri
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, abort, jsonify, make_response, request
 from flask_jwt_simple import jwt_required
 import pandas as pd
 
@@ -49,6 +52,31 @@ def get_events():
         q=q
     )
     return jsonify(response)
+
+@events.route('/service/events/export', methods=['GET'])
+@jwt_required
+def export_event_aggregates():
+    """ Exports the event aggregates as a csv """
+    q = request.args.get('q')
+    if q:
+        query = ('name', q)
+    else:
+        query = None
+
+    database = Database()
+    df = database.read_table('event_aggregates', query=query)
+    # Delete ticket type because CSV has issues with JSON columns
+    del df['ticket_type']
+
+    today = str(datetime.datetime.now())[:10]
+    filename = 'event_aggregates_%s.csv'%(today)
+
+    buffer = StringIO()
+    df.to_csv(buffer, encoding='utf-8', index=False)
+    output = make_response(buffer.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
     
 class Events(object):
     """ Class that handles event database calls """
@@ -63,7 +91,7 @@ class Events(object):
         if q:
             query = ('name', q)
         else:
-            query =None
+            query = None
 
         df = self.database.read_table(
             'event_aggregates', 

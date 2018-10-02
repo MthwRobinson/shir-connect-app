@@ -97,11 +97,14 @@ class Events extends Component {
             <Table responsive header hover>
               <thead>
                 <tr>
-                  <th>Event</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Fees</th>
-                  <th>Attendees</th>
+                  <th className='table-heading'>Event</th>
+                  <th className='table-heading'>
+                    Start
+                    <i className='fa fa-caret-down paging-arrows'></i>
+                  </th>
+                  <th className='table-heading'>End</th>
+                  <th className='table-heading'>Fees</th>
+                  <th className='table-heading'>Attendees</th>
                 </tr>
               </thead>
               <tbody>

@@ -9,6 +9,7 @@ import {
   FormControl, 
   FormGroup 
 } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
 import './Login.css';
@@ -39,6 +40,7 @@ class Login extends Component {
         .then(res => {
           localStorage.setItem('trsToken', res.data.jwt);
           this.setState({authenticated: true});
+          this.props.history.push('/')
         })
         .catch(err => {
           this.setState({attempted: true});
@@ -107,4 +109,4 @@ class Login extends Component {
     }
 }
 
-export default Login;
+export default withRouter(Login);

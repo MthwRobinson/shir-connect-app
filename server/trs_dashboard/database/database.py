@@ -180,14 +180,46 @@ class Database(object):
             else:
                 return None
 
-    def read_table(self, table, limit=None):
+    def read_table(self, table, sort=None, order='desc', 
+        limit=None, page=None, query=None):
         """ Reads a table into a dataframe """
         sql = """
             SELECT *
             FROM {schema}.{table}
         """.format(schema=self.schema, table=table)
+        if query:
+            field = query[0]
+            search = query[1]
+            query = " WHERE lower(%s) like '%s%s%s' "%(
+                field, 
+                '%', search, '%'
+            )
+            sql += query
+        if sort:
+            sql += " ORDER BY %s %s "%(sort, order)
         if limit:
-            sql += " LIMIT %s"%(limit)
+            sql += " LIMIT %s "%(limit)
+        if page and limit:
+            offset = (page-1)*limit
+            sql += " OFFSET %s "%(offset)
         df = pd.read_sql(sql, self.connection)
         return df
+    
+    def count_rows(self, table, query=None):
+        """ Reads a table into a dataframe """
+        sql = """
+            SELECT count(*) as total
+            FROM {schema}.{table}
+        """.format(schema=self.schema, table=table)
+        if query:
+            field = query[0]
+            search = query[1]
+            query = " WHERE lower(%s) like '%s%s%s' "%(
+                field, 
+                '%', search, '%'
+            )
+            sql += query
+        df = pd.read_sql(sql, self.connection)
+        count = df.loc[0]['total']
+        return count
 

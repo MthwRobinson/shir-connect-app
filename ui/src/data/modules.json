@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Upcoming Events",
+    "icon" : "fa fa-calendar",
+    "bullets": [
+      "View upcoming events from Eventbrite.",
+      "Export event information as a .csv file."
+    ],
+    "link": "/events"
+  },
+  {
+    "title": "Upload Member Data",
+    "icon" : "fa fa-save",
+    "bullets": [
+      "Upload a .csv file with member ship data into the dashboard database."
+    ],
+    "link": "/members"
+  },
+  {
+    "title": "Event Trends",
+    "icon" : "fa fa-line-chart",
+    "bullets": [
+      "View trends in participation.",
+      "Export plots to include in presentations."
+    ],
+    "link": "/trends"
+  },
+  {
+    "title": "Event Map",
+    "icon" : "fa fa-globe",
+    "bullets": [
+      "View a map that shows where events take place.",
+      "Export maps to inclupe in presentations."
+    ],
+    "link": "/map"
+  }
+]

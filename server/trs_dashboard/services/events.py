@@ -104,7 +104,7 @@ class Events(object):
         count = self.database.count_rows('event_aggregates', query=query)
 
         pages = int((count/limit)) + 1
-        events = [json.loads(df.loc[i].to_json()) for i in df.index]
+        events = self.database.to_json(df)
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 

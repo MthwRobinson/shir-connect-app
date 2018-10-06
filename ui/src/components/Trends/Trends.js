@@ -10,9 +10,29 @@ import Loading from './../Loading/Loading';
 import './Trends.css';
 
 class Trends extends Component {
-    state = {
-      page: 'home',
-      loading: true
+  state = {
+    page: 'home',
+    loading: true
+  }
+  
+  componentDidMount(){
+      // Pulls the users name and redirects to the Login
+      // page if authentication is required
+      const token = localStorage.getItem('trsToken');
+      if(!token){
+        this.navigate('/login');
+      } else {
+        const auth = 'Bearer '.concat(token);
+        axios.get('/service/test', { headers: { Authorization: auth }})
+          .then(res => {
+            this.setState({name: res.data.name});
+          })
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
+          })
+      }
     }
 
     renderTable = () => {

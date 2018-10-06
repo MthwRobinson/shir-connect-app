@@ -1,5 +1,6 @@
 """ Connects to the Postgres database """
 from copy import deepcopy
+import json
 import logging
 import os
 
@@ -223,3 +224,13 @@ class Database(object):
         count = df.loc[0]['total']
         return count
 
+    def to_json(self, df):
+        """ Converts a dataframe to a json list """
+        return [json.loads(df.loc[i].to_json()) for i in df.index]
+
+    def fetch_list(self, sql):
+        """ Returns a sql query as a jsonfied list """
+        df = pd.read_sql(sql, self.connection)
+        results = self.to_json(df)
+        response = {'results': results}
+        return response

@@ -8,6 +8,31 @@ import './EventMap.css';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
 
+const FEATURES = [{
+  "type": "Feature",
+  "geometry": {
+            "type": "Point",
+            "coordinates": [-77.173449, 38.906103]
+        },
+  "properties": {
+            "title": "Temple Rodef Shalom",
+            "icon": "religious-jewish",
+            "description" : "<strong>Temple Rodef Shalom</strong>"
+    }
+  }, 
+  {
+  "type": "Feature",
+  "geometry": {
+            "type": "Point",
+            "coordinates": [-77.2, 38.92]
+        },
+  "properties": {
+            "title": "Mapbox DC",
+            "icon": "marker",
+            "description" : "<strong>DC!"
+        }
+}]
+
 class EventMap extends Component {
 
   constructor(props: Props) {
@@ -16,7 +41,7 @@ class EventMap extends Component {
         lng: -77.174,
         lat: 38.906,
         zoom: 10.8,
-        features: []
+        features: FEATURES
       };
   }
 
@@ -90,7 +115,7 @@ class EventMap extends Component {
             "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
             "text-offset": [0, 0.6],
             "text-anchor": "top"
-    }
+        }
         });
     });
 

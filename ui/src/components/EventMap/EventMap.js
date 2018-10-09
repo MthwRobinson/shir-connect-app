@@ -32,7 +32,8 @@ class EventMap extends Component {
         lat: 38.906,
         zoom: 10.3,
         features: [],
-        loading: true
+        mapLoading: true,
+        eventsLoading: true
       };
   }
 
@@ -50,10 +51,7 @@ class EventMap extends Component {
       .then(res => {
         let features = res.data.results;
         features.push(TRS_LOCATION);
-        this.setState({
-          features: features,
-          loading: false,
-        });
+        this.setState({features: features, mapLoading: false});
         this.buildMap()
       })
       .catch(err => {
@@ -138,43 +136,56 @@ class EventMap extends Component {
         }
         });
     });
-
   }
 
   render() {
-    const { lng, lat, zoom, features } = this.state;
 
-    if(this.state.loading===true){
-      return(
-        <div className='event-loading'>
-          <Loading />
+    let mapArea = null;
+    if(this.state.mapLoading===true){
+      mapArea = (
+        <div className='map'>
+          <div className='event-loading'>
+            <Loading />
+          </div>
         </div>
       )
     } else {
-      return (
-        <div className="EventMap">
-          <div className='events-header'>
-            <h2>
-              Event Map
-              <i
-                className="fa fa-times pull-right event-icons"
-                onClick={()=>this.props.history.push('/')}
-              ></i>
-            </h2><hr/>
-          </div>
-          <div className='map-container'>
-            <div className='map-summary-area'>
-              <h4>Events by City</h4><hr/>
-            </div>
-            <div 
-              ref={el => this.mapContainer = el} 
-              className="map pull-right"
-              id="map" 
-            />
-          </div>
-        </div>
-      );
+      mapArea = (
+        <div 
+          ref={el => this.mapContainer = el} 
+          className="map pull-right"
+          id="map" 
+        />
+      )
     }
+
+    let eventsArea = null;
+    if(this.state.eventsLoading===true){
+      eventsArea = <div className='event-loading'><Loading /></div>
+    } else {
+      eventsArea = null
+    }
+
+    return (
+      <div className="EventMap">
+        <div className='events-header'>
+          <h2>
+            Event Map
+            <i
+              className="fa fa-times pull-right event-icons"
+              onClick={()=>this.props.history.push('/')}
+            ></i>
+          </h2><hr/>
+        </div>
+        <div className='map-container'>
+          <div className='map-summary-area'>
+            <h4>Events by City</h4><hr/>
+            {eventsArea}
+          </div>
+          {mapArea}
+        </div>
+      </div>
+    );
   }  
 
 }

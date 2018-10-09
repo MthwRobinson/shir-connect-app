@@ -17,7 +17,7 @@ const FEATURES = [{
   "properties": {
             "title": "Temple Rodef Shalom",
             "icon": "religious-jewish",
-            "description" : "<strong>Temple Rodef Shalom</strong>"
+    "description" : "<strong>Temple Rodef Shalom</strong><p>hi</p>"
     }
   }, 
   {
@@ -112,7 +112,7 @@ class EventMap extends Component {
         "layout": {
             "icon-image": "{icon}-15",
             "text-field": "{title}",
-            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+            "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
             "text-offset": [0, 0.6],
             "text-anchor": "top"
         }

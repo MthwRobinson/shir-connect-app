@@ -165,7 +165,7 @@ class Events(object):
 
     def build_feature(self, row):
         """ Converts a dataframe row into a geojson feature """
-        coordinates = [row['latitude'], row['longitude']]
+        coordinates = [row['longitude'], row['latitude']]
         day = str(row['start_datetime'])[:10]
         address = ''
         if row['address_1']:

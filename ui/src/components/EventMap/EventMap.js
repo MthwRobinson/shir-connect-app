@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Col } from 'react-bootstrap';
+import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 
+import Loading from './../Loading/Loading';
+
 import './EventMap.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
 
-const FEATURES = [{
+const TRS_LOCATION = {
   "type": "Feature",
   "geometry": {
             "type": "Point",
@@ -19,19 +21,7 @@ const FEATURES = [{
             "icon": "religious-jewish",
     "description" : "<strong>Temple Rodef Shalom</strong><p>hi</p>"
     }
-  }, 
-  {
-  "type": "Feature",
-  "geometry": {
-            "type": "Point",
-            "coordinates": [-77.2, 38.92]
-        },
-  "properties": {
-            "title": "Mapbox DC",
-            "icon": "marker",
-            "description" : "<strong>DC!"
-        }
-}]
+}
 
 class EventMap extends Component {
 
@@ -40,12 +30,42 @@ class EventMap extends Component {
       this.state = {
         lng: -77.174,
         lat: 38.906,
-        zoom: 10.8,
-        features: FEATURES
+        zoom: 10.3,
+        features: [],
+        loading: true
       };
   }
 
   componentDidMount() {
+    this.getEventLocations();
+  }
+
+  getEventLocations = () => {
+    // Pulls event locations from the database and renders the map
+    this.setState({loading: true});
+    const token = localStorage.getItem('trsToken');
+    const auth = 'Bearer '.concat(token);
+    let url = '/service/events/locations';
+    axios.get(url, {headers: {Authorization: auth }})
+      .then(res => {
+        let features = res.data.results;
+        features.push(TRS_LOCATION);
+        this.setState({
+          features: features,
+          loading: false,
+        });
+        this.buildMap()
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
+      })
+
+  }
+
+  buildMap = () => {
+    // Builds the MapBox GL map
     const { lng, lat, zoom, features } = this.state;
 
     var popup = new mapboxgl.Popup({
@@ -119,34 +139,42 @@ class EventMap extends Component {
         });
     });
 
-  } 
+  }
 
   render() {
     const { lng, lat, zoom, features } = this.state;
 
-    return (
-      <div className="EventMap">
-        <div className='events-header'>
-          <h2>
-            Event Map
-            <i
-              className="fa fa-times pull-right event-icons"
-              onClick={()=>this.props.history.push('/')}
-            ></i>
-          </h2><hr/>
+    if(this.state.loading===true){
+      return(
+        <div className='event-loading'>
+          <Loading />
         </div>
-        <div className='map-container'>
-          <div className='map-summary-area'>
-            <h4>Events by City</h4><hr/>
+      )
+    } else {
+      return (
+        <div className="EventMap">
+          <div className='events-header'>
+            <h2>
+              Event Map
+              <i
+                className="fa fa-times pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
+            </h2><hr/>
           </div>
-          <div 
-            ref={el => this.mapContainer = el} 
-            className="map pull-right"
-            id="map" 
-          />
+          <div className='map-container'>
+            <div className='map-summary-area'>
+              <h4>Events by City</h4><hr/>
+            </div>
+            <div 
+              ref={el => this.mapContainer = el} 
+              className="map pull-right"
+              id="map" 
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }  
 
 }

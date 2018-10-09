@@ -61,6 +61,14 @@ def get_event_locations():
     response = event_manager.get_event_locations()
     return jsonify(response)
 
+@events.route('/service/events/cities', methods=['GET'])
+@jwt_required
+def get_event_cities():
+    """ Pulls a list of events grouped by city """
+    event_manager = Events()
+    response = event_manager.get_event_cities()
+    return jsonify(response)
+
 @events.route('/service/events/export', methods=['GET'])
 @jwt_required
 def export_event_aggregates():
@@ -114,6 +122,44 @@ class Events(object):
         pages = int((count/limit)) + 1
         events = self.database.to_json(df)
         response = {'results': events, 'count': str(count), 'pages': pages}
+        return response
+
+    def get_event_cities(self):
+        """ Pulls a list of events organized by city """
+        sql = """
+            SELECT
+                event.id as event_id,
+                event.name as event_name,
+                venue.city as city
+            FROM {schema}.events event
+            INNER JOIN {schema}.venues venue
+            ON event.venue_id = venue.id
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+
+        cities = {}
+        counts = {}
+        total = 0
+        for i in df.index:
+            row = dict(df.loc[i])
+            city = row['city']
+            if city:
+                if row['city'] not in cities:
+                    cities[city] = [row]
+                    counts[city] = 1
+                else:
+                    cities[city].append(row)
+                    counts[city] += 1
+                total += 1
+        counts = {x: str(counts[x]) for x in counts}
+        
+        response = {
+            'results': {
+                'cities': cities,
+                'counts': counts
+            },
+            'count': str(total)
+        }
         return response
 
     def get_event_locations(self):
@@ -174,10 +220,10 @@ class Events(object):
             address += row['city']
         description = """
             <strong>{title}</strong>
-            <ol>
+            <ul>
                 <li>Date: {day}</li>
                 <li>Address: {address}</li>
-            </ol>
+            </ul>
         """.format(title=row['event_name'], day=day, address=address)
 
         feature = {

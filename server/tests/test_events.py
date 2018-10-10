@@ -41,6 +41,75 @@ def test_events():
     user = user_management.get_user('unittestuser')
     assert user == None
 
+def test_event_locations():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    
+    response = CLIENT.get('/service/events?limit=25')
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    url = '/service/events/locations'
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    assert type(response.json['results']) == list
+    for result in response.json['results']:
+        assert type(result['type']) == str
+        assert type(result['geometry']['type']) == str
+        assert type(result['geometry']['coordinates'][0]) == float
+        assert type(result['geometry']['coordinates'][1]) == float
+        assert type(result['properties']['title']) == str
+        assert type(result['properties']['icon']) == str
+        assert type(result['properties']['description']) == str
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+
+def test_event_cities():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    
+    response = CLIENT.get('/service/events?limit=25')
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    url = '/service/events/cities'
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    assert type(response.json['results']) == dict
+    for city in response.json['results']['cities']:
+        assert type(response.json['results']['cities'][city]) == list
+    for city in response.json['results']['counts']:
+        assert type(response.json['results']['counts'][city]) == str
+    assert type(response.json['count']) == str
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+
 def test_export_event_aggregates():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')

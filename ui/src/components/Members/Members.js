@@ -156,13 +156,16 @@ class Members extends Component {
             <Table responsive header hover>
               <thead>
                 <tr>
+                  <th className='table-heading'>Mem. Id</th>
                   <th className='table-heading'>First Name</th>
                   <th className='table-heading'>
                     Last Name
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
-                  <th className='table-heading'>Mem. Date</th>
                   <th className='table-heading'>DOB</th>
+                  <th className='table-heading'>Religion</th>
+                  <th className='table-heading'>E-mail</th>
+                  <th className='table-heading'>Mem. Date</th>
                   <th className='table-heading'>Mem. Type</th>
                 </tr>
               </thead>
@@ -170,11 +173,14 @@ class Members extends Component {
                 {this.state.members.map((member, index) => {
                   return(
                     <tr className='table-row' key={index}>
+                      <th>{member.id}</th>
                       <th>{member.first_name}</th>
                       <th>{member.last_name}</th>
-                      <th>{member.membership_date}</th>
                       <th>{member.birth_date}</th>
-                      <th>{member.membership_type}</th>
+                      <th>{member.member_religion}</th>
+                      <th>{member.email}</th>
+                      <th>{member.membership_date}</th>
+                      <th>{member.member_type}</th>
                     </tr>
                   )
                 })}

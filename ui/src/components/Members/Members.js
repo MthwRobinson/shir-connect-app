@@ -5,6 +5,8 @@ import {
   Form,
   FormControl,
   FormGroup,
+  Row,
+  Table
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import moment from 'moment';
@@ -31,7 +33,7 @@ class Members extends Component {
 
       // Binding for the file upload in the popup
       this.uploadFile = this.uploadFile.bind(this)
-      //this.handleQuery = this.handleQuery.bind(this)
+      this.handleQuery = this.handleQuery.bind(this)
     }
 
     componentDidMount(){
@@ -81,6 +83,106 @@ class Members extends Component {
           this.props.history.push('/login');
         }
       })
+    }
+  
+    incrementPage = (direction) => {
+      // Increments the page number
+      if (direction==='up'){
+        if(this.state.page<this.state.pages){
+          const page = this.state.page + 1;
+          this.setState({page:page});
+          this.getMembers('up');
+        }
+      } else if(direction==='down') {
+        if(this.state.page>1){
+          const page = this.state.page - 1;
+          this.setState({page:page});
+          this.getMembers('down');
+        }
+      }
+    }
+
+    handleSubmit = (event) => {
+      // Handles the submit action in the search bar
+      event.preventDefault();
+      this.setState({page: 1});
+      this.getMembers('search');
+    }
+
+    handleQuery(event){
+      // Updates the query value in the state
+      this.setState({
+        query: event.target.value
+      });
+    }
+
+    renderPageCount = () => {
+      // Renders the page count at the top of the table
+      let leftCaret = null
+      if (this.state.page>1){
+        leftCaret = (
+          <i 
+            className='fa fa-caret-left paging-arrows'
+            onClick={()=>this.incrementPage('down')}
+          >
+          </i>
+        );
+      }
+      let rightCaret = null
+      if (this.state.page<this.state.pages){
+        rightCaret = (
+          <i 
+            className='fa fa-caret-right paging-arrows'
+            onClick={()=>this.incrementPage('up')}
+          >
+          </i>
+        );
+      }
+
+      return(
+        <div className='paging pull-left'>
+            {leftCaret}
+            {this.state.page}/{this.state.pages}
+            {rightCaret}
+        </div>
+      )
+    }
+
+    renderTable = () => {
+      // Creates the table with member information
+      return(
+        <div>
+          <Row className='event-table'>
+            <Table responsive header hover>
+              <thead>
+                <tr>
+                  <th className='table-heading'>First Name</th>
+                  <th className='table-heading'>
+                    Last Name
+                    <i className='fa fa-caret-down paging-arrows'></i>
+                  </th>
+                  <th className='table-heading'>Mem. Date</th>
+                  <th className='table-heading'>DOB</th>
+                  <th className='table-heading'>Mem. Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.members.map((member, index) => {
+                  return(
+                    <tr className='table-row' key={index}>
+                      <th>{member.first_name}</th>
+                      <th>{member.last_name}</th>
+                      <th>{member.membership_date}</th>
+                      <th>{member.birth_date}</th>
+                      <th>{member.membership_type}</th>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </Row>
+        </div>
+      )
     }
 
     uploadFile(event) {
@@ -168,6 +270,19 @@ class Members extends Component {
     render() {
       const popup = this.renderPopup();
 
+      let table = null
+      if(this.state.loading){
+        table = (
+          <div className='event-loading'>
+            <Loading/>
+          </div>
+        )
+      } else {
+        table = this.renderTable();
+      }
+
+      let pageCount = this.renderPageCount();
+
       return (
         <div className="Members">
           <div className='events-header'>
@@ -182,6 +297,25 @@ class Members extends Component {
             </h2><hr/>
           </div>
           {popup}
+          <div className='event-header'>
+            {pageCount}
+            <div className='pull-right'>
+              <Form onSubmit={this.handleSubmit} inline>
+                <FormGroup>
+                  <FormControl 
+                    value={this.state.query}
+                    onChange={this.handleQuery}
+                    type="text" 
+                  />
+                </FormGroup>
+                <Button 
+                  className='search-button'
+                  type="submit"
+                >Search</Button>
+              </Form>
+            </div>
+          </div>
+          {table}
         </div>
       );
     }

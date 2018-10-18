@@ -2,11 +2,9 @@
 import React, { Component } from 'react';
 import {
   Button,
-  ControlLabel,
   Form,
   FormControl,
   FormGroup,
-  Input
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';

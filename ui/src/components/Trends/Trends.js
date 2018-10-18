@@ -1,7 +1,7 @@
 // Renders the component for the Trends screen
 import React, { Component } from 'react';
 import { Row, Table } from 'react-bootstrap';
-import { Route, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 

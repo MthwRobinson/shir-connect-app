@@ -20,6 +20,38 @@ from trs_dashboard.database.database import Database
 
 members = Blueprint('members', __name__)
 
+@members.route('/service/members', methods=['GET'])
+@jwt_required
+def get_members():
+    """ Pulls the list of members from the database """
+    limit = request.args.get('limit')
+    if not limit:
+        limit = 25
+    else:
+        limit = int(limit)
+    page = request.args.get('page')
+    if not page:
+        page = 1
+    else:
+        page = int(page)
+    order = request.args.get('order')
+    if not order:
+        order = 'desc'
+    sort = request.args.get('sort')
+    if not sort:
+        sort = 'last_name'
+    q = request.args.get('q')
+
+    member_manager = Members()
+    response = member_manager.get_members(
+        limit=limit,
+        page=page,
+        order=order,
+        sort=sort,
+        q=q
+    )
+    return jsonify(response)
+
 @members.route('/service/members/upload', methods=['POST'])
 @jwt_required
 def upload_members():
@@ -41,6 +73,28 @@ class Members(object):
         self.database = Database()
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
         self.member_columns = conf.MEMBER_COLUMNS
+
+    def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
+        """ Pulls a list of members from the database """
+        if q:
+            query = ('last_name', q)
+        else:
+            query = None
+
+        df = self.database.read_table(
+            'members_view',
+            limit=limit,
+            page=page,
+            order=order,
+            sort=sort,
+            query=query
+        )
+        count = self.database.count_rows('members_view', query=query)
+
+        pages = int((count/limit)) + 1
+        members = self.database.to_json(df)
+        response = {'results': members, 'count': str(count), 'pages': pages}
+        return response
     
     def upload_file(self, request):
         """ Reads the file and uploads it to the database """

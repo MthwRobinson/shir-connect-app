@@ -7,19 +7,80 @@ import {
   FormGroup,
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import moment from 'moment';
 import axios from 'axios';
 
+import Loading from './../Loading/Loading';
+
 import './Members.css';
+
+const LIMIT = 25
 
 class Members extends Component {
     constructor(props){
       super(props);
       this.state = {
-        showUpload: true
+        members: [],
+        pages: 1,
+        page: 1,
+        count: 0,
+        query: '',
+        loading: true,
+        showUpload: false
       }
 
       // Binding for the file upload in the popup
       this.uploadFile = this.uploadFile.bind(this)
+      //this.handleQuery = this.handleQuery.bind(this)
+    }
+
+    componentDidMount(){
+      this.getMembers();
+    }
+
+    getMembers = (fetchType) => {
+      // Pulls members to display in the table
+      this.setState({loading: true});
+      const token = localStorage.getItem('trsToken');
+      const auth = 'Bearer '.concat(token);
+      let url = '/service/members?limit='+LIMIT;
+      if(fetchType==='search'){
+        url += '&page=1';
+      } else if (fetchType==='up'){
+        url += '&page='+(this.state.page+1);
+      } else if (fetchType==='down'){
+        url += '&page='+(this.state.page-1);
+      } else {
+        url += '&page='+this.state.page;
+      }
+      if(this.state.query.trim().length>0){
+        url += '&q='+this.state.query;
+      }
+      axios.get(url, {headers: {Authorization: auth}})
+        .then(res => {
+          let members = [];
+          for(var i=0; i<res.data.results.length; i++){
+            let member = res.data.results[i];
+            var birthday = moment(member.birth_date);
+            member.birth_date = birthday.format('MM/DD/YY');
+            var membership_date = moment(member.membership_date);
+            member.membership_date = membership_date.format('MM/DD/YY');
+            members.push(member);
+          }
+          
+          this.setState({
+            members: members,
+            count: parseInt(res.data.count, 10),
+            pages: parseInt(res.data.pages, 10),
+            loading: false
+          });
+          console.log(this.state.members);
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
+      })
     }
 
     uploadFile(event) {

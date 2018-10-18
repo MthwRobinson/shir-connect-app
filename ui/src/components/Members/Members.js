@@ -5,9 +5,11 @@ import {
   ControlLabel,
   Form,
   FormControl,
-  FormGroup
+  FormGroup,
+  Input
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import axios from 'axios';
 
 import './Members.css';
 
@@ -17,6 +19,38 @@ class Members extends Component {
       this.state = {
         showUpload: true
       }
+
+      // Binding for the file upload in the popup
+      this.uploadFile = this.uploadFile.bind(this)
+    }
+
+    uploadFile(event) {
+      // Handles uploading the member data in the popup
+      event.preventDefault();
+
+      // Get the file information
+      const data = new FormData();
+      const file = this.uploadInput.files[0];
+      data.append('file', file);
+
+      // Post the data
+      const token = localStorage.getItem('trsToken');
+      const auth = 'Bearer '.concat(token);
+      const url = '/service/members/upload';
+      axios.post(url, data, {
+          headers: {
+            'Authorization': auth,
+            'Content-Type': 'application/vnd.ms-excel'
+          }
+      }).then(res => {
+          this.hideUpload();    
+        })
+        .catch(err => {
+          if(err.response.status===401){
+            this.props.history.push('/login');
+          }
+        })
+
     }
 
     showUpload = () => {
@@ -29,7 +63,7 @@ class Members extends Component {
       this.setState({ showUpload: false });
     }
 
-  renderPopup = () => {
+    renderPopup = () => {
       // Renders the popup with the upload form
       let showHideClassName = null;
       if(this.state.showUpload===true){
@@ -52,14 +86,15 @@ class Members extends Component {
                 Accepted file types include .csv files and MS Excel files.
                 Columns and data types will be validated prior to uploading.
               </p>
-              <Form>
+              <Form onSubmit={this.uploadFile}>
                 <FormGroup horizontal>
                   <FormControl 
                     className="upload-file"
                     type="file"
+                    inputRef={(ref) => this.uploadInput = ref}
                   /><br/>
                   <Button
-                    bsStyle="primary" 
+                    bsStyle="primary"
                     type="submit"
                   >Upload</Button>
                 </FormGroup>

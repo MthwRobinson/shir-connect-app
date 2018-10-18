@@ -12,3 +12,17 @@ PG_USER = 'postgres'
 PG_HOST = 'localhost'
 PG_DATABASE = 'postgres'
 PG_SCHEMA = 'trs_dashboard'
+
+# Member upload confits
+ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
+MEMBER_COLUMNS = {
+    'time_columns': ['birth_date', 'membership_date'],
+    'columns': {
+        'first': 'first_name',
+        'last': 'last_name',
+        'zip': 'postal_code',
+        'member_id': 'id',
+        'memo': 'member_religion',
+        'e-mail_for_member': 'email'
+    }
+}

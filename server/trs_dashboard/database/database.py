@@ -94,6 +94,31 @@ class Database(object):
                 if not test:
                     self.refresh_view(view)
 
+    def backup_table(self, table):
+        """ Creates a backup of the specified table """
+        sql = """
+            DROP TABLE IF EXISTS {schema}.{table}_backup;
+            CREATE TABLE {schema}.{table}_backup
+            AS SELECT *
+            FROM {schema}.{table}
+        """.format(schema=self.schema, table=table)
+        self.run_query(sql)
+
+    def revert_table(self, table):
+        """ Reverts a table to the backup """
+        sql = """
+            DROP TABLE IF EXISTS {schema}.{table};
+            CREATE TABLE {schema}.{table}
+            AS SELECT *
+            FROM {schema}.{table}
+        """.format(schema=self.schema, table=table)
+        self.run_query(sql)
+
+    def truncate_table(self, table):
+        """ Truncates a table """
+        sql = "TRUNCATE %s.%s"%(self.schema, table)
+        self.run_query(sql)
+
     def get_columns(self, table):
         """ Pulls the column names for a table """
         sql = """

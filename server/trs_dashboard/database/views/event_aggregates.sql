@@ -1,5 +1,5 @@
 CREATE MATERIALIZED VIEW 
-IF NOT EXISTS trs_dashboard.event_aggregates
+IF NOT EXISTS {schema}.event_aggregates
 AS
 SELECT 
   a.id,
@@ -17,13 +17,13 @@ SELECT
     'total_fees', c.total_fees,
     'attendees', c.attendees
   )) as ticket_type
-FROM trs_dashboard.events a
+FROM {schema}.events a
 LEFT JOIN(
   SELECT 
     event_id, 
     SUM(cost) AS total_fees,
     COUNT(*) AS attendee_count
-  FROM trs_dashboard.attendees
+  FROM {schema}.attendees
   GROUP BY event_id
 ) b ON a.id=b.event_id
 LEFT JOIN(
@@ -33,12 +33,12 @@ LEFT JOIN(
     COUNT(*) as attendees,
     cost,
     SUM(cost) as total_fees
-  FROM trs_dashboard.attendees
+  FROM {schema}.attendees
   GROUP BY event_id, ticket_class_name, cost
 ) c ON c.event_id = c.event_id
 LEFT JOIN(
   SELECT id, postal_code
-  FROM trs_dashboard.venues
+  FROM {schema}.venues
 ) d ON a.venue_id = d.id
 GROUP BY 
   a.id,

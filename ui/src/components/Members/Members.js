@@ -28,7 +28,8 @@ class Members extends Component {
         count: 0,
         query: '',
         loading: true,
-        showUpload: false
+        showUpload: false,
+        uploadLoading: false
       }
 
       // Binding for the file upload in the popup
@@ -192,6 +193,7 @@ class Members extends Component {
     uploadFile(event) {
       // Handles uploading the member data in the popup
       event.preventDefault();
+      this.setState({uploadLoading: true});
 
       // Get the file information
       const data = new FormData();
@@ -208,7 +210,9 @@ class Members extends Component {
             'Content-Type': 'application/vnd.ms-excel'
           }
       }).then(res => {
-          this.hideUpload();    
+          this.getMembers();
+          this.hideUpload();
+          this.setState({uploadLoading: false});
         })
         .catch(err => {
           if(err.response.status===401){
@@ -237,14 +241,11 @@ class Members extends Component {
         showHideClassName = "popup popup-display-none";  
       }
 
-      return(
-        <div className={showHideClassName}>
-          <section className="popup-main">
-            <h4>Upload Member Data
-              <i className="fa fa-times pull-right event-icons"
-                 onClick={()=>this.hideUpload()}
-              ></i>
-            </h4><hr/>
+      let body = null;
+      if(this.state.uploadLoading===true){
+         body = <Loading />
+      } else {
+        body = (
             <div className='upload-body'>
               <p>
                 Upload member data into the dashboard database.
@@ -265,6 +266,18 @@ class Members extends Component {
                 </FormGroup>
               </Form>
             </div>
+        )
+      }
+
+      return(
+        <div className={showHideClassName}>
+          <section className="popup-main">
+            <h4>Upload Member Data
+              <i className="fa fa-times pull-right event-icons"
+                 onClick={()=>this.hideUpload()}
+              ></i>
+            </h4><hr/>
+            {body}
           </section>
         </div>
       )

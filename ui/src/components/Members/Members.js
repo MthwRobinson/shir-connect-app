@@ -164,7 +164,6 @@ class Members extends Component {
                   </th>
                   <th className='table-heading'>DOB</th>
                   <th className='table-heading'>Religion</th>
-                  <th className='table-heading'>E-mail</th>
                   <th className='table-heading'>Mem. Date</th>
                   <th className='table-heading'>Mem. Type</th>
                 </tr>
@@ -178,7 +177,6 @@ class Members extends Component {
                       <th>{member.last_name}</th>
                       <th>{member.birth_date}</th>
                       <th>{member.member_religion}</th>
-                      <th>{member.email}</th>
                       <th>{member.membership_date}</th>
                       <th>{member.member_type}</th>
                     </tr>

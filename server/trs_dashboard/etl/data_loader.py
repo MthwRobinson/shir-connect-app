@@ -90,7 +90,7 @@ class DataLoader(object):
                 else:
                     time.sleep(60)
 
-            if events['pagination']['has_more_items']:
+            if not events['pagination']['has_more_items']:
                 more_events = False
                 break
             else:

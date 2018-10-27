@@ -9,10 +9,11 @@
     "link": "/events"
   },
   {
-    "title": "Upload Member Data",
-    "icon" : "fa fa-save",
+    "title": "Members",
+    "icon" : "fa fa-user",
     "bullets": [
-      "Upload a .csv file with member ship data into the dashboard database."
+      "View and sort members",
+      "Upload an Excel file with member ship data into the dashboard database."
     ],
     "link": "/members"
   },

@@ -304,7 +304,7 @@ class Members extends Component {
         <div className="Members">
           <div className='events-header'>
             <h2>
-              Members
+              Members ({this.state.count})
               <i className="fa fa-times pull-right event-icons"
                  onClick={()=>this.props.history.push('/')}
               ></i>

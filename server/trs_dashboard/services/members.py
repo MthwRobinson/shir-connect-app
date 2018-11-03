@@ -211,6 +211,12 @@ class Members(object):
             np.random.shuffle(postal_codes)
             postal_code = postal_codes[0]
 
+            # Generate a fake email
+            if row['last_name']:
+                email = row['last_name'] + '@fake.com'
+            else:
+                email = 'fake@fake.com'
+
             # Append the dummy data
             data['id'].append('M'+str(i))
             data['first_name'].append(row['first_name'])
@@ -222,7 +228,7 @@ class Members(object):
             data['postal_code'].append(postal_code)
             data['member_family'].append('Y')
             data['member_type'].append('Member')
-            data['email'].append(row['last_name'].lower()+'@fake.com')
+            data['email'].append(email)
 
         df = pd.DataFrame(data)
         if load:
@@ -230,6 +236,9 @@ class Members(object):
             for i in df.index:
                 item = dict(df.loc[i])
                 self.database.load_item(item, 'members')
+            good_columns = self.check_columns()
+            if good_columns:
+                self.database.refresh_view('members_view')
         else:
             return df
 

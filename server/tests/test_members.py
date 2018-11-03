@@ -4,6 +4,7 @@ import json
 import pandas as pd
 
 from trs_dashboard.services.app import app
+from trs_dashboard.services.members import Members
 from trs_dashboard.services.user_management import UserManagement
 
 CLIENT = app.test_client()
@@ -39,3 +40,8 @@ def test_members():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+
+def test_dummy_members():
+    members = Members()
+    df = members.create_dummy_members(limit=20)
+    assert len(df) == 20

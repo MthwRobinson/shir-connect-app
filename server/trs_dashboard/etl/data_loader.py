@@ -86,7 +86,7 @@ class DataLoader(object):
                         attendees = self.get_attendees(event_id, page)
                 # Sleep to avoid the Eventbrite rate limit
                 if test:
-                    break
+                    return
                 else:
                     time.sleep(60)
 

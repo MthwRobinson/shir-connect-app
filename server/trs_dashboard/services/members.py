@@ -13,6 +13,7 @@ import daiquiri
 from flask import Blueprint, abort, jsonify, make_response, request
 from flask_jwt_simple import jwt_required
 import pandas as pd
+import numpy as np
 from werkzeug.utils import secure_filename
 
 import trs_dashboard.configuration as conf
@@ -181,5 +182,55 @@ class Members(object):
         field = ''.join([i for i in field if not i.isdigit()])
         field = field.lower().replace(' ','_')
         return field
-                
+
+    def create_dummy_members(self, limit=None, load=False):
+        """ Creates dummy membership data for development """
+        df = self.database.read_table('attendees', limit=limit)
+
+        sql = """
+            SELECT DISTINCT postal_code
+            FROM {schema}.venues
+        """.format(schema=self.database.schema)
+        postal_table = pd.read_sql(sql, self.database.connection)
+        postal_codes = [x for x in postal_table['postal_code']]
+
+        columns = self.database.get_columns('members')
+        data = {x: [] for x in columns}
+        for i in df.index:
+            row = dict(df.loc[i])
+
+            # Generate random birthdays and member ship dates
+            interval = 29200
+            start = datetime.datetime(1938, 1, 1)
+            bday_draw = int(np.random.random()*interval)
+            member_draw = int(np.random.random()*(interval-bday_draw))
+            bday = start + datetime.timedelta(days=bday_draw)
+            member_date = start + datetime.timedelta(days=member_draw)
+
+            # Generate a random zip code
+            np.random.shuffle(postal_codes)
+            postal_code = postal_codes[0]
+
+            # Append the dummy data
+            data['id'].append('M'+str(i))
+            data['first_name'].append(row['first_name'])
+            data['last_name'].append(row['last_name'])
+            data['nickname'].append(row['first_name'])
+            data['birth_date'].append(bday)
+            data['membership_date'].append(member_date)
+            data['member_religion'].append('Jewish')
+            data['postal_code'].append(postal_code)
+            data['member_family'].append('Y')
+            data['member_type'].append('Member')
+            data['email'].append(row['last_name'].lower()+'@fake.com')
+
+        df = pd.DataFrame(data)
+        if load:
+            self.database.truncate_table('members')
+            for i in df.index:
+                item = dict(df.loc[i])
+                self.database.load_item(item, 'members')
+        else:
+            return df
+
 

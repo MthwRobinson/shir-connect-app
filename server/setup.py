@@ -10,7 +10,8 @@ reqs = [
     'pandas',
     'psycopg2',
     'requests',
-    'uuid'
+    'uuid',
+    'xlrd'
 ]
 
 test_reqs = ['pytest', 'pytest-sugar', 'pytest-cov', 'pylint']

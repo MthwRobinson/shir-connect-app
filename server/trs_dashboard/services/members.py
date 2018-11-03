@@ -37,7 +37,7 @@ def get_members():
         page = int(page)
     order = request.args.get('order')
     if not order:
-        order = 'desc'
+        order = 'asc'
     sort = request.args.get('sort')
     if not sort:
         sort = 'last_name'
@@ -185,7 +185,13 @@ class Members(object):
 
     def create_dummy_members(self, limit=None, load=False):
         """ Creates dummy membership data for development """
-        df = self.database.read_table('attendees', limit=limit)
+        sql = """
+            SELECT DISTINCT first_name, last_name
+            FROM {schema}.attendees
+        """.format(schema=self.database.schema)
+        if limit:
+            sql += " LIMIT %s "%(limit)
+        df = pd.read_sql(sql, self.database.connection)
 
         sql = """
             SELECT DISTINCT postal_code
@@ -211,17 +217,19 @@ class Members(object):
             np.random.shuffle(postal_codes)
             postal_code = postal_codes[0]
 
-            # Generate a fake email
-            if row['last_name']:
-                email = row['last_name'] + '@fake.com'
+            # Generate first name and last name
+            if not row['first_name'] or not row['last_name']:
+                continue
             else:
-                email = 'fake@fake.com'
+                first_name = row['first_name'].title()
+                last_name = row['last_name'].title()
+                email = row['last_name'] + '@fake.com'
 
             # Append the dummy data
             data['id'].append('M'+str(i))
-            data['first_name'].append(row['first_name'])
-            data['last_name'].append(row['last_name'])
-            data['nickname'].append(row['first_name'])
+            data['first_name'].append(first_name)
+            data['last_name'].append(last_name)
+            data['nickname'].append(first_name)
             data['birth_date'].append(bday)
             data['membership_date'].append(member_date)
             data['member_religion'].append('Jewish')

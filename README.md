@@ -63,6 +63,11 @@ When new data is uploaded, it overwrites the current record.
 Information for upcoming events will be updated until the event takes place.
 All datetimes will be stored in the database as UTC.
 
+The data load can also be run using `sh scripts/load_eventbrite.sh`. To schedule a daily load, run `crontab -e` and add the following line:
+```
+30 1 * * * /bin/sh /home/ubuntu/trs-dashboard/script/load_eventbrite.sh
+```
+
 ### Running the Flask App
 
 The REST API is a Flask app that can be launched from the CLI.

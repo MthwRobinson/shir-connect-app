@@ -11,3 +11,13 @@ sudo apt-get install postgresql postgres-contrib
 sudo apt-get install python-pip
 pip install virtualenv
 sudo apt-get install python3-venv
+
+# Install NVM and Node
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+nvm install node
+nvm install --lts
+nvm use --lts
+
+# Install global npm packages
+npm install -g serve
+npm install -g pm2

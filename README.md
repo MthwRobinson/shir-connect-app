@@ -50,6 +50,15 @@ To install the UI, navigate to the `/ui` folder and run `npm install`.
 After that, you can run `npm run start` to run a development server for the app.
 To access the REST API, you will need to configure a web server to redirect `/` to `localhost:5000` and `/service` to `localhost:3000`.
 
+### Running the app persistently
+
+The production app runs persistently using `pm2`. To start the application, you can run:
+```
+pm2 start scripts/start_app.sh
+```
+
+After the app is started, `pm2 stop <id>` will stop the app, `pm2 start <id>` will start the app and the `pm2 restart <id>` will restart the app. You can determin the id by running `pm2 list`.
+
 ## Operation
 
 ### Load Data

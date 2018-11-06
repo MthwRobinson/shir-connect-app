@@ -59,6 +59,8 @@ pm2 start scripts/start_app.sh
 
 After the app is started, `pm2 stop <id>` will stop the app, `pm2 start <id>` will start the app and the `pm2 restart <id>` will restart the app. You can determin the id by running `pm2 list`.
 
+To enable HTTPS and setup hosting, first run `sudo certbot --nginx -d dreidel-parrot.dataflock.io` and then set up the nginx config. The nginx config can be found at `server.conf`. Simply move this configuration to `/etc/nginx/conf.d`.
+
 ## Operation
 
 ### Load Data

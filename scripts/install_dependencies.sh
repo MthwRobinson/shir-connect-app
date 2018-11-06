@@ -21,3 +21,16 @@ nvm use --lts
 # Install global npm packages
 npm install -g serve
 npm install -g pm2
+
+# Nginx
+sudo wget http://nginx.org/keys/nginx_signing.key
+sudo apt-key add nginx_signing.key
+sudo apt-get update
+sudo apt-get install nginx
+
+# Let's Encrypt
+sudo apt-get update
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+sudo apt-get install python-certbot-nginx

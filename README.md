@@ -11,6 +11,17 @@
 
 ## Installation
 
+### Dependencies
+
+The TRS Dashboard app dependings on a number of Debian dependencies. The dependencies include Postgres, Python virtual environments and node. These can be install by running `sudo sh scripts/install_dependencies.sh`
+
+In addition, the following environmental variables need to be added to `~/.bashrc`:
+```
+export APP_ENVIRONMENT="LOCAL"
+export EVENTBRITE_OAUTH="{eventbrite_token}"
+export JWT_SECRET_KEY="{any_alphanumeric_sequence"
+```
+
 ### Server 
 
 To install the server side application navigate to the `/server` folder and run  `pip install -e .[test]`.

@@ -3,9 +3,8 @@ import React, { Component } from 'react';
 import { Row, Table } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
-import Plot from 'react-plotly.js';
 
-import Loading from './../Loading/Loading';
+import AgeGroupAttendance from './Plots/AgeGroupAttendance';
 import AverageAttendancePlot from './Plots/AverageAttendancePlot';
 import MonthlyRevenuePlot from './Plots/MonthlyRevenuePlot';
 
@@ -65,6 +64,13 @@ class Trends extends Component {
                   <td>Average Attendance</td>
                   <td>Finds the average attendance for events broken down by day of week, excluding events with zero attendance.</td>
                 </tr>
+                <tr 
+                  className='table-row'
+                  onClick={()=>this.setState({page:'age-group-attendance'})}
+                >
+                  <td>Age Group Participation</td>
+                  <td>Counts the number of unique participants in each age group during each year.</td>
+                </tr>
               </tbody>
             </Table>
           </Row>
@@ -100,6 +106,8 @@ class Trends extends Component {
         body = <MonthlyRevenuePlot />
       } else if(this.state.page==='avg-attendance'){
         body = <AverageAttendancePlot />
+      } else if(this.state.page==='age-group-attendance'){
+        body = <AgeGroupAttendance />
       }
 
       return (

@@ -33,7 +33,7 @@ def average_attendance():
     response = trends.get_average_attendance()
     return jsonify(response)
 
-@trends.route('/service/trends/age-group-attendees')
+@trends.route('/service/trends/age-group-attendance')
 @jwt_required
 def age_group_attendees():
     """ Finds a distinct count of attendees by age group and year """

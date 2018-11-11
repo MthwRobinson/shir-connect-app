@@ -8,7 +8,7 @@ reqs = [
     'flask_jwt_simple',
     'gunicorn',
     'pandas',
-    'psycopg2',
+    'psycopg2-binary',
     'requests',
     'uuid',
     'xlrd'

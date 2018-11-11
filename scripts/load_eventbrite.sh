@@ -6,6 +6,5 @@ if [ -f $LOCK ]; then
 fi
 touch $LOCK
 echo Eventbrite load is starting
-source /home/trs_dashboard/.bashrc
-/home/trs_dashboard/anaconda3/bin/trs_dashboard load_eventbrite
+/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard load_eventbrite
 rm $LOCK

@@ -52,13 +52,14 @@ class MonthlyRevenuePlot extends Component {
   render(){
     if(this.state.loading){
       return (
-        <div className='event-loading'>
+        <div className='event-loading' id="plot-container">
           <Loading />
         </div>
       )
     } else {
+      const width = document.getElementById('plot-container').clientWidth;
       return (
-        <div className='plot-area'>
+        <div className='plot-area' id="plot-container">
           <Plot
             data={[{
             x: this.state.x,
@@ -68,8 +69,8 @@ class MonthlyRevenuePlot extends Component {
               marker: {color: '#0038b8'},
             }]}
             layout={ {
-              width: 1200,
-              height: 470,
+              width: width,
+              height: Math.max(300, width/2.6),
               title: 'Event Revenue by Month',
               titlefont: {family: 'Source Sans Pro'},
               yaxis: {

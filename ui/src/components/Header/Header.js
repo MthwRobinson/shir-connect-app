@@ -21,7 +21,7 @@ class Header extends Component {
                       height="40px"
                       alt=""
                     />
-                    <b>TRS Dashboard</b>
+                    <b>Shir Connection</b>
                 </a>
               </Navbar.Brand>
             </Navbar.Header>

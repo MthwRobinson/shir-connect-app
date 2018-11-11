@@ -75,7 +75,7 @@ class Events extends Component {
       } else if(fetchType==='up'){
         url += '&page='+(this.state.page+1); 
       } else if(fetchType==='down') {
-        url += '&page='+(this.state.page+1); 
+        url += '&page='+(this.state.page-1); 
       } else {
         url += '&page='+this.state.page;
       }

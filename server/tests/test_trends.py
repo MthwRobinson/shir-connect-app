@@ -76,7 +76,7 @@ def test_year_group_attendees():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testpassword')
-    url = '/service/trends/age-group-attendees'
+    url = '/service/trends/age-group-attendance'
     
     response = CLIENT.get(url)
     assert response.status_code == 401

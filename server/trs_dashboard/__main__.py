@@ -10,6 +10,7 @@ from gunicorn.app.wsgiapp import WSGIApplication
 
 from trs_dashboard.database.database import Database
 from trs_dashboard.etl.data_loader import DataLoader
+from trs_dashboard.etl.geometries import Geometries
 from trs_dashboard.services.app import app
 
 # Configure logging
@@ -48,6 +49,12 @@ def load_eventbrite():
     data_loader = DataLoader()
     data_loader.run()
     end = datetime.datetime.now()
+    LOGGER.info('Updating zip code geometries ...')
+    geo = Geometries()
+    zip_codes = geo.missing_zip_codes()
+    for code in zip_codes:
+        LOGGER.info('Loading geojson for %s'%(code))
+        geo.load_zip_code(code)
     LOGGER.info('Finished Eventbrite dataload at %s'%(end))
 main.add_command(load_eventbrite)
 

@@ -13,14 +13,14 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd
 const TRS_LOCATION = {
   "type": "Feature",
   "geometry": {
-            "type": "Point",
-            "coordinates": [-77.173449, 38.906103]
-        },
+    "type": "Point",
+    "coordinates": [-77.173449, 38.906103]
+  },
   "properties": {
-            "title": "Temple Rodef Shalom",
-            "icon": "religious-jewish",
-    "description" : "<strong>Temple Rodef Shalom</strong><p>hi</p>"
-    }
+    "title": "Temple Rodef Shalom",
+    "icon": "religious-jewish",
+    "description" : "<strong>Temple Rodef Shalom</strong>"
+  }
 }
 
 class EventMap extends Component {
@@ -85,6 +85,58 @@ class EventMap extends Component {
       })
   }
 
+  addAllZipGeometries = (map) => {
+    // Adds map geometries for any zip code
+    // with members or events
+    const token = localStorage.getItem('trsToken');
+    if(!token){
+      this.history.push('/login');
+    } else {
+      const auth = 'Bearer '.concat(token);
+      const url = '/service/map/zipcodes';
+      axios.get(url, {headers:{ Authorization: auth}})
+        .then(res => {
+          const zipCodes = res.data;
+          for(let i=0; i<zipCodes.length; i++){
+            const zipCode = zipCodes[i];
+            this.addZipGeometry(map, zipCode);
+          }
+        })
+        .catch(err=>{
+          if(err.response.status===401){
+            this.history.push('/login');
+          }
+        })
+    }
+  }
+
+  addZipGeometry = (map, zipCode) => {
+    // Adds the geometry for a zip code to the map
+    const token = localStorage.getItem('trsToken');
+    if(!token){
+      this.history.push('/login');
+    } else {
+      const auth = 'Bearer '.concat(token);
+      const url = '/service/map/geometry/'.concat(zipCode);
+      axios.get(url, {headers:{ Authorization: auth}})
+        .then(res => {
+          map.addLayer(res.data);
+          map.on('click', zipCode, (e) =>{
+            new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(e.features[0].properties.description)
+              .addTo(map)
+          })
+
+        })
+        .catch(err=>{
+          if(err.response.status===401){
+            this.history.push('/login');
+          }
+        })
+    }
+  }
+
   buildMap = () => {
     // Builds the MapBox GL map
     const { lng, lat, zoom, features } = this.state;
@@ -100,6 +152,8 @@ class EventMap extends Component {
       center: [lng, lat],
       zoom
     });
+
+    this.addAllZipGeometries(map);
 
     map.on('move', () => {
       const { lng, lat } = map.getCenter();
@@ -135,29 +189,27 @@ class EventMap extends Component {
     map.on('mouseleave', 'points', function() {
         map.getCanvas().style.cursor = '';
         popup.remove();
-    });    
-
+    });
 
     map.on('load', function () {
-
-    map.addLayer({
-        "id": "points",
-        "type": "symbol",
-        "source": {
-          "type": "geojson",
-          "data": {
-              "type": "FeatureCollection",
-              "features": features 
-            }
-        },
-        "layout": {
-            "icon-image": "{icon}-15",
-            "text-field": "{title}",
-            "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-            "text-offset": [0, 0.6],
-            "text-anchor": "top"
-        }
-        });
+      map.addLayer({
+          "id": "points",
+          "type": "symbol",
+          "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": features 
+              }
+          },
+          "layout": {
+              "icon-image": "{icon}-15",
+              "text-field": "{title}",
+              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+              "text-offset": [0, 0.6],
+              "text-anchor": "top"
+          }
+      });
     });
   }
 

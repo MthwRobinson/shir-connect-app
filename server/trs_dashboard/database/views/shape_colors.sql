@@ -4,9 +4,9 @@ AS
 SELECT 
   members.postal_code as id,
   residents,
-  256-(256*((residents-min_residents)/(max_residents-min_residents))) as red,
+  256*((residents-min_residents)/(max_residents-min_residents)) as red,
   events,
-  256-(256*((events-min_events)/(max_events-min_events))) as blue
+  256*((events-min_events)/(max_events-min_events)) as blue
 FROM(
   SELECT
     postal_code,

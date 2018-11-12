@@ -37,9 +37,28 @@ class MapGeometries(object):
     def get_geometry(self, zip_code):
         """ Constructs the geometry for the specified zip code """
         geometry = self.database.get_item('geometries', zip_code)
+        colors = self.database.get_item('shape_colors', zip_code)
+        if colors:
+            red = int(colors['red'])
+            blue = int(colors['blue'])
+            events = int(colors['events'])
+            members = int(colors['residents'])
+        else:
+            red = 0; blue = 0; events = 0; members = 0;
+
         geojson = geometry['geometry']
         geojson['features'][0]['properties'] = {
-            'description': '<strong>%s</strong>'%(zip_code)
+            'description': """
+                <strong>Zip Code: {zip_code}</strong>
+                <ul>
+                    <li>Members: {members}</li>
+                    <li>Events: {events}</li>
+                </ul>
+            """.format(
+                zip_code=zip_code,
+                members=members,
+                events=events
+            )
         }
         layer = {
             'id': zip_code,
@@ -49,7 +68,7 @@ class MapGeometries(object):
                 'data': geojson
             },
             'paint': {
-                'fill-color': 'rgb(0, 255, 255)',
+                'fill-color': 'rgb(%s, 256, %s)'%(red,blue),
                 'fill-opacity': 0.6,
                 'fill-outline-color': 'rgb(0, 0, 0)'
             }

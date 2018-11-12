@@ -21,6 +21,14 @@ def geometry(zipcode):
     layer = map_geometries.get_geometry(zipcode)
     return jsonify(layer)
 
+@map_geometries.route('/service/map/zipcodes', methods=['GET'])
+@jwt_required
+def zip_codes():
+    """ Retrieves a list of zip codes """
+    map_geometries = MapGeometries()
+    zip_codes = map_geometries.get_zip_codes()
+    return jsonify(zip_codes)
+
 class MapGeometries(object):
     """ Class that handles geometries for the map """
     def __init__(self):
@@ -30,7 +38,9 @@ class MapGeometries(object):
         """ Constructs the geometry for the specified zip code """
         geometry = self.database.get_item('geometries', zip_code)
         geojson = geometry['geometry']
-        geojson['features'][0]['description'] = '<strong>%s</strong>'%(zip_code)
+        geojson['features'][0]['properties'] = {
+            'description': '<strong>%s</strong>'%(zip_code)
+        }
         layer = {
             'id': zip_code,
             'type': 'fill',
@@ -40,7 +50,33 @@ class MapGeometries(object):
             },
             'paint': {
                 'fill-color': 'rgb(0, 255, 255)',
-                'fill-opacity': 0.6
+                'fill-opacity': 0.6,
+                'fill-outline-color': 'rgb(0, 0, 0)'
             }
         }
         return layer
+
+    def get_zip_codes(self):
+        """ 
+        Pulls a list of zip codes that have at least
+        one event and at least one member 
+        """
+        sql = """
+            SELECT DISTINCT postal_code
+            FROM (
+                SELECT DISTINCT postal_code
+                FROM {schema}.members_view
+                UNION ALL
+                SELECT DISTINCT postal_code
+                FROM {schema}.venues
+            ) a
+            INNER JOIN {schema}.geometries b
+            ON a.postal_code = b.id
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        if len(df) > 0:
+            response = [str(x) for x in df['postal_code']]
+        else:
+            response = []
+        return response
+

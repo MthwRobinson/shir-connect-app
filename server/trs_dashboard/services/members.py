@@ -163,17 +163,19 @@ class Members(object):
             if column not in df.columns:
                 df[column] = None
         
-        # Change NaN values to None
-        df = df.where((pd.notnull(df)), None)
         
         # Make sure the time columns have the correct type
         for column in df.columns:
             if column in self.member_columns['time_columns']:
                 if 'datetime' not in df.dtypes[column].name:
-                    df[column] = pd.to_datetime(df[column])
+                    df[column] = pd.to_datetime(df[column], errors='coerce')
             else:
                 if 'object' not in df.dtypes[column].name:
                     df[column] = df[column].astype(str)
+        
+        # Change NaN values to None
+        df = df.astype(object)
+        df = df.where((pd.notnull(df)), None)
 
         return df
 

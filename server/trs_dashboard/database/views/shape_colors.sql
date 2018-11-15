@@ -3,10 +3,30 @@ IF NOT EXISTS {schema}.shape_colors
 AS
 SELECT 
   members.postal_code as id,
-  residents,
-  256*((residents-min_residents)/(max_residents-min_residents)) as red,
-  events,
-  256*((events-min_events)/(max_events-min_events)) as blue
+  CASE
+    WHEN residents IS NOT NULL THEN residents
+    ELSE 0
+  END AS residents,
+  CASE
+    WHEN residents IS NOT NULL THEN
+      256-(256*(
+          (ln(residents)-ln(min_residents))/
+          (ln(max_residents)-ln(min_residents))
+      ))
+    ELSE 256
+  END as red,
+  CASE
+    WHEN events IS NOT NULL THEN events
+    ELSE 0
+  END as events,
+  CASE
+    WHEN events IS NOT NULL THEN
+      LEAST(256-(256*(
+            (ln(events)-ln(min_events))/
+            (ln(max_events)-ln(min_events)))),
+      256)
+    ELSE 256 
+  END as blue
 FROM(
   SELECT
     postal_code,
@@ -52,6 +72,7 @@ FROM(
             CAST(COUNT(*) AS DECIMAL) as events 
           FROM {schema}.event_aggregates
           WHERE postal_code IS NOT NULL
+          AND postal_code <> '22043'
           GROUP BY postal_code
         ) x
       ) as max_events,

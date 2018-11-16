@@ -73,7 +73,9 @@ class Members(object):
 
         self.database = Database()
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
+        self.column_mapping = conf.COLUMN_MAPPING
         self.member_columns = conf.MEMBER_COLUMNS
+        self.spouse_columns = conf.SPOUSE_COLUMNS
 
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """
@@ -150,8 +152,8 @@ class Members(object):
         columns = [self.clean_field(x) for x in df.columns]
         db_columns = []
         for column in columns:
-            if column in self.member_columns['columns']:
-                db_column = self.member_columns['columns'][column]
+            if column in self.column_mapping['columns']:
+                db_column = self.column_mapping['columns'][column]
                 db_columns.append(db_column)
             else:
                 db_columns.append(column)
@@ -161,17 +163,20 @@ class Members(object):
         pg_columns = self.database.get_columns('members')
         for column in pg_columns:
             if column not in df.columns:
-                df[column] = None
-        
+                df.insert(0, column, None)
+        df = df[pg_columns].copy()
         
         # Make sure the time columns have the correct type
         for column in df.columns:
-            if column in self.member_columns['time_columns']:
+            if column in self.column_mapping['time_columns']:
                 if 'datetime' not in df.dtypes[column].name:
-                    df[column] = pd.to_datetime(df[column], errors='coerce')
+                    df.loc[:, column] = pd.to_datetime(
+                        df[column], 
+                        errors='coerce'
+                    )
             else:
                 if 'object' not in df.dtypes[column].name:
-                    df[column] = df[column].astype(str)
+                    df.loc[:, column] = df[column].astype(str)
         
         # Change NaN values to None
         df = df.astype(object)

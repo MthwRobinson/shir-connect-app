@@ -113,7 +113,20 @@ class Members(object):
         else:
             df = pd.read_excel(file_)
 
-        df = self.update_columns(df)
+        # Find the columns that reference the member and the spouse
+        df_members = df[self.member_columns].copy()
+        df_spouse = df[self.spouse_columns].copy()
+        del df
+
+        # Update the columns to match the postgres table
+        df_members = self.update_columns(df_members)
+        df_spouse = self.update_columns(df_spouse)
+
+        # Combine and clean up the full table
+        df = df_members.append(df_spouse)
+        df = df.dropna(how='all').copy()
+        df = df.reset_index().copy()
+
         self.database.backup_table('members')
         self.database.truncate_table('members')
         for i in df.index:

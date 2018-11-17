@@ -11,5 +11,3 @@ CREATE TABLE IF NOT EXISTS {schema}.members (
   member_type text,
   email text
 );
-
-CREATE UNIQUE INDEX IF NOT EXISTS member_index ON {schema}.members (id);

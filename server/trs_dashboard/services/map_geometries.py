@@ -21,6 +21,17 @@ def geometry(zipcode):
     layer = map_geometries.get_geometry(zipcode)
     return jsonify(layer)
 
+@map_geometries.route('/service/map/geometries', methods=['GET'])
+@jwt_required
+def geometries():
+    """ Retrieves all of the geometries for the map """
+    map_geometries = MapGeometries()
+    limit = request.args.get('limit')
+    if not limit:
+        limit = None
+    layers = map_geometries.get_geometries(limit=limit)
+    return jsonify(layers)
+
 @map_geometries.route('/service/map/zipcodes', methods=['GET'])
 @jwt_required
 def zip_codes():
@@ -45,7 +56,46 @@ class MapGeometries(object):
             members = int(colors['residents'])
         else:
             red = 0; blue = 0; events = 0; members = 0;
+        layer = self.build_layer(geometry, red, blue, members, events)
+        return layer
 
+    def get_geometries(self, limit=None):
+        """ Returns all of the geometries with their colors """
+        sql = """
+            SELECT
+                a.id as postal_code, 
+                geometry, 
+                residents, 
+                red, 
+                events, 
+                blue
+            FROM {schema}.geometries a 
+            INNER JOIN {schema}.shape_colors b
+            ON a.id = b.id
+            WHERE a.id IS NOT NULL
+        """.format(schema=self.database.schema)
+        if limit:
+            sql += " LIMIT %s "%(limit)
+        df = pd.read_sql(sql, self.database.connection)
+        
+        layers = {}
+        for i in df.index:
+            geometry = dict(df.loc[i])
+            postal_code = geometry['postal_code']
+            geo = {
+                'geometry': geometry['geometry'], 
+                'id': geometry['postal_code']
+            }
+            red = geometry['red']
+            blue = geometry['blue']
+            members = geometry['residents']
+            events = geometry['events']
+            layer = self.build_layer(geo, red, blue, members, events)
+            layers[postal_code] = layer
+        return layers
+
+    def build_layer(self, geometry, red, blue, members, events):
+        """ Builds the map layer with the correct colors """
         geojson = geometry['geometry']
         geojson['features'][0]['properties'] = {
             'description': """
@@ -55,13 +105,13 @@ class MapGeometries(object):
                     <li>Events: {events}</li>
                 </ul>
             """.format(
-                zip_code=zip_code,
+                zip_code=geometry['id'],
                 members=members,
                 events=events
             )
         }
         layer = {
-            'id': zip_code,
+            'id': geometry['id'],
             'type': 'fill',
             'source' : {
                 'type': 'geojson',

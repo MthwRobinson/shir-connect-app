@@ -94,22 +94,19 @@ class MapGeometries(object):
     def build_layer(self, geometry, red, blue, members, events):
         """ Builds the map layer with the correct colors """
         geojson = geometry['geometry']
-        try:
-            geojson['features'][0]['properties'] = {
-                'description': """
-                    <strong>Zip Code: {zip_code}</strong>
-                    <ul>
-                        <li>Members: {members}</li>
-                        <li>Events: {events}</li>
-                    </ul>
-                """.format(
-                    zip_code=geometry['id'],
-                    members=members,
-                    events=events
-                )
-            }
-        except:
-            import ipdb; ipdb.set_trace()
+        geojson['features'][0]['properties'] = {
+            'description': """
+                <strong>Zip Code: {zip_code}</strong>
+                <ul>
+                    <li>Members: {members}</li>
+                    <li>Events: {events}</li>
+                </ul>
+            """.format(
+                zip_code=geometry['id'],
+                members=members,
+                events=events
+            )
+        }
         layer = {
             'id': geometry['id'],
             'type': 'fill',

@@ -31,6 +31,7 @@ def test_zip_geometry():
     assert response.json['source']['type'] == 'geojson'
     assert type(response.json['source']['data']) == dict
     assert 'paint' in response.json
+    assert 'description' in response.json['source']['data']['features'][0]['properties']
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -94,6 +95,7 @@ def test_all_geometries():
         assert layer['source']['type'] == 'geojson'
         assert type(layer['source']['data']) == dict
         assert 'paint' in layer
+        assert 'description' in layer['source']['data']['features'][0]['properties']
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

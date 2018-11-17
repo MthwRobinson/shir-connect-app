@@ -8,11 +8,15 @@ SELECT
     ELSE 0
   END AS residents,
   CASE
-    WHEN residents IS NOT NULL THEN
-      256-(256*(
-          (ln(residents)-ln(min_residents))/
-          (ln(max_residents)-ln(min_residents))
-      ))
+    WHEN 
+      residents IS NOT NULL 
+      AND ln(max_residents) - ln(min_residents) > 0 
+      THEN LEAST(
+        256-(256*(
+        (ln(residents)-ln(min_residents))/
+        (ln(max_residents)-ln(min_residents)))),
+        256
+      )
     ELSE 256
   END as red,
   CASE
@@ -20,11 +24,15 @@ SELECT
     ELSE 0
   END as events,
   CASE
-    WHEN events IS NOT NULL THEN
-      LEAST(256-(256*(
-            (ln(events)-ln(min_events))/
-            (ln(max_events)-ln(min_events)))),
-      256)
+    WHEN 
+      events IS NOT NULL 
+      AND ln(max_events) - ln(min_events) > 0  
+      THEN LEAST(
+        256-(256*(
+        (ln(events)-ln(min_events))/
+        (ln(max_events)-ln(min_events)))),
+        256
+      )
     ELSE 256 
   END as blue
 FROM(

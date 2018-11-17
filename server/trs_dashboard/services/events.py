@@ -108,9 +108,16 @@ class Events(object):
             query = ('name', q)
         else:
             query = None
-
+        columns = [
+            'name', 
+            'start_datetime', 
+            'end_datetime', 
+            'total_fees', 
+            'attendee_count'
+        ]
         df = self.database.read_table(
-            'event_aggregates', 
+            'event_aggregates',
+            columns = columns,
             limit=limit,
             page=page,
             order=order,

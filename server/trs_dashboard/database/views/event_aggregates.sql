@@ -49,4 +49,7 @@ GROUP BY
   b.total_fees,
   attendee_count
 ORDER BY start_datetime desc
-WITH DATA
+WITH DATA;
+
+CREATE INDEX IF NOT EXISTS event_aggregate_index 
+ON {schema}.event_aggregates (start_datetime);

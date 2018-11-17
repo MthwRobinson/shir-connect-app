@@ -73,7 +73,10 @@ class Members(object):
 
         self.database = Database()
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
+        self.column_mapping = conf.COLUMN_MAPPING
         self.member_columns = conf.MEMBER_COLUMNS
+        self.spouse_columns = conf.SPOUSE_COLUMNS
+        self.home_path = conf.HOMEPATH
 
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """
@@ -110,13 +113,35 @@ class Members(object):
             df = pd.read_csv(file_)
         else:
             df = pd.read_excel(file_)
+        
+        # Find the columns that reference the member and the spouse
+        df_members = df[self.member_columns].copy()
+        df_spouse = df[self.spouse_columns].copy()
+        del df
 
-        df = self.update_columns(df)
+        # Update the columns to match the postgres table
+        df_members = self.update_columns(df_members)
+        df_spouse = self.update_columns(df_spouse)
+
+        # Combine and clean up the full table
+        df = df_members.append(df_spouse)
+        df = df.dropna(how='all').copy()
+        df = df.reset_index().copy()
+
         self.database.backup_table('members')
         self.database.truncate_table('members')
+
+        items = []
         for i in df.index:
             item = dict(df.loc[i])
-            self.database.load_item(item, 'members')
+            postal = str(item['postal_code'])
+            if '-' in postal:
+                postal = postal.split('-')[0]
+            if len(postal) != 5:
+                postal = None
+            item['postal_code'] = postal
+            items.append(item)
+        self.database.load_items(items, 'members')
 
         good_columns = self.check_columns()
         if good_columns:
@@ -150,8 +175,8 @@ class Members(object):
         columns = [self.clean_field(x) for x in df.columns]
         db_columns = []
         for column in columns:
-            if column in self.member_columns['columns']:
-                db_column = self.member_columns['columns'][column]
+            if column in self.column_mapping['columns']:
+                db_column = self.column_mapping['columns'][column]
                 db_columns.append(db_column)
             else:
                 db_columns.append(column)
@@ -161,19 +186,24 @@ class Members(object):
         pg_columns = self.database.get_columns('members')
         for column in pg_columns:
             if column not in df.columns:
-                df[column] = None
-        
-        # Change NaN values to None
-        df = df.where((pd.notnull(df)), None)
+                df.insert(0, column, None)
+        df = df[pg_columns].copy()
         
         # Make sure the time columns have the correct type
         for column in df.columns:
-            if column in self.member_columns['time_columns']:
+            if column in self.column_mapping['time_columns']:
                 if 'datetime' not in df.dtypes[column].name:
-                    df[column] = pd.to_datetime(df[column])
+                    df.loc[:, column] = pd.to_datetime(
+                        df[column], 
+                        errors='coerce'
+                    )
             else:
                 if 'object' not in df.dtypes[column].name:
-                    df[column] = df[column].astype(str)
+                    df.loc[:, column] = df[column].astype(str)
+        
+        # Change NaN values to None
+        df = df.astype(object)
+        df = df.where((pd.notnull(df)), None)
 
         return df
 

@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS {schema}.members (
   email text
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS member_index ON {schema}.members (id);
+CREATE UNIQUE INDEX IF NOT EXISTS members_index ON {schema}.members (id);

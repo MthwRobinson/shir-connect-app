@@ -64,10 +64,14 @@ class Members extends Component {
           let members = [];
           for(var i=0; i<res.data.results.length; i++){
             let member = res.data.results[i];
-            var birthday = moment(member.birth_date);
-            member.birth_date = birthday.format('MM/DD/YY');
-            var membership_date = moment(member.membership_date);
-            member.membership_date = membership_date.format('MM/DD/YY');
+            if(member.birth_date){
+              var birthday = moment(member.birth_date);
+              member.birth_date = birthday.format('MM/DD/YY');
+            }
+            if(member.membership_date){
+              var membership_date = moment(member.membership_date);
+              member.membership_date = membership_date.format('MM/DD/YY');
+            }
             members.push(member);
           }
           
@@ -164,22 +168,29 @@ class Members extends Component {
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
                   <th className='table-heading'>DOB</th>
-                  <th className='table-heading'>Religion</th>
                   <th className='table-heading'>Mem. Date</th>
                   <th className='table-heading'>Mem. Type</th>
+                  <th className='table-heading'>Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {this.state.members.map((member, index) => {
                   return(
                     <tr className='table-row' key={index}>
-                      <th>{member.id}</th>
-                      <th>{member.first_name}</th>
-                      <th>{member.last_name}</th>
-                      <th>{member.birth_date}</th>
-                      <th>{member.member_religion}</th>
-                      <th>{member.membership_date}</th>
-                      <th>{member.member_type}</th>
+                      <th>{member.id != null
+                          ? member.id : 'N/A'}</th>
+                      <th>{member.first_name != null
+                          ? member.first_name : 'N/A'}</th>
+                      <th>{member.last_name != null
+                          ? member.last_name : 'N/A'}</th>
+                      <th>{member.birth_date != null 
+                          ? member.birth_date : 'N/A'}</th>
+                      <th>{member.membership_date != null 
+                          ? member.membership_date : 'N/A'}</th>
+                      <th>{member.member_type != null
+                          ? member.member_type : 'N/A'}</th>
+                      <th>{member.member_religion != null
+                          ? member.member_religion : 'None'}</th>
                     </tr>
                   )
                 })}

@@ -51,6 +51,9 @@ class Geometries(object):
         """ Pulls a zip code and loads it into the database """
         # Fetch the KML file from the resource
         kml = self.get_kml(zip_code)
+        if not kml:
+            return
+
         filename = self.path + '/temp/%s.kml'%(zip_code)
         with open(filename, 'w') as f:
             f.write(kml)

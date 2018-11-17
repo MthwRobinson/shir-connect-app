@@ -58,6 +58,8 @@ def load_eventbrite():
             geo.load_zip_code(str(code))
         except:
             LOGGER.warning('Geojson load failed for %s'%(code))
+    LOGGER.info('Refreshing shape colors')
+    geo.database.refresh_view('shape_colors')
     LOGGER.info('Finished Eventbrite dataload at %s'%(end))
 main.add_command(load_eventbrite)
 

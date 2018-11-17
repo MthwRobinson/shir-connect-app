@@ -2,6 +2,9 @@
 import datetime
 import os
 
+# Paths
+HOMEPATH = os.path.expanduser('~')
+
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=6000)
@@ -24,7 +27,7 @@ COLUMN_MAPPING = {
         'member_id': 'id',
         'memo': 'member_religion',
         'e-mail_for_member': 'email',
-        'e-mail_for_spousse': 'email'
+        'e-mail_for_spouse': 'email'
     }
 }
 MEMBER_COLUMNS = [

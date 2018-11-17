@@ -76,6 +76,7 @@ class Members(object):
         self.column_mapping = conf.COLUMN_MAPPING
         self.member_columns = conf.MEMBER_COLUMNS
         self.spouse_columns = conf.SPOUSE_COLUMNS
+        self.home_path = conf.HOMEPATH
 
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """
@@ -112,7 +113,7 @@ class Members(object):
             df = pd.read_csv(file_)
         else:
             df = pd.read_excel(file_)
-
+        
         # Find the columns that reference the member and the spouse
         df_members = df[self.member_columns].copy()
         df_spouse = df[self.spouse_columns].copy()
@@ -129,9 +130,9 @@ class Members(object):
 
         self.database.backup_table('members')
         self.database.truncate_table('members')
-        for i in df.index:
-            item = dict(df.loc[i])
-            self.database.load_item(item, 'members')
+
+        items = [dict(df.loc[i]) for i in df.index]
+        self.database.load_items(items, 'members')
 
         good_columns = self.check_columns()
         if good_columns:

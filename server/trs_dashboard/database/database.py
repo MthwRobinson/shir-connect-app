@@ -7,6 +7,7 @@ import os
 import daiquiri
 import pandas as pd
 import psycopg2
+from psycopg2.extras import execute_values
 
 import trs_dashboard.configuration as conf
 
@@ -143,7 +144,7 @@ class Database(object):
         for key in item:
             if key not in columns:
                 del item_[key]
-
+        
         # Construct the insert statement
         n = len(item_)
         row = "(" + ', '.join(['%s' for i in range(n)]) + ")"
@@ -155,10 +156,51 @@ class Database(object):
             {row}
         """.format(schema=self.schema, table=table, cols=cols, row=row)
 
-        # Inser the data
+        # Insert the data
         values = tuple([item_[x] for x in item_])
         with self.connection.cursor() as cursor:
             cursor.execute(sql, values)
+        self.connection.commit()
+
+    def load_items(self, items, table):
+        """ 
+        Loads a list of items into the database
+        This is faster than running load_item in a loop
+        because it reduces the number of server calls
+        """
+        # Find the columns for the table
+        if table not in self.columns:
+            self.columns[table] = self.get_columns(table)
+        columns = self.columns[table]
+
+        # Determine which columns in the item are valid
+        item_ = deepcopy(items[0])
+        for key in items[0]:
+            if key not in columns:
+                del item_[key]
+
+        # Construct the insert statement
+        n = len(item_)
+        cols = "(" + ', '.join([x for x in item_]) + ")"
+        sql = """
+            INSERT INTO {schema}.{table}
+            {cols}
+            VALUES
+            %s
+        """.format(schema=self.schema, table=table, cols=cols)
+        
+        # Insert the data
+        all_values = []
+        for item in items:
+            item_ = deepcopy(item)
+            for key in item:
+                if key not in columns:
+                    del item_[key]
+            values = tuple([item_[x] for x in item_])
+            all_values.append(values)
+
+        with self.connection.cursor() as cursor:
+            execute_values(cursor, sql, all_values)
         self.connection.commit()
 
     def delete_item(self, table, item_id, secondary=None):

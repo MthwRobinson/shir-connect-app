@@ -32,6 +32,7 @@ class EventMap extends Component {
         lat: 38.906,
         zoom: 10.3,
         features: [],
+        zipLayer: {},
         mapLoading: true,
         eventsLoading: true,
         events: {
@@ -45,6 +46,27 @@ class EventMap extends Component {
   componentDidMount() {
     this.getEventLocations();
     this.getEventCounts();
+    this.getZipCodeGeometries();
+  }
+
+  getZipCodeGeometries = () => {
+    // Pulls event locations from the database and renders the map
+    this.setState({loading: true});
+    const token = localStorage.getItem('trsToken');
+    const auth = 'Bearer '.concat(token);
+    const url = '/service/map/geometries';
+    axios.get(url, {headers: {Authorization: auth }})
+      .then(res => {
+        let features = res.data;
+        this.setState({zipLayers: features});
+        this.buildMap()
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
+      })
+
   }
 
   getEventCounts = () => {
@@ -76,7 +98,6 @@ class EventMap extends Component {
         let features = res.data.results;
         features.push(TRS_LOCATION);
         this.setState({features: features, mapLoading: false});
-        this.buildMap()
       })
       .catch(err => {
         if(err.response.status===401){
@@ -98,8 +119,10 @@ class EventMap extends Component {
         .then(res => {
           const zipCodes = res.data;
           for(let i=0; i<zipCodes.length; i++){
-            const zipCode = zipCodes[i];
-            this.addZipGeometry(map, zipCode);
+            const zipCode = parseInt(zipCodes[i], 10);
+            if(zipCode in this.state.zipLayers){
+              this.addZipGeometry(map, zipCode);
+            }
           }
         })
         .catch(err=>{
@@ -112,29 +135,14 @@ class EventMap extends Component {
 
   addZipGeometry = (map, zipCode) => {
     // Adds the geometry for a zip code to the map
-    const token = localStorage.getItem('trsToken');
-    if(!token){
-      this.history.push('/login');
-    } else {
-      const auth = 'Bearer '.concat(token);
-      const url = '/service/map/geometry/'.concat(zipCode);
-      axios.get(url, {headers:{ Authorization: auth}})
-        .then(res => {
-          map.addLayer(res.data);
-          map.on('click', zipCode, (e) =>{
-            new mapboxgl.Popup()
-              .setLngLat(e.lngLat)
-              .setHTML(e.features[0].properties.description)
-              .addTo(map)
-          })
-
-        })
-        .catch(err=>{
-          if(err.response.status===401){
-            this.history.push('/login');
-          }
-        })
-    }
+    const layer = this.state.zipLayers[zipCode];
+    map.addLayer(layer);
+    map.on('click', zipCode, (e) =>{
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(e.features[0].properties.description)
+        .addTo(map)
+    })
   }
 
   buildMap = () => {

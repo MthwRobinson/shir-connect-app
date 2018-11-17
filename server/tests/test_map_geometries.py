@@ -63,3 +63,38 @@ def test_zip_codes():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+
+def test_all_geometries():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    url = '/service/map/geometries'
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    for key in response.json:
+        layer = response.json[key]
+        assert 'id' in layer
+        assert 'type' in layer
+        assert 'source' in layer
+        assert layer['source']['type'] == 'geojson'
+        assert type(layer['source']['data']) == dict
+        assert 'paint' in layer
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None

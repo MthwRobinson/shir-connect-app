@@ -26,10 +26,7 @@ def geometry(zipcode):
 def geometries():
     """ Retrieves all of the geometries for the map """
     map_geometries = MapGeometries()
-    limit = request.args.get('limit')
-    if not limit:
-        limit = None
-    layers = map_geometries.get_geometries(limit=limit)
+    layers = map_geometries.get_geometries()
     return jsonify(layers)
 
 @map_geometries.route('/service/map/zipcodes', methods=['GET'])
@@ -59,7 +56,7 @@ class MapGeometries(object):
         layer = self.build_layer(geometry, red, blue, members, events)
         return layer
 
-    def get_geometries(self, limit=None):
+    def get_geometries(self):
         """ Returns all of the geometries with their colors """
         sql = """
             SELECT
@@ -74,8 +71,6 @@ class MapGeometries(object):
             ON a.id = b.id
             WHERE a.id IS NOT NULL
         """.format(schema=self.database.schema)
-        if limit:
-            sql += " LIMIT %s "%(limit)
         df = pd.read_sql(sql, self.database.connection)
         
         layers = {}
@@ -86,6 +81,8 @@ class MapGeometries(object):
                 'geometry': geometry['geometry'], 
                 'id': geometry['postal_code']
             }
+            if len(geo['geometry']['features']) == 0:
+                continue
             red = geometry['red']
             blue = geometry['blue']
             members = geometry['residents']
@@ -97,19 +94,22 @@ class MapGeometries(object):
     def build_layer(self, geometry, red, blue, members, events):
         """ Builds the map layer with the correct colors """
         geojson = geometry['geometry']
-        geojson['features'][0]['properties'] = {
-            'description': """
-                <strong>Zip Code: {zip_code}</strong>
-                <ul>
-                    <li>Members: {members}</li>
-                    <li>Events: {events}</li>
-                </ul>
-            """.format(
-                zip_code=geometry['id'],
-                members=members,
-                events=events
-            )
-        }
+        try:
+            geojson['features'][0]['properties'] = {
+                'description': """
+                    <strong>Zip Code: {zip_code}</strong>
+                    <ul>
+                        <li>Members: {members}</li>
+                        <li>Events: {events}</li>
+                    </ul>
+                """.format(
+                    zip_code=geometry['id'],
+                    members=members,
+                    events=events
+                )
+            }
+        except:
+            import ipdb; ipdb.set_trace()
         layer = {
             'id': geometry['id'],
             'type': 'fill',

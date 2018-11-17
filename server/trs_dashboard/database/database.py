@@ -248,13 +248,17 @@ class Database(object):
             else:
                 return None
 
-    def read_table(self, table, sort=None, order='desc', 
+    def read_table(self, table, columns=None, sort=None, order='desc', 
         limit=None, page=None, query=None):
         """ Reads a table into a dataframe """
+        if not columns:
+            cols = '*'
+        else:
+            cols = ', '.join(columns)
         sql = """
-            SELECT *
+            SELECT {cols}
             FROM {schema}.{table}
-        """.format(schema=self.schema, table=table)
+        """.format(cols=cols, schema=self.schema, table=table)
         if query:
             field = query[0]
             search = query[1]

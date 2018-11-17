@@ -29,7 +29,8 @@ class Members extends Component {
         query: '',
         loading: true,
         showUpload: false,
-        uploadLoading: false
+        uploadLoading: false,
+        uploadFailed: false
       }
 
       // Binding for the file upload in the popup
@@ -178,17 +179,17 @@ class Members extends Component {
                   return(
                     <tr className='table-row' key={index}>
                       <th>{member.id != null
-                          ? member.id : 'N/A'}</th>
+                          ? member.id : '--'}</th>
                       <th>{member.first_name != null
-                          ? member.first_name : 'N/A'}</th>
+                          ? member.first_name : '--'}</th>
                       <th>{member.last_name != null
-                          ? member.last_name : 'N/A'}</th>
+                          ? member.last_name : '--'}</th>
                       <th>{member.birth_date != null 
-                          ? member.birth_date : 'N/A'}</th>
+                          ? member.birth_date : '--'}</th>
                       <th>{member.membership_date != null 
-                          ? member.membership_date : 'N/A'}</th>
+                          ? member.membership_date : '--'}</th>
                       <th>{member.member_type != null
-                          ? member.member_type : 'N/A'}</th>
+                          ? member.member_type : '--'}</th>
                       <th>{member.member_religion != null
                           ? member.member_religion : 'None'}</th>
                     </tr>
@@ -228,6 +229,11 @@ class Members extends Component {
         .catch(err => {
           if(err.response.status===401){
             this.props.history.push('/login');
+          } else {
+            this.setState({
+              uploadLoading: false,
+              uploadFailed: true
+            })
           }
         })
 
@@ -255,6 +261,19 @@ class Members extends Component {
       let body = null;
       if(this.state.uploadLoading===true){
          body = <Loading />
+      } else if(this.state.uploadFailed===true){
+        body = (
+          <div className='upload-body'>
+            <p>
+              Error uploading member file.
+              Please check the format of the file
+            </p>
+            <Button
+              bsStyle="primary"
+              onClick={()=> this.setState({uploadFailed:false})}
+            >Try Again</Button>
+          </div>
+        )
       } else {
         body = (
             <div className='upload-body'>

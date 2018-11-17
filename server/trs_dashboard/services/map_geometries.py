@@ -83,10 +83,10 @@ class MapGeometries(object):
             }
             if len(geo['geometry']['features']) == 0:
                 continue
-            red = geometry['red']
-            blue = geometry['blue']
-            members = geometry['residents']
-            events = geometry['events']
+            red = int(geometry['red'])
+            blue = int(geometry['blue'])
+            members = int(geometry['residents'])
+            events = int(geometry['events'])
             layer = self.build_layer(geo, red, blue, members, events)
             layers[postal_code] = layer
         return layers

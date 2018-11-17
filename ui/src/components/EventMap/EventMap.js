@@ -136,8 +136,10 @@ class EventMap extends Component {
   addZipGeometry = (map, zipCode) => {
     // Adds the geometry for a zip code to the map
     const layer = this.state.zipLayers[zipCode];
+    const description = layer.source.data.features[0].properties;
     map.addLayer(layer);
-    map.on('click', zipCode, (e) =>{
+    map.on('click', layer.id, (e) =>{
+      console.log(e.features[0].properties);
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(e.features[0].properties.description)

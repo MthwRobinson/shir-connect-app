@@ -53,8 +53,11 @@ def load_eventbrite():
     geo = Geometries()
     zip_codes = geo.missing_zip_codes()
     for code in zip_codes:
-        LOGGER.info('Loading geojson for %s'%(code))
-        geo.load_zip_code(code)
+        try:
+            LOGGER.info('Loading geojson for %s'%(code))
+            geo.load_zip_code(str(code))
+        except:
+            LOGGER.warning('Geojson load failed for %s'%(code))
     LOGGER.info('Finished Eventbrite dataload at %s'%(end))
 main.add_command(load_eventbrite)
 

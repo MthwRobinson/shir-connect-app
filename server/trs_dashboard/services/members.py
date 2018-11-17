@@ -131,7 +131,16 @@ class Members(object):
         self.database.backup_table('members')
         self.database.truncate_table('members')
 
-        items = [dict(df.loc[i]) for i in df.index]
+        items = []
+        for i in df.index:
+            item = dict(df.loc[i])
+            postal = str(item['postal_code'])
+            if '-' in postal:
+                postal = postal.split('-')[0]
+            if len(postal) != 5:
+                postal = None
+            item['postal_code'] = postal
+            items.append(item)
         self.database.load_items(items, 'members')
 
         good_columns = self.check_columns()

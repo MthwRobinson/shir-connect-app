@@ -288,12 +288,15 @@ class Database(object):
         """.format(schema=self.schema, table=table)
         if query:
             field = query[0]
-            search = query[1]
-            query = " WHERE lower(%s) like '%s%s%s' "%(
-                field, 
-                '%', search, '%'
-            )
-            sql += query
+            search_terms = query[1].split()
+            conditions = []
+            for term in search_terms:
+                search = " lower(%s) like lower('%s%s%s') "%(
+                    field, 
+                    '%', term, '%'
+                )
+                conditions.append(search)
+            sql += " WHERE " + " OR ".join(conditions)
         df = pd.read_sql(sql, self.connection)
         count = df.loc[0]['total']
         return count

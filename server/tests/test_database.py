@@ -26,6 +26,9 @@ def test_read_table():
     )
     assert len(df) > 0
 
+    count = database.count_rows('event_aggregates', query=('name', 'Rodef 2100'))
+    assert count > 0
+
 def test_load_items():
     database = Database()
     database.delete_item('members', 'testid1')

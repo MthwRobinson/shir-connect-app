@@ -19,6 +19,13 @@ def test_read_table():
     df = database.read_table('event_aggregates', limit=10)
     assert len(df) == 10
 
+    df = database.read_table(
+        'event_aggregates', 
+        query=('name', 'Rodef 2100'), 
+        limit=10
+    )
+    assert len(df) > 0
+
 def test_load_items():
     database = Database()
     database.delete_item('members', 'testid1')

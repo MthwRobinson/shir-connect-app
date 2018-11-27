@@ -21,7 +21,7 @@ class Header extends Component {
                       height="40px"
                       alt=""
                     />
-                    <b>Shir Connection</b>
+                    <b>Temple Rodef Shalom</b>
                 </a>
               </Navbar.Brand>
             </Navbar.Header>

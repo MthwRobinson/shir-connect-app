@@ -12,8 +12,8 @@
     "title": "Members",
     "icon" : "fa fa-user",
     "bullets": [
-      "View and sort members",
-      "Upload an Excel file with member ship data into the dashboard database."
+      "View and sort members.",
+      "Upload an Excel file with membership data into the database."
     ],
     "link": "/members"
   },

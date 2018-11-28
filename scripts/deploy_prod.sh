@@ -5,8 +5,8 @@ npm run build
 
 # Moves the build folder to the remote server
 echo "Stopping all running processes ... "
-ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
-    "/home/ubuntu/.nvm/versions/node/v11.0.0/bin/pm2 stop all"
+ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 -t \
+    'bash -ic "pm2 stop all"'
 echo "Deleting current build file ... "
 ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
     "rm -rf /home/ubuntu/trs-dashboard/ui/build"
@@ -22,8 +22,8 @@ ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
 
 # Restart service
 echo "Restarting all process ..."
-ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
-    "/home/ubuntu/.nvm/versions/node/v11.0.0/bin/pm2 start all"
+ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 -t \
+    'bash -ic "pm2 start all"'
 
 echo "Done!"
 

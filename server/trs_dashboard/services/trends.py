@@ -140,7 +140,10 @@ class Trends(object):
             ) x
             GROUP BY {group}, age_group
             ORDER BY {group} ASC, age_group DESC
-        """.format(schema=self.database.schema, group=group_by)
+        """.format(
+            schema=self.database.schema, 
+            group=group_by
+        )
         list_response = self.database.fetch_list(sql)
 
         response = {}

@@ -186,7 +186,7 @@ class EventMap extends Component {
 
   buildMap = () => {
     // Builds the MapBox GL map
-    const { lng, lat, zoom, features } = this.state;
+    const { lng, lat, zoom } = this.state;
 
     var popup = new mapboxgl.Popup({
         closeButton: false,

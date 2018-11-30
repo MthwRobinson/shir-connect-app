@@ -10,7 +10,9 @@ class AgeGroupAttendance extends Component {
   // Class displaying the monthly revenue plot
   state = {
     data: [],
-    loading: true
+    loading: true,
+    groupBy: 'Month',
+    ageGroup: 'Young Professional'
   }
 
   componentDidMount(){
@@ -21,21 +23,21 @@ class AgeGroupAttendance extends Component {
     this.setState({loading: true});
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token)
+    const group = this.state.groupBy.toLowerCase();
     let url = '/service/trends/age-group-attendance';
+    url += '?groupBy=' + group;
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
+        let key = this.state.ageGroup;
         let data = [];
-        for(let key in res.data){
-          let x = res.data[key]['year'];
-          let y = res.data[key]['count'];
-          data.push({
-            x: x,
-            y: y,
-            type: 'scatter',
-            mode: 'lines+points',
-            name: key
-          })
-        }
+        let x = res.data[key]['group'];
+        let y = res.data[key]['count'];
+        data.push({
+          x: x,
+          y: y,
+          type: 'bar',
+          color: '#0038b8'
+        })
         
         this.setState({
           data: data,
@@ -58,6 +60,8 @@ class AgeGroupAttendance extends Component {
       )
     } else {
       const width = document.getElementById('plot-container').clientWidth;
+      const group = this.state.groupBy;
+      const ageGroup = this.state.ageGroup;
       return (
         <div className='plot-area' id="plot-container">
           <Plot
@@ -65,14 +69,14 @@ class AgeGroupAttendance extends Component {
             layout={ {
               width: width,
               height: Math.max(300, width/2.6),
-              title: 'Attendees By Age Group',
+              title: ageGroup + ' Attendees By ' + group,
               titlefont: {family: 'Source Sans Pro'},
               yaxis: {
                 title: 'Unique Attendees',
                 titlefont: {family: 'Source Sans Pro'}
               },
               xaxis: {
-                title: 'Year',
+                title: group,
                 titlefont: {family: 'Source Sans Pro'},
                 tickangle: 45
               }

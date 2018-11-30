@@ -9,7 +9,7 @@ import datetime
 import logging
 
 import daiquiri
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_simple import jwt_required
 import pandas as pd
 
@@ -17,7 +17,7 @@ from trs_dashboard.database.database import Database
 
 trends = Blueprint('trends', __name__)
 
-@trends.route('/service/trends/monthly-revenue')
+@trends.route('/service/trends/monthly-revenue', methods=['GET'])
 @jwt_required
 def month_revenue():
     """ Finds event revenue aggregated by month """
@@ -25,7 +25,7 @@ def month_revenue():
     response = trends.get_monthly_revenue()
     return jsonify(response)
 
-@trends.route('/service/trends/avg-attendance')
+@trends.route('/service/trends/avg-attendance', methods=['GET'])
 @jwt_required
 def average_attendance():
     """ Finds the avg event attendace by day of week """
@@ -33,12 +33,15 @@ def average_attendance():
     response = trends.get_average_attendance()
     return jsonify(response)
 
-@trends.route('/service/trends/age-group-attendance')
+@trends.route('/service/trends/age-group-attendance', methods=['GET'])
 @jwt_required
 def age_group_attendees():
     """ Finds a distinct count of attendees by age group and year """
+    group_by = request.args.get('groupBy')
+    if not group_by:
+        group_by = 'year'
     trends = Trends()
-    response = trends.get_age_group_attendees()
+    response = trends.get_age_group_attendees(group=group_by)
     return jsonify(response)
 
 class Trends(object):
@@ -95,8 +98,12 @@ class Trends(object):
         response = self.database.fetch_list(sql)
         return response
 
-    def get_age_group_attendees(self):
+    def get_age_group_attendees(self, group='year'):
         """ Returns a count of unique attendees by age group and year """
+        if group == 'year':
+            group_by = 'event_year'
+        elif group == 'month':
+            group_by = 'event_month'
         sql = """
             SELECT
                 CASE
@@ -111,13 +118,17 @@ class Trends(object):
                     WHEN age >= 80 THEN 'Over 80'
                     ELSE 'Unknown'
                 END AS age_group,
-                event_year,
+                {group},
                 COUNT(DISTINCT attendee_id) as distinct_attendees
             FROM(
                 SELECT DISTINCT
                     event_id,
                     b.id as member_id,
                     a.id as attendee_id,
+                    concat(
+                        date_part('month', start_datetime),
+                        '-', date_part('year', start_datetime)
+                    ) as event_month,
                     date_part('year', start_datetime) as event_year,
                     date_part('year', start_datetime) - date_part('year', birth_date) as age
                 FROM {schema}.attendees a
@@ -127,16 +138,16 @@ class Trends(object):
                 INNER JOIN {schema}.event_aggregates c
                 ON a.event_id = c.id
             ) x
-            GROUP BY event_year, age_group
-            ORDER BY event_year ASC, age_group DESC
-        """.format(schema=self.database.schema)
+            GROUP BY {group}, age_group
+            ORDER BY {group} ASC, age_group DESC
+        """.format(schema=self.database.schema, group=group_by)
         list_response = self.database.fetch_list(sql)
 
         response = {}
         for row in list_response['results']:
             age_group = row['age_group']
             if age_group not in response:
-                response[age_group] = {'year': [], 'count': []}
-            response[age_group]['year'].append(row['event_year'])
+                response[age_group] = {'group': [], 'count': []}
+            response[age_group]['group'].append(row[group_by])
             response[age_group]['count'].append(row['distinct_attendees'])
         return response

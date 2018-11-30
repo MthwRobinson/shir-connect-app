@@ -96,7 +96,14 @@ def test_year_group_attendees():
     assert response.status_code == 200
     assert type(response.json) == dict
     for key in response.json:
-        assert 'year' in response.json[key]
+        assert 'group' in response.json[key]
+        assert 'count' in response.json[key]
+
+    url += '?groupBy=month'
+    assert response.status_code == 200
+    assert type(response.json) == dict
+    for key in response.json:
+        assert 'group' in response.json[key]
         assert 'count' in response.json[key]
     
     user_management.delete_user('unittestuser')

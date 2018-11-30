@@ -39,14 +39,29 @@ class EventMap extends Component {
           cities: {},
           counts: {}
         },
-        expanded: null
+        expanded: null,
+        map: null
       };
   }
 
   componentDidMount() {
-    this.getEventLocations();
     this.getEventCounts();
-    this.getZipCodeGeometries();
+    const locationPromise = this.getEventLocations();
+    const zipPromise = this.getZipCodeGeometries();
+    const mapPromise = locationPromise
+      // Only build the map after the locations have been loaded
+      .then(() =>{
+        this.setState({map: this.buildMap()});
+      })
+    Promise.all([mapPromise, zipPromise])
+      .then(() => {
+        // First add the zip codes and then add the event
+        // locaitons so the event locations will be on top
+        this.addAllZipGeometries()
+        .then(() => {
+          this.addEventLocations();
+        })
+      })
   }
 
   getZipCodeGeometries = () => {
@@ -55,18 +70,17 @@ class EventMap extends Component {
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token);
     const url = '/service/map/geometries';
-    axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url, {headers: {Authorization: auth }})
       .then(res => {
         let features = res.data;
         this.setState({zipLayers: features});
-        this.buildMap()
       })
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
         }
       })
-
+    return response
   }
 
   getEventCounts = () => {
@@ -75,7 +89,7 @@ class EventMap extends Component {
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token);
     let url = '/service/events/cities';
-    axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url, {headers: {Authorization: auth }})
       .then(res => {
         const events = res.data.results;
         this.setState({events: events, eventsLoading: false});
@@ -85,6 +99,7 @@ class EventMap extends Component {
           this.props.history.push('/login');
         }
       })
+    return response
   }
 
   getEventLocations = () => {
@@ -93,7 +108,7 @@ class EventMap extends Component {
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token);
     let url = '/service/events/locations';
-    axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url, {headers: {Authorization: auth }})
       .then(res => {
         let features = res.data.results;
         features.push(TRS_LOCATION);
@@ -104,9 +119,32 @@ class EventMap extends Component {
           this.props.history.push('/login');
         }
       })
+    return response
   }
 
-  addAllZipGeometries = (map) => {
+  addEventLocations = () => {
+      // Adds event locations to the map
+      this.state.map.addLayer({
+          "id": "points",
+          "type": "symbol",
+          "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": this.state.features 
+              }
+          },
+          "layout": {
+              "icon-image": "{icon}-15",
+              "text-field": "{title}",
+              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+              "text-offset": [0, 0.6],
+              "text-anchor": "top"
+          }
+      });
+  }
+
+  addAllZipGeometries = () => {
     // Adds map geometries for any zip code
     // with members or events
     const token = localStorage.getItem('trsToken');
@@ -115,13 +153,13 @@ class EventMap extends Component {
     } else {
       const auth = 'Bearer '.concat(token);
       const url = '/service/map/zipcodes';
-      axios.get(url, {headers:{ Authorization: auth}})
+      let response = axios.get(url, {headers:{ Authorization: auth}})
         .then(res => {
           const zipCodes = res.data;
           for(let i=0; i<zipCodes.length; i++){
             const zipCode = parseInt(zipCodes[i], 10);
             if(zipCode in this.state.zipLayers){
-              this.addZipGeometry(map, zipCode);
+              this.addZipGeometry(this.state.map, zipCode);
             }
           }
         })
@@ -130,6 +168,7 @@ class EventMap extends Component {
             this.history.push('/login');
           }
         })
+        return response
     }
   }
 
@@ -138,7 +177,6 @@ class EventMap extends Component {
     const layer = this.state.zipLayers[zipCode];
     map.addLayer(layer);
     map.on('click', layer.id, (e) =>{
-      console.log(e.features[0].properties);
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(e.features[0].properties.description)
@@ -161,8 +199,6 @@ class EventMap extends Component {
       center: [lng, lat],
       zoom
     });
-
-    this.addAllZipGeometries(map);
 
     map.on('move', () => {
       const { lng, lat } = map.getCenter();
@@ -200,26 +236,28 @@ class EventMap extends Component {
         popup.remove();
     });
 
-    map.on('load', function () {
-      map.addLayer({
-          "id": "points",
-          "type": "symbol",
-          "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": features 
-              }
-          },
-          "layout": {
-              "icon-image": "{icon}-15",
-              "text-field": "{title}",
-              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-              "text-offset": [0, 0.6],
-              "text-anchor": "top"
-          }
-      });
-    });
+    //map.on('load', function () {
+      // map.addLayer({
+      //     "id": "points",
+      //     "type": "symbol",
+      //     "source": {
+      //       "type": "geojson",
+      //       "data": {
+      //           "type": "FeatureCollection",
+      //           "features": features 
+      //         }
+      //     },
+      //     "layout": {
+      //         "icon-image": "{icon}-15",
+      //         "text-field": "{title}",
+      //         "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+      //         "text-offset": [0, 0.6],
+      //         "text-anchor": "top"
+      //     }
+      // });
+    //});
+
+    return map
   }
 
   changeExpanded = (city) => {

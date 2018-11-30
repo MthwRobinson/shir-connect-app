@@ -126,8 +126,8 @@ class Trends(object):
                     b.id as member_id,
                     a.id as attendee_id,
                     concat(
-                        date_part('month', start_datetime),
-                        '-', date_part('year', start_datetime)
+                        date_part('year', start_datetime),
+                        '-', date_part('month', start_datetime)
                     ) as event_month,
                     date_part('year', start_datetime) as event_year,
                     date_part('year', start_datetime) - date_part('year', birth_date) as age

@@ -17,6 +17,27 @@ from trs_dashboard.database.database import Database
 
 trends = Blueprint('trends', __name__)
 
+EVENT_TABLE = """
+    SELECT DISTINCT
+        event_id,
+        c.name as event_name,
+        b.id as member_id,
+        INITCAP(a.name) as member_name,
+        a.id as attendee_id,
+        concat(
+            date_part('year', start_datetime),
+            '-', date_part('month', start_datetime)
+        ) as event_month,
+        date_part('year', start_datetime) as event_year,
+        date_part('year', start_datetime) - date_part('year', birth_date) as age
+    FROM {schema}.attendees a
+    INNER JOIN {schema}.members_view b
+    ON (LOWER(a.first_name)=LOWER(b.first_name) 
+    AND LOWER(a.last_name)=LOWER(b.last_name))
+    INNER JOIN {schema}.event_aggregates c
+    ON a.event_id = c.id
+"""
+
 @trends.route('/service/trends/monthly-revenue', methods=['GET'])
 @jwt_required
 def month_revenue():
@@ -42,6 +63,20 @@ def age_group_attendees():
         group_by = 'year'
     trends = Trends()
     response = trends.get_age_group_attendees(group=group_by)
+    return jsonify(response)
+
+@trends.route('/service/trends/participation/<age_group>', methods=['GET'])
+@jwt_required
+def participation(age_group):
+    """ Finds the top events or participants by age group """
+    top = request.args.get('top')
+    if not top:
+        top = 'member'
+    limit = request.args.get('limit')
+    if not limit:
+        limit = 25
+    trends = Trends()
+    response = trends.get_participation(age_group, top, limit)
     return jsonify(response)
 
 class Trends(object):
@@ -104,6 +139,7 @@ class Trends(object):
             group_by = 'event_year'
         elif group == 'month':
             group_by = 'event_month'
+        event_table = EVENT_TABLE.format(schema=self.database.schema)
         sql = """
             SELECT
                 CASE
@@ -120,28 +156,11 @@ class Trends(object):
                 END AS age_group,
                 {group},
                 COUNT(DISTINCT attendee_id) as distinct_attendees
-            FROM(
-                SELECT DISTINCT
-                    event_id,
-                    b.id as member_id,
-                    a.id as attendee_id,
-                    concat(
-                        date_part('year', start_datetime),
-                        '-', date_part('month', start_datetime)
-                    ) as event_month,
-                    date_part('year', start_datetime) as event_year,
-                    date_part('year', start_datetime) - date_part('year', birth_date) as age
-                FROM {schema}.attendees a
-                INNER JOIN {schema}.members_view b
-                ON (LOWER(a.first_name)=LOWER(b.first_name) 
-                AND LOWER(a.last_name)=LOWER(b.last_name))
-                INNER JOIN {schema}.event_aggregates c
-                ON a.event_id = c.id
-            ) x
+            FROM( {event_table} ) x
             GROUP BY {group}, age_group
             ORDER BY {group} ASC, age_group DESC
         """.format(
-            schema=self.database.schema, 
+            event_table=event_table,
             group=group_by
         )
         list_response = self.database.fetch_list(sql)
@@ -153,4 +172,40 @@ class Trends(object):
                 response[age_group] = {'group': [], 'count': []}
             response[age_group]['group'].append(row[group_by])
             response[age_group]['count'].append(row['distinct_attendees'])
+        return response
+
+    def get_participation(self, age_group, top='member', limit=25):
+        """ Pulls the top events or attendees by age group """
+        event_table = EVENT_TABLE.format(schema=self.database.schema)
+        sql = """
+            SELECT
+                count(*) as total,
+                {top}_name,
+                {top}_id
+            FROM (
+                SELECT
+                    CASE
+                        WHEN age < 13 THEN 'Under 13'
+                        WHEN age >= 13 AND age < 18 THEN 'Teens'
+                        WHEN age >= 18 AND age < 23 THEN 'College'
+                        WHEN age >= 23 AND age < 40 THEN 'Young Professional'
+                        WHEN age >= 40 AND age < 50 THEN '40-50'
+                        WHEN age >= 50 AND age < 60 THEN '50-60'
+                        WHEN age >= 60 AND age < 70 THEN '60-70'
+                        WHEN age >= 70 AND age < 80 THEN '70-80'
+                        WHEN age >= 80 THEN 'Over 80'
+                        ELSE 'Unknown'
+                    END AS age_group,
+                    event_name,
+                    event_id,
+                    member_name,
+                    member_id
+                FROM( {event_table} ) x
+            ) y
+            WHERE age_group='{age_group}'
+            GROUP BY age_group, {top}_name, {top}_id
+            ORDER BY total DESC
+            LIMIT {limit}
+        """.format(top=top, event_table=event_table, age_group=age_group, limit=limit)
+        response = self.database.fetch_list(sql)
         return response

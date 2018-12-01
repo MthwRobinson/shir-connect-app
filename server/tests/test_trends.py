@@ -109,3 +109,41 @@ def test_year_group_attendees():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+
+def test_participation():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    url = '/service/trends/participation/Young Professional'
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    assert type(response.json['results']) == list
+    for item in response.json['results']:
+        assert 'member_id' in item
+        assert 'member_name' in item
+
+    url += '?top=event'
+    assert response.status_code == 200
+    assert type(response.json['results']) == list
+    for item in response.json['results']:
+        assert 'member_id' in item
+        assert 'member_name' in item
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None

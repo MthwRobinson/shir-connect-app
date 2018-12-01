@@ -3,6 +3,15 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import { 
+  Button,
+  Col,
+  ControlLabel,
+  Form,
+  FormControl, 
+  FormGroup, 
+  Row 
+} from 'react-bootstrap';
 
 import Loading from './../../Loading/Loading';
 
@@ -13,7 +22,8 @@ class AgeGroupAttendance extends Component {
     allData: [],
     loading: true,
     groupBy: 'Month',
-    ageGroup: 'Young Professional'
+    ageGroup: 'Young Professional',
+    ageGroups: []
   }
 
   componentDidMount(){
@@ -29,8 +39,10 @@ class AgeGroupAttendance extends Component {
     url += '?groupBy=' + group;
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
+        const ageGroups = Object.keys(res.data);
         this.setState({
           allData: res.data,
+          ageGroups: ageGroups,
           loading: false
         })
         this.renderPlot(this.state.ageGroup);
@@ -56,6 +68,32 @@ class AgeGroupAttendance extends Component {
     this.setState({data:data});
   }
 
+  renderDropDowns = () => {
+    // Renders drop downs to choose the time period
+    // and the age group
+    return (
+      <div>
+        <Form inline>
+          <Col xs={12} sm={12} md={12} lg={12}>
+            <FormGroup>
+            <ControlLabel>Age Group</ControlLabel>
+            <FormControl
+              componentClass="select"
+              value="Young Professional"
+            >
+              {this.state.ageGroups.map((ageGroup, index) => {
+                return(<option value={ageGroup}>{ageGroup}</option>)
+              })}
+            </FormControl>
+            </FormGroup>
+          </Col>
+        </Form>
+
+      </div>
+    )
+
+  }
+
   render(){
     if(this.state.loading){
       return (
@@ -64,11 +102,15 @@ class AgeGroupAttendance extends Component {
         </div>
       )
     } else {
+      const dropdowns = this.renderDropDowns();
       const width = document.getElementById('plot-container').clientWidth;
       const group = this.state.groupBy;
       const ageGroup = this.state.ageGroup;
       return (
         <div className='plot-area' id="plot-container">
+          <Row>
+            {dropdowns}
+          </Row>
           <Plot
             data={this.state.data}
             layout={ {

@@ -29,7 +29,9 @@ class AgeGroupAttendance extends Component {
       dropDownGroupBy: 'Month',
       ageGroup: 'Young Professional',
       dropDownAgeGroup: 'Young Professional',
-      ageGroups: []
+      ageGroups: [],
+      topLoading: true,
+      top: []
     }
 
     // Bindings for the plot settings
@@ -39,6 +41,7 @@ class AgeGroupAttendance extends Component {
 
   componentDidMount(){
     this.getAttendance(this.state.ageGroup, this.state.groupBy);
+    this.getTopParticipants(this.state.ageGroup);
   }
 
   handleAgeGroup(event) {
@@ -72,6 +75,30 @@ class AgeGroupAttendance extends Component {
     } else {
       this.renderPlot(ageGroup)
     }
+  }
+
+  getTopParticipants = (ageGroup) => {
+    // Gets the top participants by age group
+    this.setState({topLoading: true});
+    const token = localStorage.getItem('trsToken');
+    const auth = 'Bearer '.concat(token)
+    let url = '/service/trends/participation/' + ageGroup;
+    axios.get(url, { headers: { Authorization: auth }})
+      .then(res => {
+        const ageGroups = Object.keys(res.data);
+        this.setState({
+          top: res.data.results,
+          topLoading: false
+        })
+        this.renderPlot(ageGroup);
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
+      })
+
+
   }
 
   getAttendance = (ageGroup, groupBy) => {
@@ -172,32 +199,36 @@ class AgeGroupAttendance extends Component {
       const observations = this.state.allData[ageGroup]['group'].length
       const nticks = Math.min(observations, 10);
       return (
-        <div className='plot-area' id="plot-container">
-          <Row>
-            {dropdowns}
-          </Row>
-          <Plot
-            data={this.state.data}
-            layout={ {
-              width: width,
-              height: Math.max(300, width/2.9),
-              title: ageGroup + ' Attendees By ' + group,
-              titlefont: {family: 'Source Sans Pro'},
-              yaxis: {
-                title: 'Unique Attendees',
-                titlefont: {family: 'Source Sans Pro'}
-              },
-              xaxis: {
-                title: group,
-                titlefont: {family: 'Source Sans Pro'},
-                tickangle: 45,
-                type: 'date',
-                tickformat: format,
-                nticks: nticks
-              }
-            }
-            }
-          />
+        <div>
+          <div className='plot-area' id="plot-container">
+            <Col xs={12} sm={12} md={6} lg={6}>
+              <Row>
+                {dropdowns}
+              </Row>
+              <Plot
+                data={this.state.data}
+                layout={ {
+                  width: .5*width,
+                  height: Math.max(300, width/2.9),
+                  title: ageGroup + ' Attendees By ' + group,
+                  titlefont: {family: 'Source Sans Pro'},
+                  yaxis: {
+                    title: 'Unique Attendees',
+                    titlefont: {family: 'Source Sans Pro'}
+                  },
+                  xaxis: {
+                    title: group,
+                    titlefont: {family: 'Source Sans Pro'},
+                    tickangle: 45,
+                    type: 'date',
+                    tickformat: format,
+                    nticks: nticks
+                  }
+                }
+                }
+              />
+            </Col>
+          </div>
         </div>
       )
     }

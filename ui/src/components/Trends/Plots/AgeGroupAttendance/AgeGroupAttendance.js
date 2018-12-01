@@ -162,7 +162,15 @@ class AgeGroupAttendance extends Component {
     } else {
       const width = document.getElementById('plot-container').clientWidth;
       const group = this.state.groupBy;
+      let format = null;
+      if(group==='Month'){
+        format = '%m/%y';
+      } else{
+        format = '%Y';
+      }
       const ageGroup = this.state.ageGroup;
+      const observations = this.state.allData[ageGroup]['group'].length
+      const nticks = Math.min(observations, 10);
       return (
         <div className='plot-area' id="plot-container">
           <Row>
@@ -172,7 +180,7 @@ class AgeGroupAttendance extends Component {
             data={this.state.data}
             layout={ {
               width: width,
-              height: Math.max(300, width/2.6),
+              height: Math.max(300, width/2.9),
               title: ageGroup + ' Attendees By ' + group,
               titlefont: {family: 'Source Sans Pro'},
               yaxis: {
@@ -182,7 +190,10 @@ class AgeGroupAttendance extends Component {
               xaxis: {
                 title: group,
                 titlefont: {family: 'Source Sans Pro'},
-                tickangle: 45
+                tickangle: 45,
+                type: 'date',
+                tickformat: format,
+                nticks: nticks
               }
             }
             }

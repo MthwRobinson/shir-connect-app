@@ -235,13 +235,15 @@ class AgeGroupAttendance extends Component {
       return (
         <div className='plot-container-half'>
           <Col xs={7} sm={7} md={7} lg={7}>
-          <div className='plot-area-half' id="plot-container">
-              {dropdowns}
+            <div className='plot-area-half' id="plot-container">
+              <div className='plot-dropdown'>
+                {dropdowns}
+              </div>
               <Plot
                 data={this.state.data}
                 layout={ {
                   width: width,
-                  height: Math.max(300, width/1.5),
+                  height: Math.max(300, width/1.7),
                   title: ageGroup + ' Attendees By ' + group,
                   titlefont: {family: 'Source Sans Pro'},
                   yaxis: {
@@ -264,6 +266,7 @@ class AgeGroupAttendance extends Component {
           </Col>
 
           <div className='top-participants'>
+            <h4>Top Participants </h4><hr/>
             {table}
           </div>
         </div>

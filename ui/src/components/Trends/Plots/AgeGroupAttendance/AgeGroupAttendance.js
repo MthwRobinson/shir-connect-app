@@ -38,7 +38,7 @@ class AgeGroupAttendance extends Component {
   }
 
   componentDidMount(){
-    this.getAttendance();
+    this.getAttendance(this.state.ageGroup, this.state.groupBy);
   }
 
   handleAgeGroup(event) {
@@ -51,11 +51,34 @@ class AgeGroupAttendance extends Component {
     this.setState({dropDownGroupBy: event.target.value});
   }
 
-  getAttendance = () => {
+  handleSubmit = (event) => {
+    // Prevents the app from refreshing on submit
+    event.preventDefault();
+    // Handles the submit action on the dropdown
+    const ageGroup = this.state.dropDownAgeGroup;
+    const groupBy = this.state.dropDownGroupBy;
+    let newServiceCall = true;
+    if(groupBy===this.state.groupBy){
+      newServiceCall = false;
+    }
+
+    this.setState({
+      ageGroup: ageGroup,
+      groupBy: groupBy
+    })
+
+    if(newServiceCall){
+      this.getAttendance(ageGroup, groupBy);
+    } else {
+      this.renderPlot(ageGroup)
+    }
+  }
+
+  getAttendance = (ageGroup, groupBy) => {
     this.setState({loading: true});
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token)
-    const group = this.state.groupBy.toLowerCase();
+    const group = groupBy.toLowerCase();
     let url = '/service/trends/age-group-attendance';
     url += '?groupBy=' + group;
     axios.get(url, { headers: { Authorization: auth }})
@@ -66,7 +89,7 @@ class AgeGroupAttendance extends Component {
           ageGroups: ageGroups,
           loading: false
         })
-        this.renderPlot(this.state.ageGroup);
+        this.renderPlot(ageGroup);
       })
       .catch(err => {
         if(err.response.status===401){
@@ -94,7 +117,7 @@ class AgeGroupAttendance extends Component {
     // and the age group
     return (
       <div>
-        <Form inline>
+        <Form pullLeft inline onSubmit={this.handleSubmit}>
           <FormGroup>
             <ControlLabel className="age-group-labels"
             >Age Group</ControlLabel>
@@ -123,13 +146,13 @@ class AgeGroupAttendance extends Component {
             >Submit</Button>
           </FormGroup>
         </Form>
-
       </div>
     )
 
   }
 
   render(){
+    const dropdowns = this.renderDropDowns();
     if(this.state.loading){
       return (
         <div className='event-loading' id="plot-container">
@@ -137,7 +160,6 @@ class AgeGroupAttendance extends Component {
         </div>
       )
     } else {
-      const dropdowns = this.renderDropDowns();
       const width = document.getElementById('plot-container').clientWidth;
       const group = this.state.groupBy;
       const ageGroup = this.state.ageGroup;

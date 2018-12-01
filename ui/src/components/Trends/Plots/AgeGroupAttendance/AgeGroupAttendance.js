@@ -266,7 +266,8 @@ class AgeGroupAttendance extends Component {
                   titlefont: {family: 'Source Sans Pro'},
                   yaxis: {
                     title: 'Unique Attendees',
-                    titlefont: {family: 'Source Sans Pro'}
+                    titlefont: {family: 'Source Sans Pro'},
+                    dtick: 2
                   },
                   xaxis: {
                     title: group,

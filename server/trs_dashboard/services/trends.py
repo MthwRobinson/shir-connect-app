@@ -155,7 +155,7 @@ class Trends(object):
                     ELSE 'Unknown'
                 END AS age_group,
                 {group},
-                COUNT(DISTINCT attendee_id) as distinct_attendees
+                COUNT(DISTINCT member_name) as distinct_attendees
             FROM( {event_table} ) x
             GROUP BY {group}, age_group
             ORDER BY {group} ASC, age_group DESC
@@ -183,7 +183,7 @@ class Trends(object):
                 {top}_name as name,
                 {top}_id as id
             FROM (
-                SELECT
+                SELECT DISTINCT
                     CASE
                         WHEN age < 13 THEN 'Under 13'
                         WHEN age >= 13 AND age < 18 THEN 'Teens'

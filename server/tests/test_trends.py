@@ -96,8 +96,55 @@ def test_year_group_attendees():
     assert response.status_code == 200
     assert type(response.json) == dict
     for key in response.json:
-        assert 'year' in response.json[key]
+        assert 'group' in response.json[key]
         assert 'count' in response.json[key]
+
+    url += '?groupBy=month'
+    assert response.status_code == 200
+    assert type(response.json) == dict
+    for key in response.json:
+        assert 'group' in response.json[key]
+        assert 'count' in response.json[key]
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+
+def test_participation():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    url = '/service/trends/participation/Young Professional'
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    assert type(response.json['results']) == list
+    for item in response.json['results']:
+        assert 'id' in item
+        assert 'name' in item
+        assert 'total' in item
+
+    url += '?top=event'
+    assert response.status_code == 200
+    assert type(response.json['results']) == list
+    for item in response.json['results']:
+        assert 'id' in item
+        assert 'name' in item
+        assert 'total' in item
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

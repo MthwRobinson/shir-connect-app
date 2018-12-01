@@ -19,20 +19,39 @@ import './AgeGroupAttendance.css';
 
 class AgeGroupAttendance extends Component {
   // Class displaying the monthly revenue plot
-  state = {
-    data: [],
-    allData: [],
-    loading: true,
-    groupBy: 'Month',
-    ageGroup: 'Young Professional',
-    ageGroups: []
+  constructor(props){
+    super(props);
+    this.state = {
+      data: [],
+      allData: [],
+      loading: true,
+      groupBy: 'Month',
+      dropDownGroupBy: 'Month',
+      ageGroup: 'Young Professional',
+      dropDownAgeGroup: 'Young Professional',
+      ageGroups: []
+    }
+
+    // Bindings for the plot settings
+    this.handleAgeGroup = this.handleAgeGroup.bind(this);
+    this.handleGroupBy = this.handleGroupBy.bind(this);
   }
 
   componentDidMount(){
-    this.getRevenue();
+    this.getAttendance();
   }
 
-  getRevenue = () => {
+  handleAgeGroup(event) {
+    // Updates the state based on the age group dropdown
+    this.setState({dropDownAgeGroup: event.target.value});
+  }
+
+  handleGroupBy(event) {
+    // Updates the state based on the dropdown
+    this.setState({dropDownGroupBy: event.target.value});
+  }
+
+  getAttendance = () => {
     this.setState({loading: true});
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token)
@@ -81,7 +100,8 @@ class AgeGroupAttendance extends Component {
             >Age Group</ControlLabel>
             <FormControl
               componentClass="select"
-              value="Young Professional"
+              value={this.state.dropDownAgeGroup}
+              onChange={this.handleAgeGroup}
             >
               {this.state.ageGroups.map((ageGroup, index) => {
                 return(<option value={ageGroup}>{ageGroup}</option>)
@@ -91,7 +111,8 @@ class AgeGroupAttendance extends Component {
             >Timeframe</ControlLabel>
             <FormControl
               componentClass="select"
-              value="Month"
+              value={this.state.dropDownGroupBy}
+              onChange={this.handleGroupBy}
             >
               <option value='Month'>Month</option>
               <option value='Year'>Year</option>

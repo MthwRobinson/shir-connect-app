@@ -4,7 +4,7 @@ import { Row, Table } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
-import AgeGroupAttendance from './Plots/AgeGroupAttendance';
+import AgeGroupAttendance from './Plots/AgeGroupAttendance/AgeGroupAttendance';
 import AverageAttendancePlot from './Plots/AverageAttendancePlot';
 import MonthlyRevenuePlot from './Plots/MonthlyRevenuePlot';
 

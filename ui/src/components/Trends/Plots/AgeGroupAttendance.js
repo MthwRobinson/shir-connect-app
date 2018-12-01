@@ -10,6 +10,7 @@ class AgeGroupAttendance extends Component {
   // Class displaying the monthly revenue plot
   state = {
     data: [],
+    allData: [],
     loading: true,
     groupBy: 'Month',
     ageGroup: 'Young Professional'
@@ -28,27 +29,31 @@ class AgeGroupAttendance extends Component {
     url += '?groupBy=' + group;
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
-        let key = this.state.ageGroup;
-        let data = [];
-        let x = res.data[key]['group'];
-        let y = res.data[key]['count'];
-        data.push({
-          x: x,
-          y: y,
-          type: 'bar',
-          color: '#0038b8'
-        })
-        
         this.setState({
-          data: data,
+          allData: res.data,
           loading: false
         })
+        this.renderPlot(this.state.ageGroup);
       })
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
         }
       })
+  }
+
+  renderPlot = (ageGroup) => {
+    // Renders the plot using the specified age group
+    let data = []
+    let x = this.state.allData[ageGroup]['group'];
+    let y = this.state.allData[ageGroup]['count'];
+    data.push({
+      x: x,
+      y: y,
+      type: 'bar',
+      color: '#0038b8'
+    })
+    this.setState({data:data});
   }
 
   render(){

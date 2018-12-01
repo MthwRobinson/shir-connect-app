@@ -76,20 +76,31 @@ class AgeGroupAttendance extends Component {
     return (
       <div>
         <Form inline>
-          <Col xs={12} sm={12} md={12} lg={12}>
-            <FormGroup>
-              <ControlLabel className="age-group-labels"
-              >Age Group</ControlLabel>
-              <FormControl
-                componentClass="select"
-                value="Young Professional"
-              >
-                {this.state.ageGroups.map((ageGroup, index) => {
-                  return(<option value={ageGroup}>{ageGroup}</option>)
-                })}
-              </FormControl>
-            </FormGroup>
-          </Col>
+          <FormGroup>
+            <ControlLabel className="age-group-labels"
+            >Age Group</ControlLabel>
+            <FormControl
+              componentClass="select"
+              value="Young Professional"
+            >
+              {this.state.ageGroups.map((ageGroup, index) => {
+                return(<option value={ageGroup}>{ageGroup}</option>)
+              })}
+            </FormControl>
+            <ControlLabel className="age-group-labels"
+            >Timeframe</ControlLabel>
+            <FormControl
+              componentClass="select"
+              value="Month"
+            >
+              <option value='Month'>Month</option>
+              <option value='Year'>Year</option>
+            </FormControl>
+            <Button 
+              className="age-group-button"  
+              type="submit"
+            >Submit</Button>
+          </FormGroup>
         </Form>
 
       </div>

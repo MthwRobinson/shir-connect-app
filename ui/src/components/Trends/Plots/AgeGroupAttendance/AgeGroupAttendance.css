@@ -1,3 +1,8 @@
 .age-group-labels {
-  padding-right: 8px;
+  padding-right: 5px;
+  padding-left: 10px;
+}
+
+.age-group-button {
+  margin-left: 12px;
 }

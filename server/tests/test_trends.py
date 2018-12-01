@@ -134,15 +134,17 @@ def test_participation():
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for item in response.json['results']:
-        assert 'member_id' in item
-        assert 'member_name' in item
+        assert 'id' in item
+        assert 'name' in item
+        assert 'total' in item
 
     url += '?top=event'
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for item in response.json['results']:
-        assert 'member_id' in item
-        assert 'member_name' in item
+        assert 'id' in item
+        assert 'name' in item
+        assert 'total' in item
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

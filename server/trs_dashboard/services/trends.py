@@ -180,8 +180,8 @@ class Trends(object):
         sql = """
             SELECT
                 count(*) as total,
-                {top}_name,
-                {top}_id
+                {top}_name as name,
+                {top}_id as id
             FROM (
                 SELECT
                     CASE

@@ -32,7 +32,8 @@ class AgeGroupAttendance extends Component {
       dropDownAgeGroup: 'Young Professional',
       ageGroups: [],
       topLoading: true,
-      top: []
+      top: [],
+      topCategory: 'Participants'
     }
 
     // Bindings for the plot settings
@@ -42,7 +43,7 @@ class AgeGroupAttendance extends Component {
 
   componentDidMount(){
     this.getAttendance(this.state.ageGroup, this.state.groupBy);
-    this.getTopParticipants(this.state.ageGroup);
+    this.getTopParticipants(this.state.ageGroup, this.state.topCategory);
   }
 
   handleAgeGroup(event) {
@@ -76,15 +77,31 @@ class AgeGroupAttendance extends Component {
     } else {
       this.renderPlot(ageGroup)
     }
-    this.getTopParticipants(ageGroup);
+    this.getTopParticipants(ageGroup, this.state.topCategory);
   }
 
-  getTopParticipants = (ageGroup) => {
+  switchTopCategory = () => {
+    // Toggles the top category between participants and events
+    let topCategory = 'Events';
+    if(this.state.topCategory==='Events'){
+      this.setState({topCategory: 'Participants'})
+      topCategory = 'Participants';
+    } else {
+      this.setState({topCategory: 'Events'})
+
+    }
+    this.getTopParticipants(this.state.ageGroup, topCategory);
+  }
+
+  getTopParticipants = (ageGroup, topCategory) => {
     // Gets the top participants by age group
     this.setState({topLoading: true});
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token)
     let url = '/service/trends/participation/' + ageGroup;
+    if(topCategory==='Events'){
+      url += '?top=event';
+    }
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
         const ageGroups = Object.keys(res.data);
@@ -127,35 +144,36 @@ class AgeGroupAttendance extends Component {
 
   renderTable = () => {
     // Creates the table with member information
-    return(
-      <div>
-        <Row className='event-table'>
-          <Table responsive header hover>
-            <thead>
-              <tr>
-                <th className='table-heading'>Mem. Id</th>
-                <th className='table-heading'>Name</th>
-                <th className='table-heading'>Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.top.map((member, index) => {
-                return(
-                  <tr className='table-row' key={index}>
-                    <th>{member.member_id != null
-                        ? member.member_id : '--'}</th>
-                    <th>{member.member_name != null
-                        ? member.member_name : '--'}</th>
-                    <th>{member.total != null
-                        ? member.total : 0}</th>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </Table>
-        </Row>
-      </div>
-    )
+    if(this.state.topLoading){
+      return <Loading />
+    } else {
+      return(
+        <div>
+          <Row className='event-table'>
+            <Table responsive header hover>
+              <thead>
+                <tr>
+                  <th className='table-heading'>Name</th>
+                  <th className='table-heading'>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.top.map((item, index) => {
+                  return(
+                    <tr className='table-row' key={index}>
+                      <th>{item.name != null
+                          ? item.name : '--'}</th>
+                      <th>{item.total != null
+                          ? item.total : 0}</th>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </Table>
+          </Row>
+        </div>
+      )
+    }
   }
 
   renderPlot = (ageGroup) => {
@@ -266,7 +284,12 @@ class AgeGroupAttendance extends Component {
           </Col>
 
           <div className='top-participants'>
-            <h4>Top Participants </h4><hr/>
+            <h4>Top {this.state.topCategory}
+              <i 
+                className='fa fa-reply pull-right event-icons'
+                onClick={()=>this.switchTopCategory()}
+              ></i>
+            </h4><hr/>
             {table}
           </div>
         </div>

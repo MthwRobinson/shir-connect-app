@@ -10,7 +10,8 @@ import {
   Form,
   FormControl, 
   FormGroup, 
-  Row 
+  Row,
+  Table
 } from 'react-bootstrap';
 
 import Loading from './../../../Loading/Loading';
@@ -75,6 +76,7 @@ class AgeGroupAttendance extends Component {
     } else {
       this.renderPlot(ageGroup)
     }
+    this.getTopParticipants(ageGroup);
   }
 
   getTopParticipants = (ageGroup) => {
@@ -97,8 +99,6 @@ class AgeGroupAttendance extends Component {
           this.props.history.push('/login');
         }
       })
-
-
   }
 
   getAttendance = (ageGroup, groupBy) => {
@@ -123,6 +123,39 @@ class AgeGroupAttendance extends Component {
           this.props.history.push('/login');
         }
       })
+  }
+
+  renderTable = () => {
+    // Creates the table with member information
+    return(
+      <div>
+        <Row className='event-table'>
+          <Table responsive header hover>
+            <thead>
+              <tr>
+                <th className='table-heading'>Mem. Id</th>
+                <th className='table-heading'>Name</th>
+                <th className='table-heading'>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.top.map((member, index) => {
+                return(
+                  <tr className='table-row' key={index}>
+                    <th>{member.member_id != null
+                        ? member.member_id : '--'}</th>
+                    <th>{member.member_name != null
+                        ? member.member_name : '--'}</th>
+                    <th>{member.total != null
+                        ? member.total : 0}</th>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </Table>
+        </Row>
+      </div>
+    )
   }
 
   renderPlot = (ageGroup) => {
@@ -180,6 +213,7 @@ class AgeGroupAttendance extends Component {
 
   render(){
     const dropdowns = this.renderDropDowns();
+    const table = this.renderTable();
     if(this.state.loading){
       return (
         <div className='event-loading' id="plot-container">
@@ -199,17 +233,15 @@ class AgeGroupAttendance extends Component {
       const observations = this.state.allData[ageGroup]['group'].length
       const nticks = Math.min(observations, 10);
       return (
-        <div>
-          <div className='plot-area' id="plot-container">
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <Row>
-                {dropdowns}
-              </Row>
+        <div className='plot-container-half'>
+          <Col xs={7} sm={7} md={7} lg={7}>
+          <div className='plot-area-half' id="plot-container">
+              {dropdowns}
               <Plot
                 data={this.state.data}
                 layout={ {
-                  width: .5*width,
-                  height: Math.max(300, width/2.9),
+                  width: width,
+                  height: Math.max(300, width/1.5),
                   title: ageGroup + ' Attendees By ' + group,
                   titlefont: {family: 'Source Sans Pro'},
                   yaxis: {
@@ -226,8 +258,13 @@ class AgeGroupAttendance extends Component {
                   }
                 }
                 }
+                style={{display: 'inline-block'}}
               />
-            </Col>
+            </div>
+          </Col>
+
+          <div className='top-participants'>
+            {table}
           </div>
         </div>
       )

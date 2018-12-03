@@ -21,6 +21,26 @@ from trs_dashboard.database.database import Database
 
 events = Blueprint('events', __name__)
 
+@events.route('/service/event/<event_id>', methods=['GET'])
+@jwt_required
+def get_event(event_id):
+    """ Pulls the information for an event from the database """
+    event_manager = Events()
+    event = event_manager.database.get_item('event_aggregates', event_id)
+    if event:
+        columns = [
+            'attendee_count', 
+            'duration', 
+            'start_datetime', 
+            'end_datetime'
+        ]
+        for column in columns:
+            event[column] = str(event[column])
+        return jsonify(event)
+    else:
+        response = {'message': 'not found'}
+        return jsonify(response), 404
+
 @events.route('/service/events', methods=['GET'])
 @jwt_required
 def get_events():
@@ -101,7 +121,7 @@ class Events(object):
         self.logger = daiquiri.getLogger(__name__)
 
         self.database = Database()
-
+    
     def get_events(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Fetches the most recent events from the database """
         if q:
@@ -109,6 +129,7 @@ class Events(object):
         else:
             query = None
         columns = [
+            'id',
             'name', 
             'start_datetime', 
             'end_datetime', 

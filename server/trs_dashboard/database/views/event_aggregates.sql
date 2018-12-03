@@ -11,12 +11,7 @@ SELECT
   postal_code,
   b.total_fees,
   attendee_count,
-  json_agg(json_build_object(
-    'ticket_type', c.ticket_class_name,
-    'cost', c.cost,
-    'total_fees', c.total_fees,
-    'attendees', c.attendees
-  )) as ticket_type
+  null as ticket_type
 FROM {schema}.events a
 LEFT JOIN(
   SELECT 

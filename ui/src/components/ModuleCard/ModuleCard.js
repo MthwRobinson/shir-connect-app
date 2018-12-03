@@ -7,7 +7,7 @@ class ModuleCard extends Component {
     return (
       <div onClick={()=>this.props.click()} className="ModuleCard">
         <div className='module-image pullLeft'>
-            <i className={this.props.icon}></i>
+          <i className={this.props.icon}></i>
         </div>
         <div className="module-info pullLeft">
           <h3>{this.props.title}</h3>

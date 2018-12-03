@@ -192,7 +192,12 @@ class Events extends Component {
               <tbody>
                 {this.state.events.map((event, index) => {
                   return(
-                    <tr className='table-row' key={index}>
+                    <tr 
+                      className='table-row' 
+                      key={index}
+                      onClick={()=> 
+                        this.props.history.push('/event?id='+event.id)}
+                    >
                       <th>{event.name}</th>
                       <th>{event.start}</th>
                       <th>{event.end}</th>

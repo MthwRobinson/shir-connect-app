@@ -104,7 +104,6 @@ class AgeGroupAttendance extends Component {
     }
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
-        const ageGroups = Object.keys(res.data);
         this.setState({
           top: res.data.results,
           topLoading: false

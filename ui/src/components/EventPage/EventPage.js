@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
 
 import './EventPage.css';
 
@@ -36,7 +37,56 @@ class EventPage extends Component {
       })
   }
 
+  renderEventInfo = () => {
+    if(this.state.event){
+      const event = this.state.event;
+      const start = moment(this.state.event.start_datetime);
+      const end = moment(this.state.event.end_datetime);
+
+      let address = '';
+      if(event.address_1){
+        address += event.address_1;
+        if(event.city){
+          address += ', ' + event.city;
+        }
+        if(event.region){
+          address += ', ' + event.region;
+        }
+        if(event.postal_code){
+          address += ', ' + event.postal_code;
+        }
+      }
+
+      return(
+        <div>
+          <h4><b><u>Event Information</u></b></h4>
+          <ul>
+            <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
+            <li><b>Time: </b> 
+              {start.format('MM/DD/YY, h:MM a')}-
+              {end.format('MM/DD/YY, h:MM a')}
+            </li>
+            <li><b>Registered:</b> {event.attendee_count}/{event.capacity} </li>
+            <li><b>Venue:</b> {event.venue_name}</li>
+            <li><b>Location:</b> {address}</li>
+            <li><b>Description:</b> {event.description}</li>
+
+          </ul>
+        </div>
+        
+      )
+    } else {
+      return(
+        <div className='event-loading'>
+          <Loading />
+        </div>
+      )
+    }
+      
+  }
+
   render() {
+    let eventInfo = this.renderEventInfo();
     let body = null;
     if(this.state.loading){
       body = (
@@ -55,6 +105,11 @@ class EventPage extends Component {
                 onClick={()=>this.props.history.goBack()}
               ></i>
             </h2><hr/>
+          </div>
+          <div className='event-map-container'>
+            <div className='event-map-summary-area'>
+              {eventInfo}
+            </div>
           </div>
         </div>
       )

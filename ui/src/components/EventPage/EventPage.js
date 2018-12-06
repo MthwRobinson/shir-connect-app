@@ -34,7 +34,7 @@ class EventPage extends Component {
         });
         let lat = res.data.latitude;
         let long = res.data.longitude;
-        let name = res.data.name;
+        let name = res.data.venue_name;
         if(!(lat&&long&&name)){
           long = -77.173449;
           lat = 38.906103;
@@ -97,10 +97,6 @@ class EventPage extends Component {
       
   }
 
-  addEventLocation = () => {
-    // Adds the event location to the map
-  }
-  
   buildMap = (lng, lat, name) => {
     // Builds the MapBox GL map
     const zoom = this.state.zoom;

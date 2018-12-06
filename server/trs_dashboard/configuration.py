@@ -15,6 +15,11 @@ PG_USER = 'postgres'
 PG_HOST = 'localhost'
 PG_DATABASE = 'postgres'
 PG_SCHEMA = 'trs_dashboard'
+MATERIALIZED_VIEWS = [
+    'event_aggregates.sql',
+    'members_view.sql',
+    'shape_colors.sql'
+]
 
 # Member upload confits
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']

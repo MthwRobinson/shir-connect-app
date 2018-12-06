@@ -26,6 +26,7 @@ class Database(object):
         self.path = os.path.dirname(os.path.realpath(__file__))
 
         # Database connection and configurations
+        self.materialized_views = conf.MATERIALIZED_VIEWS
         self.columns = {}
         self.schema = conf.PG_SCHEMA
         self.database = conf.PG_DATABASE
@@ -64,7 +65,10 @@ class Database(object):
     def initialize_tables(self, folder='sql'):
         """ Creates the tables for the dashboard data """
         path = self.path + '/%s/'%(folder)
-        files = os.listdir(path)
+        if folder == 'views':
+            files = self.materialized_views
+        else:
+            files = os.listdir(path)
         for file_ in files:
             if file_.endswith('.sql'):
                 table = file_.split('.')[0]

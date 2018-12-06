@@ -2,17 +2,36 @@ CREATE MATERIALIZED VIEW
 IF NOT EXISTS {schema}.event_aggregates
 AS
 SELECT 
-  a.id,
-  name,
-  EXTRACT(isodow FROM start_datetime) AS day_of_week,
+  a.id as id,
+  capacity,
+  changed,
+  created,
+  description,
   start_datetime,
   end_datetime,
+  EXTRACT(isodow FROM start_datetime) AS day_of_week,
   end_datetime - start_datetime as duration,
+  is_free,
+  a.name as name,
+  status,
+  url,
+  vanity_url,
+  venue_id,
+  load_datetime,
+  address_1,
+  address_2,
+  city,
+  region,
+  country,
+  latitude,
+  longitude,
   postal_code,
-  b.total_fees,
-  attendee_count,
-  null as ticket_type
+  b.name as venue_name,
+  c.total_fees,
+  c.attendee_count
 FROM {schema}.events a
+LEFT JOIN {schema}.venues b
+ON a.venue_id = b.id
 LEFT JOIN(
   SELECT 
     event_id, 
@@ -20,31 +39,11 @@ LEFT JOIN(
     COUNT(*) AS attendee_count
   FROM {schema}.attendees
   GROUP BY event_id
-) b ON a.id=b.event_id
-LEFT JOIN(
-  SELECT
-    event_id,
-    ticket_class_name,
-    COUNT(*) as attendees,
-    cost,
-    SUM(cost) as total_fees
-  FROM {schema}.attendees
-  GROUP BY event_id, ticket_class_name, cost
-) c ON c.event_id = c.event_id
-LEFT JOIN(
-  SELECT id, postal_code
-  FROM {schema}.venues
-) d ON a.venue_id = d.id
-GROUP BY 
-  a.id,
-  name,
-  start_datetime,
-  end_datetime,
-  postal_code,
-  b.total_fees,
-  attendee_count
+) c ON a.id=c.event_id
 ORDER BY start_datetime desc
 WITH DATA;
 
 CREATE INDEX IF NOT EXISTS event_aggregate_index 
 ON {schema}.event_aggregates (start_datetime);
+
+

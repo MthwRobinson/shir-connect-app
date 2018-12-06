@@ -16,6 +16,7 @@ import daiquiri
 from flask import Blueprint, abort, jsonify, make_response, request
 from flask_jwt_simple import jwt_required
 import pandas as pd
+import numpy as np
 
 from trs_dashboard.database.database import Database
 
@@ -28,14 +29,21 @@ def get_event(event_id):
     event_manager = Events()
     event = event_manager.database.get_item('event_aggregates', event_id)
     if event:
-        columns = [
-            'attendee_count', 
+        col_to_string = [
             'duration', 
             'start_datetime', 
             'end_datetime'
-        ]
-        for column in columns:
-            event[column] = str(event[column])
+        ] 
+        for column in event.keys():
+            if type(event[column]) == int:
+                col_to_string.append(column)
+            elif isinstance(event[column], np.int64):
+                col_to_string.append(column)
+            elif event[column] in [True, False]:
+                col_to_string.append(column)
+            if column in col_to_string:
+                event[column] = str(event[column])
+        event[column] = str(event[column])
         return jsonify(event)
     else:
         response = {'message': 'not found'}
@@ -101,9 +109,6 @@ def export_event_aggregates():
 
     database = Database()
     df = database.read_table('event_aggregates', query=query)
-    # Delete ticket type because CSV has issues with JSON columns
-    del df['ticket_type']
-
     today = str(datetime.datetime.now())[:10]
     filename = 'event_aggregates_%s.csv'%(today)
 
@@ -128,17 +133,8 @@ class Events(object):
             query = ('name', q)
         else:
             query = None
-        columns = [
-            'id',
-            'name', 
-            'start_datetime', 
-            'end_datetime', 
-            'total_fees', 
-            'attendee_count'
-        ]
         df = self.database.read_table(
             'event_aggregates',
-            columns = columns,
             limit=limit,
             page=page,
             order=order,

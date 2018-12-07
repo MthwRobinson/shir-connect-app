@@ -31,6 +31,14 @@ def test_event():
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
+    for attendee in response.json['attendees']:
+        'attendee_id' in attendee
+        'member_id' in attendee
+        'first_name' in attendee
+        'last_name' in attendee
+        'name' in attendee
+        'age' in attendee
+        'is_member' in attendee
 
     url = '/service/event/8675309'
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})

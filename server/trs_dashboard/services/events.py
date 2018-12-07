@@ -27,23 +27,8 @@ events = Blueprint('events', __name__)
 def get_event(event_id):
     """ Pulls the information for an event from the database """
     event_manager = Events()
-    event = event_manager.database.get_item('event_aggregates', event_id)
+    event = event_manager.get_event(event_id)
     if event:
-        col_to_string = [
-            'duration', 
-            'start_datetime', 
-            'end_datetime'
-        ] 
-        for column in event.keys():
-            if type(event[column]) == int:
-                col_to_string.append(column)
-            elif isinstance(event[column], np.int64):
-                col_to_string.append(column)
-            elif event[column] in [True, False]:
-                col_to_string.append(column)
-            if column in col_to_string:
-                event[column] = str(event[column])
-        event[column] = str(event[column])
         return jsonify(event)
     else:
         response = {'message': 'not found'}
@@ -147,6 +132,56 @@ class Events(object):
         events = self.database.to_json(df)
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
+
+    def get_event(self, event_id):
+        """ Returns an event from the database """
+        event = self.database.get_item('event_aggregates', event_id)
+        if event:
+            col_to_string = [
+                'duration', 
+                'start_datetime', 
+                'end_datetime'
+            ] 
+            for column in event.keys():
+                if type(event[column]) == int:
+                    col_to_string.append(column)
+                elif isinstance(event[column], np.int64):
+                    col_to_string.append(column)
+                elif event[column] in [True, False]:
+                    col_to_string.append(column)
+                if column in col_to_string:
+                    event[column] = str(event[column])
+            event['attendees'] = self.get_attendees(event_id)
+
+        return event
+
+    def get_attendees(self, event_id):
+        """ Pulls the list of the attendees for the event """
+        sql = """
+
+            SELECT
+                a.id as attendee_id,
+                c.id as member_id,
+                a.first_name,
+                a.last_name,
+                a.name,
+                date_part('year', now()) - date_part('year', birth_date) as age,
+                CASE 
+                    WHEN c.first_name IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END as is_member
+            FROM {schema}.attendees a
+            INNER JOIN {schema}.events b
+            on a.event_id = b.id
+            LEFT JOIN {schema}.members_view c
+            ON (lower(a.first_name)=lower(c.first_name)
+            AND lower(a.last_name)=lower(c.last_name))
+            where b.id = '{event_id}'
+            ORDER BY last_name ASC
+        """.format(schema=self.database.schema, event_id=event_id)
+        df = pd.read_sql(sql, self.database.connection)
+        attendees = self.database.to_json(df)
+        return attendees
 
     def get_event_cities(self):
         """ Pulls a list of events organized by city """

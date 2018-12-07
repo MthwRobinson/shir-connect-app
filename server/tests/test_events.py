@@ -32,7 +32,6 @@ def test_event():
     assert response.status_code == 200
     assert type(response.json) == dict
     for attendee in response.json['attendees']:
-        'attendee_id' in attendee
         'member_id' in attendee
         'first_name' in attendee
         'last_name' in attendee

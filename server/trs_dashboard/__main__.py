@@ -26,11 +26,12 @@ def main():
     pass
 
 @click.command('initialize', help='Creates the db tables')
-def initialize():
+@click.option('--drop_views', is_flag=True, help='Drops materialized views')
+def initialize(drop_views=False):
     """ Initializes the tables for the dashboard """
     database = Database()
     LOGGER.info('Initializing the database ...')
-    database.initialize()
+    database.initialize(drop_views=drop_views)
 main.add_command(initialize)
 
 @click.command('refresh_views', help='Refreshes materialized views')

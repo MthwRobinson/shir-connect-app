@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Nav, NavItem } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
@@ -13,11 +14,17 @@ class EventPage extends Component {
     loading: true,
     zoom: 13,
     map: null,
-    event: {}
+    event: {},
+    activeTab: 'eventInfo'
   }
 
   componentDidMount(){
     this.getEvent();
+  }
+
+  switchTab = (tab) => {
+    // Toggles between event info and attendees
+    this.setState({activeTab: tab});
   }
 
   getEvent = () => {
@@ -82,10 +89,8 @@ class EventPage extends Component {
             <li><b>Venue:</b> {event.venue_name}</li>
             <li><b>Location:</b> {address}</li>
             <li><b>Description:</b> {event.description}</li>
-
           </ul>
-        </div>
-        
+        </div> 
       )
     } else {
       return(
@@ -184,6 +189,13 @@ class EventPage extends Component {
         </div>
       )
     } else {
+      let tabStyle = {
+        'eventInfo': 'record-tab',
+        'attendees': 'record-tab'
+      };
+      const activeTab = this.state.activeTab;
+      tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
+
       body = (
         <div className="EventPage">
           <div className='events-header'>
@@ -197,6 +209,27 @@ class EventPage extends Component {
           </div>
           <div className='event-map-container'>
             <div className='event-map-summary-area'>
+
+              <Nav bsStyle="tabs"
+                className="record-tabs"
+              >
+                <li
+                  eventKey="eventInfo" 
+                  className={tabStyle['eventInfo']}
+                  onClick={()=>this.switchTab('eventInfo')}
+                >
+                  Event Information
+                </li>
+                <li 
+                  eventKey="attendees" 
+                  className={tabStyle['attendees']}
+                  onClick={()=>this.switchTab('attendees')}
+                >
+                  Attendees
+                </li>
+            </Nav>
+
+
               {eventInfo}
             </div>
               {mapArea}

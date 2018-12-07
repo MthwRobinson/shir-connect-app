@@ -159,11 +159,12 @@ class Events(object):
         """ Pulls the list of the attendees for the event """
         sql = """
 
-            SELECT
-                a.id as attendee_id,
+            SELECT DISTINCT
                 c.id as member_id,
                 a.first_name,
                 a.last_name,
+                a.email,
+                c.postal_code,
                 a.name,
                 date_part('year', now()) - date_part('year', birth_date) as age,
                 CASE 

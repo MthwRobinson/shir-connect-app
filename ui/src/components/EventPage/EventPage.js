@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Nav, NavItem } from 'react-bootstrap';
+import { Nav, Table, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
@@ -58,6 +58,7 @@ class EventPage extends Component {
 
   renderEventInfo = () => {
     if(this.state.event){
+      if(this.state.activeTab==='eventInfo'){
       const event = this.state.event;
       const start = moment(this.state.event.start_datetime);
       const end = moment(this.state.event.end_datetime);
@@ -78,7 +79,6 @@ class EventPage extends Component {
 
       return(
         <div>
-          <h4><b><u>Event Information</u></b></h4>
           <ul>
             <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
             <li><b>Time: </b> 
@@ -92,6 +92,46 @@ class EventPage extends Component {
           </ul>
         </div> 
       )
+      } else {
+        return(
+        <div>
+            <Row className='event-table'>
+              <Table reponsive header hover>
+                <thead>
+                  <tr>
+                    <th className='table-heading'>First Name</th>
+                    <th className='table-heading'>
+                    Last Name
+                    <i className='fa fa-caret-down paging-arrows'></i>
+                    </th>
+                    <th className='table-heading'>E-mail</th>
+                    <th className='table-heading'>Age</th>
+                    <th className='table-heading'>Member</th>
+                  </tr>
+                </thead>
+              <tbody>
+                {this.state.event.attendees.map((attendee, index) => {
+                  return(
+                    <tr className='table-row' key={index}>
+                      <th>{attendee.first_name != null
+                      ? attendee.first_name : '--'}</th>
+                      <th>{attendee.last_name != null
+                      ? attendee.last_name : '--'}</th>
+                      <th>{attendee.email != null
+                      ? attendee.email : '--'}</th>
+                      <th>{attendee.age != null
+                      ? attendee.age : '--'}</th>
+                      <th>{attendee.is_member === true
+                      ? 'Yes' : 'No'}</th>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              </Table>
+            </Row>
+        </div> 
+        )
+      }
     } else {
       return(
         <div className='event-loading'>
@@ -209,8 +249,8 @@ class EventPage extends Component {
           </div>
           <div className='event-map-container'>
             <div className='event-map-summary-area'>
-
-              <Nav bsStyle="tabs"
+              <Nav 
+                bsStyle="tabs"
                 className="record-tabs"
               >
                 <li
@@ -228,8 +268,6 @@ class EventPage extends Component {
                   Attendees
                 </li>
             </Nav>
-
-
               {eventInfo}
             </div>
               {mapArea}

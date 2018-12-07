@@ -13,6 +13,7 @@ import 'react-sliding-pane/dist/react-sliding-pane.css';
 
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
+import EventPage from './components/EventPage/EventPage';
 import Header from './components/Header/Header';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
@@ -39,6 +40,7 @@ class App extends Component {
           <div>
             <PrivateRoute exact path="/" component={Home} />
             <PrivateRoute path="/events" component={Events} />
+            <PrivateRoute path="/event" component={EventPage} />
             <PrivateRoute path="/members" component={Members} />
             <PrivateRoute path="/trends" component={Trends} />
             <PrivateRoute path="/map" component={EventMap} />

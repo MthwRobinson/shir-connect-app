@@ -26,6 +26,7 @@ class Database(object):
         self.path = os.path.dirname(os.path.realpath(__file__))
 
         # Database connection and configurations
+        self.materialized_views = conf.MATERIALIZED_VIEWS
         self.columns = {}
         self.schema = conf.PG_SCHEMA
         self.database = conf.PG_DATABASE
@@ -35,14 +36,14 @@ class Database(object):
             host = conf.PG_HOST
         )
 
-    def initialize(self):
+    def initialize(self, drop_views=False):
         """ Initializes the database """
         self.logger.info('Initializing schema')
         self.initialize_schema()
         self.logger.info('Initializing tables')
         self.initialize_tables('sql')
         self.logger.info('Initializing views')
-        self.initialize_tables('views')
+        self.initialize_tables('views', drop_views=drop_views)
         
     def run_query(self, sql, commit=True):
         """ Runs a query against the postgres database """
@@ -61,13 +62,23 @@ class Database(object):
         sql = "CREATE SCHEMA IF NOT EXISTS %s"%(self.schema)
         self.run_query(sql)
 
-    def initialize_tables(self, folder='sql'):
+    def initialize_tables(self, folder='sql', drop_views=False):
         """ Creates the tables for the dashboard data """
         path = self.path + '/%s/'%(folder)
-        files = os.listdir(path)
+        if folder == 'views':
+            files = self.materialized_views
+        else:
+            files = os.listdir(path)
         for file_ in files:
             if file_.endswith('.sql'):
                 table = file_.split('.')[0]
+                if drop_views and folder=='views':
+                    sql = """
+                        DROP MATERIALIZED VIEW IF EXISTS
+                        %s.%s CASCADE
+                    """%(self.schema, table)
+                    self.logger.info('Dropped %s'%(table))
+                    self.run_query(sql)
                 msg = 'Creating table or view %s in schema %s'%(
                     table,
                     self.schema

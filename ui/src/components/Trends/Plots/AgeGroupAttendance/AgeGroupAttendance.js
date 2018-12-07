@@ -26,8 +26,8 @@ class AgeGroupAttendance extends Component {
       data: [],
       allData: [],
       loading: true,
-      groupBy: 'Month',
-      dropDownGroupBy: 'Month',
+      groupBy: 'Year',
+      dropDownGroupBy: 'Year',
       ageGroup: 'Young Professional',
       dropDownAgeGroup: 'Young Professional',
       ageGroups: [],
@@ -104,7 +104,6 @@ class AgeGroupAttendance extends Component {
     }
     axios.get(url, { headers: { Authorization: auth }})
       .then(res => {
-        const ageGroups = Object.keys(res.data);
         this.setState({
           top: res.data.results,
           topLoading: false
@@ -147,6 +146,12 @@ class AgeGroupAttendance extends Component {
     if(this.state.topLoading){
       return <Loading />
     } else {
+      let url = ''
+      if(this.state.topCategory==='Events'){
+        url = '/event?id=';
+      } else {
+        url = '/members?id=';
+      }
       return(
         <div>
           <Row className='event-table'>
@@ -160,7 +165,13 @@ class AgeGroupAttendance extends Component {
               <tbody>
                 {this.state.top.map((item, index) => {
                   return(
-                    <tr className='table-row' key={index}>
+                    <tr 
+                      className='table-row' 
+                      key={index}
+                      onClick={()=>this.props.history.push(
+                        url + item.id
+                      )}
+                    >
                       <th>{item.name != null
                           ? item.name : '--'}</th>
                       <th>{item.total != null

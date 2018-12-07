@@ -19,6 +19,8 @@ scp -i $HOME/certs/dataflock.pem \
 echo "Pulling the latest code from git ... "
 ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
     "cd /home/ubuntu/trs-dashboard && git checkout master && git pull origin master"
+ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
+    "/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard initialize --drop_views"
 
 # Restart service
 echo "Restarting all process ..."

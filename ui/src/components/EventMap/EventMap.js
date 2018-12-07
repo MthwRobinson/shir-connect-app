@@ -235,28 +235,7 @@ class EventMap extends Component {
         map.getCanvas().style.cursor = '';
         popup.remove();
     });
-
-    //map.on('load', function () {
-      // map.addLayer({
-      //     "id": "points",
-      //     "type": "symbol",
-      //     "source": {
-      //       "type": "geojson",
-      //       "data": {
-      //           "type": "FeatureCollection",
-      //           "features": features 
-      //         }
-      //     },
-      //     "layout": {
-      //         "icon-image": "{icon}-15",
-      //         "text-field": "{title}",
-      //         "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-      //         "text-offset": [0, 0.6],
-      //         "text-anchor": "top"
-      //     }
-      // });
-    //});
-
+    
     return map
   }
 

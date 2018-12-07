@@ -1,0 +1,66 @@
+.EventPage {
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-bottom: 30px;
+  text-align: left;
+  font-size: 17px;
+}
+
+.event-map {
+  width: 35vw;
+  height: 70vh;
+  float: right;
+}
+
+.event-map-summary-area {
+  float: left;
+  padding-top: 10px;
+  padding-right: 15px;
+  max-height: 70vh;
+  width: 60%;
+  overflow-y: auto;
+}
+
+.event-map-container {
+  width: 100%;
+  height: 70vh;
+  margin: auto;
+}
+
+.record-tabs {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: black;
+  outline: black;
+  margin-bottom: 10px;
+}
+
+.record-tab, .record-tab:hover {
+  color: black;
+  font-size: 22px;
+  text-decoration: none;
+  padding-right: 10px;
+  padding-left: 10px;
+  margin-right: 5px;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+
+.record-tab:hover {
+  background-color: lightgrey;
+  cursor: pointer;
+}
+
+.record-tab-selected {
+  background-color: lightgrey;
+}
+
+.record-tab > li {
+  color: black;
+}
+
+.record-tab > li:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+

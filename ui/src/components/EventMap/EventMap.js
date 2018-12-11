@@ -64,6 +64,12 @@ class EventMap extends Component {
       })
   }
 
+  selectEvent = (eventId) => {
+    // Changes to the event page
+    const url = '/event?id='+eventId;
+    this.props.history.push(url);
+  }
+
   getZipCodeGeometries = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
@@ -276,7 +282,9 @@ class EventMap extends Component {
                 <ol className='city-secondary-list'>
                   {cityEvents.map((event, index) => {
                     return(
-                      <li>{event.event_name}</li>
+                      <li
+                        onClick={()=>this.selectEvent(event.event_id)}
+                      >{event.event_name}</li>
                     )
                   })}
                 </ol>

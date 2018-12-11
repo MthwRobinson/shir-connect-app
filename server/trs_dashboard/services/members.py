@@ -182,6 +182,7 @@ class Members(object):
                 lower(a.first_name) = lower('{first_name}')
                 AND lower(a.last_name) = lower('{last_name}')
             )
+            ORDER BY start_datetime DESC
         """.format(
             schema=self.database.schema,
             first_name=first_name,

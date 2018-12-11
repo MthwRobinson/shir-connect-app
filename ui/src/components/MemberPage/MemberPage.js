@@ -85,19 +85,12 @@ class MemberPage extends Component {
           membershipDate = moment(this.state.member.membership_date)
             .format('MM/DD/YY');
         } else {
-          membershipDate = 'None'
+          membershipDate = 'Not Available'
         }
 
-      return(
-        <div>
-          <ul>
-            <li><b>Age:</b> {member.age}</li>
-            <li>
-              <b>Member:</b> {member.is_member == 'True' ? 'Yes' : 'No' }
-            </li>
-            <li><b>Membership Date: </b> {membershipDate} </li>
-            <li><b>Email: </b> {member.email}</li>
-            <li><b>Events: </b>
+        let events = null;
+        if(member.events.length>0){
+          events = (
               <ul>
                 {member.events.map((event, index) => {
                   const start = moment(event.start_datetime)
@@ -112,6 +105,23 @@ class MemberPage extends Component {
                   )
                 })}
               </ul>
+          )
+        } else {
+          events = 'None'
+        }
+
+      return(
+        <div>
+          <ul>
+            <li><b>Age:</b> {member.age != null 
+                ? member.age : 'Not Available'}</li>
+            <li>
+              <b>Member:</b> {member.is_member == 'True' ? 'Yes' : 'No' }
+            </li>
+            <li><b>Membership Date: </b> {membershipDate} </li>
+            <li><b>Email: </b> {member.email != null 
+                ? member.email : 'Not Available'}</li>
+            <li><b>Events: </b> {events}
             </li>
           </ul>
         </div> 

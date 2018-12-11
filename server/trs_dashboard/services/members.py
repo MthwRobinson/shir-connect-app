@@ -147,6 +147,7 @@ class Members(object):
         )
 
         df = pd.read_sql(sql, self.database.connection)
+        df = df.where((pd.notnull(df)), None)
         if len(df) > 0:
             col_to_string = ['membership_date']
             member = dict(df.loc[0])
@@ -189,6 +190,7 @@ class Members(object):
             last_name=last_name
         )
         df = pd.read_sql(sql, self.database.connection)
+        df = df.where((pd.notnull(df)), None)
         if len(df) > 0:
             events = []
             for i in df.index:

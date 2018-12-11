@@ -125,10 +125,12 @@ class Members(object):
                     ELSE FALSE
                 END as is_member,
                 membership_date
-            FROM {schema}.attendees a
-            LEFT JOIN {schema}.members_view c
+            FROM {schema}.members_view c
+            LEFT JOIN {schema}.attendees a
             ON (lower(a.first_name) = lower(c.first_name)
             AND lower(a.last_name) = lower(c.last_name))
+            LEFT JOIN {schema}.events b
+            ON a.event_id = b.id
             WHERE (
                 (
                     lower(a.first_name) = lower('{first_name}')

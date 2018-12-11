@@ -14,7 +14,7 @@ import {
   Table
 } from 'react-bootstrap';
 
-import Loading from './../../../Loading/Loading';
+import Loading from './../Loading/Loading';
 
 import './AgeGroupAttendance.css';
 

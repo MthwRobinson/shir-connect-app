@@ -73,6 +73,8 @@ def test_member():
     assert 'age' in response.json
     assert 'membership_date' in response.json
     assert 'is_member' in response.json
+    assert 'events' in response.json
+    assert type(response.json['events']) == list
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

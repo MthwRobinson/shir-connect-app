@@ -159,9 +159,44 @@ class Members(object):
                     col_to_string.append(column)
                 if column in col_to_string:
                     member[column] = str(member[column])
+            member['events'] = self.get_member_events(first_name, last_name)
             return member
         else:
             return None
+
+    def get_member_events(self, first_name, last_name):
+        """ Pulls information for events a member has attended """
+        sql = """
+            SELECT
+                b.id as event_id,
+                b.start_datetime,
+                b.name,
+                d.latitude,
+                d.longitude
+            FROM {schema}.attendees a
+            LEFT JOIN {schema}.events b
+            ON a.event_id = b.id
+            LEFT JOIN {schema}.venues d
+            ON b.venue_id = d.id
+            WHERE (
+                lower(a.first_name) = lower('{first_name}')
+                AND lower(a.last_name) = lower('{last_name}')
+            )
+        """.format(
+            schema=self.database.schema,
+            first_name=first_name,
+            last_name=last_name
+        )
+        df = pd.read_sql(sql, self.database.connection)
+        if len(df) > 0:
+            events = []
+            for i in df.index:
+                event = dict(df.loc[i])
+                event['start_datetime'] = str(event['start_datetime'])
+                events.append(event)
+            return events
+        else:
+            return []
 
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """

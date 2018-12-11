@@ -57,12 +57,14 @@ class MemberPage extends Component {
           loading: false,
         });
         const events = res.data.events;
-        if(events.length>0){
-          if(events[0].latitude&&events[0].longitude){
+        for(let i=0; i<events.length; i++){
+          const event = events[i];
+          if(event.latitude&&event.longitude){
             this.setState({
-              lng: events[0].longitude,
-              lat: events[0].latitude
+              lng: event.longitude,
+              lat: event.latitude
             })
+            break;
           }
         }
         this.setState({map: this.buildMap(events)})
@@ -188,37 +190,39 @@ class MemberPage extends Component {
     map.on('load', function() {
       for(let i=0; i<events.length; i++){
         const event = events[i];
-        const feature = {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [event.longitude, event.latitude]
-          },
-          "properties": {
-            "title": event.name,
-            "icon": "religious-jewish",
-            "description" : "<strong>Temple Rodef Shalom</strong>"
-          }
-        };
-
-        map.addLayer({
-            "id": "points",
-            "type": "symbol",
-            "source": {
-              "type": "geojson",
-              "data": {
-                  "type": "FeatureCollection",
-                  "features": [feature]
-                }
+        if(event.latitude&&event.longitude){
+          const feature = {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [event.longitude, event.latitude]
             },
-            "layout": {
-                "icon-image": "{icon}-15",
-                "text-field": "{title}",
-                "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-                "text-offset": [0, 0.6],
-                "text-anchor": "top"
+            "properties": {
+              "title": event.name,
+              "icon": "religious-jewish",
+              "description" : "<strong>Temple Rodef Shalom</strong>"
             }
-        });
+          };
+
+          map.addLayer({
+              "id": "points",
+              "type": "symbol",
+              "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": [feature]
+                  }
+              },
+              "layout": {
+                  "icon-image": "{icon}-15",
+                  "text-field": "{title}",
+                  "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+                  "text-offset": [0, 0.6],
+                  "text-anchor": "top"
+              }
+          });
+        }
       }
     })
     

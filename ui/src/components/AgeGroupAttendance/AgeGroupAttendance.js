@@ -62,6 +62,20 @@ class AgeGroupAttendance extends Component {
     this.getTopParticipants(ageGroup, topCategory);
   }
 
+  selectMember = (name) => {
+    // Switches to the member page
+    const firstName = name.split(' ')[0];
+    const lastName = name.split(' ')[1];
+    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    this.props.history.push(url);
+  }
+
+  selectEvent = (eventId) => {
+    // Switches to the event page
+    const url = '/event?id='+eventId;
+    this.props.history.push(url);
+  }
+
   handleAgeGroup(event) {
     // Updates the state based on the age group dropdown
     this.setState({dropDownAgeGroup: event.target.value});
@@ -165,12 +179,13 @@ class AgeGroupAttendance extends Component {
     if(this.state.topLoading){
       return <Loading />
     } else {
-      let url = ''
+      let selectItem = null
       if(this.state.topCategory==='Events'){
-        url = '/event?id=';
+        selectItem = (item) => this.selectEvent(item.id);
       } else {
-        url = '/members?id=';
+        selectItem = (item) => this.selectMember(item.name);
       }
+
       return(
         <div>
           <Row className='event-table'>
@@ -187,9 +202,7 @@ class AgeGroupAttendance extends Component {
                     <tr 
                       className='table-row' 
                       key={index}
-                      onClick={()=>this.props.history.push(
-                        url + item.id
-                      )}
+                      onClick={()=> selectItem(item)}
                     >
                       <th>{item.name != null
                           ? item.name : '--'}</th>

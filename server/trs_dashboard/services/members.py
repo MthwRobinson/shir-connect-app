@@ -21,6 +21,29 @@ from trs_dashboard.database.database import Database
 
 members = Blueprint('members', __name__)
 
+@members.route('/service/member', methods=['GET'])
+@jwt_required
+def get_member():
+    """ Pulls a members information from the database """
+    first_name = request.args.get('firstName')
+    if not first_name:
+        response = {'message': 'first name required'}
+        return jsonify(response), 404
+
+    last_name = request.args.get('lastName')
+    if not last_name:
+        response = {'message': 'last name required'}
+        return jsonify(response), 404
+
+    member_manager = Members()
+    member = member_manager.get_member(first_name, last_name)
+    if member:
+        return jsonify(member)
+    else:
+        response = {'message': 'not found'}
+        return jsonify(response), 404
+
+
 @members.route('/service/members', methods=['GET'])
 @jwt_required
 def get_members():
@@ -77,6 +100,68 @@ class Members(object):
         self.member_columns = conf.MEMBER_COLUMNS
         self.spouse_columns = conf.SPOUSE_COLUMNS
         self.home_path = conf.HOMEPATH
+
+    def get_member(self, first_name, last_name):
+        """ Pulls the information for a member """
+        sql = """
+            SELECT DISTINCT
+                CASE
+                    WHEN a.first_name IS NOT NULL then a.first_name
+                    ELSE c.first_name
+                END as first_name,
+                CASE
+                    WHEN a.last_name IS NOT NULL then a.last_name
+                    ELSE c.last_name
+                END as last_name,
+                date_part('year', now()) 
+                        - date_part('year', birth_date
+                ) as age,
+                CASE
+                    WHEN c.email IS NOT NULL THEN c.email
+                    ELSE a.email
+                END as email,
+                CASE
+                    WHEN c.first_name IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END as is_member,
+                membership_date
+            FROM {schema}.attendees a
+            LEFT JOIN {schema}.members_view c
+            ON (lower(a.first_name) = lower(c.first_name)
+            AND lower(a.last_name) = lower(c.last_name))
+            WHERE (
+                (
+                    lower(a.first_name) = lower('{first_name}')
+                    AND lower(a.last_name) = lower('{last_name}')
+                ) OR
+                (
+                    lower(c.first_name) = lower('{first_name}')
+                    AND lower(c.last_name) = lower('{last_name}')
+
+                )
+            )
+        """.format(
+            schema=self.database.schema, 
+            first_name=first_name, 
+            last_name=last_name
+        )
+
+        df = pd.read_sql(sql, self.database.connection)
+        if len(df) > 0:
+            col_to_string = ['membership_date']
+            member = dict(df.loc[0])
+            for column in member.keys():
+                if type(member[column]) == int:
+                    col_to_string.append(column)
+                elif isinstance(member[column], np.int64):
+                    col_to_string.append(column)
+                elif member[column] in [True, False]:
+                    col_to_string.append(column)
+                if column in col_to_string:
+                    member[column] = str(member[column])
+            return member
+        else:
+            return None
 
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """

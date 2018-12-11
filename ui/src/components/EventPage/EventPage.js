@@ -242,7 +242,7 @@ class EventPage extends Component {
             <h2>
               {this.state.event.name}
               <i
-                className="fa fa-times pull-right event-icons"
+                className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}
               ></i>
             </h2><hr/>

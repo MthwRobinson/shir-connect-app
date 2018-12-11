@@ -42,8 +42,24 @@ class AgeGroupAttendance extends Component {
   }
 
   componentDidMount(){
-    this.getAttendance(this.state.ageGroup, this.state.groupBy);
-    this.getTopParticipants(this.state.ageGroup, this.state.topCategory);
+    let ageGroup = localStorage.getItem('ageGroup');
+    let groupBy = localStorage.getItem('groupBy');
+    let topCategory = localStorage.getItem('topCategory');
+    if(ageGroup && groupBy && topCategory){
+      this.setState({
+        ageGroup: ageGroup,
+        dropDownAgeGroup: ageGroup,
+        groupBy: groupBy,
+        dropDownGroupBy: groupBy,
+        topCategory: topCategory
+      })
+    } else {
+      ageGroup = this.state.ageGroup;
+      groupBy = this.state.groupBy;
+      topCategory = this.state.topCategory;
+    }
+    this.getAttendance(ageGroup, groupBy);
+    this.getTopParticipants(ageGroup, topCategory);
   }
 
   handleAgeGroup(event) {
@@ -71,6 +87,9 @@ class AgeGroupAttendance extends Component {
       ageGroup: ageGroup,
       groupBy: groupBy
     })
+    localStorage.setItem('ageGroup', ageGroup)
+    localStorage.setItem('groupBy', groupBy)
+    localStorage.setItem('topCategory', this.state.topCategory)
 
     if(newServiceCall){
       this.getAttendance(ageGroup, groupBy);

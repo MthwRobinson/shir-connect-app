@@ -126,7 +126,7 @@ class Members(object):
                 END as is_member,
                 membership_date
             FROM {schema}.members_view c
-            LEFT JOIN {schema}.attendees a
+            FULL JOIN {schema}.attendees a
             ON (lower(a.first_name) = lower(c.first_name)
             AND lower(a.last_name) = lower(c.last_name))
             LEFT JOIN {schema}.events b

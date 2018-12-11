@@ -18,6 +18,7 @@ import Header from './components/Header/Header';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
 import Members from './components/Members/Members';
+import MemberPage from './components/MemberPage/MemberPage';
 import Trends from './components/Trends/Trends';
 
 class App extends Component {
@@ -41,6 +42,7 @@ class App extends Component {
             <PrivateRoute exact path="/" component={Home} />
             <PrivateRoute path="/events" component={Events} />
             <PrivateRoute path="/event" component={EventPage} />
+            <PrivateRoute path="/member" component={MemberPage} />
             <PrivateRoute path="/members" component={Members} />
             <PrivateRoute path="/trends" component={Trends} />
             <PrivateRoute path="/map" component={EventMap} />

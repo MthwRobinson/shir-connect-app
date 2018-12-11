@@ -170,7 +170,7 @@ class Members(object):
     def get_member_events(self, first_name, last_name):
         """ Pulls information for events a member has attended """
         sql = """
-            SELECT
+            SELECT DISTINCT
                 b.id as event_id,
                 b.start_datetime,
                 b.name,

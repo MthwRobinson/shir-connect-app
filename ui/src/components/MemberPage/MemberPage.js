@@ -11,6 +11,8 @@ import Loading from './../Loading/Loading';
 
 class MemberPage extends Component {
   state = {
+    lng: -77.173449,
+    lat: 38.906103,
     loading: true,
     zoom: 13,
     map: null,
@@ -54,15 +56,16 @@ class MemberPage extends Component {
           member: res.data,
           loading: false,
         });
-        let lat = res.data.latitude;
-        let long = res.data.longitude;
-        let name = res.data.venue_name;
-        if(!(lat&&long&&name)){
-          long = -77.173449;
-          lat = 38.906103;
-          name = 'Temple Rodef Shalom';
+        const events = res.data.events;
+        if(events.length>0){
+          if(events[0].latitude&&events[0].longitude){
+            this.setState({
+              lng: events[0].longitude,
+              lat: events[0].latitude
+            })
+          }
         }
-        this.setState({map: this.buildMap(long, lat, name)})
+        this.setState({map: this.buildMap(events)})
       })
       .catch(err => {
         if(err.response.status===401){
@@ -161,9 +164,9 @@ class MemberPage extends Component {
       
   }
 
-  buildMap = (lng, lat, name) => {
+  buildMap = (events) => {
     // Builds the MapBox GL map
-    const zoom = this.state.zoom;
+    const { lng, lat, zoom } = this.state;
 
     const map = new mapboxgl.Map({
       container: this.mapContainer,
@@ -183,37 +186,40 @@ class MemberPage extends Component {
     });
 
     map.on('load', function() {
-      const feature = {
-        "type": "Feature",
-        "geometry": {
-          "type": "Point",
-          "coordinates": [lng, lat]
-        },
-        "properties": {
-          "title": name,
-          "icon": "religious-jewish",
-          "description" : "<strong>Temple Rodef Shalom</strong>"
-        }
-      };
-
-      map.addLayer({
-          "id": "points",
-          "type": "symbol",
-          "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": [feature]
-              }
+      for(let i=0; i<events.length; i++){
+        const event = events[i];
+        const feature = {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [event.longitude, event.latitude]
           },
-          "layout": {
-              "icon-image": "{icon}-15",
-              "text-field": "{title}",
-              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-              "text-offset": [0, 0.6],
-              "text-anchor": "top"
+          "properties": {
+            "title": event.name,
+            "icon": "religious-jewish",
+            "description" : "<strong>Temple Rodef Shalom</strong>"
           }
-      });
+        };
+
+        map.addLayer({
+            "id": "points",
+            "type": "symbol",
+            "source": {
+              "type": "geojson",
+              "data": {
+                  "type": "FeatureCollection",
+                  "features": [feature]
+                }
+            },
+            "layout": {
+                "icon-image": "{icon}-15",
+                "text-field": "{title}",
+                "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+                "text-offset": [0, 0.6],
+                "text-anchor": "top"
+            }
+        });
+      }
     })
     
     return map

@@ -106,12 +106,12 @@ class Members(object):
         sql = """
             SELECT DISTINCT
                 CASE
-                    WHEN a.first_name IS NOT NULL then a.first_name
-                    ELSE c.first_name
+                    WHEN a.first_name IS NOT NULL then INITCAP(a.first_name)
+                    ELSE INITCAP(c.first_name)
                 END as first_name,
                 CASE
-                    WHEN a.last_name IS NOT NULL then a.last_name
-                    ELSE c.last_name
+                    WHEN a.last_name IS NOT NULL then INITCAP(a.last_name)
+                    ELSE INITCAP(c.last_name)
                 END as last_name,
                 date_part('year', now()) 
                         - date_part('year', birth_date

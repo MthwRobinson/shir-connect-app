@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Nav, Table, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
@@ -141,7 +140,7 @@ class MemberPage extends Component {
       if(this.state.activeTab==='memberInfo'){
         const member = this.state.member;
         let membershipDate = null;
-        if(this.state.member.membership_date != 'None'){
+        if(this.state.member.membership_date !== 'None'){
           membershipDate = moment(this.state.member.membership_date)
             .format('MM/DD/YY');
         } else {
@@ -204,42 +203,44 @@ class MemberPage extends Component {
     });
 
     map.on('load', function() {
+      let features = []
       for(let i=0; i<events.length; i++){
-        const event = events[i];
+       const event = events[i];
         if(event.latitude&&event.longitude){
-          const feature = {
-            "type": "Feature",
-            "geometry": {
-              "type": "Point",
-              "coordinates": [event.longitude, event.latitude]
-            },
-            "properties": {
-              "title": event.name,
-              "icon": "religious-jewish",
-              "description" : "<strong>Temple Rodef Shalom</strong>"
-            }
-          };
-
-          map.addLayer({
-              "id": "points",
-              "type": "symbol",
-              "source": {
-                "type": "geojson",
-                "data": {
-                    "type": "FeatureCollection",
-                    "features": [feature]
-                  }
+            const feature = {
+              "type": "Feature",
+              "geometry": {
+                "type": "Point",
+                "coordinates": [event.longitude, event.latitude]
               },
-              "layout": {
-                  "icon-image": "{icon}-15",
-                  "text-field": "{title}",
-                  "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-                  "text-offset": [0, 0.6],
-                  "text-anchor": "top"
+              "properties": {
+                "title": event.name,
+                "icon": "religious-jewish",
+                "description" : "<strong>Temple Rodef Shalom</strong>"
               }
-          });
-        }
+            };
+            features.push(feature);
+          }
       }
+
+      map.addLayer({
+          "id": "points",
+          "type": "symbol",
+          "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": features
+              }
+          },
+          "layout": {
+              "icon-image": "{icon}-15",
+              "text-field": "{title}",
+              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+              "text-offset": [0, 0.6],
+              "text-anchor": "top"
+          }
+      });
     })
     
     return map
@@ -247,7 +248,6 @@ class MemberPage extends Component {
 
   render() {
     let memberInfo = this.renderMemberInfo();
-    let heatmap = this.renderHeatmap();
     let body = null;
     let mapArea = null;
     if(this.state.mapLoading===true){

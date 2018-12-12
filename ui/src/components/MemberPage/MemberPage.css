@@ -1,0 +1,21 @@
+.MemberPage {
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-bottom: 30px;
+  text-align: left;
+  font-size: 17px;
+}
+
+.event-list {
+  cursor: pointer;
+}
+
+.member-info {
+  padding-left: 0;
+  list-style: none;
+}
+
+.member-info > li {
+  display: inline;
+  padding-right: 6px;
+}

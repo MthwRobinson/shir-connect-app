@@ -14,7 +14,7 @@ import {
   Table
 } from 'react-bootstrap';
 
-import Loading from './../../../Loading/Loading';
+import Loading from './../Loading/Loading';
 
 import './AgeGroupAttendance.css';
 
@@ -42,8 +42,38 @@ class AgeGroupAttendance extends Component {
   }
 
   componentDidMount(){
-    this.getAttendance(this.state.ageGroup, this.state.groupBy);
-    this.getTopParticipants(this.state.ageGroup, this.state.topCategory);
+    let ageGroup = localStorage.getItem('ageGroup');
+    let groupBy = localStorage.getItem('groupBy');
+    let topCategory = localStorage.getItem('topCategory');
+    if(ageGroup && groupBy && topCategory){
+      this.setState({
+        ageGroup: ageGroup,
+        dropDownAgeGroup: ageGroup,
+        groupBy: groupBy,
+        dropDownGroupBy: groupBy,
+        topCategory: topCategory
+      })
+    } else {
+      ageGroup = this.state.ageGroup;
+      groupBy = this.state.groupBy;
+      topCategory = this.state.topCategory;
+    }
+    this.getAttendance(ageGroup, groupBy);
+    this.getTopParticipants(ageGroup, topCategory);
+  }
+
+  selectMember = (name) => {
+    // Switches to the member page
+    const firstName = name.split(' ')[0];
+    const lastName = name.split(' ')[1];
+    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    this.props.history.push(url);
+  }
+
+  selectEvent = (eventId) => {
+    // Switches to the event page
+    const url = '/event?id='+eventId;
+    this.props.history.push(url);
   }
 
   handleAgeGroup(event) {
@@ -71,6 +101,9 @@ class AgeGroupAttendance extends Component {
       ageGroup: ageGroup,
       groupBy: groupBy
     })
+    localStorage.setItem('ageGroup', ageGroup)
+    localStorage.setItem('groupBy', groupBy)
+    localStorage.setItem('topCategory', this.state.topCategory)
 
     if(newServiceCall){
       this.getAttendance(ageGroup, groupBy);
@@ -146,12 +179,13 @@ class AgeGroupAttendance extends Component {
     if(this.state.topLoading){
       return <Loading />
     } else {
-      let url = ''
+      let selectItem = null
       if(this.state.topCategory==='Events'){
-        url = '/event?id=';
+        selectItem = (item) => this.selectEvent(item.id);
       } else {
-        url = '/members?id=';
+        selectItem = (item) => this.selectMember(item.name);
       }
+
       return(
         <div>
           <Row className='event-table'>
@@ -168,9 +202,7 @@ class AgeGroupAttendance extends Component {
                     <tr 
                       className='table-row' 
                       key={index}
-                      onClick={()=>this.props.history.push(
-                        url + item.id
-                      )}
+                      onClick={()=> selectItem(item)}
                     >
                       <th>{item.name != null
                           ? item.name : '--'}</th>

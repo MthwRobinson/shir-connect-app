@@ -18,10 +18,10 @@
     "link": "/members"
   },
   {
-    "title": "Event Trends",
+    "title": "Age Group Trends",
     "icon" : "fa fa-line-chart",
     "bullets": [
-      "View trends in participation.",
+      "View trends in age group participation.",
       "Export plots to include in presentations."
     ],
     "link": "/trends"

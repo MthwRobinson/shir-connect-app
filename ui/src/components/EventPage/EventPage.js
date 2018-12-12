@@ -27,6 +27,12 @@ class EventPage extends Component {
     this.setState({activeTab: tab});
   }
 
+  selectMember = (firstName, lastName) => {
+    // Switches to the member page
+    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    this.props.history.push(url);
+  }
+
   getEvent = () => {
     this.setState({loading: true});
     const token = localStorage.getItem('trsToken');
@@ -112,7 +118,14 @@ class EventPage extends Component {
               <tbody>
                 {this.state.event.attendees.map((attendee, index) => {
                   return(
-                    <tr className='table-row' key={index}>
+                    <tr 
+                      className='table-row' 
+                      key={index}
+                      onClick={()=>this.selectMember(
+                        attendee.first_name,
+                        attendee.last_name
+                      )}
+                    >
                       <th>{attendee.first_name != null
                       ? attendee.first_name : '--'}</th>
                       <th>{attendee.last_name != null
@@ -242,7 +255,7 @@ class EventPage extends Component {
             <h2>
               {this.state.event.name}
               <i
-                className="fa fa-times pull-right event-icons"
+                className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}
               ></i>
             </h2><hr/>

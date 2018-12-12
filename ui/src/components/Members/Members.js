@@ -42,6 +42,12 @@ class Members extends Component {
       this.getMembers();
     }
 
+    selectMember = (firstName, lastName) => {
+      // Switches to the member page
+      const url = '/member?firstName='+firstName+'&lastName='+lastName;
+      this.props.history.push(url);
+    }
+
     getMembers = (fetchType) => {
       // Pulls members to display in the table
       this.setState({loading: true});
@@ -177,7 +183,14 @@ class Members extends Component {
               <tbody>
                 {this.state.members.map((member, index) => {
                   return(
-                    <tr className='table-row' key={index}>
+                    <tr 
+                      className='table-row' 
+                      key={index}
+                      onClick={()=>this.selectMember(
+                        member.first_name,
+                        member.last_name
+                      )}
+                    >
                       <th>{member.id != null
                           ? member.id : '--'}</th>
                       <th>{member.first_name != null

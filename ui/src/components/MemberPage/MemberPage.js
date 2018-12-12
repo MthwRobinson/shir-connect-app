@@ -5,6 +5,7 @@ import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
 import CalendarHeatmap from 'react-calendar-heatmap';
+import ReactTooltip from 'react-tooltip';
 
 import 'react-calendar-heatmap/dist/styles.css';
 
@@ -117,7 +118,16 @@ class MemberPage extends Component {
                     endDate={endDate}
                     values={values[year]}
                     onClick={(value) => this.selectEvent(value.eventId)}
+
+                    tooltipDataAttrs={value => {
+                      if(value.name){
+                        return {
+                          'data-tip': `Attended ${value.name} on ${value.date}`
+                        };
+                      }
+                    }}
                   />
+                  <ReactTooltip />
                 </div>
               )
             })}
@@ -126,7 +136,7 @@ class MemberPage extends Component {
       }
     }
 
-  renderEventInfo = () => {
+  renderMemberInfo = () => {
     if(this.state.member&&this.state.member.events){
       if(this.state.activeTab==='memberInfo'){
         const member = this.state.member;
@@ -145,15 +155,19 @@ class MemberPage extends Component {
           events = 'None'
         }
 
+      let info = (
+        <ul className='member-info' >
+          <li><b>Age:</b> {member.age != null 
+              ? member.age : 'Not Available'}</li>
+          <li><b>Membership Date: </b> {membershipDate} </li>
+          <li><b>Email: </b> {member.email != null 
+              ? member.email : 'Not Available'}</li>
+        </ul>
+      )
+
       return(
         <div>
-          <ul className='member-info' >
-            <li><b>Age:</b> {member.age != null 
-                ? member.age : 'Not Available'}</li>
-            <li><b>Membership Date: </b> {membershipDate} </li>
-            <li><b>Email: </b> {member.email != null 
-                ? member.email : 'Not Available'}</li>
-          </ul>
+          {info}
           {events}
         </div> 
       )
@@ -232,7 +246,7 @@ class MemberPage extends Component {
   }
 
   render() {
-    let memberInfo = this.renderEventInfo();
+    let memberInfo = this.renderMemberInfo();
     let heatmap = this.renderHeatmap();
     let body = null;
     let mapArea = null;

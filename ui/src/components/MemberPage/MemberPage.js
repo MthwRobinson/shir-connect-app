@@ -18,7 +18,7 @@ class MemberPage extends Component {
     lng: -77.173449,
     lat: 38.906103,
     loading: true,
-    zoom: 13,
+    zoom: 10,
     map: null,
     member: {},
     activeTab: 'memberInfo'
@@ -152,16 +152,16 @@ class MemberPage extends Component {
         if(member.events.length>0){
           events = this.renderHeatmap();
         } else {
-          events = 'None'
+          events = 'Member has not attended any events.'
         }
 
       let info = (
         <ul className='member-info' >
           <li><b>Age:</b> {member.age != null 
-              ? member.age : 'Not Available'}</li>
+              ? member.age : 'N/A'}</li>
           <li><b>Membership Date: </b> {membershipDate} </li>
           <li><b>Email: </b> {member.email != null 
-              ? member.email : 'Not Available'}</li>
+              ? member.email : 'N/A'}</li>
         </ul>
       )
 

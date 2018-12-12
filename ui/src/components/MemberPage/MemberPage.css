@@ -9,3 +9,13 @@
 .event-list {
   cursor: pointer;
 }
+
+.member-info {
+  padding-left: 0;
+  list-style: none;
+}
+
+.member-info > li {
+  display: inline;
+  padding-right: 6px;
+}

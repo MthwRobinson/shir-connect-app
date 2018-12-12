@@ -13,6 +13,7 @@
     "plotly.js": "^1.41.3",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.4",
+    "react-calendar-heatmap": "^1.8.0",
     "react-dom": "^16.4.2",
     "react-fontawesome": "^1.6.1",
     "react-plotly": "^1.0.0",

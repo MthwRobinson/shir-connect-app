@@ -4,6 +4,9 @@ import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
+import CalendarHeatmap from 'react-calendar-heatmap';
+
+import 'react-calendar-heatmap/dist/styles.css';
 
 import './MemberPage.css';
 
@@ -76,6 +79,49 @@ class MemberPage extends Component {
       })
   }
 
+  renderHeatmap = () => {
+      // Renders the calendar heat map
+      const member = this.state.member;
+      if(member&&member.events){
+        
+        let values = {};
+        for(let i=0; i<member.events.length; i++){
+          const event = member.events[i];
+          const year = moment(event.start_datetime).format('YYYY');
+          const start = moment(event.start_datetime).format('YYYY-MM-DD');
+          if(year in values){
+            values[year].push({date: start});
+          } else {
+            values[year] = [{date: start}];
+          }
+        }
+
+        return (
+          <div>
+            <h4><b>Events</b></h4>
+            {Object.keys(values).reverse().map((year, index) => {
+              const startDate = new Date(year + '-01-01');
+              const endDate = moment(startDate)
+                .add(1, 'years')
+                .format('YYYY-MM-DD');
+              console.log(endDate);
+              console.log(startDate);
+              return(
+                <div>
+                  <h4>{year}</h4>
+                  <CalendarHeatmap
+                    startDate={startDate}
+                    endDate={endDate}
+                    values={values[year]}
+                  />
+                </div>
+              )
+            })}
+          </div> 
+        )
+      }
+    }
+
   renderEventInfo = () => {
     if(this.state.member&&this.state.member.events){
       if(this.state.activeTab==='memberInfo'){
@@ -85,87 +131,29 @@ class MemberPage extends Component {
           membershipDate = moment(this.state.member.membership_date)
             .format('MM/DD/YY');
         } else {
-          membershipDate = 'Not Available'
+          membershipDate = 'N/A'
         }
 
         let events = null;
         if(member.events.length>0){
-          events = (
-              <ul>
-                {member.events.map((event, index) => {
-                  const start = moment(event.start_datetime)
-                    .format('MM/DD/YY');
-                  return(
-                    <li
-                      className="event-list"
-                      onClick={()=>this.selectEvent(event.event_id)}
-                    >
-                      <b>{start}:</b> {event.name}
-                    </li>
-                  )
-                })}
-              </ul>
-          )
+          events = this.renderHeatmap();
         } else {
           events = 'None'
         }
 
       return(
         <div>
-          <ul>
+          <ul className='member-info' >
             <li><b>Age:</b> {member.age != null 
                 ? member.age : 'Not Available'}</li>
-            <li>
-              <b>Member:</b> {member.is_member == 'True' ? 'Yes' : 'No' }
-            </li>
             <li><b>Membership Date: </b> {membershipDate} </li>
             <li><b>Email: </b> {member.email != null 
                 ? member.email : 'Not Available'}</li>
-            <li><b>Events: </b> {events}
-            </li>
           </ul>
+          {events}
         </div> 
       )
-      } else {
-        return(
-        <div>
-            <Row className='event-table'>
-              <Table reponsive header hover>
-                <thead>
-                  <tr>
-                    <th className='table-heading'>First Name</th>
-                    <th className='table-heading'>
-                    Last Name
-                    <i className='fa fa-caret-down paging-arrows'></i>
-                    </th>
-                    <th className='table-heading'>E-mail</th>
-                    <th className='table-heading'>Age</th>
-                    <th className='table-heading'>Member</th>
-                  </tr>
-                </thead>
-              <tbody>
-                {this.state.member.attendees.map((attendee, index) => {
-                  return(
-                    <tr className='table-row' key={index}>
-                      <th>{attendee.first_name != null
-                      ? attendee.first_name : '--'}</th>
-                      <th>{attendee.last_name != null
-                      ? attendee.last_name : '--'}</th>
-                      <th>{attendee.email != null
-                      ? attendee.email : '--'}</th>
-                      <th>{attendee.age != null
-                      ? attendee.age : '--'}</th>
-                      <th>{attendee.is_member === true
-                      ? 'Yes' : 'No'}</th>
-                    </tr>
-                  )
-                })}
-              </tbody>
-              </Table>
-            </Row>
-        </div> 
-        )
-      }
+      } 
     } else {
       return(
         <div className='event-loading'>
@@ -241,6 +229,7 @@ class MemberPage extends Component {
 
   render() {
     let memberInfo = this.renderEventInfo();
+    let heatmap = this.renderHeatmap();
     let body = null;
     let mapArea = null;
     if(this.state.mapLoading===true){
@@ -288,28 +277,9 @@ class MemberPage extends Component {
           </div>
           <div className='event-map-container'>
             <div className='event-map-summary-area'>
-              <Nav 
-                bsStyle="tabs"
-                className="record-tabs"
-              >
-                <li
-                  eventKey="memberInfo" 
-                  className={tabStyle['memberInfo']}
-                  onClick={()=>this.switchTab('memberInfo')}
-                >
-                  Member Information
-                </li>
-                <li 
-                  eventKey="attendees" 
-                  className={tabStyle['attendees']}
-                  onClick={()=>this.switchTab('attendees')}
-                >
-                  Attendees
-                </li>
-            </Nav>
               {memberInfo}
             </div>
-              {mapArea}
+            {mapArea}
           </div>
         </div>
       )

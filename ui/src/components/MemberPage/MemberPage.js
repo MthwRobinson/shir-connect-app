@@ -89,10 +89,15 @@ class MemberPage extends Component {
           const event = member.events[i];
           const year = moment(event.start_datetime).format('YYYY');
           const start = moment(event.start_datetime).format('YYYY-MM-DD');
+          const value = {
+            date: start,
+            eventId: event.event_id,
+            name: event.name
+          }
           if(year in values){
-            values[year].push({date: start});
+            values[year].push(value);
           } else {
-            values[year] = [{date: start}];
+            values[year] = [value];
           }
         }
 
@@ -104,8 +109,6 @@ class MemberPage extends Component {
               const endDate = moment(startDate)
                 .add(1, 'years')
                 .format('YYYY-MM-DD');
-              console.log(endDate);
-              console.log(startDate);
               return(
                 <div>
                   <h4>{year}</h4>
@@ -113,6 +116,7 @@ class MemberPage extends Component {
                     startDate={startDate}
                     endDate={endDate}
                     values={values[year]}
+                    onClick={(value) => this.selectEvent(value.eventId)}
                   />
                 </div>
               )

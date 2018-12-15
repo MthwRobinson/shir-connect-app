@@ -10,7 +10,7 @@ class Loading extends Component {
         <div className="Loading">
           <img
             className="loading-start"
-            src="./Star_of_David_Blue.svg"
+            src="./shirconnect_logo_blue.svg"
             height="40px"
             alt=""
             id="loading"

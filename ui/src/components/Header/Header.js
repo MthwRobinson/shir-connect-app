@@ -17,11 +17,11 @@ class Header extends Component {
                   className='pull-left'>
                     <img
                       className="header-star"
-                      src="./Star_of_David.svg"
+                      src="./shirconnect_logo_white.svg"
                       height="40px"
                       alt=""
                     />
-                    <b>Shir Connect | TRS</b>
+                    <b>Shir Connect</b>
                 </a>
               </Navbar.Brand>
             </Navbar.Header>

@@ -36,7 +36,7 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      this.getEvents();
+      this.getEvents('initial');
     }
 
     downloadCSV = () => {
@@ -70,18 +70,47 @@ class Events extends Component {
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token)
       let url = '/service/events?limit='+LIMIT;
+
+      // Load settings from session storage
+      const eventPage = sessionStorage.getItem('eventPage');
+      const eventPages = sessionStorage.getItem('eventPages');
+      const eventQuery = sessionStorage.getItem('eventQuery');
+      const eventCount = sessionStorage.getItem('eventCount');
+      let settingsLoaded = false
+      if(eventPage&&eventPages&&eventQuery&&eventCount){
+        settingsLoaded = true
+      }
+
+      // Determine the correct page to load
       if(fetchType==='search'){
-        url += '&page=1'
+        url += '&page=1';
       } else if(fetchType==='up'){
         url += '&page='+(this.state.page+1); 
       } else if(fetchType==='down') {
         url += '&page='+(this.state.page-1); 
+      } else if(fetchType==='initial'&&settingsLoaded){
+        url += '&page='+eventPage;
+        this.setState({ 
+          page: parseInt(eventPage, 10),
+          pages: parseInt(eventPages, 10),
+          count: parseInt(eventCount, 10),
+          query: eventQuery
+        });
       } else {
         url += '&page='+this.state.page;
       }
-      if(this.state.query.trim().length>0){
-        url += '&q='+this.state.query;
+
+      // Parse the event query
+      if(fetchType==='initial'&&settingsLoaded){
+        if(eventQuery.trim().length>0){
+          url += '&q='+eventQuery;
+        }
+      } else {
+        if(this.state.query.trim().length>0){
+          url += '&q='+this.state.query;
+        }
       }
+      
       axios.get(url, { headers: { Authorization: auth }})
         .then(res => {
           let events = [];
@@ -93,11 +122,19 @@ class Events extends Component {
             event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
+          const pages = parseInt(res.data.pages, 10);
+          const count = parseInt(res.data.count, 10);
+
+          // Save settings in session storage and update state
+          sessionStorage.setItem('eventPages', pages);
+          sessionStorage.setItem('eventPage', this.state.page);
+          sessionStorage.setItem('eventQuery', this.state.query);
+          sessionStorage.setItem('eventCount', count);
 
           this.setState({
             events: events,
             count: parseInt(res.data.count, 10),
-            pages: parseInt(res.data.pages, 10),
+            pages: pages,
             loading: false
           });
         })
@@ -162,6 +199,7 @@ class Events extends Component {
         );
       }
 
+
       return(
         <div className='paging pull-left'>
             {leftCaret}
@@ -185,7 +223,6 @@ class Events extends Component {
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
                   <th className='table-heading'>End</th>
-                  <th className='table-heading'>Fees</th>
                   <th className='table-heading'>Attendees</th>
                 </tr>
               </thead>
@@ -201,7 +238,6 @@ class Events extends Component {
                       <th>{event.name}</th>
                       <th>{event.start}</th>
                       <th>{event.end}</th>
-                      <th>${event.total_fees != null ? event.total_fees.toFixed(2) : 0.00}</th>
                       <th>{event.attendee_count}</th>
                     </tr>
                   )

@@ -289,6 +289,10 @@ class MemberPage extends Component {
             <h2>
               {this.state.member.name}
               <i
+                className="fa fa-home pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
+              <i
                 className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}
               ></i>

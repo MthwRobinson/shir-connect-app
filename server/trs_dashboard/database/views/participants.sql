@@ -52,6 +52,6 @@ SELECT DISTINCT
     ON (x.first_name=y.first_name AND x.last_name=y.last_name
     AND x.last_event_date=y.last_event_date)
   ) e
-  ON (LOWER(a.first_name) = LOWER(b.first_name)
-  AND LOWER(e.last_name) = LOWER(e.last_name))                 
+  ON (LOWER(a.first_name) = LOWER(e.first_name)
+  AND LOWER(a.last_name) = LOWER(e.last_name))                 
 WITH DATA

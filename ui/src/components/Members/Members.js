@@ -9,6 +9,7 @@ import {
   Table
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 import moment from 'moment';
 import axios from 'axios';
 
@@ -125,7 +126,6 @@ class Members extends Component {
             pages: pages,
             loading: false
           });
-          console.log(this.state.members);
       })
       .catch(err => {
         if(err.response.status===401){
@@ -408,7 +408,9 @@ class Members extends Component {
                 <Button 
                   className='search-button'
                   type="submit"
+                  data-tip="Returns search results for last name."
                 >Search</Button>
+                <ReactToolTip />
               </Form>
             </div>
           </div>

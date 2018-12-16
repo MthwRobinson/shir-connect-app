@@ -9,6 +9,7 @@ import {
   Table
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
@@ -295,8 +296,10 @@ class Events extends Component {
                 <Button 
                   className='search-button'
                   type="submit"
+                  data-tip="Returns searchs fesults for the event name."
                 >Search</Button>
               </Form>
+              <ReactToolTip />
             </div>
           </div>
             {table}

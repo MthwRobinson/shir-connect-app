@@ -31,7 +31,7 @@
     "icon" : "fa fa-globe",
     "bullets": [
       "View a map that shows where events take place.",
-      "Export maps to inclupe in presentations."
+      "Export maps to include in presentations."
     ],
     "link": "/map"
   }

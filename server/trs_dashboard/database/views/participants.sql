@@ -16,7 +16,10 @@ SELECT DISTINCT
     END AS is_member,
     e.last_event_date,
     e.event_name,
-    e.events_attended
+    CASE
+      WHEN e.events_attended IS NOT NULL THEN e.events_attended
+      ELSE 0
+    END AS events_attended
   FROM {schema}.attendees a
   FULL JOIN {schema}.members b
   ON (LOWER(a.first_name) = LOWER(b.first_name)

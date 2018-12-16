@@ -55,6 +55,7 @@ class Members extends Component {
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token);
       let url = '/service/members?limit='+LIMIT;
+      url += '&sort=events_attended&order=DESC';
 
       // Load settings from session storage
       const memberPage = sessionStorage.getItem('memberPage');
@@ -101,13 +102,9 @@ class Members extends Component {
           let members = [];
           for(var i=0; i<res.data.results.length; i++){
             let member = res.data.results[i];
-            if(member.birth_date){
-              var birthday = moment(member.birth_date);
-              member.birth_date = birthday.format('MM/DD/YY');
-            }
-            if(member.membership_date){
-              var membership_date = moment(member.membership_date);
-              member.membership_date = membership_date.format('MM/DD/YY');
+            if(member.last_event_date){
+              var last_event_date = moment(member.last_event_date);
+              member.last_event_date = last_event_date.format('MM/DD/YY');
             }
             members.push(member);
           }
@@ -205,16 +202,14 @@ class Members extends Component {
             <Table responsive header hover>
               <thead>
                 <tr>
-                  <th className='table-heading'>Mem. Id</th>
                   <th className='table-heading'>First Name</th>
+                  <th className='table-heading'>Last Name</th>
                   <th className='table-heading'>
-                    Last Name
+                    Events
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
-                  <th className='table-heading'>DOB</th>
-                  <th className='table-heading'>Mem. Date</th>
-                  <th className='table-heading'>Mem. Type</th>
-                  <th className='table-heading'>Notes</th>
+                  <th className='table-heading'>Most Recent</th>
+                  <th className='table-heading'>Event Name</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,20 +223,16 @@ class Members extends Component {
                         member.last_name
                       )}
                     >
-                      <th>{member.id != null
-                          ? member.id : '--'}</th>
                       <th>{member.first_name != null
                           ? member.first_name : '--'}</th>
                       <th>{member.last_name != null
                           ? member.last_name : '--'}</th>
-                      <th>{member.birth_date != null 
-                          ? member.birth_date : '--'}</th>
-                      <th>{member.membership_date != null 
-                          ? member.membership_date : '--'}</th>
-                      <th>{member.member_type != null
-                          ? member.member_type : '--'}</th>
-                      <th>{member.member_religion != null
-                          ? member.member_religion : 'None'}</th>
+                      <th>{member.events_attended != null
+                          ? member.events_attended : 0}</th>
+                      <th>{member.last_event_date != null
+                          ? member.last_event_date : 'None'}</th>
+                      <th>{member.event_name != null
+                          ? member.event_name : 'None'}</th>
                     </tr>
                   )
                 })}
@@ -384,7 +375,7 @@ class Members extends Component {
         <div className="Members">
           <div className='events-header'>
             <h2>
-              Members ({this.state.count})
+              Participants ({this.state.count})
               <i className="fa fa-times pull-right event-icons"
                  onClick={()=>this.props.history.push('/')}
               ></i>

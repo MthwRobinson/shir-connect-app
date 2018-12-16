@@ -84,7 +84,7 @@ class EventPage extends Component {
       }
 
       return(
-        <div>
+        <div className='event-table'>
           <ul>
             <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
             <li><b>Time: </b> 
@@ -112,7 +112,6 @@ class EventPage extends Component {
                     </th>
                     <th className='table-heading'>E-mail</th>
                     <th className='table-heading'>Age</th>
-                    <th className='table-heading'>Member</th>
                   </tr>
                 </thead>
               <tbody>
@@ -133,9 +132,7 @@ class EventPage extends Component {
                       <th>{attendee.email != null
                       ? attendee.email : '--'}</th>
                       <th>{attendee.age != null
-                      ? attendee.age : '--'}</th>
-                      <th>{attendee.is_member === true
-                      ? 'Yes' : 'No'}</th>
+                      ? attendee.age : ''}</th>
                     </tr>
                   )
                 })}
@@ -254,6 +251,10 @@ class EventPage extends Component {
           <div className='events-header'>
             <h2>
               {this.state.event.name}
+              <i
+                className="fa fa-home pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
               <i
                 className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}

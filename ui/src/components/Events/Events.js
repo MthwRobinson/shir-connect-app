@@ -133,7 +133,7 @@ class Events extends Component {
 
           this.setState({
             events: events,
-            count: parseInt(res.data.count, 10),
+            count: count,
             pages: pages,
             loading: false
           });

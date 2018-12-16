@@ -39,7 +39,7 @@ class Members extends Component {
     }
 
     componentDidMount(){
-      this.getMembers();
+      this.getMembers('initial');
     }
 
     selectMember = (firstName, lastName) => {
@@ -54,18 +54,47 @@ class Members extends Component {
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token);
       let url = '/service/members?limit='+LIMIT;
+
+      // Load settings from session storage
+      const memberPage = sessionStorage.getItem('memberPage');
+      const memberPages = sessionStorage.getItem('memberPages');
+      const memberQuery = sessionStorage.getItem('memberQuery');
+      const memberCount = sessionStorage.getItem('memberCount');
+      let settingsLoaded = false;
+      if(memberPage&&memberPages&&memberCount){
+          settingsLoaded = true
+      }
+      
+      // Determine the correct page to load
       if(fetchType==='search'){
         url += '&page=1';
       } else if (fetchType==='up'){
         url += '&page='+(this.state.page+1);
       } else if (fetchType==='down'){
         url += '&page='+(this.state.page-1);
+      } else if (fetchType==='initial'&&settingsLoaded){
+        url += '&page='+memberPage;
+        this.setState({
+          page: parseInt(memberPage, 10),
+          pages: parseInt(memberPages, 10),
+          count: parseInt(memberCount, 10),
+          query: memberQuery
+        })
       } else {
         url += '&page='+this.state.page;
       }
-      if(this.state.query.trim().length>0){
-        url += '&q='+this.state.query;
+
+      // Parse the member query
+      if(fetchType==='initial'&&settingsLoaded&&memberQuery){
+        if(memberQuery.trim().length>0){
+          url += '&q='+memberQuery;
+        }
+      } else {
+        if(this.state.query.trim().length>0){
+          url += '&q='+this.state.query;
+        }
       }
+
       axios.get(url, {headers: {Authorization: auth}})
         .then(res => {
           let members = [];
@@ -81,11 +110,19 @@ class Members extends Component {
             }
             members.push(member);
           }
-          
+          const pages = parseInt(res.data.pages, 10);
+          const count = parseInt(res.data.count, 10);
+
+          // Save settings in session storage and update state
+          sessionStorage.setItem('memberPages', pages);
+          sessionStorage.setItem('memberPage', this.state.page);
+          sessionStorage.setItem('memberQuery', this.state.query);
+          sessionStorage.setItem('memberCount', count);
+
           this.setState({
             members: members,
-            count: parseInt(res.data.count, 10),
-            pages: parseInt(res.data.pages, 10),
+            count: count,
+            pages: pages,
             loading: false
           });
           console.log(this.state.members);

@@ -92,8 +92,12 @@ class EventPage extends Component {
               {end.format('MM/DD/YY, h:MM a')}
             </li>
             <li><b>Registered:</b> {event.attendee_count}/{event.capacity} </li>
-            <li><b>Venue:</b> {event.venue_name}</li>
-            <li><b>Location:</b> {address}</li>
+            <li><b>Venue:</b> {event.venue_name != null
+                ? event.venue_name : 'Temple Rodef Shalom'}
+            </li>
+            <li><b>Location:</b> {address.length>0
+                ? address : '2100 Westmoreland St, Falls Church, VA, 22043'}
+            </li>
             <li><b>Description:</b> {event.description}</li>
           </ul>
         </div> 

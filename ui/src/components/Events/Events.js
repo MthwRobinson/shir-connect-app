@@ -77,7 +77,7 @@ class Events extends Component {
       const eventQuery = sessionStorage.getItem('eventQuery');
       const eventCount = sessionStorage.getItem('eventCount');
       let settingsLoaded = false
-      if(eventPage&&eventPages&&eventQuery&&eventCount){
+      if(eventPage&&eventPages&&eventCount){
         settingsLoaded = true
       }
 
@@ -101,7 +101,7 @@ class Events extends Component {
       }
 
       // Parse the event query
-      if(fetchType==='initial'&&settingsLoaded){
+      if(fetchType==='initial'&&settingsLoaded&&eventQuery){
         if(eventQuery.trim().length>0){
           url += '&q='+eventQuery;
         }
@@ -239,7 +239,8 @@ class Events extends Component {
                       <th>{event.start}</th>
                       <th>{event.venue_name !== null 
                           ? event.venue_name : 'Temple Rodef Shalom'}</th>
-                      <th>{event.attendee_count}</th>
+                      <th>{event.attendee_count != null 
+                          ? event.attendee_count : 0}</th>
                     </tr>
                   )
                 })}

@@ -26,7 +26,7 @@ def test_members():
     jwt = response.json['jwt']
     
     url = '/service/members?limit=25&page=2'
-    url += '&sort=membership_date&order=desc'
+    url += '&sort=last_event_date&order=desc'
     url += '&q=smuckler'
     response = CLIENT.get(url)
     assert response.status_code == 401

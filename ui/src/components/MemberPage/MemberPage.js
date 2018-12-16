@@ -111,7 +111,7 @@ class MemberPage extends Component {
                 .add(1, 'years')
                 .format('YYYY-MM-DD');
               return(
-                <div>
+                <div className='event-table'>
                   <h4>{year}</h4>
                   <CalendarHeatmap
                     startDate={startDate}

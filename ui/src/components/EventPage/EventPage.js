@@ -83,6 +83,11 @@ class EventPage extends Component {
         }
       }
 
+      let attendeeCount = 0;
+      if(event.attendee_count > 0){
+        attendeeCount = event.attendee_count;
+      }
+
       return(
         <div className='event-table'>
           <ul>
@@ -91,12 +96,12 @@ class EventPage extends Component {
               {start.format('MM/DD/YY, h:MM a')}-
               {end.format('MM/DD/YY, h:MM a')}
             </li>
-            <li><b>Registered:</b> {event.attendee_count}/{event.capacity} </li>
+            <li><b>Registered:</b> {attendeeCount}/{event.capacity} </li>
             <li><b>Venue:</b> {event.venue_name != null
                 ? event.venue_name : 'Temple Rodef Shalom'}
             </li>
             <li><b>Location:</b> {address.length>0
-                ? address : '2100 Westmoreland St, Falls Church, VA, 22043'}
+                ? address : 'Not Available'}
             </li>
             <li><b>Description:</b> {event.description}</li>
           </ul>

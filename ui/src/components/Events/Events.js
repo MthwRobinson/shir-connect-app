@@ -222,7 +222,7 @@ class Events extends Component {
                     Start
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
-                  <th className='table-heading'>End</th>
+                  <th className='table-heading'>Venue</th>
                   <th className='table-heading'>Attendees</th>
                 </tr>
               </thead>
@@ -237,7 +237,8 @@ class Events extends Component {
                     >
                       <th>{event.name}</th>
                       <th>{event.start}</th>
-                      <th>{event.end}</th>
+                      <th>{event.venue_name !== null 
+                          ? event.venue_name : 'Temple Rodef Shalom'}</th>
                       <th>{event.attendee_count}</th>
                     </tr>
                   )

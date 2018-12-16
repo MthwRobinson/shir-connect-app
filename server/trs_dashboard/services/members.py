@@ -211,7 +211,7 @@ class Members(object):
             query = None
 
         df = self.database.read_table(
-            'members_view',
+            'participants',
             limit=limit,
             page=page,
             order=order,

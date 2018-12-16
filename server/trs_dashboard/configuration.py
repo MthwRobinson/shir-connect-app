@@ -18,6 +18,7 @@ PG_SCHEMA = 'trs_dashboard'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',
     'members_view.sql',
+    'participants.sql',
     'shape_colors.sql'
 ]
 

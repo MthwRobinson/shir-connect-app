@@ -83,17 +83,26 @@ class EventPage extends Component {
         }
       }
 
+      let attendeeCount = 0;
+      if(event.attendee_count > 0){
+        attendeeCount = event.attendee_count;
+      }
+
       return(
-        <div>
+        <div className='event-table'>
           <ul>
             <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
             <li><b>Time: </b> 
               {start.format('MM/DD/YY, h:MM a')}-
               {end.format('MM/DD/YY, h:MM a')}
             </li>
-            <li><b>Registered:</b> {event.attendee_count}/{event.capacity} </li>
-            <li><b>Venue:</b> {event.venue_name}</li>
-            <li><b>Location:</b> {address}</li>
+            <li><b>Registered:</b> {attendeeCount}/{event.capacity} </li>
+            <li><b>Venue:</b> {event.venue_name != null
+                ? event.venue_name : 'Temple Rodef Shalom'}
+            </li>
+            <li><b>Location:</b> {address.length>0
+                ? address : 'Not Available'}
+            </li>
             <li><b>Description:</b> {event.description}</li>
           </ul>
         </div> 
@@ -112,7 +121,6 @@ class EventPage extends Component {
                     </th>
                     <th className='table-heading'>E-mail</th>
                     <th className='table-heading'>Age</th>
-                    <th className='table-heading'>Member</th>
                   </tr>
                 </thead>
               <tbody>
@@ -133,9 +141,7 @@ class EventPage extends Component {
                       <th>{attendee.email != null
                       ? attendee.email : '--'}</th>
                       <th>{attendee.age != null
-                      ? attendee.age : '--'}</th>
-                      <th>{attendee.is_member === true
-                      ? 'Yes' : 'No'}</th>
+                      ? attendee.age : ''}</th>
                     </tr>
                   )
                 })}
@@ -254,6 +260,10 @@ class EventPage extends Component {
           <div className='events-header'>
             <h2>
               {this.state.event.name}
+              <i
+                className="fa fa-home pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
               <i
                 className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}

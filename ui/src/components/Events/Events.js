@@ -9,6 +9,7 @@ import {
   Table
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
@@ -36,7 +37,7 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      this.getEvents();
+      this.getEvents('initial');
     }
 
     downloadCSV = () => {
@@ -70,18 +71,47 @@ class Events extends Component {
       const token = localStorage.getItem('trsToken');
       const auth = 'Bearer '.concat(token)
       let url = '/service/events?limit='+LIMIT;
+
+      // Load settings from session storage
+      const eventPage = sessionStorage.getItem('eventPage');
+      const eventPages = sessionStorage.getItem('eventPages');
+      const eventQuery = sessionStorage.getItem('eventQuery');
+      const eventCount = sessionStorage.getItem('eventCount');
+      let settingsLoaded = false
+      if(eventPage&&eventPages&&eventCount){
+        settingsLoaded = true
+      }
+
+      // Determine the correct page to load
       if(fetchType==='search'){
-        url += '&page=1'
+        url += '&page=1';
       } else if(fetchType==='up'){
         url += '&page='+(this.state.page+1); 
       } else if(fetchType==='down') {
         url += '&page='+(this.state.page-1); 
+      } else if(fetchType==='initial'&&settingsLoaded){
+        url += '&page='+eventPage;
+        this.setState({ 
+          page: parseInt(eventPage, 10),
+          pages: parseInt(eventPages, 10),
+          count: parseInt(eventCount, 10),
+          query: eventQuery
+        });
       } else {
         url += '&page='+this.state.page;
       }
-      if(this.state.query.trim().length>0){
-        url += '&q='+this.state.query;
+
+      // Parse the event query
+      if(fetchType==='initial'&&settingsLoaded&&eventQuery){
+        if(eventQuery.trim().length>0){
+          url += '&q='+eventQuery;
+        }
+      } else {
+        if(this.state.query.trim().length>0){
+          url += '&q='+this.state.query;
+        }
       }
+      
       axios.get(url, { headers: { Authorization: auth }})
         .then(res => {
           let events = [];
@@ -93,11 +123,19 @@ class Events extends Component {
             event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
+          const pages = parseInt(res.data.pages, 10);
+          const count = parseInt(res.data.count, 10);
+
+          // Save settings in session storage and update state
+          sessionStorage.setItem('eventPages', pages);
+          sessionStorage.setItem('eventPage', this.state.page);
+          sessionStorage.setItem('eventQuery', this.state.query);
+          sessionStorage.setItem('eventCount', count);
 
           this.setState({
             events: events,
-            count: parseInt(res.data.count, 10),
-            pages: parseInt(res.data.pages, 10),
+            count: count,
+            pages: pages,
             loading: false
           });
         })
@@ -162,6 +200,7 @@ class Events extends Component {
         );
       }
 
+
       return(
         <div className='paging pull-left'>
             {leftCaret}
@@ -184,8 +223,7 @@ class Events extends Component {
                     Start
                     <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
-                  <th className='table-heading'>End</th>
-                  <th className='table-heading'>Fees</th>
+                  <th className='table-heading'>Venue</th>
                   <th className='table-heading'>Attendees</th>
                 </tr>
               </thead>
@@ -200,9 +238,10 @@ class Events extends Component {
                     >
                       <th>{event.name}</th>
                       <th>{event.start}</th>
-                      <th>{event.end}</th>
-                      <th>${event.total_fees != null ? event.total_fees.toFixed(2) : 0.00}</th>
-                      <th>{event.attendee_count}</th>
+                      <th>{event.venue_name !== null 
+                          ? event.venue_name : 'Temple Rodef Shalom'}</th>
+                      <th>{event.attendee_count != null 
+                          ? event.attendee_count : 0}</th>
                     </tr>
                   )
                 })}
@@ -257,8 +296,10 @@ class Events extends Component {
                 <Button 
                   className='search-button'
                   type="submit"
+                  data-tip="Returns searchs fesults for the event name."
                 >Search</Button>
               </Form>
+              <ReactToolTip />
             </div>
           </div>
             {table}

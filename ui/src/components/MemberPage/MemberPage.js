@@ -105,7 +105,8 @@ class MemberPage extends Component {
           <div>
             <h4><b>Events</b></h4>
             {Object.keys(values).reverse().map((year, index) => {
-              const startDate = new Date(year + '-01-01');
+              const startDate = moment(new Date(year + '-01-01'))
+                .add(-1, 'days');
               const endDate = moment(startDate)
                 .add(1, 'years')
                 .format('YYYY-MM-DD');
@@ -143,8 +144,6 @@ class MemberPage extends Component {
         if(this.state.member.membership_date !== 'None'){
           membershipDate = moment(this.state.member.membership_date)
             .format('MM/DD/YY');
-        } else {
-          membershipDate = 'N/A'
         }
 
         let events = null;
@@ -154,13 +153,23 @@ class MemberPage extends Component {
           events = 'Member has not attended any events.'
         }
 
+      let age = null;
+      if(member.age){
+        age = <li><b>Age:</b> {member.age}</li>
+      }
+      let joinedDate = null;
+      if(membershipDate){
+        joinedDate = <li><b>Membership Date:</b> {membershipDate}</li>
+      }
+      let memberEmail = null;
+      if(member.email){
+        memberEmail = <li><b>Email: </b> {member.email}</li>
+      }
       let info = (
         <ul className='member-info' >
-          <li><b>Age:</b> {member.age != null 
-              ? member.age : 'N/A'}</li>
-          <li><b>Membership Date: </b> {membershipDate} </li>
-          <li><b>Email: </b> {member.email != null 
-              ? member.email : 'N/A'}</li>
+          {age}
+          {joinedDate}
+          {memberEmail}
         </ul>
       )
 
@@ -287,6 +296,10 @@ class MemberPage extends Component {
           <div className='events-header'>
             <h2>
               {this.state.member.name}
+              <i
+                className="fa fa-home pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
               <i
                 className="fa fa-chevron-left pull-right event-icons"
                 onClick={()=>this.props.history.goBack()}

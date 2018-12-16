@@ -9,10 +9,10 @@
     "link": "/events"
   },
   {
-    "title": "Members",
+    "title": "Participants",
     "icon" : "fa fa-user",
     "bullets": [
-      "View and sort members.",
+      "View and sort participants.",
       "Upload an Excel file with membership data into the database."
     ],
     "link": "/members"

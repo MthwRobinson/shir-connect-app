@@ -105,7 +105,8 @@ class MemberPage extends Component {
           <div>
             <h4><b>Events</b></h4>
             {Object.keys(values).reverse().map((year, index) => {
-              const startDate = new Date(year + '-01-01');
+              const startDate = moment(new Date(year + '-01-01'))
+                .add(-1, 'days');
               const endDate = moment(startDate)
                 .add(1, 'years')
                 .format('YYYY-MM-DD');

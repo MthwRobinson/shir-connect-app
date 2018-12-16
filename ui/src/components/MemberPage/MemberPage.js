@@ -144,8 +144,6 @@ class MemberPage extends Component {
         if(this.state.member.membership_date !== 'None'){
           membershipDate = moment(this.state.member.membership_date)
             .format('MM/DD/YY');
-        } else {
-          membershipDate = 'N/A'
         }
 
         let events = null;
@@ -155,13 +153,23 @@ class MemberPage extends Component {
           events = 'Member has not attended any events.'
         }
 
+      let age = null;
+      if(member.age){
+        age = <li><b>Age:</b> {member.age}</li>
+      }
+      let joinedDate = null;
+      if(membershipDate){
+        joinedDate = <li><b>Membership Date:</b> {membershipDate}</li>
+      }
+      let memberEmail = null;
+      if(member.email){
+        memberEmail = <li><b>Email: </b> {member.email}</li>
+      }
       let info = (
         <ul className='member-info' >
-          <li><b>Age:</b> {member.age != null 
-              ? member.age : 'N/A'}</li>
-          <li><b>Membership Date: </b> {membershipDate} </li>
-          <li><b>Email: </b> {member.email != null 
-              ? member.email : 'N/A'}</li>
+          {age}
+          {joinedDate}
+          {memberEmail}
         </ul>
       )
 

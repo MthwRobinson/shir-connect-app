@@ -218,7 +218,7 @@ class Members(object):
             sort=sort,
             query=query
         )
-        count = self.database.count_rows('members_view', query=query)
+        count = self.database.count_rows('participants', query=query)
 
         pages = int((count/limit)) + 1
         members = self.database.to_json(df)

@@ -1,2 +1,26 @@
 .App {
 }
+
+.menu-content {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: black;
+}
+
+.menu-content > hr {
+  border-color: black;
+}
+
+.menu-content > h3 {
+  line-height: 20%;
+}
+
+.menu-content > a {
+  color: black;
+  font-size: 20px;
+  line-height: 180%;
+}
+
+.menu-content > a:hover {
+  color: #666666;
+  text-decoration: none;
+}

@@ -26,6 +26,7 @@ class Home extends Component {
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
+      console.log(this.state.name);
       const token = localStorage.getItem('trsToken');
       if(!token){
         this.navigate('/login');

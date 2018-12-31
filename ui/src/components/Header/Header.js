@@ -20,6 +20,7 @@ class Header extends Component {
                       src="./shirconnect_logo_white.svg"
                       height="40px"
                       alt=""
+                      onClick={this.props.toggleMenu}
                     />
                     <b>Shir Connect</b>
                 </a>

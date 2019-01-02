@@ -14,6 +14,7 @@ import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
 
+import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './Events.css';
@@ -267,42 +268,45 @@ class Events extends Component {
       let pageCount = this.renderPageCount();
 
       return (
-        <div className="Events">
-          <div className='events-header'>
-            <h2>
-              Events ({this.state.count})
-              <i 
-                className="fa fa-times pull-right event-icons"
-                onClick={()=>this.props.history.push('/')}
-              >
-              </i>
-              <i 
-                className="fa fa-download pull-right event-icons"
-                onClick={()=>this.downloadCSV()}
-              ></i>
-            </h2><hr/>
-          </div>
-          <div className='event-header'>
-            {pageCount}
-            <div className='pull-right'>
-              <Form onSubmit={this.handleSubmit} inline>
-                <FormGroup>
-                  <FormControl 
-                    value={this.state.query}
-                    onChange={this.handleQuery}
-                    type="text" 
-                  />
-                </FormGroup>
-                <Button 
-                  className='search-button'
-                  type="submit"
-                  data-tip="Returns searchs fesults for the event name."
-                >Search</Button>
-              </Form>
-              <ReactToolTip />
+        <div>
+          <Header />
+          <div className="Events">
+            <div className='events-header'>
+              <h2>
+                Events ({this.state.count})
+                <i 
+                  className="fa fa-times pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                >
+                </i>
+                <i 
+                  className="fa fa-download pull-right event-icons"
+                  onClick={()=>this.downloadCSV()}
+                ></i>
+              </h2><hr/>
             </div>
+            <div className='event-header'>
+              {pageCount}
+              <div className='pull-right'>
+                <Form onSubmit={this.handleSubmit} inline>
+                  <FormGroup>
+                    <FormControl 
+                      value={this.state.query}
+                      onChange={this.handleQuery}
+                      type="text" 
+                    />
+                  </FormGroup>
+                  <Button 
+                    className='search-button'
+                    type="submit"
+                    data-tip="Returns searchs fesults for the event name."
+                  >Search</Button>
+                </Form>
+                <ReactToolTip />
+              </div>
+            </div>
+              {table}
           </div>
-            {table}
         </div>
       );
     }

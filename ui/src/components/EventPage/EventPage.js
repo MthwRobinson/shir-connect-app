@@ -7,6 +7,7 @@ import moment from 'moment';
 
 import './EventPage.css';
 
+import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 class EventPage extends Component {
@@ -299,7 +300,10 @@ class EventPage extends Component {
       )
     }
     return (
-      body
+      <div>
+        <Header />
+        {body}
+      </div>
     );
   }
 }

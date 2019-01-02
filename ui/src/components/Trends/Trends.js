@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
 import AgeGroupAttendance from './../AgeGroupAttendance/AgeGroupAttendance';
+import Header from './../Header/Header';
 
 import './Trends.css';
 
@@ -34,16 +35,19 @@ class Trends extends Component {
 
     render() {
       return (
-        <div className="Trends">
-          <div className='events-header'>
-            <h2>Age Group Trends
-              <i
-                className="fa fa-times pull-right event-icons"
-                onClick={()=>this.props.history.push('/')}
-              />
-            </h2><hr/>
+        <div>
+          <Header />
+          <div className="Trends">
+            <div className='events-header'>
+              <h2>Age Group Trends
+                <i
+                  className="fa fa-times pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                />
+              </h2><hr/>
+            </div>
+            <AgeGroupAttendance />
           </div>
-          <AgeGroupAttendance />
         </div>
       );
     }

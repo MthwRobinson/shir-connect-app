@@ -14,7 +14,6 @@ import 'react-sliding-pane/dist/react-sliding-pane.css';
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
 import EventPage from './components/EventPage/EventPage';
-import Header from './components/Header/Header';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
 import Members from './components/Members/Members';

@@ -1,7 +1,7 @@
 // Header component for the app
 // The header is persistent in all views
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { Navbar } from 'react-bootstrap';
 import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
@@ -27,21 +27,25 @@ class Header extends Component {
   renderMenu = () => {
     // Builds the popout menu.
     // Menu is expanded is paneOpen is true
-    return (
-      <div ref={ref => this.el = ref}>
-        <SlidingPane
-          width='20%'
-          isOpen={ this.state.paneOpen }
-          from='left'
-          onRequestClose={this.toggleMenu}
-        >
-          <div className="menu-content">
-            <h3>Admin</h3><hr/>
-            <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link>
-          </div>
-        </SlidingPane>
-      </div>
+    if(this.props.history.location.pathname==='/login'){
+      return null
+    } else {
+      return (
+        <div ref={ref => this.el = ref}>
+          <SlidingPane
+            width='20%'
+            isOpen={ this.state.paneOpen }
+            from='left'
+            onRequestClose={this.toggleMenu}
+          >
+            <div className="menu-content">
+              <h3>Admin</h3><hr/>
+              <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link>
+            </div>
+          </SlidingPane>
+        </div>
       );
+    }
   }
 
   toggleMenu = (event) => {
@@ -55,6 +59,11 @@ class Header extends Component {
     // Logs out and redirects to the sign-in page
     clearToken();
     this.setState({paneOpen: false})
+  }
+
+  navigateHome = (event) => {
+    event.preventDefault();
+    this.props.history.push('/');
   }
   
   render() {
@@ -75,7 +84,7 @@ class Header extends Component {
                       alt=""
                       onClick={this.toggleMenu}
                     />
-                    <b>Shir Connect</b>
+                    <b onClick={this.navigateHome}>Shir Connect</b>
                 </a>
               </Navbar.Brand>
             </Navbar.Header>
@@ -85,4 +94,4 @@ class Header extends Component {
     }
 }
 
-export default Header;
+export default withRouter(Header);

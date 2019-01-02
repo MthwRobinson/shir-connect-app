@@ -50,8 +50,11 @@ class Home extends Component {
     render() {
       if(this.state.loading){
         return(
-          <div className="event-loading">
-            <Loading />
+          <div>
+            <Header />
+            <div className="event-loading">
+              <Loading />
+            </div>
           </div>
         )
       } else {

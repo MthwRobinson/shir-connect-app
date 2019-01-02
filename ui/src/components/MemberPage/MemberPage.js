@@ -294,7 +294,6 @@ class MemberPage extends Component {
 
       body = (
         <div>
-          <Header />
           <div className="MemberPage">
             <div className='events-header'>
               <h2>
@@ -319,7 +318,12 @@ class MemberPage extends Component {
         </div>
       )
     }
-    return body;
+    return (
+      <div>
+        <Header />
+        {body}
+      </div>
+    );
   }
 }
 

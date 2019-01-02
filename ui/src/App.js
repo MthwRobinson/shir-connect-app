@@ -1,7 +1,7 @@
 // Main app component. Includes routing logic
 import React, { Component } from 'react';
 import { 
-  BrowserRouter as Router, 
+  BrowserRouter as Router,
   Redirect,
   Route 
 } from 'react-router-dom';
@@ -36,7 +36,6 @@ class App extends Component {
 
     return (
       <div className="App">
-        <Header></Header>
         <Router>
           <div>
             <PrivateRoute exact path="/" component={Home} />

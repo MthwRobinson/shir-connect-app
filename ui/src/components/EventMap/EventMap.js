@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 
+import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './EventMap.css';
@@ -333,22 +334,25 @@ class EventMap extends Component {
     }
 
     return (
-      <div className="EventMap">
-        <div className='events-header'>
-          <h2>
-            Event Map
-            <i
-              className="fa fa-times pull-right event-icons"
-              onClick={()=>this.props.history.push('/')}
-            ></i>
-          </h2><hr/>
-        </div>
-        <div className='map-container'>
-          <div className='map-summary-area'>
-            <h4>Events by City</h4><hr/>
-            {eventsArea}
+      <div>
+        <Header />
+        <div className="EventMap">
+          <div className='events-header'>
+            <h2>
+              Event Map
+              <i
+                className="fa fa-times pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              ></i>
+            </h2><hr/>
           </div>
-          {mapArea}
+          <div className='map-container'>
+            <div className='map-summary-area'>
+              <h4>Events by City</h4><hr/>
+              {eventsArea}
+            </div>
+            {mapArea}
+          </div>
         </div>
       </div>
     );

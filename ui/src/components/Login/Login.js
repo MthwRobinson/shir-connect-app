@@ -12,6 +12,8 @@ import {
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
+import Header from './../Header/Header';
+
 import './Login.css';
 
 class Login extends Component {
@@ -76,34 +78,36 @@ class Login extends Component {
 
     render() {
       let errorMsg = this.renderError();
-
       return (
-        <div className="Login pullLeft">
-          <h2>Login</h2>
-          <Form onSubmit={this.handleSubmit} horizontal >
-            <FormGroup className="pullLeft">
-              <ControlLabel>User Name</ControlLabel>
-              <FormControl
-                value={this.state.userName}
-                onChange={this.handleUserName}
-                type="text" 
-              />
-            </FormGroup>
-            <FormGroup>
-              <ControlLabel>Password</ControlLabel>
-              <FormControl
-                value={this.state.password}
-                onChange={this.handlePassword}
-                type="password" 
-              />
-            </FormGroup>
-            {errorMsg}
-            <Button 
-              className="login-button"  
-              bsStyle="primary" 
-              type="submit"
-            >Submit</Button>
-          </Form>
+        <div>
+          <Header />
+          <div className="Login pullLeft">
+            <h2>Login</h2>
+            <Form onSubmit={this.handleSubmit} horizontal >
+              <FormGroup className="pullLeft">
+                <ControlLabel>User Name</ControlLabel>
+                <FormControl
+                  value={this.state.userName}
+                  onChange={this.handleUserName}
+                  type="text" 
+                />
+              </FormGroup>
+              <FormGroup>
+                <ControlLabel>Password</ControlLabel>
+                <FormControl
+                  value={this.state.password}
+                  onChange={this.handlePassword}
+                  type="password" 
+                />
+              </FormGroup>
+              {errorMsg}
+              <Button 
+                className="login-button"  
+                bsStyle="primary" 
+                type="submit"
+              >Submit</Button>
+            </Form>
+          </div>
         </div>
       );
     }

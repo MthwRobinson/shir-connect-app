@@ -10,6 +10,7 @@ import 'react-calendar-heatmap/dist/styles.css';
 
 import './MemberPage.css';
 
+import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 class MemberPage extends Component {
@@ -292,31 +293,36 @@ class MemberPage extends Component {
       tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
 
       body = (
-        <div className="MemberPage">
-          <div className='events-header'>
-            <h2>
-              {this.state.member.name}
-              <i
-                className="fa fa-home pull-right event-icons"
-                onClick={()=>this.props.history.push('/')}
-              ></i>
-              <i
-                className="fa fa-chevron-left pull-right event-icons"
-                onClick={()=>this.props.history.goBack()}
-              ></i>
-            </h2><hr/>
-          </div>
-          <div className='event-map-container'>
-            <div className='event-map-summary-area'>
-              {memberInfo}
+        <div>
+          <div className="MemberPage">
+            <div className='events-header'>
+              <h2>
+                {this.state.member.name}
+                <i
+                  className="fa fa-home pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                ></i>
+                <i
+                  className="fa fa-chevron-left pull-right event-icons"
+                  onClick={()=>this.props.history.goBack()}
+                ></i>
+              </h2><hr/>
             </div>
-            {mapArea}
+            <div className='event-map-container'>
+              <div className='event-map-summary-area'>
+                {memberInfo}
+              </div>
+              {mapArea}
+            </div>
           </div>
         </div>
       )
     }
     return (
-      body
+      <div>
+        <Header />
+        {body}
+      </div>
     );
   }
 }

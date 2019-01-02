@@ -13,6 +13,7 @@ import ReactToolTip from 'react-tooltip';
 import moment from 'moment';
 import axios from 'axios';
 
+import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './Members.css';
@@ -372,40 +373,43 @@ class Members extends Component {
       let pageCount = this.renderPageCount();
 
       return (
-        <div className="Members">
-          <div className='events-header'>
-            <h2>
-              Participants ({this.state.count})
-              <i className="fa fa-times pull-right event-icons"
-                 onClick={()=>this.props.history.push('/')}
-              ></i>
-              <i className="fa fa-upload pull-right event-icons"
-                 onClick={()=>this.showUpload()}
-              ></i>
-            </h2><hr/>
-          </div>
-          {popup}
-          <div className='event-header'>
-            {pageCount}
-            <div className='pull-right'>
-              <Form onSubmit={this.handleSubmit} inline>
-                <FormGroup>
-                  <FormControl 
-                    value={this.state.query}
-                    onChange={this.handleQuery}
-                    type="text" 
-                  />
-                </FormGroup>
-                <Button 
-                  className='search-button'
-                  type="submit"
-                  data-tip="Returns search results for last name."
-                >Search</Button>
-                <ReactToolTip />
-              </Form>
+        <div>
+          <Header />
+          <div className="Members">
+            <div className='events-header'>
+              <h2>
+                Participants ({this.state.count})
+                <i className="fa fa-times pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                ></i>
+                <i className="fa fa-upload pull-right event-icons"
+                  onClick={()=>this.showUpload()}
+                ></i>
+              </h2><hr/>
             </div>
+            {popup}
+            <div className='event-header'>
+              {pageCount}
+              <div className='pull-right'>
+                <Form onSubmit={this.handleSubmit} inline>
+                  <FormGroup>
+                    <FormControl 
+                      value={this.state.query}
+                      onChange={this.handleQuery}
+                      type="text" 
+                    />
+                  </FormGroup>
+                  <Button 
+                    className='search-button'
+                    type="submit"
+                    data-tip="Returns search results for last name."
+                  >Search</Button>
+                  <ReactToolTip />
+                </Form>
+              </div>
+            </div>
+            {table}
           </div>
-          {table}
         </div>
       );
     }

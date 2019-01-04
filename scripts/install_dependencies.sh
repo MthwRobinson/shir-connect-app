@@ -34,3 +34,9 @@ sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:certbot/certbot
 sudo apt-get update
 sudo apt-get install python-certbot-nginx
+
+# Install schmig (for database migration)
+cd $HOME
+git clone git@github.com:mbucc/shmig.git
+cd shmig
+sudo make install

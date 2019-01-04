@@ -5,7 +5,7 @@ sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`
 
 # Install Postgres
 sudo apt-get update
-sudo apt-get install postgresql postgres-contrib
+sudo apt-get install postgresql postgres-contrib postgresql-client-common
 
 # Install Python 3 virtual environments
 sudo apt-get install python-pip

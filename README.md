@@ -108,3 +108,16 @@ trs_dashboard launch_api --prod
 ```
 Note that the WSGI server will run in the context of the terminal session where it is launched.
 For production, the Flask app should be launched using `init.d`, `systemctl` or similar.
+
+## DevOps Tasks
+
+### Database migrations
+
+Database migrations are implemented using shmig.
+The configurations for shmig can be found in `database/shmig.conf`.
+To generate a new database migration, run `shmig -t postgresql -d postgres create mymigration`.
+This will create a file in `database/migrations` that ends with `-mymigration.sql`.
+In that file, write the SQL commands for a forward step in after  `====UP====` and the SQL commands for a backward step after `===DOWN===`.
+To migrate the database forward run `shmig -t postgresql -d postgres up`.
+To migrate the database backward run `shmig -t postgresql -d postgres down`.
+You can also run `shmig -t postgresql -d postgres up step=1` to run a single migration step.

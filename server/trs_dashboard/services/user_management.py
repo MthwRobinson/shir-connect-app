@@ -98,7 +98,8 @@ class UserManagement(object):
         else:
             return False
 
-    def add_user(self, username, password):
+    def add_user(self, username, password, 
+                 role='standard', modules=[]):
         """ Adds a new user to the database """
         # Check to see if the user already exists
         user = self.get_user(username)

@@ -19,6 +19,7 @@ scp -i $HOME/certs/dataflock.pem \
 echo "Pulling the latest code from git ... "
 ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
     "cd /home/ubuntu/trs-dashboard && git checkout master && git pull origin master"
+echo "Migrating database tables ..."
 ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
     "cd /home/ubuntu/trs-dashboard/database/ && shmig -t postgresql -d postgres up"
 

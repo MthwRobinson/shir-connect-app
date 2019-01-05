@@ -30,7 +30,7 @@ class MemberLoader(object):
 
     def load(self, df, source='MM2000', test=False):
         """ Loads the data in to the member database """
-        if source==='MM2000':
+        if source=='MM2000':
             items = self.parse_mm2000(df)
 
         self.database.backup_table('members')

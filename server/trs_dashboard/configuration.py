@@ -22,7 +22,7 @@ MATERIALIZED_VIEWS = [
     'shape_colors.sql'
 ]
 
-# Member upload confits
+# Member upload configs
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
 COLUMN_MAPPING = {
     'time_columns': ['birth_date', 'membership_date'],

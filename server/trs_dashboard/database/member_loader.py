@@ -47,6 +47,7 @@ class MemberLoader(object):
             self.logger.info('Refreshing materialized views.')
             self.database.refresh_view('members_view')
             self.database.refresh_view('participants')
+            self.database.refresh_view('shape_colors')
         else:
             self.logger.warning('Column mismatch in upload')
             self.database.revert_table('members')

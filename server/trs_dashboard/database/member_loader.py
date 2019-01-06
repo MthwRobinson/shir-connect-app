@@ -25,21 +25,26 @@ class MemberLoader(object):
         filename = self.path + '/member_columns.json'
         with open(filename, 'r') as f:
             self.column_mapping = json.load(f)
-
         self.database = Database()
 
     def load(self, df, source='MM2000', test=False):
         """ Loads the data in to the member database """
         if source=='MM2000':
+            self.logger.info('Parsing MM2000 data.')
             items = self.parse_mm2000(df)
 
+        self.logger.info('Backing up current member table.')
         self.database.backup_table('members')
+        self.logger.info('Truncating current member table.')
         self.database.truncate_table('members')
+        self.logger.info('Loading updated member data.')
         for item in items:
             self.database.load_item(item, 'members')
 
+        self.logger.info('Checking updated columns.')
         good_columns = self.check_columns()
         if good_columns:
+            self.logger.info('Refreshing member materialized view.')
             self.database.refresh_view('members_view')
         else:
             self.logger.warning('Column mismatch in upload')
@@ -70,7 +75,8 @@ class MemberLoader(object):
 
             for i in df_group.index:
                 item = dict(df_group.loc[i])
-
+                
+                # Convert postal codes to five number format
                 postal = str(item['postal_code'])
                 if '-' in postal:
                     postal = postal.split('-')[0]
@@ -78,9 +84,12 @@ class MemberLoader(object):
                     postal = None
                 item['postal_code'] = postal
 
+                # ID extension for children and spouses
+                # since a family shares the same id
                 if id_extension:
                     item['id'] += id_extension
 
+                # Remove invalid birthdates
                 if item['birth_date']:
                     if item['birth_date'].startswith('0'):
                         item['birth_date'] = None
@@ -88,12 +97,15 @@ class MemberLoader(object):
                     if item['membership_date'].startswith('0'):
                         item['membership_date'] = None
 
+                # Children only have a full name, not separate
+                # first names and last name
                 if 'first_name' not in item and item['full_name']:
                     item['first_name'] = item['full_name'].split()[0]
                 if 'last_name' not in item  and item['full_name']:
                     item['last_name'] = item['full_name'].split()[0]
                 if 'first_name' in item and 'last_name' in item:
                     items.append(item)
+
         return items
 
     def check_columns(self):
@@ -103,4 +115,4 @@ class MemberLoader(object):
         for column in new_columns:
             if column not in old_columns:
                 return False
-         return True
+        return True

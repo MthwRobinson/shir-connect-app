@@ -30,66 +30,6 @@
         "S Sex": "gender",
         "S Email": "email"
       }
-    },
-    "Child1": {
-      "id_extension": "_C1",
-      "columns": {
-        "Member ID": "id",
-        "Member Family": "member_family",
-        "Mem Type": "member_type",
-        "Membership Date": "membership_date",
-        "Zip": "postal_code", 
-        "Child 1": "full_name",
-        "Child 1 Age": "birth_date" 
-      }
-    },
-    "Child2": {
-      "id_extension": "_C2",
-      "columns": {
-        "Member ID": "id",
-        "Member Family": "member_family",
-        "Mem Type": "member_type",
-        "Membership Date": "membership_date",
-        "Zip": "postal_code", 
-        "Child 2": "full_name",
-        "Child 2 Age": "birth_date"
-      }
-    },
-     "Child3": {
-      "id_extension": "_C3",
-      "columns": {
-        "Member ID": "id",
-        "Member Family": "member_family",
-        "Mem Type": "member_type",
-        "Membership Date": "membership_date",
-        "Zip": "postal_code", 
-        "Child 3": "full_name",
-        "Child 3 Age": "birth_date" 
-      }
-    },
-    "Child4": {
-      "id_extension": "_C4",
-      "columns": {
-        "Member ID": "id",
-        "Member Family": "member_family",
-        "Mem Type": "member_type",
-        "Membership Date": "membership_date",
-        "Zip": "postal_code", 
-        "Child 4": "full_name",
-        "Child 4 Age": "birth_date"
-      }
-    },
-    "Child5": {
-      "id_extension": "_C5",
-      "columns": {
-        "Member ID": "id",
-        "Member Family": "member_family",
-        "Mem Type": "member_type",
-        "Membership Date": "membership_date",
-        "Zip": "postal_code", 
-        "Child 5": "full_name",
-        "Child 5 Age": "birth_date" 
-      }
     }
   }
 }

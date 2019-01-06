@@ -22,6 +22,9 @@ ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
 echo "Migrating database tables ... "
 ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
     "cd /home/ubuntu/trs-dashboard/database/ && shmig -t postgresql -d postgres up"
+echo "Refreshing materialized views ... "
+ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
+      "/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard initialize --drop_views"
 
 # Restart service
 echo "Restarting all process ..."

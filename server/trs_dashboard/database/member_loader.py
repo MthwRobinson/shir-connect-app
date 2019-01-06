@@ -44,8 +44,9 @@ class MemberLoader(object):
         self.logger.info('Checking updated columns.')
         good_columns = self.check_columns()
         if good_columns:
-            self.logger.info('Refreshing member materialized view.')
+            self.logger.info('Refreshing materialized views.')
             self.database.refresh_view('members_view')
+            self.database.refresh_view('participants')
         else:
             self.logger.warning('Column mismatch in upload')
             self.database.revert_table('members')

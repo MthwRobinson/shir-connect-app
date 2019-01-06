@@ -183,11 +183,9 @@ class Trends(object):
             FROM (
                 SELECT DISTINCT
                     CASE
-                        WHEN age < 13 THEN 'Under 13'
-                        WHEN age >= 13 AND age < 18 THEN 'Teens'
                         WHEN age >= 18 AND age < 23 THEN 'College'
-                        WHEN age >= 23 AND age < 40 THEN 'Young Professional'
-                        WHEN age >= 40 AND age < 50 THEN '40-50'
+                        WHEN age >= 23 AND age < 35 THEN 'Young Professional'
+                        WHEN age >= 35 AND age < 50 THEN '35-50'
                         WHEN age >= 50 AND age < 60 THEN '50-60'
                         WHEN age >= 60 AND age < 70 THEN '60-70'
                         WHEN age >= 70 AND age < 80 THEN '70-80'

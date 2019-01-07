@@ -155,6 +155,7 @@ class ChangePassword extends Component {
         <div>
           <Header />
           <div className="ChangePassword pullLeft">
+            <h3>Change Password</h3>
             <Form onSubmit={this.handleSubmit} horizontal >
               <FormGroup className="pullLeft">
                 <ControlLabel>Old Password</ControlLabel>

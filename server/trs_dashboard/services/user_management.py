@@ -161,6 +161,10 @@ class UserManagement(object):
     def add_user(self, username, password, 
                  role='standard', modules=[]):
         """ Adds a new user to the database """
+        complex_enough = self.check_pw_complexity(password)
+        if not complex_enough:
+            return False
+
         # Check to see if the user already exists
         user = self.get_user(username)
         if user:
@@ -186,6 +190,10 @@ class UserManagement(object):
 
     def update_password(self, username, password):
         """ Updates the password for a user. """
+        complex_enough = self.check_pw_complexity(password)
+        if not complex_enough:
+            return False
+
         # Check to see if the user exists
         user = self.get_user(username)
         if user:
@@ -200,3 +208,16 @@ class UserManagement(object):
             return True
         else:
             return False
+
+    def check_pw_complexity(self, password):
+        """ Checks to ensure a password is sufficiently complex """
+        if len(password) < 10:
+            return False
+        elif password.isalnum():
+            return False
+        elif password.islower():
+            return False
+        elif password.isupper():
+            return False
+        else:
+            return True

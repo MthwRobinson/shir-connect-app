@@ -7,11 +7,11 @@ def test_user_register():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.delete_user('unittestadmin')
-    user_management.add_user('unittestadmin', 'testpassword')
+    user_management.add_user('unittestadmin', 'testPassword!')
    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestadmin',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -38,7 +38,7 @@ def test_user_register():
     response = CLIENT.post('/service/user/register', 
         json=dict(
             username='unittestuser', 
-            password='testpassword',
+            password='testPassword!',
             role='standard',
             modules=[]
         ),
@@ -48,7 +48,7 @@ def test_user_register():
 
     # Can't register the same user twice
     response = CLIENT.post('/service/user/register', 
-        json=dict(username='unittestuser', password='testpassword'),
+        json=dict(username='unittestuser', password='testPassword!'),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 409
@@ -64,7 +64,7 @@ def test_user_register():
 def test_user_authenticate():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.post('/service/user/authenticate')
     assert response.status_code == 400
@@ -79,7 +79,7 @@ def test_user_authenticate():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -104,11 +104,11 @@ def test_user_authenticate():
 def test_change_password():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -127,9 +127,9 @@ def test_change_password():
     # Old password must be correct to change password
     response = CLIENT.post('/service/user/change-password', 
         json=dict(
-            old_password='wrongtestpassword',
-            new_password='updatedtestpassword',
-            new_password2='updatedtestpassword'
+            old_password='wrongtestPassword!',
+            new_password='updatedtestPassword!',
+            new_password2='updatedtestPassword!'
         ),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
@@ -138,9 +138,9 @@ def test_change_password():
     # New passwords must match to update password
     response = CLIENT.post('/service/user/change-password', 
         json=dict(
-            old_password='testpassword',
-            new_password='wrongupdatedtestpassword',
-            new_password2='updatedtestpassword'
+            old_password='testPassword!',
+            new_password='wrongupdatedtestPassword!',
+            new_password2='updatedtestPassword!'
         ),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
@@ -149,9 +149,9 @@ def test_change_password():
     # Success!
     response = CLIENT.post('/service/user/change-password', 
         json=dict(
-            old_password='testpassword',
-            new_password='updatedtestpassword',
-            new_password2='updatedtestpassword'
+            old_password='testPassword!',
+            new_password='updatedtestPassword!',
+            new_password2='updatedtestPassword!'
         ),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
@@ -170,11 +170,11 @@ def test_change_password():
 def test_authorize():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -194,3 +194,11 @@ def test_authorize():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+
+def test_pw_complexity():
+    user_management = UserManagement()
+    assert user_management.check_pw_complexity('Hell@') == False
+    assert user_management.check_pw_complexity('hiphophoooray') == False
+    assert user_management.check_pw_complexity('Hiphophoooray') == False
+    assert user_management.check_pw_complexity('HIPHOPHOORAY') == False
+    assert user_management.check_pw_complexity('HIPHOPHooR@Y') == True

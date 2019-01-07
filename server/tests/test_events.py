@@ -11,7 +11,7 @@ CLIENT = app.test_client()
 def test_event():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     url = '/service/event/7757038511'
     response = CLIENT.get(url)
@@ -19,7 +19,7 @@ def test_event():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -51,14 +51,14 @@ def test_event():
 def test_events():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -84,14 +84,14 @@ def test_events():
 def test_event_locations():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -120,14 +120,14 @@ def test_event_locations():
 def test_event_cities():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -153,11 +153,11 @@ def test_event_cities():
 def test_export_event_aggregates():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
 
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     jwt = response.json['jwt']

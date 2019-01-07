@@ -181,11 +181,11 @@ def test_authorize():
     jwt = response.json['jwt']
 
     # Authorization header required to change password
-    response = CLIENT.post('/service/user/authorize')
+    response = CLIENT.get('/service/user/authorize')
     assert response.status_code == 401
     
     # Success!
-    response = CLIENT.post('/service/user/authorize', 
+    response = CLIENT.get('/service/user/authorize', 
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 200

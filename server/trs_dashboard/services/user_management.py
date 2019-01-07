@@ -70,7 +70,7 @@ def user_authenticate():
         response = {'message': msg}
         return jsonify(response), 401
 
-@user_management.route('/service/user/authorize', methods=['POST'])
+@user_management.route('/service/user/authorize', methods=['GET'])
 @jwt_required
 def user_authorize():
     """ Returns user authorization and role metadata """

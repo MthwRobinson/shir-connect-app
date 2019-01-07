@@ -33,14 +33,15 @@ class Header extends Component {
       return (
         <div ref={ref => this.el = ref}>
           <SlidingPane
-            width='20%'
+            width='300px'
             isOpen={ this.state.paneOpen }
             from='left'
             onRequestClose={this.toggleMenu}
           >
             <div className="menu-content">
               <h3>Admin</h3><hr/>
-              <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link>
+              <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link><br/>
+              <Link to="/change-password">Change Password</Link>
             </div>
           </SlidingPane>
         </div>

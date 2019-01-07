@@ -6,7 +6,7 @@ CLIENT = app.test_client()
 def test_zip_geometry():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/map/geometry/22102'
     
     response = CLIENT.get(url)
@@ -14,7 +14,7 @@ def test_zip_geometry():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -40,7 +40,7 @@ def test_zip_geometry():
 def test_zip_codes():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/map/zipcodes'
     
     response = CLIENT.get(url)
@@ -48,7 +48,7 @@ def test_zip_codes():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -68,7 +68,7 @@ def test_zip_codes():
 def test_all_geometries():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/map/geometries'
     
     response = CLIENT.get(url)
@@ -76,7 +76,7 @@ def test_all_geometries():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str

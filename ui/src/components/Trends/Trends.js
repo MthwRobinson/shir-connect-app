@@ -21,9 +21,9 @@ class Trends extends Component {
         this.navigate('/login');
       } else {
         const auth = 'Bearer '.concat(token);
-        axios.get('/service/test', { headers: { Authorization: auth }})
+        axios.get('/service/user/authorize', { headers: { Authorization: auth }})
           .then(res => {
-            this.setState({name: res.data.name});
+            this.setState({name: res.data.id});
           })
           .catch( err => {
             if(err.response.status===401){

@@ -11,6 +11,7 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../node_modules/font-awesome/css/font-awesome.min.css';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
 
+import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
 import EventPage from './components/EventPage/EventPage';
@@ -38,6 +39,7 @@ class App extends Component {
         <Router>
           <div>
             <PrivateRoute exact path="/" component={Home} />
+            <PrivateRoute path="/change-password" component={ChangePassword} />
             <PrivateRoute path="/events" component={Events} />
             <PrivateRoute path="/event" component={EventPage} />
             <PrivateRoute path="/member" component={MemberPage} />

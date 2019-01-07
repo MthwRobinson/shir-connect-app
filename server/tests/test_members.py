@@ -12,14 +12,14 @@ CLIENT = app.test_client()
 def test_members():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     
     response = CLIENT.get('/service/members?limit=25')
     assert response.status_code == 401
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -44,7 +44,7 @@ def test_members():
 def test_member():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/member'
     
     response = CLIENT.get(url)
@@ -52,7 +52,7 @@ def test_member():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str

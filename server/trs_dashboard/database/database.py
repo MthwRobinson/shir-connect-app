@@ -243,6 +243,21 @@ class Database(object):
         else:
             return None
 
+    def update_column(self, table, item_id, column, value):
+        """ Updates the value of the specified column """
+        sql = """
+            UPDATE {schema}.{table}
+            SET {column} = {value}
+            WHERE id = '{item_id}'
+        """.format(
+            schema=self.schema, 
+            table=table, 
+            column=column, 
+            value=value,
+            item_id=item_id
+        )
+        self.run_query(sql)
+
     def last_event_date(self):
         """ Pulls the most recent event start date from the database """
         sql = """

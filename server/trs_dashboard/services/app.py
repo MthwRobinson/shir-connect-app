@@ -18,15 +18,3 @@ app.register_blueprint(map_geometries)
 app.register_blueprint(members)
 app.register_blueprint(user_management)
 jwt = JWTManager(app)
-
-@app.route('/service/test', methods=['GET'])
-@jwt_required
-def test():
-    """ Tests to make sure the flask app is working """
-    return jsonify({
-        'status': 'success',
-        'message': 'Hello, friend! My name is %s :)'%(
-            get_jwt_identity()
-        ),
-        'name': get_jwt_identity()
-    })

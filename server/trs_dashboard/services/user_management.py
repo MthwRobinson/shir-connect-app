@@ -10,7 +10,7 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_simple import create_jwt, jwt_required
+from flask_jwt_simple import create_jwt, jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database
@@ -70,6 +70,67 @@ def user_authenticate():
         response = {'message': msg}
         return jsonify(response), 401
 
+@user_management.route('/service/user/authorize', methods=['GET'])
+@jwt_required
+def user_authorize():
+    """ Returns user authorization and role metadata """
+    username = get_jwt_identity()
+    user_management = UserManagement()
+    user = user_management.get_user(username)
+    if not user:
+        response = {'message': 'user not found'}
+        return jsonify(response), 400
+    else:
+        del user['password']
+        return jsonify(user), 200
+
+@user_management.route('/service/user/change-password', methods=['POST'])
+@jwt_required
+def change_password():
+    """ Updates the password for the user """
+    if not request.json:
+        response = {'message': 'no post body'}
+        return jsonify(response), 400
+    else:
+        # Check the post body for the correct keys
+        if 'old_password' not in request.json:
+            response = {'message': 'old_password missing in post body'}
+            return jsonify(response), 400
+        if 'new_password' not in request.json:
+            response = {'message': 'new_password missing in post body'}
+            return jsonify(response), 400
+        if 'new_password2' not in request.json:
+            response = {'message': 'new_password2 missing in post body'}
+            return jsonify(response), 400
+
+        # Check to see if the old password was correct
+        user_management = UserManagement()
+        old_password = request.json['old_password']
+        username = get_jwt_identity()
+        authorized = user_management.authenticate_user(
+            username=username,
+            password=old_password
+        )
+        if not authorized:
+            response = {'message': 'old password was incorrect'}
+            return jsonify(response), 400
+
+        # Check to make sure the two new passwords match
+        new_password = request.json['new_password']
+        new_password2 = request.json['new_password2']
+        if new_password != new_password2:
+            response = {'message': 'new passwords did not match'}
+            return jsonify(response), 400
+
+        # Update the user's password
+        updated = user_management.update_password(username, new_password)
+        if updated:
+            response = {'message': 'password updated for %s'%(username)}
+            return jsonify(response), 201
+        else:
+            response = {'message': 'password update failed'}
+            return jsonify(response), 400
+
 class UserManagement(object):
     """ Class that handles user centric REST operations """
     def __init__(self):
@@ -90,9 +151,8 @@ class UserManagement(object):
         user = self.get_user(username)
         if not user:
             return False
-
-        pw = password.encode('utf-8')
-        pw_hash = hashlib.sha512(pw).hexdigest()
+        
+        pw_hash = self.hash_pw(password)
         if user['password'] == pw_hash:
             return True
         else:
@@ -101,13 +161,16 @@ class UserManagement(object):
     def add_user(self, username, password, 
                  role='standard', modules=[]):
         """ Adds a new user to the database """
+        complex_enough = self.check_pw_complexity(password)
+        if not complex_enough:
+            return False
+
         # Check to see if the user already exists
         user = self.get_user(username)
         if user:
             return False
         else:
-            pw = password.encode('utf-8')
-            pw_hash = hashlib.sha512(pw).hexdigest()
+            pw_hash = self.hash_pw(password)
             item = {
                 'id': username,
                 'password': pw_hash
@@ -119,3 +182,42 @@ class UserManagement(object):
         """ Deletes a user from the database """
         self.database.delete_item('users', username)
 
+    def hash_pw(self, password):
+        """ Hashes a password """
+        pw = password.encode('utf-8')
+        pw_hash = hashlib.sha512(pw).hexdigest()
+        return pw_hash
+
+    def update_password(self, username, password):
+        """ Updates the password for a user. """
+        complex_enough = self.check_pw_complexity(password)
+        if not complex_enough:
+            return False
+
+        # Check to see if the user exists
+        user = self.get_user(username)
+        if user:
+            pw_hash = self.hash_pw(password)
+            pw_value = "'%s'"%(pw_hash)
+            self.database.update_column(
+                table='users',
+                item_id=username,
+                column='password',
+                value=pw_value
+            )
+            return True
+        else:
+            return False
+
+    def check_pw_complexity(self, password):
+        """ Checks to ensure a password is sufficiently complex """
+        if len(password) < 10:
+            return False
+        elif password.isalnum():
+            return False
+        elif password.islower():
+            return False
+        elif password.isupper():
+            return False
+        else:
+            return True

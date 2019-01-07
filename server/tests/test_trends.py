@@ -11,7 +11,7 @@ CLIENT = app.test_client()
 def test_monthly_revenue():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/monthly-revenue'
     
     response = CLIENT.get(url)
@@ -19,7 +19,7 @@ def test_monthly_revenue():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -43,7 +43,7 @@ def test_monthly_revenue():
 def test_avg_attendance():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/avg-attendance'
     
     response = CLIENT.get(url)
@@ -51,7 +51,7 @@ def test_avg_attendance():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -75,7 +75,7 @@ def test_avg_attendance():
 def test_year_group_attendees():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/age-group-attendance'
     
     response = CLIENT.get(url)
@@ -83,7 +83,7 @@ def test_year_group_attendees():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
@@ -113,7 +113,7 @@ def test_year_group_attendees():
 def test_participation():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testpassword')
+    user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/participation/Young Professional'
     
     response = CLIENT.get(url)
@@ -121,7 +121,7 @@ def test_participation():
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
-        password='testpassword'
+        password='testPassword!'
     ))
     assert response.status_code == 200
     assert type(response.json['jwt']) == str

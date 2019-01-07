@@ -20,6 +20,13 @@ def test_user_register():
     # Authorization header  is required to register a user
     response = CLIENT.post('/service/user/register')
     assert response.status_code == 401
+    
+    # Only an admin can register a user
+    response = CLIENT.post('/service/user/register',
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 403
+    user_management.update_role('unittestadmin', 'admin')
 
     # JSON body is required to register a user
     response = CLIENT.post('/service/user/register',

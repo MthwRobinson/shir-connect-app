@@ -22,6 +22,13 @@ user_management = Blueprint('user_management', __name__)
 @jwt_required
 def user_register():
     """ Registers a new user """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can update accesses'}
+        return jsonify(response), 403
+
     if not request.json:
         response = {'message': 'no post body'}
         return jsonify(response), 400

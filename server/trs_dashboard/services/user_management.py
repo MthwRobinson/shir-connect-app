@@ -70,6 +70,20 @@ def user_authenticate():
         response = {'message': msg}
         return jsonify(response), 401
 
+@user_management.route('/service/user/authorize', methods=['POST'])
+@jwt_required
+def user_authorize():
+    """ Returns user authorization and role metadata """
+    username = get_jwt_identity()
+    user_management = UserManagement()
+    user = user_management.get_user(username)
+    if not user:
+        response = {'message': 'user not found'}
+        return jsonify(response), 400
+    else:
+        del user['password']
+        return jsonify(user), 200
+
 @user_management.route('/service/user/change-password', methods=['POST'])
 @jwt_required
 def change_password():

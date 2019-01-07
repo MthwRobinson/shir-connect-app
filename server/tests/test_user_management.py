@@ -166,3 +166,31 @@ def test_change_password():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+
+def test_authorize():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testpassword')
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testpassword'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+
+    # Authorization header required to change password
+    response = CLIENT.post('/service/user/authorize')
+    assert response.status_code == 401
+    
+    # Success!
+    response = CLIENT.post('/service/user/authorize', 
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 200
+    assert 'password' not in response.json
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None

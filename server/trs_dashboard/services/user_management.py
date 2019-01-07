@@ -188,6 +188,38 @@ def update_access():
         response = {'message': 'role updated for %s'%(username)}
         return jsonify(response), 201
 
+@user_management.route('/service/user/reset-password', methods=['POST'])
+@jwt_required
+def reset_password():
+    """ Resets the password for the user in the post body """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can reset password'}
+        return jsonify(response), 403
+    else:
+        if 'username' not in request.json:
+            response = {'message': 'username required in post body'}
+            return jsonify(response), 400
+        if 'password' not in request.json:
+            response = {'message': 'password required in post body'}
+            return jsonify(response), 400
+        if 'password2' not in request.json:
+            response = {'message': 'password2 required in post body'}
+            return jsonify(response), 400
+        
+        username = request.json['username']
+        password = request.json['password']
+        password2 = request.json['password2']
+        if password != password2:
+            response = {'message': 'passwords must match'}
+            return jsonify(response), 400
+        else:
+            user_management.update_password(username, password)
+            response = {'message': 'role updated for %s'%(username)}
+            return jsonify(response), 201
+
 class UserManagement(object):
     """ Class that handles user centric REST operations """
     def __init__(self):
@@ -299,7 +331,6 @@ class UserManagement(object):
             column='modules',
             value=value
         )
-
 
     def check_pw_complexity(self, password):
         """ Checks to ensure a password is sufficiently complex """

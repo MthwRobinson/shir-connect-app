@@ -339,6 +339,99 @@ def test_update_access():
     user = user_management.get_user('unittestadmin')
     assert user == None
 
+def test_reset_password():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.delete_user('unittestadmin')
+    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.add_user('unittestadmin', 'testPassword!')
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # Authorization header required to change password
+    response = CLIENT.post('/service/user/reset-password')
+    assert response.status_code == 401
+    
+    # User must be an admin to update roles
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            username='unittestuser',
+            password='testPASSWORD@',
+            password2='testPASSWORD@'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 403
+
+    user_management.update_role('unittestadmin', 'admin')
+    # Username must be in the post body
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            password='testPASSWORD@',
+            password2='testPASSWORD@'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Password must be in the post body
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            username='unittestuser',
+            password2='testPASSWORD@'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Password2 must be in the post body
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            username='unittestuser',
+            password='testPASSWORD@'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Passwords must match
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            username='unittestuser',
+            password='testPASSWORD@',
+            password2='testPASSWORD!'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Success!
+    response = CLIENT.post('/service/user/reset-password', 
+        json=dict(
+            username='unittestuser',
+            password='testPASSWORD@',
+            password2='testPASSWORD@'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 201
+    unittestuser = user_management.get_user('unittestuser')
+    assert unittestuser['password'] == user_management.hash_pw('testPASSWORD@')
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+    
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
+    assert user == None
+
 def test_pw_complexity():
     user_management = UserManagement()
     assert user_management.check_pw_complexity('Hell@') == False

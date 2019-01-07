@@ -220,6 +220,20 @@ def reset_password():
             response = {'message': 'role updated for %s'%(username)}
             return jsonify(response), 201
 
+@user_management.route('/service/users/list', methods=['GET'])
+@jwt_required
+def list_users():
+    """ Returns a list of the current active users """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can reset password'}
+        return jsonify(response), 403
+    else:
+        users = user_management.list_users()
+        return jsonify(users), 200
+
 class UserManagement(object):
     """ Class that handles user centric REST operations """
     def __init__(self):
@@ -331,6 +345,16 @@ class UserManagement(object):
             column='modules',
             value=value
         )
+
+    def list_users(self):
+        """ Lists all of the active users """
+        df = self.database.read_table('users')
+        users = []
+        for i in df.index:
+            user = dict(df.loc[i])
+            del user['password']
+            users.append(user)
+        return users
 
     def check_pw_complexity(self, password):
         """ Checks to ensure a password is sufficiently complex """

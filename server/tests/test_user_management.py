@@ -432,6 +432,46 @@ def test_reset_password():
     user = user_management.get_user('unittestadmin')
     assert user == None
 
+def test_list_users():
+    user_management = UserManagement()
+    user_management.delete_user('unittestadmin')
+    user_management.add_user('unittestadmin', 'testPassword!')
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # Authorization header required to change password
+    response = CLIENT.get('/service/users/list')
+    assert response.status_code == 401
+    
+    # User must be an admin to update roles
+    response = CLIENT.get('/service/users/list', 
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 403
+
+    user_management.update_role('unittestadmin', 'admin')
+    # Success!
+    response = CLIENT.get('/service/users/list', 
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 200
+    users = response.json
+    for user in users:
+        assert 'id' in user
+        assert 'role' in user
+        assert 'modules' in user
+        assert 'password' not in user
+    
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
+    assert user == None
+
 def test_pw_complexity():
     user_management = UserManagement()
     assert user_management.check_pw_complexity('Hell@') == False

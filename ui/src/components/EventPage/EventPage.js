@@ -59,6 +59,8 @@ class EventPage extends Component {
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
         }
       })
   }

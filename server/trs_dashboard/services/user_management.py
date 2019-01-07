@@ -18,7 +18,7 @@ from trs_dashboard.database.database import Database
 
 user_management = Blueprint('user_management', __name__)
 
-@user_management.route('/service/user/register', methods=['POST'])
+@user_management.route('/service/user', methods=['POST'])
 @jwt_required
 def user_register():
     """ Registers a new user """
@@ -26,7 +26,7 @@ def user_register():
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
     if admin_user['role'] != 'admin':
-        response = {'message': 'only admins can update accesses'}
+        response = {'message': 'only admins can add users'}
         return jsonify(response), 403
 
     if not request.json:
@@ -48,6 +48,20 @@ def user_register():
     else:
         response = {'message': 'user already exists'}
         return jsonify(response), 409
+
+@user_management.route('/service/user/<username>', methods=['DELETE'])
+@jwt_required
+def delete_user(username):
+    """ Deletes a user """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can delete users'}
+        return jsonify(response), 403
+    user_management.delete_user(username)
+    response = {'message': 'user %s has been removed'%(username)}
+    return jsonify(response), 204
 
 @user_management.route('/service/user/authenticate', methods=['POST'])
 def user_authenticate():

@@ -3,7 +3,7 @@ from trs_dashboard.services.user_management import UserManagement
 
 CLIENT = app.test_client()
 
-def test_user_register():
+def test_add_user():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.delete_user('unittestadmin')
@@ -18,31 +18,31 @@ def test_user_register():
     jwt = response.json['jwt']
     
     # Authorization header  is required to register a user
-    response = CLIENT.post('/service/user/register')
+    response = CLIENT.post('/service/user')
     assert response.status_code == 401
     
     # Only an admin can register a user
-    response = CLIENT.post('/service/user/register',
+    response = CLIENT.post('/service/user',
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 403
     user_management.update_role('unittestadmin', 'admin')
 
     # JSON body is required to register a user
-    response = CLIENT.post('/service/user/register',
+    response = CLIENT.post('/service/user',
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 400
     
     # Username and password is required to register a user
-    response = CLIENT.post('/service/user/register', 
+    response = CLIENT.post('/service/user', 
         json=dict(username='unittestuser'),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 400
 
     # Success!
-    response = CLIENT.post('/service/user/register', 
+    response = CLIENT.post('/service/user', 
         json=dict(
             username='unittestuser', 
             password='testPassword!',
@@ -54,7 +54,7 @@ def test_user_register():
     assert response.status_code == 201
 
     # Can't register the same user twice
-    response = CLIENT.post('/service/user/register', 
+    response = CLIENT.post('/service/user', 
         json=dict(username='unittestuser', password='testPassword!'),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
@@ -67,6 +67,44 @@ def test_user_register():
     user_management.delete_user('unittestadmin')
     user = user_management.get_user('unittestadmin')
     assert user == None
+
+def test_delete_user():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.delete_user('unittestadmin')
+    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.add_user('unittestadmin', 'testPassword!')
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # Authorization header  is required to delete a user
+    response = CLIENT.delete('/service/user/unittestuser')
+    assert response.status_code == 401
+    
+    # Only an admin can delete a user
+    response = CLIENT.delete('/service/user/unittestuser',
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 403
+    user_management.update_role('unittestadmin', 'admin')
+
+    # Success!
+    response = CLIENT.delete('/service/user/unittestuser',
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 204
+    
+    user = user_management.get_user('unittestuser')
+    assert user == None
+    
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
 
 def test_user_authenticate():
     user_management = UserManagement()

@@ -157,6 +157,30 @@ def update_role():
             response = {'message': 'role update for %s'%(username)}
             return jsonify(response), 201
 
+@user_management.route('/service/user/update-access', methods=['POST'])
+@jwt_required
+def update_access():
+    """ Updates the accesses for the user in the post body """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can update accesses'}
+        return jsonify(response), 403
+    else:
+        if 'username' not in request.json:
+            response = {'message': 'username required in post body'}
+            return jsonify(response), 400
+        if 'modules' not in request.json:
+            response = {'message': 'role required in post body'}
+            return jsonify(response), 400
+
+        username = request.json['username']
+        modules = request.json['modules']
+        user_management.update_access(username, modules)
+        response = {'message': 'role updated for %s'%(username)}
+        return jsonify(response), 201
+
 class UserManagement(object):
     """ Class that handles user centric REST operations """
     def __init__(self):

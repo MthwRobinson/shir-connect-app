@@ -74,7 +74,7 @@ def test_user_authenticate():
     ))
     assert response.status_code == 400
 
-    response = CLIENT.get('/service/test')
+    response = CLIENT.get('/service/user/authorize')
     assert response.status_code == 401
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
@@ -85,11 +85,11 @@ def test_user_authenticate():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
 
-    response = CLIENT.get('/service/test', headers={
+    response = CLIENT.get('/service/user/authorize', headers={
         'Authorization': 'Bearer %s'%(jwt)
     })
     assert response.status_code == 200
-    assert 'unittestuser' in response.json['message']
+    assert response.json['id'] == 'unittestuser'
     
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',

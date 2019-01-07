@@ -24,38 +24,3 @@ MATERIALIZED_VIEWS = [
 
 # Member upload configs
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
-COLUMN_MAPPING = {
-    'time_columns': ['birth_date', 'membership_date'],
-    'columns': {
-        'first': 'first_name',
-        'last': 'last_name',
-        'zip': 'postal_code',
-        'member_id': 'id',
-        'memo': 'member_religion',
-        'e-mail_for_member': 'email',
-        'e-mail_for_spouse': 'email'
-    }
-}
-MEMBER_COLUMNS = [
-    'FIRST1',
-    'LAST1',
-    'NICKNAME1',
-    'MEMO1',
-    'ZIP1',
-    'Member ID',
-    'E-Mail for Member',
-    'MEMBER FAMILY',
-    'MEMBER TYPE',
-    'MEMBERSHIP DATE',
-    'BIRTH DATE1'
-]
-SPOUSE_COLUMNS = [
-    'FIRST2',
-    'LAST2',
-    'NICKNAME2',
-    'MEMO2',
-    'ZIP2',
-    'E-Mail for Spouse',
-    'BIRTH DATE2'
-]
-

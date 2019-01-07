@@ -99,10 +99,6 @@ class Members(object):
         self.member_loader = MemberLoader()
 
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
-        self.column_mapping = conf.COLUMN_MAPPING
-        self.member_columns = conf.MEMBER_COLUMNS
-        self.spouse_columns = conf.SPOUSE_COLUMNS
-        self.home_path = conf.HOMEPATH
 
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """

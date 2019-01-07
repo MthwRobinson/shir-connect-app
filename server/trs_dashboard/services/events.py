@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 from trs_dashboard.database.database import Database
-from trs_dashboard.configuration import EVENT_GROUP
+from trs_dashboard.configuration import EVENT_GROUP, MAP_GROUP
 
 events = Blueprint('events', __name__)
 
@@ -89,7 +89,7 @@ def get_event_locations():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'}
         return jsonify(response), 403
     response = event_manager.get_event_locations()
@@ -103,7 +103,7 @@ def get_event_cities():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'}
         return jsonify(response), 403
     response = event_manager.get_event_cities()

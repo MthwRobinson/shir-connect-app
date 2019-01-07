@@ -122,7 +122,7 @@ def test_event_locations():
     # User must have access to events
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['events'])
+    user_management.update_access('unittestuser', ['map'])
 
     # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
@@ -166,7 +166,7 @@ def test_event_cities():
     # User must have access to events
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['events'])
+    user_management.update_access('unittestuser', ['map'])
 
     # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})

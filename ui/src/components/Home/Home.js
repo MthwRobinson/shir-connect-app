@@ -32,10 +32,10 @@ class Home extends Component {
         this.navigate('/login');
       } else {
         const auth = 'Bearer '.concat(token);
-        axios.get('/service/test', { headers: { Authorization: auth }})
+        axios.get('/service/user/authorize', { headers: { Authorization: auth }})
           .then(res => {
             this.setState({
-              name: res.data.name,
+              name: res.data.id,
               loading: false
             });
           })

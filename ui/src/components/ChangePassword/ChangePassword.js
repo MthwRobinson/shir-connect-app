@@ -132,7 +132,14 @@ class ChangePassword extends Component {
           return(
             <div className='error-msg'>
               <p className='error-msg'>
-                Password update failed.
+                Password update failed. Please Ensure:
+                  <ol>
+                    <li>Your old password is correct.</li>
+                    <li>Your new password has at least 10 characters,
+                      is not all upper case,
+                      is not all lswer case,
+                      and has at least one special character.</li>
+                  </ol>
               </p>
             </div>
           );

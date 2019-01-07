@@ -22,5 +22,7 @@ MATERIALIZED_VIEWS = [
     'shape_colors.sql'
 ]
 
-# Member upload configs
+# Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
+ACCESS_GROUPS = ['events', 'members', 'trends', 'map']
+USER_ROLES = ['admin', 'standard']

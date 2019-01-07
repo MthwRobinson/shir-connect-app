@@ -13,6 +13,7 @@ from flask import Blueprint, abort, jsonify, request
 from flask_jwt_simple import create_jwt, jwt_required, get_jwt_identity
 import pandas as pd
 
+import trs_dashboard.configuration as conf
 from trs_dashboard.database.database import Database
 
 user_management = Blueprint('user_management', __name__)
@@ -131,6 +132,31 @@ def change_password():
             response = {'message': 'password update failed'}
             return jsonify(response), 400
 
+@user_management.route('/service/user/update-role', methods=['POST'])
+@jwt_required
+def update_role():
+    """ Updates the role for the user in the post body """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+    if admin_user['role'] != 'admin':
+        response = {'message': 'only admins can update roles'}
+        return jsonify(response), 403
+    else:
+        if 'username' not in request.json:
+            response = {'message': 'username required in post body'}
+            return jsonify(response), 400
+        if 'role' not in request.json:
+            response = {'message': 'role required in post body'}
+            return jsonify(response), 400
+
+        username = request.json['username']
+        role = request.json['role']
+        updated = user_management.update_role(username, role)
+        if updated:
+            response = {'message': 'role update for %s'%(username)}
+            return jsonify(response), 201
+
 class UserManagement(object):
     """ Class that handles user centric REST operations """
     def __init__(self):
@@ -138,6 +164,9 @@ class UserManagement(object):
         self.logger = daiquiri.getLogger(__name__)
 
         self.database = Database()
+
+        self.access_groups = conf.ACCESS_GROUPS
+        self.user_roles = conf.USER_ROLES
 
     def get_user(self, username):
         """ Fetches a user from the database """
@@ -208,6 +237,38 @@ class UserManagement(object):
             return True
         else:
             return False
+
+    def update_role(self, username, role):
+        """ 
+        Updates the role for the user.
+        The two types of users are admin and standard
+        """
+        if role not in self.user_roles:
+            return False
+        else:
+            value = "'%s'"%(role)
+            self.database.update_column(
+                table='users',
+                item_id=username,
+                column='role',
+                value=value
+            )
+            return True
+
+    def update_access(self, username, modules):
+        """
+        Updates the modules thate are available for the user.
+        The available types are events, members, trends and map
+        """
+        mods = [x for x in modules if x in self.access_groups]
+        value = "'{" + ','.join(['"%s"'%(x) for x in mods]) + "}'"
+        self.database.update_column(
+            table='users',
+            item_id=username,
+            column='modules',
+            value=value
+        )
+
 
     def check_pw_complexity(self, password):
         """ Checks to ensure a password is sufficiently complex """

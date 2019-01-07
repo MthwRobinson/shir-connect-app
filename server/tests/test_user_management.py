@@ -195,6 +195,74 @@ def test_authorize():
     user = user_management.get_user('unittestuser')
     assert user == None
 
+def test_update_role():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.delete_user('unittestadmin')
+    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.add_user('unittestadmin', 'testPassword!')
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # Authorization header required to change password
+    response = CLIENT.post('/service/user/update-role')
+    assert response.status_code == 401
+    
+    # User must be an admin to update roles
+    response = CLIENT.post('/service/user/update-role', 
+        json=dict(
+            username='unittestuser',
+            role='admin'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 403
+
+    user_management.update_role('unittestadmin', 'admin')
+    # Username must be in the post body
+    response = CLIENT.post('/service/user/update-role', 
+        json=dict(
+            role='admin'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Role must be in the post body
+    response = CLIENT.post('/service/user/update-role', 
+        json=dict(
+            username='unittestuser'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 400
+    
+    # Success!
+    response = CLIENT.post('/service/user/update-role', 
+        json=dict(
+            username='unittestuser',
+            role='admin'
+        ),
+        headers={'Authorization': 'Bearer %s'%(jwt)}
+    )
+    assert response.status_code == 201
+    unittestuser = user_management.get_user('unittestuser')
+    assert unittestuser['role'] == 'admin'
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+    
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
+    assert user == None
+
 def test_pw_complexity():
     user_management = UserManagement()
     assert user_management.check_pw_complexity('Hell@') == False

@@ -46,6 +46,7 @@ class EventMap extends Component {
   }
 
   componentDidMount() {
+    this.checkAccess();
     this.getEventCounts();
     const locationPromise = this.getEventLocations();
     const zipPromise = this.getZipCodeGeometries();
@@ -63,6 +64,22 @@ class EventMap extends Component {
           this.addEventLocations();
         })
       })
+  }
+
+  checkAccess = () => {
+    // Checks to make sure the user has access to the 
+    // map access group
+    const token = localStorage.getItem('trsToken');
+    const auth = 'Bearer '.concat(token);
+    const url = '/service/map/authorize';
+    let response = axios.get(url, {headers: {Authorization: auth }})
+      .catch(err => {
+        if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        }
+      })
+    return response
+
   }
 
   selectEvent = (eventId) => {
@@ -104,8 +121,6 @@ class EventMap extends Component {
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
-        } else if(err.response.status===403){
-          this.props.history.push('/forbidden');
         }
       })
     return response

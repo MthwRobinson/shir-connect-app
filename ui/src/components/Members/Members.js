@@ -32,7 +32,8 @@ class Members extends Component {
         loading: true,
         showUpload: false,
         uploadLoading: false,
-        uploadFailed: false
+        uploadFailed: false,
+        userRole: 'standard'
       }
 
       // Binding for the file upload in the popup
@@ -40,8 +41,26 @@ class Members extends Component {
       this.handleQuery = this.handleQuery.bind(this)
     }
 
-    componentDidMount(){
+  componentDidMount(){
+      this.checkAccess(); 
       this.getMembers('initial');
+    }
+  
+    checkAccess = () => {
+      // Checks to make sure the user has access to the 
+      // member access group
+      const token = localStorage.getItem('trsToken');
+      const auth = 'Bearer '.concat(token);
+      const url = '/service/member/authorize';
+      axios.get(url, {headers: {Authorization: auth }})
+        .then(res => {
+            this.setState({userRole: res.data.role})
+        })
+        .catch(err => {
+          if(err.response.status===403){
+            this.props.history.push('/forbidden');
+          }
+        })
     }
 
     selectMember = (firstName, lastName) => {
@@ -372,6 +391,17 @@ class Members extends Component {
 
       let pageCount = this.renderPageCount();
 
+      let uploadButton = null
+      if(this.state.userRole==='admin'){
+        uploadButton = (
+            <i 
+              className="fa fa-upload pull-right event-icons"
+              onClick={()=>this.showUpload()}
+              data-tip="Upload member information."
+            ></i>
+        )
+      }
+
       return (
         <div>
           <Header />
@@ -382,9 +412,7 @@ class Members extends Component {
                 <i className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 ></i>
-                <i className="fa fa-upload pull-right event-icons"
-                  onClick={()=>this.showUpload()}
-                ></i>
+                {uploadButton}
               </h2><hr/>
             </div>
             {popup}

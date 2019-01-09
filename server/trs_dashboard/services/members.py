@@ -11,7 +11,7 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, make_response, request
-from flask_jwt_simple import jwt_required
+from flask_jwt_simple import jwt_required, get_jwt_identity
 import pandas as pd
 import numpy as np
 from werkzeug.utils import secure_filename
@@ -26,6 +26,13 @@ members = Blueprint('members', __name__)
 @jwt_required
 def get_member():
     """ Pulls a members information from the database """
+    member_manager = Members()
+    jwt_user = get_jwt_identity()
+    user = member_manager.database.get_item('users', jwt_user)
+    if conf.MEMBER_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
+
     first_name = request.args.get('firstName')
     if not first_name:
         response = {'message': 'first name required'}
@@ -36,7 +43,6 @@ def get_member():
         response = {'message': 'last name required'}
         return jsonify(response), 404
 
-    member_manager = Members()
     member = member_manager.get_member(first_name, last_name)
     if member:
         return jsonify(member)
@@ -44,11 +50,17 @@ def get_member():
         response = {'message': 'not found'}
         return jsonify(response), 404
 
-
 @members.route('/service/members', methods=['GET'])
 @jwt_required
 def get_members():
     """ Pulls the list of members from the database """
+    member_manager = Members()
+    jwt_user = get_jwt_identity()
+    user = member_manager.database.get_item('users', jwt_user)
+    if conf.MEMBER_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
+
     limit = request.args.get('limit')
     if not limit:
         limit = 25
@@ -67,7 +79,6 @@ def get_members():
         sort = 'last_name'
     q = request.args.get('q')
 
-    member_manager = Members()
     response = member_manager.get_members(
         limit=limit,
         page=page,
@@ -82,6 +93,12 @@ def get_members():
 def upload_members():
     """ Uploads membership data as a .csv or excel file """
     member_manager = Members()
+    jwt_user = get_jwt_identity()
+    user = member_manager.database.get_item('users', jwt_user)
+    if user['role'] != conf.ADMIN_ROLE:
+        response = {'message': 'only admins can upload files'}
+        return jsonify(response), 403
+
     good_upload = member_manager.upload_file(request)
     if good_upload:
         response = {'message': 'success'}

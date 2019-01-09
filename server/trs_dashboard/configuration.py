@@ -24,7 +24,11 @@ MATERIALIZED_VIEWS = [
 
 # Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
-USER_ROLES = ['admin', 'standard']
+
+ADMIN_ROLE = 'admin'
+STANDARD_ROLE = 'standard'
+USER_ROLES = [ADMIN_ROLE, STANDARD_ROLE]
+
 EVENT_GROUP = 'events'
 MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'

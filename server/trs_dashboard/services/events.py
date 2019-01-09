@@ -32,7 +32,7 @@ def get_event(event_id):
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
     if EVENT_GROUP not in user['modules']:
-        response = {'message': '%s does not have acccess to events'}
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
     event = event_manager.get_event(event_id)
@@ -51,7 +51,7 @@ def get_events():
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
     if EVENT_GROUP not in user['modules']:
-        response = {'message': '%s does not have acccess to events'}
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
     limit = request.args.get('limit')
@@ -90,7 +90,7 @@ def get_event_locations():
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
     if MAP_GROUP not in user['modules']:
-        response = {'message': '%s does not have acccess to events'}
+        response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_locations()
     return jsonify(response)
@@ -104,7 +104,7 @@ def get_event_cities():
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
     if MAP_GROUP not in user['modules']:
-        response = {'message': '%s does not have acccess to events'}
+        response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_cities()
     return jsonify(response)
@@ -118,7 +118,7 @@ def export_event_aggregates():
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
     if EVENT_GROUP not in user['modules']:
-        response = {'message': '%s does not have acccess to events'}
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
     q = request.args.get('q')

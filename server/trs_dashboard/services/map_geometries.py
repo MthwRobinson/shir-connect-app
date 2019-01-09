@@ -6,10 +6,11 @@ Includes:
     2. MapGeometries class for database calls
 """
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_simple import jwt_required
+from flask_jwt_simple import jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database
+from trs_dashboard.configuration import MAP_GROUP
 
 map_geometries = Blueprint('map_geometries', __name__)
 
@@ -18,6 +19,12 @@ map_geometries = Blueprint('map_geometries', __name__)
 def geometry(zipcode):
     """ Retrieves a zip code geometry from the database """
     map_geometries = MapGeometries()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = map_geometries.database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to events'%(jwt_user)}
+        return jsonify(response), 403
     layer = map_geometries.get_geometry(zipcode)
     return jsonify(layer)
 
@@ -26,6 +33,12 @@ def geometry(zipcode):
 def geometries():
     """ Retrieves all of the geometries for the map """
     map_geometries = MapGeometries()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = map_geometries.database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to events'%(jwt_user)}
+        return jsonify(response), 403
     layers = map_geometries.get_geometries()
     return jsonify(layers)
 
@@ -34,6 +47,12 @@ def geometries():
 def zip_codes():
     """ Retrieves a list of zip codes """
     map_geometries = MapGeometries()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = map_geometries.database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to events'%(jwt_user)}
+        return jsonify(response), 403
     zip_codes = map_geometries.get_zip_codes()
     return jsonify(zip_codes)
 

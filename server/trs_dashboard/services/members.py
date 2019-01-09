@@ -22,6 +22,20 @@ from trs_dashboard.database.member_loader import MemberLoader
 
 members = Blueprint('members', __name__)
 
+@members.route('/service/member/authorize', methods=['GET'])
+@jwt_required
+def member_authorize():
+    """ Checks to see if the user is authorized to see members """
+    database = Database()
+    jwt_user = get_jwt_identity()
+    user = database.get_item('users', jwt_user)
+    if conf.MEMBER_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
+    else:
+        del user['password']
+        return jsonify(user), 200
+
 @members.route('/service/member', methods=['GET'])
 @jwt_required
 def get_member():

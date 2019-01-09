@@ -14,6 +14,20 @@ from trs_dashboard.configuration import MAP_GROUP
 
 map_geometries = Blueprint('map_geometries', __name__)
 
+@map_geometries.route('/service/map/authorize', methods=['GET'])
+@jwt_required
+def map_authorize():
+    """ Checks whether the users is authorized to view the map """
+    database = Database()
+    jwt_user = get_jwt_identity()
+    user = database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have access the map'%(jwt_user)}
+        return jsonify(response), 403
+    else:
+        response = {'message': '%s is authorized to view the map'%(jwt_user)}
+        return jsonify(response), 200
+
 @map_geometries.route('/service/map/geometry/<zipcode>', methods=['GET'])
 @jwt_required
 def geometry(zipcode):
@@ -23,7 +37,7 @@ def geometry(zipcode):
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
     if MAP_GROUP not in user['modules']:
-        response = {'message': '%s does not have access to events'%(jwt_user)}
+        response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     layer = map_geometries.get_geometry(zipcode)
     return jsonify(layer)
@@ -37,7 +51,7 @@ def geometries():
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
     if MAP_GROUP not in user['modules']:
-        response = {'message': '%s does not have access to events'%(jwt_user)}
+        response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     layers = map_geometries.get_geometries()
     return jsonify(layers)
@@ -51,7 +65,7 @@ def zip_codes():
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
     if MAP_GROUP not in user['modules']:
-        response = {'message': '%s does not have access to events'%(jwt_user)}
+        response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     zip_codes = map_geometries.get_zip_codes()
     return jsonify(zip_codes)

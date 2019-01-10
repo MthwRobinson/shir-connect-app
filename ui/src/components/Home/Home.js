@@ -15,7 +15,8 @@ const MODULES = require('./../../data/modules.json');
 class Home extends Component {
     state = {
       name: '',
-      loading: true
+      loading: true,
+      modules: []
     }
 
 
@@ -36,6 +37,7 @@ class Home extends Component {
           .then(res => {
             this.setState({
               name: res.data.id,
+              modules: res.data.modules,
               loading: false
             });
           })
@@ -47,7 +49,78 @@ class Home extends Component {
       }
     }
 
+    renderModuleCards(){
+      // Only renders cards that users have access to
+
+      // Check to see if the modules returned by the service
+      // appear in the modules.json file
+      let goodModules = [];
+      for(let module of this.state.modules){
+        if(module in MODULES){
+          goodModules.push(module);
+        }
+      }
+      const rowCount = Math.ceil(goodModules.length/2);
+
+      let i = 0;
+      let rows = [];
+      while(i < rowCount){
+        const idx1 = i*2;
+        const idx2 = idx1 + 1;
+        
+        // Render the first module
+        const module1 = goodModules[idx1];
+        const moduleCard1 = (
+            <Col xs={12} sm={12} md={6} lg={6}>
+              <ModuleCard 
+                title={MODULES[module1].title}
+                icon={MODULES[module1].icon}
+                bullets={MODULES[module1].bullets}
+                click={()=>this.navigate(MODULES[module1].link)}
+              />
+            </Col>
+        )
+        
+        // If the number of modules is odd, render the second module
+        let module2 = null;
+        let moduleCard2 = null;
+        if(idx2 < goodModules.length){
+          module2 = goodModules[idx2];
+          moduleCard2 = (
+            <Col xs={12} sm={12} md={6} lg={6}>
+              <ModuleCard 
+                title={MODULES[module2].title}
+                icon={MODULES[module2].icon}
+                bullets={MODULES[module2].bullets}
+                click={()=>this.navigate(MODULES[module2].link)}
+              />
+            </Col>
+          )
+        }
+
+        const row = (
+          <Row className='module-row'>
+            {moduleCard1}
+            {moduleCard2}
+          </Row>
+        )
+        rows.push(row);
+        i++;
+      }
+      return rows
+
+    }
+
     render() {
+      let message = null;
+      if(this.state.modules.length===0){
+        message = <h4>Contact your system administrator to request access to a module.</h4>
+      } else {
+        message = <h4>Choose a module to begin.</h4>
+      }
+
+      let rows = this.renderModuleCards();
+
       if(this.state.loading){
         return(
           <div>
@@ -64,44 +137,9 @@ class Home extends Component {
             <div className="Home">
               <div className="home-header">
                 <h2>Welcome, {this.state.name}!</h2><hr/>
-                <h4>Choose a module to begin.</h4>
+                {message}
               </div>
-              <Row className="module-row">
-                <Col xs={12} sm={12} md={6} lg={6}>
-                  <ModuleCard 
-                    title={MODULES[0].title}
-                    icon={MODULES[0].icon}
-                    bullets={MODULES[0].bullets}
-                    click={()=>this.navigate(MODULES[0].link)}
-                  />
-                </Col>
-                <Col xs={12} sm={12} md={6} lg={6}>
-                  <ModuleCard 
-                    title={MODULES[1].title}
-                    icon={MODULES[1].icon}
-                    bullets={MODULES[1].bullets}
-                    click={()=>this.navigate(MODULES[1].link)}
-                  />
-                </Col>
-              </Row>
-              <Row className="module-row">
-                <Col xs={12} sm={12} md={6} lg={6}>
-                  <ModuleCard 
-                    title={MODULES[2].title}
-                    icon={MODULES[2].icon}
-                    bullets={MODULES[2].bullets}
-                    click={()=>this.navigate(MODULES[2].link)}
-                  />
-                </Col>
-                <Col xs={12} sm={12} md={6} lg={6}>
-                  <ModuleCard 
-                    title={MODULES[3].title}
-                    icon={MODULES[3].icon}
-                    bullets={MODULES[3].bullets}
-                    click={()=>this.navigate(MODULES[3].link)}
-                  />
-                </Col>
-              </Row>
+              {rows}
             </div>
           </div>
         );

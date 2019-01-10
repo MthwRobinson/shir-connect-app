@@ -10,10 +10,11 @@ import logging
 
 import daiquiri
 from flask import Blueprint, jsonify, request
-from flask_jwt_simple import jwt_required
+from flask_jwt_simple import jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database
+from trs_dashboard.configuration import TRENDS_GROUP
 
 trends = Blueprint('trends', __name__)
 
@@ -38,11 +39,31 @@ EVENT_TABLE = """
     ON a.event_id = c.id
 """
 
+@trends.route('/service/trends/authorize', methods=['GET'])
+@jwt_required
+def member_authorize():
+    """ Checks to see if the user is authorized to see members """
+    database = Database()
+    jwt_user = get_jwt_identity()
+    user = database.get_item('users', jwt_user)
+    if TRENDS_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to trends'%(jwt_user)}
+        return jsonify(response), 403
+    else:
+        del user['password']
+        return jsonify(user), 200
+
 @trends.route('/service/trends/monthly-revenue', methods=['GET'])
 @jwt_required
 def month_revenue():
     """ Finds event revenue aggregated by month """
     trends = Trends()
+    # Make sure user has access to the trends page
+    jwt_user = get_jwt_identity()
+    user = trends.database.get_item('users', jwt_user)
+    if TRENDS_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
     response = trends.get_monthly_revenue()
     return jsonify(response)
 
@@ -51,6 +72,12 @@ def month_revenue():
 def average_attendance():
     """ Finds the avg event attendace by day of week """
     trends = Trends()
+    # Make sure user has access to the trends page
+    jwt_user = get_jwt_identity()
+    user = trends.database.get_item('users', jwt_user)
+    if TRENDS_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
     response = trends.get_average_attendance()
     return jsonify(response)
 
@@ -58,10 +85,17 @@ def average_attendance():
 @jwt_required
 def age_group_attendees():
     """ Finds a distinct count of attendees by age group and year """
+    trends = Trends()
+    # Make sure user has access to the trends page
+    jwt_user = get_jwt_identity()
+    user = trends.database.get_item('users', jwt_user)
+    if TRENDS_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
+
     group_by = request.args.get('groupBy')
     if not group_by:
         group_by = 'year'
-    trends = Trends()
     response = trends.get_age_group_attendees(group=group_by)
     return jsonify(response)
 
@@ -69,13 +103,20 @@ def age_group_attendees():
 @jwt_required
 def participation(age_group):
     """ Finds the top events or participants by age group """
+    trends = Trends()
+    # Make sure user has access to the trends page
+    jwt_user = get_jwt_identity()
+    user = trends.database.get_item('users', jwt_user)
+    if TRENDS_GROUP not in user['modules']:
+        response = {'message': '%s does not have access to members'%(jwt_user)}
+        return jsonify(response), 403
+
     top = request.args.get('top')
     if not top:
         top = 'member'
     limit = request.args.get('limit')
     if not limit:
         limit = 25
-    trends = Trends()
     response = trends.get_participation(age_group, top, limit)
     return jsonify(response)
 

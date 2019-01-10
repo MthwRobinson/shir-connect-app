@@ -38,12 +38,21 @@ def user_register():
         response = {'message': 'missing key in post body'}
         return jsonify(response), 400
 
-    new_user['id'] = new_user['username']
+    if 'role' not in new_user:
+        new_user['role'] = 'standard'
+    if 'modules' not in new_user:
+        new_user['modules'] = []
+
     user_management = UserManagement()
-    status = user_management.add_user(new_user['id'], new_user['password'])
+    status = user_management.add_user(
+        username=new_user['username'], 
+        password=new_user['password'],
+        role=new_user['role'],
+        modules=new_user['modules']
+    )
     # Status returns false if user already exists
     if status:
-        response = {'message': 'user %s created'%(new_user['id'])}
+        response = {'message': 'user %s created'%(new_user['username'])}
         return jsonify(response), 201
     else:
         response = {'message': 'user already exists'}
@@ -293,7 +302,9 @@ class UserManagement(object):
             pw_hash = self.hash_pw(password)
             item = {
                 'id': username,
-                'password': pw_hash
+                'password': pw_hash,
+                'role': role,
+                'modules': modules
             }
             self.database.load_item(item, 'users')
             return True

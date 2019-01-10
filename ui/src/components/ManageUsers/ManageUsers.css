@@ -5,3 +5,20 @@
   padding-bottom: 30px;
   text-align: left;
 }
+
+.add-user-container {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.form-check-box {
+  margin-right: 10px;
+}
+
+#access-control-boxes {
+  padding-right: 5px;
+}
+
+.user-management-rows{
+  text-transform: capitalize;
+}

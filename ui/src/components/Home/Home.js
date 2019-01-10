@@ -114,7 +114,12 @@ class Home extends Component {
     render() {
       let message = null;
       if(this.state.modules.length===0){
-        message = <h4>Contact your system administrator to request access to a module.</h4>
+        message = (
+          <h4>
+            You do not currently have access to any modules.
+            Contact your system administrator to request access.
+          </h4>
+        )
       } else {
         message = <h4>Choose a module to begin.</h4>
       }

@@ -3,6 +3,36 @@ from trs_dashboard.services.user_management import UserManagement
 
 CLIENT = app.test_client()
 
+def test_user_access():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestadmin', 'testPassword!')
+    url = '/service/user/access'
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # Authorization header is requred
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    # Success!
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    assert 'modules' in response.json
+    assert 'role' in response.json
+    assert 'password' not in response.json
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+
+
 def test_add_user():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')

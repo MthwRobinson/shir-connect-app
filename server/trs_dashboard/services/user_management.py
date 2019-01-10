@@ -49,6 +49,16 @@ def user_register():
         response = {'message': 'user already exists'}
         return jsonify(response), 409
 
+@user_management.route('/service/user/access', methods=['GET'])
+@jwt_required
+def user_access():
+    """ Returns the roles and access control groups for the user """
+    database = Database()
+    jwt_user = get_jwt_identity()
+    user = database.get_item('users', jwt_user)
+    del user['password']
+    return jsonify(user), 200
+
 @user_management.route('/service/user/<username>', methods=['DELETE'])
 @jwt_required
 def delete_user(username):

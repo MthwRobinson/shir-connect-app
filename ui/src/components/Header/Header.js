@@ -68,6 +68,7 @@ class Header extends Component {
           >
             <div className="menu-content">
               <h3>Admin</h3><hr/>
+              <Link to="/">Home</Link><br/>
               <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link><br/>
               <Link to="/change-password">Change Password</Link><br/>
               {adminOptions}

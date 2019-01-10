@@ -19,7 +19,7 @@ class Trends extends Component {
     const token = localStorage.getItem('trsToken');
     const auth = 'Bearer '.concat(token);
     const url = '/service/trends/authorize';
-    let response = axios.get(url, {headers: {Authorization: auth }})
+    axios.get(url, {headers: {Authorization: auth }})
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');

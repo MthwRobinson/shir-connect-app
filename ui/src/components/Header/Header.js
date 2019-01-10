@@ -5,6 +5,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { Navbar } from 'react-bootstrap';
 import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
+import axios from 'axios';
 
 import { clearToken } from './../../utilities/authentication';
 
@@ -14,19 +15,46 @@ class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      paneOpen: false
+      paneOpen: false,
+      userRole: 'standard'
     }
   }
   
   componentDidMount() {
     // The modal element is the popout menu
     Modal.setAppElement(this.el);
+    this.checkAccess();
   }
 
+  checkAccess() {
+    // Checks to make sure the role of the user
+    if(this.props.history.location.pathname!=='/login'){
+      const token = localStorage.getItem('trsToken');
+      const auth = 'Bearer '.concat(token);
+      const url = '/service/user/authorize';
+      axios.get(url, {headers: {Authorization: auth }})
+        .then(res => {
+          const userRole = res.data.role;
+          this.setState({userRole: userRole})
+        })
+        .catch(err => {
+          if(err.response.status===401){
+            this.props.history.push('/login');
+          } else if(err.response.status===403){
+            this.props.history.push('/forbidden');
+          }
+        })
+    }
+  }
 
   renderMenu = () => {
     // Builds the popout menu.
     // Menu is expanded is paneOpen is true
+    let adminOptions = null;
+    if(this.state.userRole==='admin'){
+      adminOptions = <Link to="/manage-users">Manage Users</Link>
+    }
+    
     if(this.props.history.location.pathname==='/login'){
       return null
     } else {
@@ -41,7 +69,8 @@ class Header extends Component {
             <div className="menu-content">
               <h3>Admin</h3><hr/>
               <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link><br/>
-              <Link to="/change-password">Change Password</Link>
+              <Link to="/change-password">Change Password</Link><br/>
+              {adminOptions}
             </div>
           </SlidingPane>
         </div>

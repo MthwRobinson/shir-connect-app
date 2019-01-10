@@ -583,9 +583,14 @@ class ManageUsers extends Component {
             >{modules}</th>
             <th>
               <i 
-                className='fa fa-times pull-right event-icons'
+                className='fa fa-times pull-right event-icons delete-user-icon'
                 onClick={()=>this.deleteClick(user.id)}
                 data-tip="Delete user."
+              ></i>
+              <i 
+                className='fa fa-key fa-flip-horizontal pull-right event-icons'
+                onClick={()=>this.deleteClick(user.id)}
+                data-tip="Reset password."
               ></i>
             </th>
           </tr>

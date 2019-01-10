@@ -26,14 +26,16 @@ class ManageUsers extends Component {
       this.state = {
         users: [],
         loading: true,
-        addModalOpen: true,
+        addModalOpen: false,
         username: '',
         password: '',
         role: 'standard',
         events: false,
         members: false,
         trends: false,
-        map: false
+        map: false,
+        deleteModalOpen: false,
+        deleteUsername: ''
       }
     }
   
@@ -116,18 +118,41 @@ class ManageUsers extends Component {
               username: '',
               password: '',
               role: this.state.role,
-              module: this.state.modules
+              events: false,
+              members: false,
+              trends: false,
+              map: false
             })
           })
           .catch( err => {
             if(err.response.status===401){
               this.navigate('/login');
-            } else if(err.response.status===403){
-              this.navigate('/forbidden');
             }
           })
       }
+    }
 
+    deleteUser = () => {
+      // Deletes the selected user
+      this.setState({loading: true});
+      const token = localStorage.getItem('trsToken');
+      if(!token){
+        this.this.history.push('/login');
+      } else {
+        this.setState({deleteModalOpen: false});
+        const auth = 'Bearer '.concat(token);
+        const url = '/service/user/' + this.state.deleteUsername;
+        axios.delete(url, {headers: { Authorization: auth }})
+          .then(res => {
+            this.getUsers();
+            this.setState({ deleteUsername: '' });
+          })
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
+          })
+      }
     }
 
     //------------------
@@ -182,7 +207,6 @@ class ManageUsers extends Component {
     closeAddWindow = () => {
       // Closes the modal window
       this.setState({ addModalOpen: false });
-      console.log(this.state);
     }
 
     renderOpenModal = () => {
@@ -271,6 +295,62 @@ class ManageUsers extends Component {
       )
     }
 
+    //------------------
+    // DELETE USER MODAL
+    //-------------------
+    
+    deleteClick = (username) => {
+      // Click handler for the x in the table
+      this.setState({
+        deleteModalOpen: true,
+        deleteUsername: username
+      })
+    }
+  
+    openDeleteWindow = () => {
+      // Opens the delete modal window
+      this.setState({ deleteModalOpen: true });
+    }
+
+    closeDeleteWindow = () => {
+      // Closes the delete modal window
+      this.setState({ deleteModalOpen: false });
+    }
+
+    renderDeleteModal = () => {
+      // The modal that pops up to add a new user
+      return(
+        <div>
+          <Modal 
+            open={this.state.deleteModalOpen}
+            showCloseIcon={false}
+            center
+          >
+            <div className="add-user-container">
+              <h3><u>
+                Delete User
+                <i 
+                  className='fa fa-times pull-right event-icons'
+                  onClick={()=>this.closeDeleteWindow()}
+                ></i>
+              </u></h3>
+              <h4>
+                Are you sure you want to remove 
+                {' '+this.state.deleteUsername}?
+              </h4>
+              <Button
+                className='confirm-delete-button'
+                bsStyle='danger'
+                onClick={()=>this.deleteUser()}
+              >Confirm</Button>
+            </div>
+          </Modal>
+        </div>
+      )
+    }
+
+    
+
     renderTable = () => {
       // Renders the table of current users
       let users = [];
@@ -281,7 +361,12 @@ class ManageUsers extends Component {
             <th>{user.id}</th>
             <th className='user-management-rows'>{user.role}</th>
             <th className='user-management-rows'>{modules}</th>
-            <th><i className='fa fa-times pull-right event-icons'></i></th>
+            <th>
+              <i 
+                className='fa fa-times pull-right event-icons'
+                onClick={()=>this.deleteClick(user.id)}
+              ></i>
+            </th>
           </tr>
         )
         users.push(userRow);
@@ -310,6 +395,8 @@ class ManageUsers extends Component {
 
   render() {
       const addWindow = this.renderOpenModal();
+      const deleteWindow = this.renderDeleteModal();
+
       let table = null;
       if(this.state.loading){
         table = (
@@ -339,6 +426,7 @@ class ManageUsers extends Component {
             {table}
           </div>
           {addWindow}
+          {deleteWindow}
           <ReactToolTip />
         </div>
       );

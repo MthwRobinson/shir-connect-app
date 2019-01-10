@@ -15,10 +15,10 @@
   margin-right: 10px;
 }
 
-#access-control-boxes {
-  padding-right: 5px;
-}
-
 .user-management-rows{
   text-transform: capitalize;
+}
+
+.confirm-delete-button {
+  margin-top: 6px;
 }

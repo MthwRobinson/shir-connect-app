@@ -17,6 +17,7 @@
 
 .user-management-rows{
   text-transform: capitalize;
+  cursor: pointer;
 }
 
 .confirm-delete-button {

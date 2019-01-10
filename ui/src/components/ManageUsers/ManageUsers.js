@@ -35,7 +35,13 @@ class ManageUsers extends Component {
         trends: false,
         map: false,
         deleteModalOpen: false,
-        deleteUsername: ''
+        deleteUsername: '',
+        modRole: 'standard',
+        modEvents: false,
+        modMembers: false,
+        modTrends: false,
+        modMap: false,
+        modUsername: ''
       }
     }
   
@@ -52,7 +58,19 @@ class ManageUsers extends Component {
       this.handleMembers = this.handleMembers.bind(this);
       this.handleTrends = this.handleTrends.bind(this);
       this.handleMap = this.handleMap.bind(this);
+
+      // Bindings for the modify user form
+      this.handleModSubmit = this.handleModSubmit.bind(this);
+      this.handleModRole = this.handleModRole.bind(this);
+      this.handleModEvents = this.handleModEvents.bind(this);
+      this.handleModMembers = this.handleModMembers.bind(this);
+      this.handleModTrends = this.handleModTrends.bind(this);
+      this.handleModMap = this.handleModMap.bind(this);
     }
+  
+    //------------------
+    // SERVICE CALLS
+    //-------------------
   
     getUsers = () => {
       // Pulls a list of users from the database
@@ -146,6 +164,59 @@ class ManageUsers extends Component {
           .then(res => {
             this.getUsers();
             this.setState({ deleteUsername: '' });
+          })
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
+          })
+      }
+    }
+  
+    modUser = () => {
+      // Posts updated user roles and modules
+      this.setState({loading: true});
+      const token = localStorage.getItem('trsToken');
+      if(!token){
+        this.this.history.push('/login');
+      } else {
+        const auth = 'Bearer '.concat(token);
+        // Build the post body
+        let modules = [];
+        if(this.state.events){
+          modules.push('events');
+        }
+        if(this.state.members){
+          modules.push('members');
+        }
+        if(this.state.trends){
+          modules.push('trends');
+        }
+        if(this.state.map){
+          modules.push('map');
+        }
+        const data = {
+          username: this.state.username,
+          password: this.state.password,
+          role: this.state.role,
+          modules: modules
+        } 
+
+        axios.post('/service/user',
+          data,
+          {headers: { Authorization: auth }})
+          .then(res => {
+            this.getUsers();
+            this.setState({
+              addModalOpen: false,
+              username: '',
+              password: '',
+              role: this.state.role,
+              events: false,
+              members: false,
+              trends: false,
+              map: false
+            })
           })
           .catch( err => {
             if(err.response.status===401){
@@ -348,8 +419,142 @@ class ManageUsers extends Component {
         </div>
       )
     }
+  
+  
+    //------------------
+    // MODIFY USER MODAL
+    //-------------------
+    handleModUsername(event){
+      // Updates the username in the state
+      this.setState({ modUsername: event.target.value });
+    }
+  
+    handleModRole(event){
+      // Updates the role in the state
+      this.setState({ modRole: event.target.value });
+    }
 
-    
+    handleModEvents(event){
+      // Updates the events checkbox
+      this.setState({ modEvents: event.target.checked });
+    }
+
+    handleModMembers(event){
+      // Updates the members checkbox
+      this.setState({ modMembers: event.target.checked});
+    }
+
+    handleModTrends(event){
+      // Updates the trends checkbox
+      this.setState({ modTrends: event.target.checked });
+    }
+
+    handleModMap(event){
+      // Updates the map checkbox
+      this.setState({ modMap: event.target.checked });
+    }
+
+    handleModSubmit(event){
+      // Posts user updates to the database
+      event.preventDefault();
+      this.modifyUser();
+    }
+
+    openModWindow = (username, role, modules) => {
+      // Opens the modify user modal window
+      this.setState({
+        modUsername: username,
+        modRole: role,
+        modEvents: modules.includes('events'),
+        modMembers: modules.includes('members'),
+        modTrends: modules.includes('trends'),
+        modMap: modules.includes('map'),
+        modModalOpen: true 
+      });
+    }
+
+    closeModWindow = () => {
+      // Closes the modal window
+      this.setState({ 
+        modModalOpen: false,
+        modRole: 'standard',
+        modEvents: false,
+        modMembers: false,
+        modTrends: false,
+        modMap: false,
+        modUsername: ''
+      });
+    }
+
+    renderModModal = () => {
+      // The modal that pops up to add a new user
+      return(
+        <div>
+          <Modal 
+            open={this.state.modModalOpen}
+            showCloseIcon={false}
+            center
+          >
+            <div className="add-user-container">
+              <h3><u>
+                Update {this.state.modUsername}
+                <i 
+                  className='fa fa-times pull-right event-icons'
+                  onClick={()=>this.closeModWindow()}
+                ></i>
+              </u></h3>
+              <Form>
+                <FormGroup>
+                  <ControlLabel>Role</ControlLabel>
+                  <FormControl 
+                    componentClass="select"
+                    value={this.state.modRole}
+                    onChange={this.handleModRole}
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="admin">Admin</option>
+                  </FormControl>
+                </FormGroup>
+                <FormGroup>
+                  <ControlLabel>Modules</ControlLabel><br/>
+                  <Checkbox
+                    checked={this.state.modEvents}
+                    onChange={this.handleModEvents}
+                    className='form-check-box' inline>
+                    {' '}Events
+                  </Checkbox>
+                  <Checkbox 
+                    checked={this.state.modMembers}
+                    onChange={this.handleModMembers}
+                  className='form-check-box' inline>
+                    {' '}Members
+                  </Checkbox><br/>
+                  <Checkbox 
+                    checked={this.state.modTrends}
+                    onChange={this.handleModTrends}
+                    className='form-check-box' 
+                  inline>
+                    {' '}Trends
+                  </Checkbox>
+                  <Checkbox 
+                    checked={this.state.modMap}
+                    onChange={this.handleModMap}
+                    className='form-check-box' 
+                  inline>
+                    {' '}Map
+                  </Checkbox>
+                </FormGroup>
+                <Button
+                  className='login-button'
+                  bsStyle='primary'
+                  type='submit'
+                >Submit</Button>
+              </Form>
+            </div>
+          </Modal>
+        </div>
+      )
+    }
 
     renderTable = () => {
       // Renders the table of current users
@@ -357,7 +562,10 @@ class ManageUsers extends Component {
       for(const user of this.state.users){
         const modules = user.modules.join(', ');
         const userRow = (
-          <tr className='table-rows'>
+          <tr 
+            className='table-rows'
+            onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+          >
             <th>{user.id}</th>
             <th className='user-management-rows'>{user.role}</th>
             <th className='user-management-rows'>{modules}</th>
@@ -365,6 +573,7 @@ class ManageUsers extends Component {
               <i 
                 className='fa fa-times pull-right event-icons'
                 onClick={()=>this.deleteClick(user.id)}
+                data-tip="Delete user."
               ></i>
             </th>
           </tr>
@@ -389,6 +598,7 @@ class ManageUsers extends Component {
               </tbody>
             </Table>
           </Row>
+          <ReactToolTip />
         </div>
       )
     }
@@ -396,6 +606,7 @@ class ManageUsers extends Component {
   render() {
       const addWindow = this.renderOpenModal();
       const deleteWindow = this.renderDeleteModal();
+      const modWindow = this.renderModModal();
 
       let table = null;
       if(this.state.loading){
@@ -427,6 +638,7 @@ class ManageUsers extends Component {
           </div>
           {addWindow}
           {deleteWindow}
+          {modWindow}
           <ReactToolTip />
         </div>
       );

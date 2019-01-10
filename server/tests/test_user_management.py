@@ -47,11 +47,15 @@ def test_add_user():
             username='unittestuser', 
             password='testPassword!',
             role='standard',
-            modules=[]
+            modules=['events','map']
         ),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
     assert response.status_code == 201
+    user = user_management.get_user('unittestuser')
+    assert 'events' in user['modules']
+    assert 'map' in user['modules']
+    assert user['role'] == 'standard'
 
     # Can't register the same user twice
     response = CLIENT.post('/service/user', 

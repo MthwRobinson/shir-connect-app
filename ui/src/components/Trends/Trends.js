@@ -14,43 +14,39 @@ class Trends extends Component {
   }
   
   componentDidMount(){
-      // Pulls the users name and redirects to the Login
-      // page if authentication is required
-      const token = localStorage.getItem('trsToken');
-      if(!token){
-        this.navigate('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        axios.get('/service/user/authorize', { headers: { Authorization: auth }})
-          .then(res => {
-            this.setState({name: res.data.id});
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-      }
-    }
+    // Checks to make sure the user has access to the 
+    // trends access group
+    const token = localStorage.getItem('trsToken');
+    const auth = 'Bearer '.concat(token);
+    const url = '/service/trends/authorize';
+    let response = axios.get(url, {headers: {Authorization: auth }})
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        }
+      })
+  }
 
-    render() {
-      return (
-        <div>
-          <Header />
-          <div className="Trends">
-            <div className='events-header'>
-              <h2>Age Group Trends
-                <i
-                  className="fa fa-times pull-right event-icons"
-                  onClick={()=>this.props.history.push('/')}
-                />
-              </h2><hr/>
-            </div>
-            <AgeGroupAttendance />
+  render() {
+    return (
+      <div>
+        <Header />
+        <div className="Trends">
+          <div className='events-header'>
+            <h2>Age Group Trends
+              <i
+                className="fa fa-times pull-right event-icons"
+                onClick={()=>this.props.history.push('/')}
+              />
+            </h2><hr/>
           </div>
+          <AgeGroupAttendance />
         </div>
-      );
-    }
+      </div>
+    );
+  }
 }
 
 export default withRouter(Trends);

@@ -173,55 +173,62 @@ class ManageUsers extends Component {
       }
     }
   
-    modUser = () => {
+    modifyUser = () => {
       // Posts updated user roles and modules
       this.setState({loading: true});
       const token = localStorage.getItem('trsToken');
       if(!token){
         this.this.history.push('/login');
       } else {
+        this.closeModWindow();
         const auth = 'Bearer '.concat(token);
         // Build the post body
         let modules = [];
-        if(this.state.events){
+        if(this.state.modEvents){
           modules.push('events');
         }
-        if(this.state.members){
+        if(this.state.modMembers){
           modules.push('members');
         }
-        if(this.state.trends){
+        if(this.state.modTrends){
           modules.push('trends');
         }
-        if(this.state.map){
+        if(this.state.modMap){
           modules.push('map');
         }
         const data = {
-          username: this.state.username,
-          password: this.state.password,
-          role: this.state.role,
+          username: this.state.modUsername,
           modules: modules
         } 
 
-        axios.post('/service/user',
+        // Update the access for the user
+        const updateAccess = axios.post('/service/user/update-access',
           data,
           {headers: { Authorization: auth }})
-          .then(res => {
-            this.getUsers();
-            this.setState({
-              addModalOpen: false,
-              username: '',
-              password: '',
-              role: this.state.role,
-              events: false,
-              members: false,
-              trends: false,
-              map: false
-            })
-          })
           .catch( err => {
             if(err.response.status===401){
               this.navigate('/login');
             }
+          })
+
+        // Update the role for the user
+        const roleData = {
+          username: this.state.modUsername,
+          role: this.state.modRole
+        }
+        const updateRole = axios.post('/service/user/update-role',
+          roleData,
+          {headers: {Authorization: auth}})
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
+          })
+
+        // Update the users in the table
+        Promise.all([updateAccess, updateRole])
+          .then(() => {
+            this.getUsers();
           })
       }
     }
@@ -503,7 +510,7 @@ class ManageUsers extends Component {
                   onClick={()=>this.closeModWindow()}
                 ></i>
               </u></h3>
-              <Form>
+              <Form onSubmit={this.handleModSubmit} horizontal>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
                   <FormControl 
@@ -562,13 +569,18 @@ class ManageUsers extends Component {
       for(const user of this.state.users){
         const modules = user.modules.join(', ');
         const userRow = (
-          <tr 
-            className='table-rows'
-            onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
-          >
-            <th>{user.id}</th>
-            <th className='user-management-rows'>{user.role}</th>
-            <th className='user-management-rows'>{modules}</th>
+          <tr className='table-rows'>
+            <th
+              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+            >{user.id}</th>
+            <th 
+              className='user-management-rows'
+              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+            >{user.role}</th>
+            <th 
+              className='user-management-rows'
+              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+            >{modules}</th>
             <th>
               <i 
                 className='fa fa-times pull-right event-icons'

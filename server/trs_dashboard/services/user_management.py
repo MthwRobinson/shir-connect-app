@@ -55,8 +55,8 @@ def user_register():
         response = {'message': 'user %s created'%(new_user['username'])}
         return jsonify(response), 201
     else:
-        response = {'message': 'user already exists'}
-        return jsonify(response), 409
+        response = {'message': 'bad request'}
+        return jsonify(response), 400
 
 @user_management.route('/service/user/<username>', methods=['DELETE'])
 @jwt_required
@@ -373,7 +373,7 @@ class UserManagement(object):
 
     def list_users(self):
         """ Lists all of the active users """
-        df = self.database.read_table('users')
+        df = self.database.read_table('users', sort='id', order='asc')
         users = []
         for i in df.index:
             user = dict(df.loc[i])

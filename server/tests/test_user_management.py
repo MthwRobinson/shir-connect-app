@@ -58,7 +58,7 @@ def test_add_user():
         json=dict(username='unittestuser', password='testPassword!'),
         headers={'Authorization': 'Bearer %s'%(jwt)}
     )
-    assert response.status_code == 409
+    assert response.status_code == 400
 
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

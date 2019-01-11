@@ -245,8 +245,8 @@ class ManageUsers extends Component {
         // Build the post body
         const data = {username: this.state.resetUsername} 
 
-        // Update the access for the user
-        const updateAccess = axios.post('/service/user/reset-password',
+        // Update the password for the user
+        axios.post('/service/user/reset-password',
           data,
           {headers: { Authorization: auth }})
           .then( res => {

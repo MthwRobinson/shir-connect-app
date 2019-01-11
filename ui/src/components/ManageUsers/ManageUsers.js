@@ -27,6 +27,7 @@ class ManageUsers extends Component {
         users: [],
         loading: true,
         addModalOpen: false,
+        addUserError: false,
         username: '',
         password: '',
         role: 'standard',
@@ -41,7 +42,8 @@ class ManageUsers extends Component {
         modMembers: false,
         modTrends: false,
         modMap: false,
-        modUsername: ''
+        modUsername: '',
+        resetUsername: ''
       }
     }
   
@@ -52,7 +54,6 @@ class ManageUsers extends Component {
       // Bindings for the new user form
       this.handleAddSubmit = this.handleAddSubmit.bind(this);
       this.handleUsername = this.handleUsername.bind(this);
-      this.handlePassword = this.handlePassword.bind(this);
       this.handleRole = this.handleRole.bind(this);
       this.handleEvents = this.handleEvents.bind(this);
       this.handleMembers = this.handleMembers.bind(this);
@@ -66,6 +67,9 @@ class ManageUsers extends Component {
       this.handleModMembers = this.handleModMembers.bind(this);
       this.handleModTrends = this.handleModTrends.bind(this);
       this.handleModMap = this.handleModMap.bind(this);
+
+      // Bindings for reset password form
+
     }
   
     //------------------
@@ -99,7 +103,10 @@ class ManageUsers extends Component {
 
     addUser = () => {
       // Posts a new user to the database
-      this.setState({loading: true});
+      this.setState({
+        loading: true,
+        addUserError: false
+      });
       const token = localStorage.getItem('trsToken');
       if(!token){
         this.this.history.push('/login');
@@ -121,7 +128,6 @@ class ManageUsers extends Component {
         }
         const data = {
           username: this.state.username,
-          password: this.state.password,
           role: this.state.role,
           modules: modules
         } 
@@ -131,20 +137,14 @@ class ManageUsers extends Component {
           {headers: { Authorization: auth }})
           .then(res => {
             this.getUsers();
-            this.setState({
-              addModalOpen: false,
-              username: '',
-              password: '',
-              role: this.state.role,
-              events: false,
-              members: false,
-              trends: false,
-              map: false
-            })
+            this.setState({password: res.data.password})
           })
           .catch( err => {
             if(err.response.status===401){
               this.navigate('/login');
+            } else if(err.response.status===400){
+              this.getUsers();
+              this.setState({addUserError: true})
             }
           })
       }
@@ -240,11 +240,6 @@ class ManageUsers extends Component {
       // Updates the username in the state
       this.setState({ username: event.target.value });
     }
-
-    handlePassword(event){
-      // Updates the password in the state
-      this.setState({ password: event.target.value });
-    }
   
     handleRole(event){
       // Updates the role in the state
@@ -284,10 +279,35 @@ class ManageUsers extends Component {
 
     closeAddWindow = () => {
       // Closes the modal window
-      this.setState({ addModalOpen: false });
+      this.setState({
+        addUserError: false,
+        addModalOpen: false,
+        username: '',
+        password: '',
+        role: '',
+        events: false,
+        members: false,
+        trends: false,
+        map: false
+      });
     }
 
     renderOpenModal = () => {
+      let msg = null
+      if(this.state.password&&!this.state.addUserError){
+        msg = (
+            <p className='success-msg'>
+              Success! User password is:<br/>
+              {'\n'}<b>{this.state.password}</b>
+            </p>
+        )
+      } else if(this.state.addUserError){
+        msg = (
+            <p className='error-msg'>
+              Error! User may already exist.
+            </p>
+        )
+      }
       // The modal that pops up to add a new user
       return(
         <div>
@@ -313,14 +333,6 @@ class ManageUsers extends Component {
                     type="text"
                   />
                 </FormGroup>
-                <FormGroup className='pullLeft'>
-                  <ControlLabel>Password</ControlLabel>
-                  <FormControl
-                    value={this.state.password}
-                    onChange={this.handlePassword}
-                    type="password"
-                  />
-                </FormGroup>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
                   <FormControl 
@@ -332,7 +344,7 @@ class ManageUsers extends Component {
                     <option value="admin">Admin</option>
                   </FormControl>
                 </FormGroup>
-                <FormGroup>
+                <FormGroup className='bottom-user-form'>
                   <ControlLabel>Modules</ControlLabel><br/>
                   <Checkbox
                     checked={this.state.events}
@@ -361,6 +373,7 @@ class ManageUsers extends Component {
                     {' '}Map
                   </Checkbox>
                 </FormGroup>
+                {msg}
                 <Button
                   className='login-button'
                   bsStyle='primary'

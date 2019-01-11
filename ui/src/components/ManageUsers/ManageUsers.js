@@ -43,7 +43,9 @@ class ManageUsers extends Component {
         modTrends: false,
         modMap: false,
         modUsername: '',
-        resetUsername: ''
+        resetUsername: '',
+        resetPassword: '',
+        resetModalOpen: false
       }
     }
   
@@ -232,6 +234,31 @@ class ManageUsers extends Component {
           })
       }
     }
+  
+    resetPassword = () => {
+      // Resets a user's password
+      const token = localStorage.getItem('trsToken');
+      if(!token){
+        this.this.history.push('/login');
+      } else {
+        const auth = 'Bearer '.concat(token);
+        // Build the post body
+        const data = {username: this.state.resetUsername} 
+
+        // Update the access for the user
+        const updateAccess = axios.post('/service/user/reset-password',
+          data,
+          {headers: { Authorization: auth }})
+          .then( res => {
+            this.setState({resetPassword: res.data.password})
+          })
+          .catch( err => {
+            if(err.response.status===401){
+              this.navigate('/login');
+            }
+          })
+      }
+    }
 
     //------------------
     // ADD USER MODAL
@@ -292,14 +319,22 @@ class ManageUsers extends Component {
       });
     }
 
-    renderOpenModal = () => {
-      let msg = null
+    renderAddModal = () => {
+      let msg = null;
+      let done = null;
       if(this.state.password&&!this.state.addUserError){
         msg = (
             <p className='success-msg'>
               Success! User password is:<br/>
               {'\n'}<b>{this.state.password}</b>
             </p>
+        )
+        done = (
+          <Button
+            className='login-button'
+            bsStyle='primary'
+            onClick={()=>this.closeAddWindow()}
+          >Done</Button>
         )
       } else if(this.state.addUserError){
         msg = (
@@ -375,10 +410,11 @@ class ManageUsers extends Component {
                 </FormGroup>
                 {msg}
                 <Button
-                  className='login-button'
+                  className='login-button add-user-button'
                   bsStyle='primary'
                   type='submit'
                 >Submit</Button>
+                {done}
               </Form>
             </div>
           </Modal>
@@ -439,7 +475,6 @@ class ManageUsers extends Component {
         </div>
       )
     }
-  
   
     //------------------
     // MODIFY USER MODAL
@@ -519,7 +554,7 @@ class ManageUsers extends Component {
               <h3><u>
                 Update {this.state.modUsername}
                 <i 
-                  className='fa fa-times pull-right event-icons'
+                  className='fa fa-times pull-right event-icons exit-modify'
                   onClick={()=>this.closeModWindow()}
                 ></i>
               </u></h3>
@@ -575,6 +610,83 @@ class ManageUsers extends Component {
         </div>
       )
     }
+  
+    //----------------------
+    // RESET PASSWORD MODAL
+    //----------------------
+    
+    resetClick = (username) => {
+      // Click handler for the x in the table
+      this.setState({
+        resetModalOpen: true,
+        resetUsername: username
+      })
+    }
+  
+    openResetWindow = () => {
+      // Opens the delete modal window
+      this.setState({ resetModalOpen: true });
+    }
+
+    closeResetWindow = () => {
+      // Closes the delete modal window
+      this.setState({ 
+        resetModalOpen: false,
+        resetUsername: '',
+        resetPassword: ''
+      });
+    }
+
+    renderResetModal = () => {
+      // The modal that pops up to add a new user
+      let msg = null;
+      let done = null;
+      if(this.state.resetPassword){
+        msg = (
+            <p className='success-msg'>
+              Success! New password is:<br/>
+              {'\n'}<b>{this.state.resetPassword}</b>
+            </p>
+        )
+        done = (
+          <Button
+            className='confirm-delete-button login-button'
+            bsStyle='primary'
+            onClick={()=>this.closeResetWindow()}
+          >Done</Button>
+        )
+      }
+      return(
+        <div>
+          <Modal 
+            open={this.state.resetModalOpen}
+            showCloseIcon={false}
+            center
+          >
+            <div className="add-user-container">
+              <h3><u>
+                Reset Password
+                <i 
+                  className='fa fa-times pull-right event-icons'
+                  onClick={()=>this.closeResetWindow()}
+                ></i>
+              </u></h3>
+              <h4>
+                Reset password for 
+                {' '+this.state.resetUsername}?
+              </h4>
+              {msg}
+              <Button
+                className='confirm-delete-button login-button'
+                bsStyle='primary'
+                onClick={()=>this.resetPassword()}
+              >Confirm</Button>
+              {done}
+            </div>
+          </Modal>
+        </div>
+      )
+    }
 
     renderTable = () => {
       // Renders the table of current users
@@ -602,7 +714,7 @@ class ManageUsers extends Component {
               ></i>
               <i 
                 className='fa fa-key fa-flip-horizontal pull-right event-icons'
-                onClick={()=>this.deleteClick(user.id)}
+                onClick={()=>this.resetClick(user.id)}
                 data-tip="Reset password."
               ></i>
             </th>
@@ -634,9 +746,10 @@ class ManageUsers extends Component {
     }
 
   render() {
-      const addWindow = this.renderOpenModal();
+      const addWindow = this.renderAddModal();
       const deleteWindow = this.renderDeleteModal();
       const modWindow = this.renderModModal();
+      const resetWindow = this.renderResetModal();
 
       let table = null;
       if(this.state.loading){
@@ -669,6 +782,7 @@ class ManageUsers extends Component {
           {addWindow}
           {deleteWindow}
           {modWindow}
+          {resetWindow}
           <ReactToolTip />
         </div>
       );

@@ -25,6 +25,9 @@ ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
 echo "Refreshing materialized views ..."
 ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
       "/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard initialize --drop_views"
+echo "Installing new python dependencies ..."
+ssh -i $HOME/certs/dataflock.pem ubuntu@13.58.50.14 \
+    "cd /home/ubuntu/trs-dashboard/server/ && /home/ubuntu/venv/trs_dashboard/bin/pip install -e ."
 
 # Restart service
 echo "Restarting all process ..."

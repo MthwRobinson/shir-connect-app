@@ -554,7 +554,7 @@ class ManageUsers extends Component {
               <h3><u>
                 Update {this.state.modUsername}
                 <i 
-                  className='fa fa-times pull-right event-icons exit-modify'
+                  className='fa fa-times pull-right event-icons'
                   onClick={()=>this.closeModWindow()}
                 ></i>
               </u></h3>

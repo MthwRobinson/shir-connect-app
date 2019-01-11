@@ -1,5 +1,5 @@
-[
-  {
+{
+  "events": {
     "title": "Events",
     "icon" : "fa fa-calendar",
     "bullets": [
@@ -8,16 +8,17 @@
     ],
     "link": "/events"
   },
-  {
+  "members": {
     "title": "Participants",
     "icon" : "fa fa-user",
     "bullets": [
       "View and sort participants.",
       "Upload an Excel file with membership data into the database."
     ],
-    "link": "/members"
+    "link": "/members",
+    "accessGroup": "members"
   },
-  {
+  "trends": {
     "title": "Age Group Trends",
     "icon" : "fa fa-line-chart",
     "bullets": [
@@ -26,13 +27,14 @@
     ],
     "link": "/trends"
   },
-  {
+  "map": {
     "title": "Event Map",
     "icon" : "fa fa-globe",
     "bullets": [
       "View a map that shows where events take place.",
       "Export maps to include in presentations."
     ],
-    "link": "/map"
+    "link": "/map",
+    "accessGroup": "map"
   }
-]
+}

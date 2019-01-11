@@ -11,6 +11,7 @@ reqs = [
     'psycopg2-binary',
     'requests',
     'uuid',
+    'xkcdpass',
     'xlrd'
 ]
 

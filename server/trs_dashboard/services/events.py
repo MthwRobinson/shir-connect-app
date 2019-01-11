@@ -14,11 +14,12 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, make_response, request
-from flask_jwt_simple import jwt_required
+from flask_jwt_simple import jwt_required, get_jwt_identity
 import pandas as pd
 import numpy as np
 
 from trs_dashboard.database.database import Database
+from trs_dashboard.configuration import EVENT_GROUP, MAP_GROUP
 
 events = Blueprint('events', __name__)
 
@@ -27,6 +28,13 @@ events = Blueprint('events', __name__)
 def get_event(event_id):
     """ Pulls the information for an event from the database """
     event_manager = Events()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = event_manager.database.get_item('users', jwt_user)
+    if EVENT_GROUP not in user['modules']:
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
+        return jsonify(response), 403
+
     event = event_manager.get_event(event_id)
     if event:
         return jsonify(event)
@@ -38,6 +46,14 @@ def get_event(event_id):
 @jwt_required
 def get_events():
     """ Pulls events from the database """
+    event_manager = Events()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = event_manager.database.get_item('users', jwt_user)
+    if EVENT_GROUP not in user['modules']:
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
+        return jsonify(response), 403
+
     limit = request.args.get('limit')
     if not limit:
         limit = 25
@@ -56,7 +72,6 @@ def get_events():
         sort = 'start_datetime'
     q = request.args.get('q')
 
-    event_manager = Events()
     response = event_manager.get_events(
         limit=limit,
         page=page,
@@ -71,6 +86,12 @@ def get_events():
 def get_event_locations():
     """ Pulls the most recent event at each location """
     event_manager = Events()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = event_manager.database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have acccess to the map'%(jwt_user)}
+        return jsonify(response), 403
     response = event_manager.get_event_locations()
     return jsonify(response)
 
@@ -79,6 +100,12 @@ def get_event_locations():
 def get_event_cities():
     """ Pulls a list of events grouped by city """
     event_manager = Events()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = event_manager.database.get_item('users', jwt_user)
+    if MAP_GROUP not in user['modules']:
+        response = {'message': '%s does not have acccess to the map'%(jwt_user)}
+        return jsonify(response), 403
     response = event_manager.get_event_cities()
     return jsonify(response)
 
@@ -86,6 +113,14 @@ def get_event_cities():
 @jwt_required
 def export_event_aggregates():
     """ Exports the event aggregates as a csv """
+    database = Database()
+    # Make sure the user has access to the module
+    jwt_user = get_jwt_identity()
+    user = database.get_item('users', jwt_user)
+    if EVENT_GROUP not in user['modules']:
+        response = {'message': '%s does not have acccess to events'%(jwt_user)}
+        return jsonify(response), 403
+
     q = request.args.get('q')
     if q:
         query = ('name', q)

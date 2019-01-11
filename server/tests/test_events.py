@@ -12,7 +12,8 @@ def test_event():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
-    
+
+    # User must be authenticated
     url = '/service/event/7757038511'
     response = CLIENT.get(url)
     assert response.status_code == 401
@@ -25,9 +26,16 @@ def test_event():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # JWT must be present in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to events
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['events'])
 
+    # Success
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
@@ -53,6 +61,7 @@ def test_events():
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
     
+    # User must be authenticated
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
@@ -64,12 +73,19 @@ def test_events():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # JWT must be in the header
     url = '/service/events?limit=25&page=2'
     url += '&sort=start_datetime&order=desc'
     url += '&q=trsty'
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to events
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['events'])
 
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
@@ -86,6 +102,7 @@ def test_event_locations():
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
     
+    # User must be authenticated
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
@@ -97,10 +114,17 @@ def test_event_locations():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # Request must have a header
     url = '/service/events/locations'
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to events
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
 
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
@@ -122,6 +146,7 @@ def test_event_cities():
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
     
+    # User must be authenticated
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
     
@@ -133,10 +158,17 @@ def test_event_cities():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # Request must have JWT in the header
     url = '/service/events/cities'
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to events
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
 
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == dict
@@ -154,6 +186,11 @@ def test_export_event_aggregates():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
+    
+    # User must be authenticated
+    url = '/service/events/export?q=trsty'
+    response = CLIENT.get(url)
+    assert response.status_code == 401
 
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
@@ -162,6 +199,13 @@ def test_export_event_aggregates():
     assert response.status_code == 200
     jwt = response.json['jwt']
 
+    # User must have access to events
+    url = '/service/events/export?q=trsty'
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['events'])
+
+    # Success!
     url = '/service/events/export?q=trsty'
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200

@@ -18,6 +18,7 @@
     "react-fontawesome": "^1.6.1",
     "react-plotly": "^1.0.0",
     "react-plotly.js": "^2.2.0",
+    "react-responsive-modal": "^3.5.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4",
     "react-sliding-pane": "^2.1.1",

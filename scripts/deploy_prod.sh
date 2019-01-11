@@ -24,7 +24,10 @@ ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
     "cd /home/ubuntu/trs-dashboard/database/ && shmig -t postgresql -d postgres up"
 echo "Refreshing materialized views ... "
 ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
-      "/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard initialize --drop_views"
+    "/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard initialize --drop_views"
+echo "Installing new python dependencies ..."
+ssh -i $HOME/certs/trs.pem ubuntu@52.14.35.159 \
+    "cd /home/ubuntu/trs-dashboard/server/ && /home/ubuntu/venv/trs_dashboard/bin/pip install -e ."
 
 # Restart service
 echo "Restarting all process ..."

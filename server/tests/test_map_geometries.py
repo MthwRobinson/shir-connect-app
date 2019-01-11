@@ -3,12 +3,13 @@ from trs_dashboard.services.user_management import UserManagement
 
 CLIENT = app.test_client()
 
-def test_zip_geometry():
+def test_map_authorize():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
-    url = '/service/map/geometry/22102'
+    url = '/service/map/authorize'
     
+    # User must be authenticated
     response = CLIENT.get(url)
     assert response.status_code == 401
     
@@ -20,9 +21,51 @@ def test_zip_geometry():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # The JWT must be present in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # The user must have access to the map module
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
 
+    # Success!
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 200
+    
+    user_management.delete_user('unittestuser')
+    user = user_management.get_user('unittestuser')
+    assert user == None
+
+def test_zip_geometry():
+    user_management = UserManagement()
+    user_management.delete_user('unittestuser')
+    user_management.add_user('unittestuser', 'testPassword!')
+    url = '/service/map/geometry/22102'
+
+    # User must be authenticated
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='testPassword!'
+    ))
+    assert response.status_code == 200
+    assert type(response.json['jwt']) == str
+    jwt = response.json['jwt']
+    
+    # The JWT must be present in the header
+    response = CLIENT.get(url)
+    assert response.status_code == 401
+    
+    # The user must have access to the map module
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
+
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert 'id' in response.json
@@ -43,6 +86,7 @@ def test_zip_codes():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/map/zipcodes'
     
+    # The user must be authenticated
     response = CLIENT.get(url)
     assert response.status_code == 401
     
@@ -54,9 +98,16 @@ def test_zip_codes():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # The JWT must be present in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # The user must have access to the mpa
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
 
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == list
@@ -71,6 +122,7 @@ def test_all_geometries():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/map/geometries'
     
+    # The user must be authenticated
     response = CLIENT.get(url)
     assert response.status_code == 401
     
@@ -82,9 +134,16 @@ def test_all_geometries():
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
     
+    # The JWT must be present in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
 
+    # The user must have access to the map
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['map'])
+
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     for key in response.json:

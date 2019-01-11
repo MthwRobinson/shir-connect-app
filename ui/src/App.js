@@ -15,8 +15,10 @@ import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
 import EventPage from './components/EventPage/EventPage';
+import Forbidden from './components/Forbidden/Forbidden';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
+import ManageUsers from './components/ManageUsers/ManageUsers';
 import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
 import Trends from './components/Trends/Trends';
@@ -42,6 +44,8 @@ class App extends Component {
             <PrivateRoute path="/change-password" component={ChangePassword} />
             <PrivateRoute path="/events" component={Events} />
             <PrivateRoute path="/event" component={EventPage} />
+            <PrivateRoute path="/forbidden" component={Forbidden} />
+            <PrivateRoute path="/manage-users" component={ManageUsers} />
             <PrivateRoute path="/member" component={MemberPage} />
             <PrivateRoute path="/members" component={Members} />
             <PrivateRoute path="/trends" component={Trends} />

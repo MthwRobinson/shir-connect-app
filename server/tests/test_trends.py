@@ -14,9 +14,6 @@ def test_monthly_revenue():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/monthly-revenue'
     
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
@@ -24,10 +21,17 @@ def test_monthly_revenue():
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
-    
+   
+    # JWT needs to be included in the response header
     response = CLIENT.get(url)
     assert response.status_code == 401
 
+    # User must have access to trends
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['trends'])
+
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
@@ -46,9 +50,6 @@ def test_avg_attendance():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/avg-attendance'
     
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
@@ -56,10 +57,17 @@ def test_avg_attendance():
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
-    
+   
+    # JWT need to be in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
 
+    # User must have access to trends
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['trends'])
+
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
@@ -78,9 +86,6 @@ def test_year_group_attendees():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/age-group-attendance'
     
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
@@ -88,10 +93,17 @@ def test_year_group_attendees():
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
-    
+   
+    # JWT must be in the response header
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to trends
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['trends'])
 
+    # Success!
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
@@ -99,6 +111,7 @@ def test_year_group_attendees():
         assert 'group' in response.json[key]
         assert 'count' in response.json[key]
 
+    # And now let's try grouping by month
     url += '?groupBy=month'
     assert response.status_code == 200
     assert type(response.json) == dict
@@ -116,9 +129,6 @@ def test_participation():
     user_management.add_user('unittestuser', 'testPassword!')
     url = '/service/trends/participation/Young Professional'
     
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
@@ -126,9 +136,15 @@ def test_participation():
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
-    
+   
+    # JWT must be in the header
     response = CLIENT.get(url)
     assert response.status_code == 401
+    
+    # User must have access to the trends page 
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 403
+    user_management.update_access('unittestuser', ['trends'])
 
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200

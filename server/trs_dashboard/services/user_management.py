@@ -7,11 +7,14 @@ Includes:
 """
 import hashlib
 import logging
+import random
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
 from flask_jwt_simple import create_jwt, jwt_required, get_jwt_identity
 import pandas as pd
+import numpy as np
+import xkcdpass.xkcd_password as xkcd
 
 import trs_dashboard.configuration as conf
 from trs_dashboard.database.database import Database
@@ -23,27 +26,33 @@ user_management = Blueprint('user_management', __name__)
 def user_register():
     """ Registers a new user """
     user_management = UserManagement()
+    # Only and admin can create a new user
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
     if admin_user['role'] != 'admin':
         response = {'message': 'only admins can add users'}
         return jsonify(response), 403
 
+    # Check to make sure there is a request body
     if not request.json:
         response = {'message': 'no post body'}
         return jsonify(response), 400
 
+    # The username must be in there request
     new_user = request.json
-    if 'username' not in new_user  or 'password' not in new_user:
+    if 'username' not in new_user:
         response = {'message': 'missing key in post body'}
         return jsonify(response), 400
 
+    # Use default roles and modules if they are not present
     if 'role' not in new_user:
         new_user['role'] = 'standard'
     if 'modules' not in new_user:
         new_user['modules'] = []
 
-    user_management = UserManagement()
+    # Generate a password for the user
+    new_user['password'] = user_management.generate_password()
+
     status = user_management.add_user(
         username=new_user['username'], 
         password=new_user['password'],
@@ -52,7 +61,10 @@ def user_register():
     )
     # Status returns false if user already exists
     if status:
-        response = {'message': 'user %s created'%(new_user['username'])}
+        response = {
+            'message': 'user %s created'%(new_user['username']),
+            'password': new_user['password']
+        }
         return jsonify(response), 201
     else:
         response = {'message': 'bad request'}
@@ -216,32 +228,27 @@ def update_access():
 def reset_password():
     """ Resets the password for the user in the post body """
     user_management = UserManagement()
+    # Only and admin can reset a password
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
     if admin_user['role'] != 'admin':
         response = {'message': 'only admins can reset password'}
         return jsonify(response), 403
     else:
+        # Check the request body
         if 'username' not in request.json:
             response = {'message': 'username required in post body'}
             return jsonify(response), 400
-        if 'password' not in request.json:
-            response = {'message': 'password required in post body'}
-            return jsonify(response), 400
-        if 'password2' not in request.json:
-            response = {'message': 'password2 required in post body'}
-            return jsonify(response), 400
         
+        # Generate a password and post the update to the datase
         username = request.json['username']
-        password = request.json['password']
-        password2 = request.json['password2']
-        if password != password2:
-            response = {'message': 'passwords must match'}
-            return jsonify(response), 400
-        else:
-            user_management.update_password(username, password)
-            response = {'message': 'role updated for %s'%(username)}
-            return jsonify(response), 201
+        password = user_management.generate_password()
+        user_management.update_password(username, password)
+        response = {
+            'message': 'role updated for %s'%(username),
+            'password': password
+        }
+        return jsonify(response), 201
 
 @user_management.route('/service/users/list', methods=['GET'])
 @jwt_required
@@ -393,3 +400,24 @@ class UserManagement(object):
             return False
         else:
             return True
+
+    def generate_password(self):
+        """ Creates an XKCD style password """
+        # Choose four random english words and three random integers
+        wordfile = xkcd.locate_wordfile()
+        wordlist = xkcd.generate_wordlist(
+            wordfile=wordfile,
+            min_length=4,
+            max_length=8
+        )
+        words = xkcd.generate_xkcdpassword(wordlist, numwords=4).split()
+        numbers = np.random.randint(low=0, high=9, size=3)
+        
+        # Generate the password
+        password = ''
+        for i, word in enumerate(words):
+            password += word.title()
+            if i < 3:
+                password += str(numbers[i])
+        password += random.choice('!@#$%^&')
+        return password

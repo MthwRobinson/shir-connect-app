@@ -419,5 +419,5 @@ class UserManagement(object):
             password += word.title()
             if i < 3:
                 password += str(numbers[i])
-        password += random.choice('!@#$%^&')
+        password += random.choice('!@#$%&')
         return password

@@ -1,17 +1,24 @@
 // Implements helper functions for the user authentication workflow
 import axios from 'axios';
 
-function clearToken() {
-  // Clears the JWT from local storage
-  localStorage.removeItem('trsToken');
-}
-export { clearToken };
-
+//----------------
+// ACCESS TOKENS
+//----------------
 function setAccessToken(accessToken){
   // Sets the access token in local storage
   localStorage.setItem('trsToken', accessToken);
 }
 export { setAccessToken };
+
+function getAccessToken(){
+  // Pulls the access token from local storage
+  return localStorage.getItem('trsToken');
+}
+export { getAccessToken }
+
+//----------------
+// REFRESH TOKENS
+//----------------
 
 function setRefreshToken(refreshToken){
   // Sets the refresh token in local storage
@@ -27,8 +34,8 @@ function getRefreshToken(){
 function refreshAccessToken(){
   // Refreshes the access token
   const refreshToken = getRefreshToken();
-  const auth = 'Bearar '.concat(refreshToken);
-  const url = '/service/user/authorize';
+  const auth = 'Bearer '.concat(refreshToken);
+  const url = '/service/user/refresh';
   axios.get(url, {headers: {Authorization: auth}})
     .then(res => {
       const accessToken = res.data.jwt;
@@ -36,3 +43,14 @@ function refreshAccessToken(){
     })
 }
 export { refreshAccessToken }
+
+//------------------
+// LOGOUT FUNCTIONS
+//------------------
+
+function logout() {
+  // Clears the JWT from local storage
+  localStorage.clear();
+  sessionStorage.clear();
+}
+export { logout };

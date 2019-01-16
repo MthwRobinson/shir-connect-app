@@ -12,9 +12,12 @@ import random
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
 from flask_jwt_extended import (
-    create_access_token, 
-    jwt_required, 
-    get_jwt_identity
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    decode_token,
+    jwt_refresh_token_required,
+    jwt_required
 )
 import pandas as pd
 import numpy as np
@@ -90,7 +93,11 @@ def delete_user(username):
 
 @user_management.route('/service/user/authenticate', methods=['POST'])
 def user_authenticate():
-    """ Authenticates a user and returns a json web token """
+    """ 
+    Authenticates a user and returns a json web token
+    In the response body, refresh_token is the refresh token
+        and jwt is the access token
+    """
     if not request.json:
         response = {'message': 'no post body'}
         return jsonify(response), 400
@@ -100,22 +107,39 @@ def user_authenticate():
         response = {'message': 'missing key in post body'}
         return jsonify(response), 400
 
+    username = auth_user['username']
+    password = auth_user['password']
+
     user_management = UserManagement()
     authorized = user_management.authenticate_user(
-        username=auth_user['username'],
-        password=auth_user['password']
+        username=username,
+        password=password
     )
     if authorized:
-        msg = 'user %s authenticated'%(auth_user['username'])
+        access_token = create_access_token(identity=username)
+        access_expiration = decode_token(access_token)['exp']
+        refresh_token = create_refresh_token(identity=username)
+        refresh_expiration = decode_token(refresh_token)['exp']
         response = {
-            'message': msg,
-            'jwt': create_access_token(identity=auth_user['username'])
+            'jwt': access_token,
+            'refresh_token': refresh_token,
         }
         return jsonify(response), 200
     else:
         msg = 'authentication failed for user %s'%(auth_user['username'])
         response = {'message': msg}
         return jsonify(response), 401
+
+@user_management.route('/service/user/refresh', methods=['GET'])
+@jwt_refresh_token_required
+def user_refresh():
+    """ Creates a refreshed access token for the user """
+    username = get_jwt_identity()
+    access_token = create_access_token(identity=username)
+    response = {
+        'access_token': access_token
+    }
+    return jsonify(response), 200
 
 @user_management.route('/service/user/authorize', methods=['GET'])
 @jwt_required

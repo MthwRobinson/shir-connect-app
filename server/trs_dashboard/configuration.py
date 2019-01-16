@@ -7,7 +7,8 @@ HOMEPATH = os.path.expanduser('~')
 
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-JWT_EXPIRATION_DELTA = datetime.timedelta(seconds=6000)
+JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(seconds=900)
+JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(seconds=7200)
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Database configurations and secrets

@@ -10,11 +10,17 @@ from trs_dashboard.services.members import members
 from trs_dashboard.services.user_management import user_management
 
 app = Flask(__name__)
+
+# Set JSON web token configurations
 app.config['JWT_SECRET_KEY'] = conf.JWT_SECRET_KEY
-app.config['JWT_EXPIRATION_DELTA'] = conf.JWT_EXPIRATION_DELTA
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = conf.JWT_ACCESS_TOKEN_EXPIRES
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = conf.JWT_REFRESH_TOKEN_EXPIRES
+
+# Register end points with the appp
 app.register_blueprint(events)
 app.register_blueprint(trends)
 app.register_blueprint(map_geometries)
 app.register_blueprint(members)
 app.register_blueprint(user_management)
+
 jwt = JWTManager(app)

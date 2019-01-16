@@ -107,18 +107,25 @@ def test_user_authenticate():
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
-    
+   
+    # Username and password are required to authenticate
     response = CLIENT.post('/service/user/authenticate')
     assert response.status_code == 400
     
+    # Password is required to authenticate
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser'
     ))
     assert response.status_code == 400
 
-    response = CLIENT.get('/service/user/authorize')
+    # Password must be correct to authenticate
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestuser',
+        password='badpassword'
+    ))
     assert response.status_code == 401
-    
+
+    # Success !
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
@@ -126,19 +133,43 @@ def test_user_authenticate():
     assert response.status_code == 200
     assert type(response.json['jwt']) == str
     jwt = response.json['jwt']
+    refresh_token = response.json['refresh_token']
 
+    # JWT header must be present to authorize
+    response = CLIENT.get('/service/user/authorize')
+    assert response.status_code == 401
+
+    # Success!
     response = CLIENT.get('/service/user/authorize', headers={
         'Authorization': 'Bearer %s'%(jwt)
     })
     assert response.status_code == 200
     assert response.json['id'] == 'unittestuser'
     
-    response = CLIENT.post('/service/user/authenticate', json=dict(
-        username='unittestuser',
-        password='badpassword'
-    ))
+    # Need a refresh token to refresh
+    response = CLIENT.get('/service/user/refresh')
     assert response.status_code == 401
+
+    # Needs to be a refresh token, not an access token
+    response = CLIENT.get('/service/user/refresh', headers={
+        'Authorization': 'Bearer %s'%(jwt)
+    })
+    assert response.status_code == 422
+   
+    # Success!
+    response = CLIENT.get('/service/user/refresh', headers={
+        'Authorization': 'Bearer %s'%(refresh_token)
+    })
+    assert response.status_code == 200
+    new_jwt = response.json['jwt']
     
+    # Make sure the refreshed token works
+    response = CLIENT.get('/service/user/authorize', headers={
+        'Authorization': 'Bearer %s'%(jwt)
+    })
+    assert response.status_code == 200
+    assert response.json['id'] == 'unittestuser'
+
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None

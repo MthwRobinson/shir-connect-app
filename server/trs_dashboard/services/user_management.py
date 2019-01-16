@@ -15,7 +15,6 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     get_jwt_identity,
-    decode_token,
     jwt_refresh_token_required,
     jwt_required
 )
@@ -117,9 +116,7 @@ def user_authenticate():
     )
     if authorized:
         access_token = create_access_token(identity=username)
-        access_expiration = decode_token(access_token)['exp']
         refresh_token = create_refresh_token(identity=username)
-        refresh_expiration = decode_token(refresh_token)['exp']
         response = {
             'jwt': access_token,
             'refresh_token': refresh_token,
@@ -137,7 +134,7 @@ def user_refresh():
     username = get_jwt_identity()
     access_token = create_access_token(identity=username)
     response = {
-        'access_token': access_token
+        'jwt': access_token
     }
     return jsonify(response), 200
 

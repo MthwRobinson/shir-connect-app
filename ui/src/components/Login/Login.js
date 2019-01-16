@@ -14,6 +14,11 @@ import axios from 'axios';
 
 import Header from './../Header/Header';
 
+import { 
+  setAccessToken, 
+  setRefreshToken 
+} from './../../utilities/authentication';
+
 import './Login.css';
 
 class Login extends Component {
@@ -40,6 +45,11 @@ class Login extends Component {
         password: this.state.password
       })
         .then(res => {
+          const refreshToken = res.data.refresh_token;
+          setRefreshToken(refreshToken);
+          const accessToken = res.data.jwt;
+          setAccessToken(accessToken);
+
           localStorage.setItem('trsToken', res.data.jwt);
           this.setState({authenticated: true});
           this.props.history.push('/')

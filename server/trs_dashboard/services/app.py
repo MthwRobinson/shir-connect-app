@@ -1,6 +1,6 @@
 """ Flask app for the TRS Dashboard backend """
 from flask import Flask, jsonify
-from flask_jwt_simple import JWTManager, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 import trs_dashboard.configuration as conf
 from trs_dashboard.services.events import events

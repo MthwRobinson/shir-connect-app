@@ -11,7 +11,11 @@ import random
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_simple import create_jwt, jwt_required, get_jwt_identity
+from flask_jwt_extended import (
+    create_access_token, 
+    jwt_required, 
+    get_jwt_identity
+)
 import pandas as pd
 import numpy as np
 import xkcdpass.xkcd_password as xkcd
@@ -105,7 +109,7 @@ def user_authenticate():
         msg = 'user %s authenticated'%(auth_user['username'])
         response = {
             'message': msg,
-            'jwt': create_jwt(identity=auth_user['username'])
+            'jwt': create_access_token(identity=auth_user['username'])
         }
         return jsonify(response), 200
     else:

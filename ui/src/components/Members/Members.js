@@ -1,4 +1,6 @@
 // Renders the component for the Members screen
+import axios from 'axios';
+import moment from 'moment';
 import React, { Component } from 'react';
 import {
   Button,
@@ -10,9 +12,11 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
-import moment from 'moment';
-import axios from 'axios';
 
+import {
+  getAccessToken,
+  refreshAccessToken
+} from './../../utilities/authentication'; 
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -49,12 +53,15 @@ class Members extends Component {
     checkAccess = () => {
       // Checks to make sure the user has access to the 
       // member access group
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       const url = '/service/member/authorize';
       axios.get(url, {headers: {Authorization: auth }})
         .then(res => {
-            this.setState({userRole: res.data.role})
+          this.setState({userRole: res.data.role});
+          // Refresh the token to keep the session active
+          refreshAccessToken(); 
+
         })
         .catch(err => {
           if(err.response.status===403){
@@ -72,7 +79,7 @@ class Members extends Component {
     getMembers = (fetchType) => {
       // Pulls members to display in the table
       this.setState({loading: true});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       let url = '/service/members?limit='+LIMIT;
       url += '&sort=events_attended&order=DESC';
@@ -274,7 +281,7 @@ class Members extends Component {
       data.append('file', file);
 
       // Post the data
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       const url = '/service/members/upload';
       axios.post(url, data, {

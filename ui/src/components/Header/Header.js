@@ -14,12 +14,15 @@ import {
 
 import './Header.css';
 
+const MODULES = require('./../../data/modules.json');
+
 class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
       paneOpen: false,
-      userRole: 'standard'
+      userRole: 'standard',
+      modules: []
     }
   }
   
@@ -37,14 +40,14 @@ class Header extends Component {
       const url = '/service/user/authorize';
       axios.get(url, {headers: {Authorization: auth }})
         .then(res => {
-          const userRole = res.data.role;
-          this.setState({userRole: userRole})
+          this.setState({
+            modules: res.data.modules,
+            userRole: res.data.role
+          });
         })
-        .catch(err => {
+        .catch( err => {
           if(err.response.status===401){
-            this.props.history.push('/login');
-          } else if(err.response.status===403){
-            this.props.history.push('/forbidden');
+            this.navigate('/login');
           }
         })
     }
@@ -62,6 +65,36 @@ class Header extends Component {
         </div>
       )
     }
+
+    // Checks which page the user has access to
+    let goodModules = [];
+    for(let module of this.state.modules){
+      if(module in MODULES){
+        goodModules.push(module);
+      }
+    }
+
+    // Creates a link for each page a user can access
+    let pages = [(
+      <div className='menu-content'>
+        <Link to="/">Home</Link><br/>
+      </div>
+    )];
+    for(let module of goodModules){
+      pages.push(
+        <div className='menu-content'>
+          <Link to={MODULES[module].link}>
+            {MODULES[module].title}
+          </Link>
+        </div>
+      )
+    }
+    let availablePages = (
+      <div className="menu-content panel-nav-options">
+        <h3>Pages</h3><hr/>
+        {pages}
+      </div>
+    )
     
     if(this.props.history.location.pathname==='/login'){
       return null
@@ -74,14 +107,7 @@ class Header extends Component {
             from='left'
             onRequestClose={this.toggleMenu}
           >
-            <div className="menu-content panel-nav-options">
-              <h3>Pages</h3><hr/>
-              <Link to="/">Home</Link><br/>
-              <Link to="/events">Events</Link><br/>
-              <Link to="/members">Participants</Link><br/>
-              <Link to="/map">Map</Link><br/>
-              <Link to="/trends">Trends</Link><br/>
-            </div>
+            {availablePages}
             <div className="menu-content panel-nav-options">
               <h3>Actions</h3><hr/>
               <Link to="/login" onClick={()=>this.logout()}>
@@ -89,7 +115,7 @@ class Header extends Component {
               </Link><br/>
               <Link to="/change-password">Change Password</Link><br/>
             </div>
-              {adminOptions}
+            {adminOptions}
           </SlidingPane>
         </div>
       );

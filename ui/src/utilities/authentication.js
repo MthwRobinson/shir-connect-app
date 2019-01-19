@@ -6,13 +6,13 @@ import axios from 'axios';
 //----------------
 function setAccessToken(accessToken){
   // Sets the access token in local storage
-  localStorage.setItem('trsToken', accessToken);
+  localStorage.setItem('accessToken', accessToken);
 }
 export { setAccessToken };
 
 function getAccessToken(){
   // Pulls the access token from local storage
-  return localStorage.getItem('trsToken');
+  return localStorage.getItem('accessToken');
 }
 export { getAccessToken }
 

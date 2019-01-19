@@ -55,7 +55,12 @@ class Header extends Component {
     // Menu is expanded is paneOpen is true
     let adminOptions = null;
     if(this.state.userRole==='admin'){
-      adminOptions = <Link to="/manage-users">Manage Users</Link>
+      adminOptions = (
+        <div className='menu-content panel-nav-options'>
+          <h3>Admin</h3><hr/>
+          <Link to="/manage-users">Manage Users</Link>
+        </div>
+      )
     }
     
     if(this.props.history.location.pathname==='/login'){
@@ -69,13 +74,22 @@ class Header extends Component {
             from='left'
             onRequestClose={this.toggleMenu}
           >
-            <div className="menu-content">
-              <h3>Admin</h3><hr/>
+            <div className="menu-content panel-nav-options">
+              <h3>Pages</h3><hr/>
               <Link to="/">Home</Link><br/>
-              <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link><br/>
-              <Link to="/change-password">Change Password</Link><br/>
-              {adminOptions}
+              <Link to="/events">Events</Link><br/>
+              <Link to="/members">Participants</Link><br/>
+              <Link to="/map">Map</Link><br/>
+              <Link to="/trends">Trends</Link><br/>
             </div>
+            <div className="menu-content panel-nav-options">
+              <h3>Actions</h3><hr/>
+              <Link to="/login" onClick={()=>this.logout()}>
+                Sign Out
+              </Link><br/>
+              <Link to="/change-password">Change Password</Link><br/>
+            </div>
+              {adminOptions}
           </SlidingPane>
         </div>
       );

@@ -4,6 +4,10 @@ import { Col, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
+import { 
+  getAccessToken, 
+  refreshAccessToken 
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import ModuleCard from './../ModuleCard/ModuleCard';
 import Loading from './../Loading/Loading';
@@ -28,7 +32,7 @@ class Home extends Component {
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.navigate('/login');
       } else {
@@ -40,6 +44,9 @@ class Home extends Component {
               modules: res.data.modules,
               loading: false
             });
+
+            // Refresh the token to keep the session active
+            refreshAccessToken();
           })
           .catch( err => {
             if(err.response.status===401){

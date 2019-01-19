@@ -15,6 +15,10 @@ import ReactToolTip from 'react-tooltip';
 import Modal from 'react-responsive-modal';
 import { withRouter } from 'react-router-dom';
 
+import { 
+  getAccessToken,
+  refreshAccessToken
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -50,8 +54,11 @@ class ManageUsers extends Component {
     }
   
     componentDidMount(){
-      // Pulls the users name and redirects to the Login
+      // Pulls the users name
       this.getUsers();
+
+      // Refreshes the token to keep the session active
+      refreshAccessToken();
 
       // Bindings for the new user form
       this.handleAddSubmit = this.handleAddSubmit.bind(this);
@@ -81,7 +88,7 @@ class ManageUsers extends Component {
     getUsers = () => {
       // Pulls a list of users from the database
       this.setState({loading: true});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {
@@ -109,7 +116,7 @@ class ManageUsers extends Component {
         loading: true,
         addUserError: false
       });
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {
@@ -155,7 +162,7 @@ class ManageUsers extends Component {
     deleteUser = () => {
       // Deletes the selected user
       this.setState({loading: true});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {
@@ -178,7 +185,7 @@ class ManageUsers extends Component {
     modifyUser = () => {
       // Posts updated user roles and modules
       this.setState({loading: true});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {
@@ -237,7 +244,7 @@ class ManageUsers extends Component {
   
     resetPassword = () => {
       // Resets a user's password
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {

@@ -6,7 +6,7 @@ Includes:
     2. MapGeometries class for database calls
 """
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_simple import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database

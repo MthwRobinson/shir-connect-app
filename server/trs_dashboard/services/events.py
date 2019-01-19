@@ -14,7 +14,7 @@ import logging
 
 import daiquiri
 from flask import Blueprint, abort, jsonify, make_response, request
-from flask_jwt_simple import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 import numpy as np
 

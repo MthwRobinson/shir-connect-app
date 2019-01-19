@@ -1,6 +1,7 @@
 // Renders the component for the Login screen
 // On login, the component will retrieve a JWT
 //  from the server and store it in local storage
+import axios from 'axios';
 import React, { Component } from 'react';
 import { 
   Button, 
@@ -10,8 +11,12 @@ import {
   FormGroup 
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
 
+import {
+  clearStorage,
+  setAccessToken, 
+  setRefreshToken 
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 
 import './Login.css';
@@ -32,6 +37,11 @@ class Login extends Component {
 
     }
 
+    componentDidMount(){
+      // Clear any information from local storage
+      clearStorage();
+    }
+
     handleSubmit = (event) => {
       // Authenticates with the service and stores the JWT
       // in local storage if authentication is successful
@@ -40,6 +50,11 @@ class Login extends Component {
         password: this.state.password
       })
         .then(res => {
+          const refreshToken = res.data.refresh_token;
+          setRefreshToken(refreshToken);
+          const accessToken = res.data.jwt;
+          setAccessToken(accessToken);
+
           localStorage.setItem('trsToken', res.data.jwt);
           this.setState({authenticated: true});
           this.props.history.push('/')

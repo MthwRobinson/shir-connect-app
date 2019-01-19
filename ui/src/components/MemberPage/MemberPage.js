@@ -1,17 +1,22 @@
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+// Renders the component for individual members
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
+import React, { Component } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
+import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
-import 'react-calendar-heatmap/dist/styles.css';
-
-import './MemberPage.css';
-
+import {
+  getAccessToken,
+  refreshAccessToken
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
+
+import './MemberPage.css';
+import 'react-calendar-heatmap/dist/styles.css';
+
 
 class MemberPage extends Component {
   state = {
@@ -40,7 +45,7 @@ class MemberPage extends Component {
 
   getMember = () => {
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token)
     const searchTerms = this.props.location.search.split('?')[1].split('&');
     let params = {}
@@ -72,6 +77,8 @@ class MemberPage extends Component {
           }
         }
         this.setState({map: this.buildMap(events)})
+        // Refresh the token to keep the session active
+        refreshAccessToken();
       })
       .catch(err => {
         if(err.response.status===401){

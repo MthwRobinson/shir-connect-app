@@ -6,11 +6,7 @@ import {
   Route 
 } from 'react-router-dom';
 
-import './App.css';
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import '../node_modules/font-awesome/css/font-awesome.min.css';
-import 'react-sliding-pane/dist/react-sliding-pane.css';
-
+import { getAccessToken } from './utilities/authentication';
 import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
@@ -23,6 +19,11 @@ import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
 import Trends from './components/Trends/Trends';
 
+import './App.css';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import '../node_modules/font-awesome/css/font-awesome.min.css';
+import 'react-sliding-pane/dist/react-sliding-pane.css';
+
 class App extends Component {
   render() {
     // PrivateRoute ensures that there is a token
@@ -30,7 +31,7 @@ class App extends Component {
     // a component
     const PrivateRoute = ({ component: Component, ...rest }) => (
       <Route {...rest} render={(props) => (
-        localStorage.getItem('trsToken') === null
+        getAccessToken() === null
         ? <Redirect to='/login' />
         : <Component {...props} />
       )} />

@@ -7,16 +7,22 @@ import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
 import axios from 'axios';
 
-import { clearToken } from './../../utilities/authentication';
+import { 
+  clearStorage,
+  getAccessToken
+} from './../../utilities/authentication';
 
 import './Header.css';
+
+const MODULES = require('./../../data/modules.json');
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {
       paneOpen: false,
-      userRole: 'standard'
+      userRole: 'standard',
+      modules: []
     }
   }
   
@@ -29,19 +35,19 @@ class Header extends Component {
   checkAccess() {
     // Checks to make sure the role of the user
     if(this.props.history.location.pathname!=='/login'){
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       const url = '/service/user/authorize';
       axios.get(url, {headers: {Authorization: auth }})
         .then(res => {
-          const userRole = res.data.role;
-          this.setState({userRole: userRole})
+          this.setState({
+            modules: res.data.modules,
+            userRole: res.data.role
+          });
         })
-        .catch(err => {
+        .catch( err => {
           if(err.response.status===401){
-            this.props.history.push('/login');
-          } else if(err.response.status===403){
-            this.props.history.push('/forbidden');
+            this.navigate('/login');
           }
         })
     }
@@ -52,8 +58,43 @@ class Header extends Component {
     // Menu is expanded is paneOpen is true
     let adminOptions = null;
     if(this.state.userRole==='admin'){
-      adminOptions = <Link to="/manage-users">Manage Users</Link>
+      adminOptions = (
+        <div className='menu-content panel-nav-options'>
+          <h3>Admin</h3><hr/>
+          <Link to="/manage-users">Manage Users</Link>
+        </div>
+      )
     }
+
+    // Checks which page the user has access to
+    let goodModules = [];
+    for(let module of this.state.modules){
+      if(module in MODULES){
+        goodModules.push(module);
+      }
+    }
+
+    // Creates a link for each page a user can access
+    let pages = [(
+      <div className='menu-content'>
+        <Link to="/">Home</Link><br/>
+      </div>
+    )];
+    for(let module of goodModules){
+      pages.push(
+        <div className='menu-content'>
+          <Link to={MODULES[module].link}>
+            {MODULES[module].title}
+          </Link>
+        </div>
+      )
+    }
+    let availablePages = (
+      <div className="menu-content panel-nav-options">
+        <h3>Pages</h3><hr/>
+        {pages}
+      </div>
+    )
     
     if(this.props.history.location.pathname==='/login'){
       return null
@@ -66,13 +107,15 @@ class Header extends Component {
             from='left'
             onRequestClose={this.toggleMenu}
           >
-            <div className="menu-content">
-              <h3>Admin</h3><hr/>
-              <Link to="/">Home</Link><br/>
-              <Link to="/login" onClick={()=>this.logout()}>Sign Out</Link><br/>
+            {availablePages}
+            <div className="menu-content panel-nav-options">
+              <h3>Actions</h3><hr/>
+              <Link to="/login" onClick={()=>this.logout()}>
+                Sign Out
+              </Link><br/>
               <Link to="/change-password">Change Password</Link><br/>
-              {adminOptions}
             </div>
+            {adminOptions}
           </SlidingPane>
         </div>
       );
@@ -87,8 +130,8 @@ class Header extends Component {
   }
 
   logout = () => {
-    // Logs out and redirects to the sign-in page
-    clearToken();
+    // Clears browser storage and redirects to the sign-in page
+    clearStorage();
     this.setState({paneOpen: false})
   }
 

@@ -14,6 +14,11 @@ import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
 
+import {
+  getAccessToken,
+  refreshAccessToken 
+} from './../../utilities/authentication';
+
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -39,11 +44,12 @@ class Events extends Component {
   
     componentDidMount(){
       this.getEvents('initial');
+      refreshAccessToken();
     }
 
     downloadCSV = () => {
       // Downloads the events information csv
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       let url = '/service/events/export';
       if(this.state.query.trim().length>0){
@@ -69,7 +75,7 @@ class Events extends Component {
     getEvents = (fetchType) => {
       // Pulls events to display in a table
       this.setState({loading: true});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token)
       let url = '/service/events?limit='+LIMIT;
 

@@ -1,8 +1,13 @@
-import React, { Component } from 'react';
-import mapboxgl from 'mapbox-gl';
+// Renders the component 
 import axios from 'axios';
+import mapboxgl from 'mapbox-gl';
+import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import {
+  getAccessToken,
+  refreshAccessToken
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -69,10 +74,14 @@ class EventMap extends Component {
   checkAccess = () => {
     // Checks to make sure the user has access to the 
     // map access group
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token);
     const url = '/service/map/authorize';
     let response = axios.get(url, {headers: {Authorization: auth }})
+      .then(res => {
+        // Refresh the token to keep the session active
+        refreshAccessToken();
+      })
       .catch(err => {
         if(err.response.status===403){
           this.props.history.push('/forbidden');
@@ -91,7 +100,7 @@ class EventMap extends Component {
   getZipCodeGeometries = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token);
     const url = '/service/map/geometries';
     let response = axios.get(url, {headers: {Authorization: auth }})
@@ -110,7 +119,7 @@ class EventMap extends Component {
   getEventCounts = () => {
     // Pulls event counts by location
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token);
     let url = '/service/events/cities';
     let response = axios.get(url, {headers: {Authorization: auth }})
@@ -129,7 +138,7 @@ class EventMap extends Component {
   getEventLocations = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token);
     let url = '/service/events/locations';
     let response = axios.get(url, {headers: {Authorization: auth }})
@@ -171,7 +180,7 @@ class EventMap extends Component {
   addAllZipGeometries = () => {
     // Adds map geometries for any zip code
     // with members or events
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     if(!token){
       this.history.push('/login');
     } else {

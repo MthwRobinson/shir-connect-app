@@ -10,6 +10,10 @@ import {
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
+import {
+  getAccessToken,
+  refreshAccessToken
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 
 import './ChangePassword.css';
@@ -31,13 +35,12 @@ class ChangePassword extends Component {
       this.handleOldPassword = this.handleOldPassword.bind(this);
       this.handleNewPassword = this.handleNewPassword.bind(this);
       this.handleNewPassword2 = this.handleNewPassword2.bind(this);
-
     }
   
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       if(!token){
         this.this.history.push('/login');
       } else {
@@ -48,6 +51,9 @@ class ChangePassword extends Component {
               name: res.data.id,
               loading: false
             });
+
+            // Refresh the access token to keep the seesion active
+            refreshAccessToken();
           })
           .catch( err => {
             if(err.response.status===401){
@@ -61,7 +67,7 @@ class ChangePassword extends Component {
       // Authenticates with the service and stores the JWT
       // in local storage if authentication is successful
       this.setState({updated: false, mismatch: false, attempted: false});
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       axios.post('/service/user/change-password', 
         {

@@ -7,7 +7,10 @@ import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
 import axios from 'axios';
 
-import { clearStorage } from './../../utilities/authentication';
+import { 
+  clearStorage,
+  getAccessToken
+} from './../../utilities/authentication';
 
 import './Header.css';
 
@@ -29,7 +32,7 @@ class Header extends Component {
   checkAccess() {
     // Checks to make sure the role of the user
     if(this.props.history.location.pathname!=='/login'){
-      const token = localStorage.getItem('trsToken');
+      const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
       const url = '/service/user/authorize';
       axios.get(url, {headers: {Authorization: auth }})

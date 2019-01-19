@@ -48,9 +48,9 @@ export { refreshAccessToken }
 // LOGOUT FUNCTIONS
 //------------------
 
-function logout() {
+function clearStorage() {
   // Clears the JWT from local storage
   localStorage.clear();
   sessionStorage.clear();
 }
-export { logout };
+export { clearStorage };

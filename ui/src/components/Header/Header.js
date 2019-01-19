@@ -7,7 +7,7 @@ import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
 import axios from 'axios';
 
-import { logout } from './../../utilities/authentication';
+import { clearStorage } from './../../utilities/authentication';
 
 import './Header.css';
 
@@ -87,8 +87,8 @@ class Header extends Component {
   }
 
   logout = () => {
-    // Logs out and redirects to the sign-in page
-    logout();
+    // Clears browser storage and redirects to the sign-in page
+    clearStorage();
     this.setState({paneOpen: false})
   }
 

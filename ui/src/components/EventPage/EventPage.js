@@ -5,10 +5,15 @@ import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
 
-import './EventPage.css';
-
+import {
+  getAccessToken,
+  refreshAccessToken,
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
+
+import './EventPage.css';
+
 
 class EventPage extends Component {
   state = {
@@ -21,6 +26,8 @@ class EventPage extends Component {
 
   componentDidMount(){
     this.getEvent();
+    // Refresh the access token to keep the session active
+    refreshAccessToken();
   }
 
   switchTab = (tab) => {
@@ -36,7 +43,7 @@ class EventPage extends Component {
 
   getEvent = () => {
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token)
     const eventId = this.props.location.search.split('=')[1];
     let url = '/service/event/' + eventId;

@@ -1,8 +1,7 @@
 // Renders the monthly revenue component
-import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import React, { Component } from 'react';
 import { 
   Button,
   Col,
@@ -13,7 +12,9 @@ import {
   Row,
   Table
 } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
 
+import { getAccessToken } from './../../utilities/authentication';
 import Loading from './../Loading/Loading';
 
 import './AgeGroupAttendance.css';
@@ -42,9 +43,9 @@ class AgeGroupAttendance extends Component {
   }
 
   componentDidMount(){
-    let ageGroup = localStorage.getItem('ageGroup');
-    let groupBy = localStorage.getItem('groupBy');
-    let topCategory = localStorage.getItem('topCategory');
+    let ageGroup = sessionStorage.getItem('ageGroup');
+    let groupBy = sessionStorage.getItem('groupBy');
+    let topCategory = sessionStorage.getItem('topCategory');
     if(ageGroup && groupBy && topCategory){
       this.setState({
         ageGroup: ageGroup,
@@ -101,9 +102,9 @@ class AgeGroupAttendance extends Component {
       ageGroup: ageGroup,
       groupBy: groupBy
     })
-    localStorage.setItem('ageGroup', ageGroup)
-    localStorage.setItem('groupBy', groupBy)
-    localStorage.setItem('topCategory', this.state.topCategory)
+    sessionStorage.setItem('ageGroup', ageGroup)
+    sessionStorage.setItem('groupBy', groupBy)
+    sessionStorage.setItem('topCategory', this.state.topCategory)
 
     if(newServiceCall){
       this.getAttendance(ageGroup, groupBy);
@@ -129,7 +130,7 @@ class AgeGroupAttendance extends Component {
   getTopParticipants = (ageGroup, topCategory) => {
     // Gets the top participants by age group
     this.setState({topLoading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token)
     let url = '/service/trends/participation/' + ageGroup;
     if(topCategory==='Events'){
@@ -152,7 +153,7 @@ class AgeGroupAttendance extends Component {
 
   getAttendance = (ageGroup, groupBy) => {
     this.setState({loading: true});
-    const token = localStorage.getItem('trsToken');
+    const token = getAccessToken();
     const auth = 'Bearer '.concat(token)
     const group = groupBy.toLowerCase();
     let url = '/service/trends/age-group-attendance';

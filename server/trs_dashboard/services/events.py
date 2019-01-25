@@ -172,6 +172,7 @@ class Events(object):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
         if event:
+            # Peform type conversions on the columns
             col_to_string = [
                 'duration', 
                 'start_datetime', 
@@ -186,7 +187,44 @@ class Events(object):
                     col_to_string.append(column)
                 if column in col_to_string:
                     event[column] = str(event[column])
+
+            # Add attendees and event aggregate information
             event['attendees'] = self.get_attendees(event_id)
+            event = self.compute_aggregates(event)
+
+        return event
+
+    def compute_aggregates(self, event):
+        """ Computes event aggregates for the event quick facts view """
+        if event['attendee_count']:
+            attendee_count = int(event['attendee_count'])
+        else:
+            attendee_count = 0
+
+        # Compute the aggregate statistics
+        total_age = 0
+        age_count = 0
+        members = 0
+        for attendee in event['attendees']:
+            if attendee['age']:
+                total_age += attendee['age']
+                age_count += 1
+            if attendee['is_member']:
+                members += 1
+
+        # Add average age to the event
+        if total_age > 0:
+            average_age = total_age/age_count
+        else:
+            average_age = False
+        event['average_age'] = average_age
+
+        # Add member percentage to the event
+        if attendee_count > 0:
+            pct_members = members/attendee_count
+        else:
+            pct_members = 0
+        event['pct_members'] = pct_members
 
         return event
 

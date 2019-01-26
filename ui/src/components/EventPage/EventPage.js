@@ -11,6 +11,7 @@ import {
 import EventInfo from './Tabs/EventInfo';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
+import QuickFacts from './Tabs/QuickFacts';
 
 import './EventPage.css';
 
@@ -106,52 +107,6 @@ class EventPage extends Component {
     )
   }
 
-  renderQuickFacts = () => {
-    // Renders the quick facts section of the tab
-    // Renders the event description and link
-    const event = this.state.event;
-    const start = moment(this.state.event.start_datetime);
-    const end = moment(this.state.event.end_datetime);
-
-    let address = '';
-    if(event.address_1){
-      address += event.address_1;
-      if(event.city){
-        address += ', ' + event.city;
-      }
-      if(event.region){
-        address += ', ' + event.region;
-      }
-      if(event.postal_code){
-        address += ', ' + event.postal_code;
-      }
-    }
-
-    let attendeeCount = 0;
-    if(event.attendee_count > 0){
-      attendeeCount = event.attendee_count;
-    }
-
-    return(
-      <div className='event-table'>
-        <ul>
-          <li><b>Time: </b> 
-            {start.format('MM/DD/YY, h:MM a')}-
-            {end.format('MM/DD/YY, h:MM a')}
-          </li>
-          <li><b>Registered:</b> {attendeeCount}/{event.capacity} </li>
-          <li><b>Venue:</b> {event.venue_name != null
-              ? event.venue_name : 'Temple Rodef Shalom'}
-          </li>
-          <li><b>Location:</b> {address.length>0
-              ? address : 'Not Available'}
-          </li>
-          <li><b>Description:</b> {event.description}</li>
-        </ul>
-      </div> 
-    )
-  }
-
   renderTab = () => {
     if(this.state.event){
       if(this.state.activeTab==='eventInfo'){
@@ -159,7 +114,7 @@ class EventPage extends Component {
       } else if(this.state.activeTab==='attendees') {
         return this.renderAttendees();
       } else if(this.state.activeTab==='quickFacts'){
-        return this.renderQuickFacts();
+        return <QuickFacts event={this.state.event} />;
       }
     } else {
       return(

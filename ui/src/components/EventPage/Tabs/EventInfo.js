@@ -1,11 +1,9 @@
-import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { getMapBoxToken } from './../../../utilities/authentication';
-import Loading from './../../Loading/Loading';
 
 mapboxgl.accessToken = getMapBoxToken();
 

@@ -1,14 +1,14 @@
+import axios from 'axios';
+import moment from 'moment';
 import React, { Component } from 'react';
 import { Nav, Table, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
-import mapboxgl from 'mapbox-gl';
-import moment from 'moment';
 
 import {
   getAccessToken,
   refreshAccessToken,
 } from './../../utilities/authentication';
+import EventInfo from './Tabs/EventInfo';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -18,10 +18,8 @@ import './EventPage.css';
 class EventPage extends Component {
   state = {
     loading: true,
-    zoom: 13,
-    map: null,
-    event: {},
-    activeTab: 'eventInfo'
+    event: null,
+    activeTab: 'attendees'
   }
 
   componentDidMount(){
@@ -53,15 +51,6 @@ class EventPage extends Component {
           event: res.data,
           loading: false,
         });
-        let lat = res.data.latitude;
-        let long = res.data.longitude;
-        let name = res.data.venue_name;
-        if(!(lat&&long&&name)){
-          long = -77.173449;
-          lat = 38.906103;
-          name = 'Temple Rodef Shalom';
-        }
-        this.setState({map: this.buildMap(long, lat, name)})
       })
       .catch(err => {
         if(err.response.status===401){
@@ -213,7 +202,7 @@ class EventPage extends Component {
   renderTab = () => {
     if(this.state.event){
       if(this.state.activeTab==='eventInfo'){
-        return this.renderEventInfo();
+        return <EventInfo event={this.state.event} />;
       } else if(this.state.activeTab==='attendees') {
         return this.renderAttendees();
       } else if(this.state.activeTab==='quickFacts'){
@@ -229,86 +218,10 @@ class EventPage extends Component {
       
   }
 
-  buildMap = (lng, lat, name) => {
-    // Builds the MapBox GL map
-    const zoom = this.state.zoom;
-
-    const map = new mapboxgl.Map({
-      container: this.mapContainer,
-      style: 'mapbox://styles/mapbox/streets-v9',
-      center: [lng, lat],
-      zoom
-    });
-
-    map.on('move', () => {
-      const { lng, lat } = map.getCenter();
-
-      this.setState({
-        lng: lng.toFixed(4),
-        lat: lat.toFixed(4),
-        zoom: map.getZoom().toFixed(2)
-      });
-    });
-
-    map.on('load', function() {
-      const feature = {
-        "type": "Feature",
-        "geometry": {
-          "type": "Point",
-          "coordinates": [lng, lat]
-        },
-        "properties": {
-          "title": name,
-          "icon": "religious-jewish",
-          "description" : "<strong>Temple Rodef Shalom</strong>"
-        }
-      };
-
-      map.addLayer({
-          "id": "points",
-          "type": "symbol",
-          "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": [feature]
-              }
-          },
-          "layout": {
-              "icon-image": "{icon}-15",
-              "text-field": "{title}",
-              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-              "text-offset": [0, 0.6],
-              "text-anchor": "top"
-          }
-      });
-    })
-    
-    return map
-  }
-
   render() {
     let eventInfo = this.renderTab();
     let body = null;
-    let mapArea = null;
-    if(this.state.mapLoading===true){
-      mapArea = (
-        <div className='event-map'>
-          <div className='event-loading'>
-            <Loading />
-          </div>
-        </div>
-      )
-    } else {
-      mapArea = (
-        <div 
-          ref={el => this.mapContainer = el} 
-          className="event-map pull-right"
-          id="event-map" 
-        />
-      )
-    }
-
+    
     if(this.state.loading){
       body = (
         <div className='event-loading'>
@@ -325,47 +238,42 @@ class EventPage extends Component {
       tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
 
       body = (
-        <div className="EventPage">
-          <div className='events-header'>
-            <h2>
-              {this.state.event.name}
-              <i
-                className="fa fa-home pull-right event-icons"
-                onClick={()=>this.props.history.push('/')}
-              ></i>
-              <i
-                className="fa fa-chevron-left pull-right event-icons"
-                onClick={()=>this.props.history.goBack()}
-              ></i>
-            </h2><hr/>
-          </div>
-          <div className='event-map-container'>
-            <div className='event-map-summary-area'>
-              <Nav 
-                bsStyle="tabs"
-                className="record-tabs"
-              >
-                <li
-                  eventKey="eventInfo" 
-                  className={tabStyle['eventInfo']}
-                  onClick={()=>this.switchTab('eventInfo')}
-                >Event Information</li>
-                <li 
-                  eventKey="quickFacts" 
-                  className={tabStyle['quickFacts']}
-                  onClick={()=>this.switchTab('quickFacts')}
-                >Quick Facts</li>
-                <li 
-                  eventKey="attendees" 
-                  className={tabStyle['attendees']}
-                  onClick={()=>this.switchTab('attendees')}
-                >Attendees</li>
-            </Nav>
-              {eventInfo}
+          <div className="EventPage">
+            <div className='events-header'>
+              <h2>
+                {this.state.event.name}
+                <i
+                  className="fa fa-home pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                ></i>
+                <i
+                  className="fa fa-chevron-left pull-right event-icons"
+                  onClick={()=>this.props.history.goBack()}
+                ></i>
+              </h2><hr/>
             </div>
-              {mapArea}
+            <Nav 
+              bsStyle="tabs"
+              className="record-tabs"
+            >
+              <li
+                eventKey="eventInfo" 
+                className={tabStyle['eventInfo']}
+                onClick={()=>this.switchTab('eventInfo')}
+              >Event Information</li>
+              <li 
+                eventKey="quickFacts" 
+                className={tabStyle['quickFacts']}
+                onClick={()=>this.switchTab('quickFacts')}
+              >Quick Facts</li>
+              <li 
+                eventKey="attendees" 
+                className={tabStyle['attendees']}
+                onClick={()=>this.switchTab('attendees')}
+              >Attendees</li>
+          </Nav>
+          {eventInfo}
           </div>
-        </div>
       )
     }
     return (

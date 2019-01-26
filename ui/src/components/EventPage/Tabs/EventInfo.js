@@ -4,9 +4,10 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { getMapBoxToken } from './../../../utilities/authentication';
 import Loading from './../../Loading/Loading';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
+mapboxgl.accessToken = getMapBoxToken();
 
 class EventInfo extends Component {
   state = {

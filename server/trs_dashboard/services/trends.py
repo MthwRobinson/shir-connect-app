@@ -14,7 +14,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database
-from trs_dashboard.configuration import TRENDS_GROUP
+import trs_dashboard.configuration as conf
 
 trends = Blueprint('trends', __name__)
 
@@ -46,7 +46,7 @@ def member_authorize():
     database = Database()
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if TRENDS_GROUP not in user['modules']:
+    if conf.TRENDS_GROUP not in user['modules']:
         response = {'message': '%s does not have access to trends'%(jwt_user)}
         return jsonify(response), 403
     else:
@@ -61,7 +61,7 @@ def month_revenue():
     # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if TRENDS_GROUP not in user['modules']:
+    if conf.TRENDS_GROUP not in user['modules']:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
     response = trends.get_monthly_revenue()
@@ -75,7 +75,7 @@ def average_attendance():
     # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if TRENDS_GROUP not in user['modules']:
+    if conf.TRENDS_GROUP not in user['modules']:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
     response = trends.get_average_attendance()
@@ -89,7 +89,7 @@ def age_group_attendees():
     # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if TRENDS_GROUP not in user['modules']:
+    if conf.TRENDS_GROUP not in user['modules']:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
 
@@ -107,7 +107,7 @@ def participation(age_group):
     # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if TRENDS_GROUP not in user['modules']:
+    if conf.TRENDS_GROUP not in user['modules']:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
 
@@ -181,24 +181,17 @@ class Trends(object):
         elif group == 'month':
             group_by = 'event_month'
         event_table = EVENT_TABLE.format(schema=self.database.schema)
+        age_groups = self.build_age_groups()
         sql = """
             SELECT
-                CASE
-                    WHEN age >= 18 AND age < 23 THEN 'College'
-                    WHEN age >= 23 AND age < 35 THEN 'Young Professional'
-                    WHEN age >= 35 AND age < 50 THEN '35-50'
-                    WHEN age >= 50 AND age < 60 THEN '50-60'
-                    WHEN age >= 60 AND age < 70 THEN '60-70'
-                    WHEN age >= 70 AND age < 80 THEN '70-80'
-                    WHEN age >= 80 THEN 'Over 80'
-                    ELSE 'Unknown'
-                END AS age_group,
+                {age_groups},
                 {group},
                 COUNT(DISTINCT member_name) as distinct_attendees
             FROM( {event_table} ) x
             GROUP BY {group}, age_group
             ORDER BY {group} ASC, age_group DESC
         """.format(
+            age_groups=age_groups,
             event_table=event_table,
             group=group_by
         )
@@ -216,6 +209,7 @@ class Trends(object):
     def get_participation(self, age_group, top='member', limit=25):
         """ Pulls the top events or attendees by age group """
         event_table = EVENT_TABLE.format(schema=self.database.schema)
+        age_groups = self.build_age_groups()
         sql = """
             SELECT
                 count(*) as total,
@@ -223,16 +217,7 @@ class Trends(object):
                 {top}_id as id
             FROM (
                 SELECT DISTINCT
-                    CASE
-                        WHEN age >= 18 AND age < 23 THEN 'College'
-                        WHEN age >= 23 AND age < 35 THEN 'Young Professional'
-                        WHEN age >= 35 AND age < 50 THEN '35-50'
-                        WHEN age >= 50 AND age < 60 THEN '50-60'
-                        WHEN age >= 60 AND age < 70 THEN '60-70'
-                        WHEN age >= 70 AND age < 80 THEN '70-80'
-                        WHEN age >= 80 THEN 'Over 80'
-                        ELSE 'Unknown'
-                    END AS age_group,
+                    {age_groups},
                     event_name,
                     event_id,
                     member_name,
@@ -243,6 +228,38 @@ class Trends(object):
             GROUP BY age_group, {top}_name, {top}_id
             ORDER BY total DESC
             LIMIT {limit}
-        """.format(top=top, event_table=event_table, age_group=age_group, limit=limit)
+        """.format(
+            age_groups=age_groups,
+            top=top, 
+            event_table=event_table, 
+            age_group=age_group, 
+            limit=limit
+        )
         response = self.database.fetch_list(sql)
         return response
+
+    @staticmethod
+    def build_age_groups():
+        """ Builds the SQL case statement to determine a 
+        participant's age group """
+        age_groups = conf.AGE_GROUPS
+        sql = ' CASE '
+        for group in age_groups:
+            # Build the conditions
+            conditions = []
+            if 'min' in age_groups[group]:
+                condition = ' age >= %s '%(age_groups[group]['min'])
+                conditions.append(condition)
+            if 'max' in age_groups[group]:
+                condition = ' age < %s '%(age_groups[group]['max'])
+                conditions.append(condition)
+
+            # If there are no conditions, skip thegroup
+            if len(conditions) == 0:
+                continue
+            # Build the SQL statement
+            else:
+                sql += ' WHEN ' + ' AND '.join(conditions)
+                sql += ' THEN ' + " '%s' "%(group)
+        sql += " ELSE 'Unknown' END as age_group "
+        return sql

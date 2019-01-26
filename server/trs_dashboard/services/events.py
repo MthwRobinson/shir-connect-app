@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 from trs_dashboard.database.database import Database
-from trs_dashboard.configuration import EVENT_GROUP, MAP_GROUP
+import trs_dashboard.configuration as conf
 
 events = Blueprint('events', __name__)
 
@@ -31,7 +31,7 @@ def get_event(event_id):
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -50,7 +50,7 @@ def get_events():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -89,7 +89,7 @@ def get_event_locations():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_locations()
@@ -103,7 +103,7 @@ def get_event_cities():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_cities()
@@ -117,7 +117,7 @@ def export_event_aggregates():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -205,19 +205,39 @@ class Events(object):
         total_age = 0
         age_count = 0
         members = 0
+        age_groups = {}
         for attendee in event['attendees']:
             if attendee['age']:
+                # Updates for the average age
                 total_age += attendee['age']
                 age_count += 1
+
+                # Update the age group count
+                for group in conf.AGE_GROUPS:
+                    meets_reqs = True
+                    conditions = conf.AGE_GROUPS[group]
+                    if 'min' in conditions:
+                        if attendee['age'] < conditions['min']:
+                            meets_reqs = False
+                    if 'max' in conditions:
+                        if attendee['age'] >= conditions['max']:
+                            meets_reqs = False
+                    if meets_reqs:
+                        if group not in age_groups:
+                            age_groups[group] = 1
+                        else:
+                            age_groups[group] += 1
+                
             if attendee['is_member']:
                 members += 1
 
-        # Add average age to the event
+        # Add age/age group information to the event
         if total_age > 0:
             average_age = total_age/age_count
         else:
             average_age = False
         event['average_age'] = average_age
+        event['age_groups'] = age_groups
 
         # Add member percentage to the event
         if attendee_count > 0:

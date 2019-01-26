@@ -14,12 +14,11 @@ import Loading from './../Loading/Loading';
 
 import './EventPage.css';
 
-
 class EventPage extends Component {
   state = {
     loading: true,
     event: null,
-    activeTab: 'attendees'
+    activeTab: 'eventInfo'
   }
 
   componentDidMount(){
@@ -59,52 +58,6 @@ class EventPage extends Component {
           this.props.history.push('/forbidden');
         }
       })
-  }
-
-  renderEventInfo = () => {
-    // Renders the event description and link
-    const event = this.state.event;
-    const start = moment(this.state.event.start_datetime);
-    const end = moment(this.state.event.end_datetime);
-
-    let address = '';
-    if(event.address_1){
-      address += event.address_1;
-      if(event.city){
-        address += ', ' + event.city;
-      }
-      if(event.region){
-        address += ', ' + event.region;
-      }
-      if(event.postal_code){
-        address += ', ' + event.postal_code;
-      }
-    }
-
-    let attendeeCount = 0;
-    if(event.attendee_count > 0){
-      attendeeCount = event.attendee_count;
-    }
-
-    return(
-      <div className='event-table'>
-        <ul>
-          <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
-          <li><b>Time: </b> 
-            {start.format('MM/DD/YY, h:MM a')}-
-            {end.format('MM/DD/YY, h:MM a')}
-          </li>
-          <li><b>Registered:</b> {attendeeCount}/{event.capacity} </li>
-          <li><b>Venue:</b> {event.venue_name != null
-              ? event.venue_name : 'Temple Rodef Shalom'}
-          </li>
-          <li><b>Location:</b> {address.length>0
-              ? address : 'Not Available'}
-          </li>
-          <li><b>Description:</b> {event.description}</li>
-        </ul>
-      </div> 
-    )
   }
 
   renderAttendees = () => {

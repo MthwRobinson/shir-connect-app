@@ -8,7 +8,8 @@
 
 .event-map {
   width: 35vw;
-  height: 100%;
+  height: 90%;
+  max-height: 600px;
   margin-top: 10px;
   margin-bottom: 10px;
   float: right;
@@ -18,7 +19,7 @@
   float: left;
   padding-top: 10px;
   padding-right: 15px;
-  max-height: 80vh;
+  max-height: 600px;
   width: 60%;
   overflow-y: hidden;
 }

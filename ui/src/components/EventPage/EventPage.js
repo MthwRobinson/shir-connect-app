@@ -19,7 +19,7 @@ class EventPage extends Component {
   state = {
     loading: true,
     event: null,
-    activeTab: 'eventInfo'
+    activeTab: 'quickFacts'
   }
 
   componentDidMount(){

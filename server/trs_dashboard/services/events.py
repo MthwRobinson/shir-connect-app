@@ -196,11 +196,6 @@ class Events(object):
 
     def compute_aggregates(self, event):
         """ Computes event aggregates for the event quick facts view """
-        if event['attendee_count']:
-            attendee_count = int(event['attendee_count'])
-        else:
-            attendee_count = 0
-
         # Compute the aggregate statistics
         total_age = 0
         age_count = 0
@@ -239,12 +234,9 @@ class Events(object):
         event['average_age'] = average_age
         event['age_groups'] = age_groups
 
-        # Add member percentage to the event
-        if attendee_count > 0:
-            pct_members = members/attendee_count
-        else:
-            pct_members = 0
-        event['pct_members'] = pct_members
+        # Add member breakdown to the event
+        event['member_count'] = members
+        event['non_member_count'] = len(event['attendees']) - members
 
         return event
 

@@ -74,10 +74,11 @@
   padding-bottom: 30px;
   text-align: left;
   font-size: 17px;
-  max-height: 70vh;
+  max-height: 65vh;
+  overflow-y: scroll;
 }
 
-.quick-facts-list {
+.quick-facts-bullets {
   list-style-type: none;
   list-style-position: inside;
   padding-left: 0;
@@ -86,8 +87,9 @@
 .quick-facts-list {
   float: left;
   max-height: 70vh;
-  width: 43%;
+  width: 40%;
   display: inline-block;
+  margin-right: -23px;
 }
 
 .quick-facts-plot-area {
@@ -98,7 +100,7 @@
 
 .quick-facts-plot-container {
   width: 100%;
-  height: 70vh;
+  max-height: 68vh;
   margin: auto;
   float: left;
 }

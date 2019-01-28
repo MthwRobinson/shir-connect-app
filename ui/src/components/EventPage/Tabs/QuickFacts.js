@@ -1,6 +1,5 @@
 // Renders the information in the Quick Facts
 // section of the events view
-import moment from 'moment';
 import React, { Component } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import Plot from 'react-plotly.js';

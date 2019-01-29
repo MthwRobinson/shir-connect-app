@@ -28,7 +28,19 @@ SELECT
   postal_code,
   b.name as venue_name,
   c.total_fees,
-  c.attendee_count
+  c.attendee_count,
+  CASE
+    WHEN (lower(description) like '% meal %'
+      OR lower(description) like '% breakfast %'
+      OR lower(description) like '% lunch %'
+      OR lower(description) like '% dinner %'
+      OR lower(a.name) like '% meal %'
+      OR lower(a.name) like '% breakfast %'
+      OR lower(a.name) like '% lunch %'
+      OR lower(a.name) like '% dinner %'
+    ) THEN TRUE
+    ELSE FALSE
+  END as is_food
 FROM {schema}.events a
 LEFT JOIN {schema}.venues b
 ON a.venue_id = b.id

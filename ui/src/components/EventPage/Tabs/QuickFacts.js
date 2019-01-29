@@ -172,11 +172,39 @@ class QuickFacts extends Component {
       showlegend: false,
       margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
     }
+    
+  renderFirst = () => {
+    // Renders the plot that shows the number of first-timers
+    
+    // Generate the data for the plot
+    const event = this.props.event;
+    const repeatAttendees = event.attendee_count - event.first_time_count;
+    let values = [event.first_time_count, repeatAttendees];
+    let labels = ['First Time', 'Repear'];
+    const data = [{
+      values: values,
+      labels: labels,
+      type: 'pie',
+      hole: .4,
+      textinfo: 'label',
+      textfont: {color: 'white'},
+      hoverinfo: 'label+percent',
+      marker: {colors: PLOT_COLORS, color: 'white'}
+    }]
+
+
+    // Determine the layout and render
+    const layout = {
+      height: 275,
+      width: 275,
+      showlegend: false,
+      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+    }
 
     return(
       <Col xs={6} sm={6} md={6} lg={6}>
       <div className='quick-facts-plot-container'>
-        <h4>Capacity ({event.capacity})</h4>
+        <h4>Capacity</h4>
         <div className='quick-facts-list'>
           <ul className="quick-facts-bullets">
             <li><b>Registered: </b> {event.attendee_count}</li>

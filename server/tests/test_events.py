@@ -44,6 +44,7 @@ def test_event():
     assert 'average_age' in response.json
     assert 'member_count' in response.json
     assert 'non_member_count' in response.json
+    assert 'first_event_count' in response.json
     assert 'age_groups' in response.json
     for group in response.json['age_groups']:
         count = response.json['age_groups'][group]

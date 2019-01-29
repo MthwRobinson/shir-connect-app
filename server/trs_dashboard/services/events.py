@@ -197,11 +197,14 @@ class Events(object):
     def compute_aggregates(self, event):
         """ Computes event aggregates for the event quick facts view """
         # Compute the aggregate statistics
+        start_date = str(event['start_datetime'])[:10]
         total_age = 0
         age_count = 0
         members = 0
+        first_event_count = 0
         age_groups = {}
         for attendee in event['attendees']:
+            # Compile age group information
             if attendee['age']:
                 # Updates for the average age
                 total_age += attendee['age']
@@ -222,9 +225,19 @@ class Events(object):
                             age_groups[group] = 1
                         else:
                             age_groups[group] += 1
-                
+            
+            # See if the participant is a member
             if attendee['is_member']:
                 members += 1
+
+            # Check to see if the participant is a first
+            # time participants
+            if not attendee['first_event_date']:
+                first_event_count += 1
+            else:
+                first_event_date = str(attendee['first_event_date'])[:10]
+                if first_event_date == start_date:
+                    first_event_count += 1
 
         # Add age/age group information to the event
         if total_age > 0:
@@ -237,6 +250,9 @@ class Events(object):
         # Add member breakdown to the event
         event['member_count'] = members
         event['non_member_count'] = len(event['attendees']) - members
+
+        # Add the number of first timers
+        event['first_event_count'] = first_event_count
 
         return event
 
@@ -255,18 +271,29 @@ class Events(object):
                 CASE 
                     WHEN c.first_name IS NOT NULL THEN TRUE
                     ELSE FALSE
-                END as is_member
+                END as is_member,
+                d.first_event_date
             FROM {schema}.attendees a
             INNER JOIN {schema}.events b
             on a.event_id = b.id
             LEFT JOIN {schema}.members_view c
             ON (lower(a.first_name)=lower(c.first_name)
             AND lower(a.last_name)=lower(c.last_name))
+            LEFT JOIN {schema}.participants d
+            ON (lower(d.first_name)=lower(c.first_name)
+            AND lower(d.last_name)=lower(c.last_name))
             where b.id = '{event_id}'
             ORDER BY last_name ASC
         """.format(schema=self.database.schema, event_id=event_id)
         df = pd.read_sql(sql, self.database.connection)
         attendees = self.database.to_json(df)
+
+        # Conver the first_event_date epoch time to a timestamp
+        for attendee in attendees:
+            if attendee['first_event_date']:
+                first = attendee['first_event_date']
+                first_ts = datetime.datetime.fromtimestamp(first/1000)
+                attendee['first_event_date'] = first_ts.isoformat()
         return attendees
 
     def get_event_cities(self):

@@ -125,10 +125,13 @@ class EventInfo extends Component {
             <ul>
               <li><b>Event Link:</b> <a href={event.url}>{event.name}</a></li>
               <li><b>Time: </b> 
-                {start.format('MM/DD/YY, h:MM a')}-
+                {start.format('MM/DD/YY, h:MM a')}{' - '}
                 {end.format('MM/DD/YY, h:MM a')}
               </li>
-              <li><b>Registered:</b> {attendeeCount}/{event.capacity} </li>
+              <li><b>Attendees: {event.attendee_count}</b></li>
+              <li><b>Average Cost: </b>
+                ${(event.total_fees/event.attendee_count).toFixed(2)}
+              </li>
               <li><b>Venue:</b> {event.venue_name != null
                   ? event.venue_name : 'Temple Rodef Shalom'}
               </li>

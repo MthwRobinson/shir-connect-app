@@ -15,9 +15,6 @@ const PLOT_COLORS = [
 ]
 
 class QuickFacts extends Component {
-  //--------------------
-  // DEMOGRAPHICS INFO
-  //--------------------
   renderAgeGroupList = () => {
     // Shows the number of people in each age group
     // who are attending the event
@@ -147,17 +144,72 @@ class QuickFacts extends Component {
       </Col>
     )
   }
+  
+  renderCapacity = () => {
+    // Creates a donut chart showing the capacity of the event
+    
+    // Generate the data for the plot
+    const event = this.props.event;
+    const remaining = event.capacity - event.attendee_count;
+    let values = [event.attendee_count, remaining];
+    let labels = ['Registered', 'Remaining'];
+    const data = [{
+      values: values,
+      labels: labels,
+      type: 'pie',
+      hole: .4,
+      textinfo: 'label',
+      textfont: {color: 'white'},
+      hoverinfo: 'label+percent',
+      marker: {colors: PLOT_COLORS, color: 'white'}
+    }]
+
+
+    // Determine the layout and render
+    const layout = {
+      height: 275,
+      width: 275,
+      showlegend: false,
+      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+    }
+
+    return(
+      <Col xs={6} sm={6} md={6} lg={6}>
+      <div className='quick-facts-plot-container'>
+        <h4>Capacity ({event.capacity})</h4>
+        <div className='quick-facts-list'>
+          <ul className="quick-facts-bullets">
+            <li><b>Registered: </b> {event.attendee_count}</li>
+            <li><b>Remaining: </b> {remaining}</li>
+          </ul>
+        </div>
+        <div className='quick-facts-plot-area' id="plot-container">
+          <Plot
+          data={data}
+          layout={layout}
+          style={{display: 'inline-block'}}
+          config={{displayModeBar: false}}
+          />
+        </div>
+      </div>
+      </Col>
+    )
+  }
 
   render(){
     const ageGroups = this.renderAgeGroups();
     const members = this.renderMembers();
+    const capacity = this.renderCapacity();
     return(
       <div className='QuickFacts'>
-        <h4>Demographics</h4><hr/>
-          <Row>
-            {ageGroups}
-            {members}
-          </Row>
+        <h4>Quick Facts</h4><hr/>
+        <Row>
+          {capacity}
+          {ageGroups}
+        </Row><hr/>
+        <Row>
+          {members}
+        </Row>
       </div> 
     )
   }

@@ -172,15 +172,37 @@ class QuickFacts extends Component {
       showlegend: false,
       margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
     }
-    
-  renderFirst = () => {
+    return(
+      <Col xs={6} sm={6} md={6} lg={6}>
+      <div className='quick-facts-plot-container'>
+        <h4>Capacity ({event.capacity})</h4>
+        <div className='quick-facts-list'>
+          <ul className="quick-facts-bullets">
+            <li><b>Registered: </b> {event.attendee_count}</li>
+            <li><b>Remaining: </b> {remaining}</li>
+          </ul>
+        </div>
+        <div className='quick-facts-plot-area' id="plot-container">
+          <Plot
+          data={data}
+          layout={layout}
+          style={{display: 'inline-block'}}
+          config={{displayModeBar: false}}
+          />
+        </div>
+      </div>
+      </Col>
+    )
+  }
+
+  renderFirstEvent = () => {
     // Renders the plot that shows the number of first-timers
     
     // Generate the data for the plot
     const event = this.props.event;
-    const repeatAttendees = event.attendee_count - event.first_time_count;
-    let values = [event.first_time_count, repeatAttendees];
-    let labels = ['First Time', 'Repear'];
+    const repeatAttendees = event.attendee_count - event.first_event_count;
+    let values = [event.first_event_count, repeatAttendees];
+    let labels = ['First Event', 'Repeat'];
     const data = [{
       values: values,
       labels: labels,
@@ -204,11 +226,11 @@ class QuickFacts extends Component {
     return(
       <Col xs={6} sm={6} md={6} lg={6}>
       <div className='quick-facts-plot-container'>
-        <h4>Capacity</h4>
+        <h4>First Event</h4>
         <div className='quick-facts-list'>
           <ul className="quick-facts-bullets">
-            <li><b>Registered: </b> {event.attendee_count}</li>
-            <li><b>Remaining: </b> {remaining}</li>
+            <li><b>First Event: </b> {event.first_event_count}</li>
+            <li><b>Repeat: </b> {repeatAttendees}</li>
           </ul>
         </div>
         <div className='quick-facts-plot-area' id="plot-container">
@@ -228,6 +250,7 @@ class QuickFacts extends Component {
     const ageGroups = this.renderAgeGroups();
     const members = this.renderMembers();
     const capacity = this.renderCapacity();
+    const firstEvent = this.renderFirstEvent();
     return(
       <div className='QuickFacts'>
         <h4>Quick Facts</h4><hr/>
@@ -237,6 +260,7 @@ class QuickFacts extends Component {
         </Row><hr/>
         <Row>
           {members}
+          {firstEvent}
         </Row>
       </div> 
     )

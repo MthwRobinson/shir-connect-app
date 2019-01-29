@@ -6,6 +6,7 @@ import { withRouter } from 'react-router-dom';
 
 import {
   getAccessToken,
+  getMapBoxToken,
   refreshAccessToken
 } from './../../utilities/authentication';
 import Header from './../Header/Header';
@@ -14,7 +15,7 @@ import Loading from './../Loading/Loading';
 import './EventMap.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
+mapboxgl.accessToken = getMapBoxToken();
 
 const TRS_LOCATION = {
   "type": "Feature",

@@ -39,6 +39,18 @@ def test_event():
     response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
+
+    # Check to make sure the aggregates are present
+    assert 'average_age' in response.json
+    assert 'member_count' in response.json
+    assert 'non_member_count' in response.json
+    assert 'first_event_count' in response.json
+    assert 'age_groups' in response.json
+    for group in response.json['age_groups']:
+        count = response.json['age_groups'][group]
+        assert type(count) == int
+
+    # Check to make sure the attendees are present
     for attendee in response.json['attendees']:
         'member_id' in attendee
         'first_name' in attendee

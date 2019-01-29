@@ -14,6 +14,7 @@ SELECT DISTINCT
       WHEN b.first_name IS NOT NULL THEN TRUE
       ELSE FALSE
     END AS is_member,
+    e.first_event_date,
     e.last_event_date,
     e.event_name,
     CASE
@@ -30,11 +31,13 @@ SELECT DISTINCT
       x.last_name,
       event_name,
       x.last_event_date,
+      x.first_event_date,
       x.events_attended
     FROM(
       SELECT
-        MAX(c.start_datetime) last_event_date,
-        COUNT(DISTINCT c.name) as events_attended,
+        MAX(c.start_datetime) AS last_event_date,
+        MIN(c.start_datetime) AS first_event_date,
+        COUNT(DISTINCT c.name) AS events_attended,
         LOWER(d.first_name) AS first_name,
         LOWER(d.last_name) AS last_name
       FROM {schema}.events c

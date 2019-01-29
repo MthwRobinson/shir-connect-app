@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 from trs_dashboard.database.database import Database
-from trs_dashboard.configuration import EVENT_GROUP, MAP_GROUP
+import trs_dashboard.configuration as conf
 
 events = Blueprint('events', __name__)
 
@@ -31,7 +31,7 @@ def get_event(event_id):
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -50,7 +50,7 @@ def get_events():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -89,7 +89,7 @@ def get_event_locations():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_locations()
@@ -103,7 +103,7 @@ def get_event_cities():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     response = event_manager.get_event_cities()
@@ -117,7 +117,7 @@ def export_event_aggregates():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if EVENT_GROUP not in user['modules']:
+    if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -172,6 +172,7 @@ class Events(object):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
         if event:
+            # Peform type conversions on the columns
             col_to_string = [
                 'duration', 
                 'start_datetime', 
@@ -186,7 +187,72 @@ class Events(object):
                     col_to_string.append(column)
                 if column in col_to_string:
                     event[column] = str(event[column])
+
+            # Add attendees and event aggregate information
             event['attendees'] = self.get_attendees(event_id)
+            event = self.compute_aggregates(event)
+
+        return event
+
+    def compute_aggregates(self, event):
+        """ Computes event aggregates for the event quick facts view """
+        # Compute the aggregate statistics
+        start_date = str(event['start_datetime'])[:10]
+        total_age = 0
+        age_count = 0
+        members = 0
+        first_event_count = 0
+        age_groups = {}
+        for attendee in event['attendees']:
+            # Compile age group information
+            if attendee['age']:
+                # Updates for the average age
+                total_age += attendee['age']
+                age_count += 1
+
+                # Update the age group count
+                for group in conf.AGE_GROUPS:
+                    meets_reqs = True
+                    conditions = conf.AGE_GROUPS[group]
+                    if 'min' in conditions:
+                        if attendee['age'] < conditions['min']:
+                            meets_reqs = False
+                    if 'max' in conditions:
+                        if attendee['age'] >= conditions['max']:
+                            meets_reqs = False
+                    if meets_reqs:
+                        if group not in age_groups:
+                            age_groups[group] = 1
+                        else:
+                            age_groups[group] += 1
+            
+            # See if the participant is a member
+            if attendee['is_member']:
+                members += 1
+
+            # Check to see if the participant is a first
+            # time participants
+            if not attendee['first_event_date']:
+                first_event_count += 1
+            else:
+                first_event_date = str(attendee['first_event_date'])[:10]
+                if first_event_date == start_date:
+                    first_event_count += 1
+
+        # Add age/age group information to the event
+        if total_age > 0:
+            average_age = total_age/age_count
+        else:
+            average_age = False
+        event['average_age'] = average_age
+        event['age_groups'] = age_groups
+
+        # Add member breakdown to the event
+        event['member_count'] = members
+        event['non_member_count'] = len(event['attendees']) - members
+
+        # Add the number of first timers
+        event['first_event_count'] = first_event_count
 
         return event
 
@@ -205,18 +271,29 @@ class Events(object):
                 CASE 
                     WHEN c.first_name IS NOT NULL THEN TRUE
                     ELSE FALSE
-                END as is_member
+                END as is_member,
+                d.first_event_date
             FROM {schema}.attendees a
             INNER JOIN {schema}.events b
             on a.event_id = b.id
             LEFT JOIN {schema}.members_view c
             ON (lower(a.first_name)=lower(c.first_name)
             AND lower(a.last_name)=lower(c.last_name))
+            LEFT JOIN {schema}.participants d
+            ON (lower(d.first_name)=lower(c.first_name)
+            AND lower(d.last_name)=lower(c.last_name))
             where b.id = '{event_id}'
             ORDER BY last_name ASC
         """.format(schema=self.database.schema, event_id=event_id)
         df = pd.read_sql(sql, self.database.connection)
         attendees = self.database.to_json(df)
+
+        # Conver the first_event_date epoch time to a timestamp
+        for attendee in attendees:
+            if attendee['first_event_date']:
+                first = attendee['first_event_date']
+                first_ts = datetime.datetime.fromtimestamp(first/1000)
+                attendee['first_event_date'] = first_ts.isoformat()
         return attendees
 
     def get_event_cities(self):

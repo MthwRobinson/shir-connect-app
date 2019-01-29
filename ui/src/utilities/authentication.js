@@ -54,3 +54,12 @@ function clearStorage() {
   sessionStorage.clear();
 }
 export { clearStorage };
+
+//-------------------
+// MAPBOX TOKEN 
+// ------------------
+
+function getMapBoxToken() {
+  return 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
+}
+export { getMapBoxToken }

@@ -8,7 +8,10 @@
 
 .event-map {
   width: 35vw;
-  height: 70vh;
+  height: 90%;
+  max-height: 600px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   float: right;
 }
 
@@ -16,7 +19,7 @@
   float: left;
   padding-top: 10px;
   padding-right: 15px;
-  max-height: 70vh;
+  max-height: 600px;
   width: 60%;
   overflow-y: hidden;
 }
@@ -64,3 +67,40 @@
   cursor: pointer;
 }
 
+.QuickFacts {
+  padding-top: 10px;
+  padding-left: 2%;
+  padding-right: 2%;
+  padding-bottom: 30px;
+  text-align: left;
+  font-size: 17px;
+  max-height: 65vh;
+  overflow-y: scroll;
+}
+
+.quick-facts-bullets {
+  list-style-type: none;
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.quick-facts-list {
+  float: left;
+  max-height: 70vh;
+  width: 40%;
+  display: inline-block;
+  margin-right: -23px;
+}
+
+.quick-facts-plot-area {
+  width: 50%;
+  float: left;
+  display: inline-block;
+}
+
+.quick-facts-plot-container {
+  width: 100%;
+  max-height: 68vh;
+  margin: auto;
+  float: left;
+}

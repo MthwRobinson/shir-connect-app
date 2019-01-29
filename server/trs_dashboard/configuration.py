@@ -26,12 +26,26 @@ MATERIALIZED_VIEWS = [
 # Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
 
+# Roles for access control
+# Admin add/modify users and upload member data
 ADMIN_ROLE = 'admin'
 STANDARD_ROLE = 'standard'
 USER_ROLES = [ADMIN_ROLE, STANDARD_ROLE]
 
+# Groups for access control
+# Each module has a group
 EVENT_GROUP = 'events'
 MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
 ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, MAP_GROUP]
+
+# Age Group Definitions
+AGE_GROUPS = {
+    'College': {'min': 18, 'max': 23},
+    'Young Professional': {'min': 23, 'max': 35},
+    '35-50': {'min': 35, 'max': 50},
+    '50-60': {'min': 50, 'max': 60},
+    '60-70': {'min': 60, 'max': 70},
+    'Over 80': {'min': 80}
+}

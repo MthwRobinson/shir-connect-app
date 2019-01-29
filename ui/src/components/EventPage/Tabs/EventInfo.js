@@ -114,8 +114,13 @@ class EventInfo extends Component {
     }
 
     let attendeeCount = 0;
-    if(event.attendee_count > 0){
+    if(event.attendee_count&&event.attendee_count > 0){
       attendeeCount = event.attendee_count;
+    }
+
+    let averageCost = 0;
+    if(event.attendee_count&&event.total_fees){
+      averageCost = event.total_fees/event.attendee_count
     }
 
     return(
@@ -128,10 +133,11 @@ class EventInfo extends Component {
                 {start.format('MM/DD/YY, h:MM a')}{' - '}
                 {end.format('MM/DD/YY, h:MM a')}
               </li>
-              <li><b>Attendees: {event.attendee_count}</b></li>
+              <li><b>Attendees: </b>{attendeeCount}</li>
               <li><b>Average Cost: </b>
-                ${(event.total_fees/event.attendee_count).toFixed(2)}
+                ${averageCost.toFixed(2)}
               </li>
+              <li><b>Food: </b> { event.is_food==='True' ? 'Yes' : 'No' }</li>
               <li><b>Venue:</b> {event.venue_name != null
                   ? event.venue_name : 'Temple Rodef Shalom'}
               </li>

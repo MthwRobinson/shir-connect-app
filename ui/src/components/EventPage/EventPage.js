@@ -33,12 +33,6 @@ class EventPage extends Component {
     this.setState({activeTab: tab});
   }
 
-  selectMember = (firstName, lastName) => {
-    // Switches to the member page
-    const url = '/member?firstName='+firstName+'&lastName='+lastName;
-    this.props.history.push(url);
-  }
-
   getEvent = () => {
     this.setState({loading: true});
     const token = getAccessToken();

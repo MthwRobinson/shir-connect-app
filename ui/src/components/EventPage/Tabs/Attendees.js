@@ -3,6 +3,12 @@ import { Table, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
 class Attendees extends Component {
+  selectMember = (firstName, lastName) => {
+    // Switches to the member page
+    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    this.props.history.push(url);
+  }
+
   render(){
     return(
       <div>

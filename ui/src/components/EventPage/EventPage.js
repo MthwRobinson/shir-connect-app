@@ -94,7 +94,7 @@ class EventPage extends Component {
       tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
 
       body = (
-          <div className="EventPage">
+          <div className="EventPage" id="event-page">
             <div className='events-header'>
               <h2>
                 {this.state.event.name}

@@ -5,6 +5,8 @@ import { Col, Row } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
 
+import Loading from './../../Loading/Loading';
+
 const PLOT_COLORS = [
   "#0038b8",
   "#ff00ff",
@@ -16,6 +18,14 @@ const PLOT_COLORS = [
 ]
 
 class QuickFacts extends Component {
+  state = {
+    'mounted': false
+  }
+
+  componentDidMount(){
+    this.setState({mounted: true});
+  }
+
   renderAgeGroupList = () => {
     // Shows the number of people in each age group
     // who are attending the event
@@ -65,34 +75,51 @@ class QuickFacts extends Component {
       marker: {colors: PLOT_COLORS, color: 'white'}
     }]
 
-
-    // Determine the layout and render
-    const layout = {
-      height: 275,
-      width: 275,
-      showlegend: false,
-      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
-    }
-
     const ageGroupList = this.renderAgeGroupList();
-    return(
-      <Col xs={6} sm={6} md={6} lg={6}>
-      <div className='quick-facts-plot-container'>
-        <h4>Age Groups</h4>
-        <div className='quick-facts-list'>
-          {ageGroupList}
+    if(!this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Age Groups</h4>
+          <div className='quick-facts-list'>
+            {ageGroupList}
+          </div>
+          <div className='quick-facts-plot-area'>
+            <Loading />
+          </div>
         </div>
-        <div className='quick-facts-plot-area' id="plot-container">
-          <Plot
-          data={data}
-          layout={layout}
-          style={{display: 'inline-block'}}
-          config={{displayModeBar: false}}
-          />
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('age-group-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Age Groups</h4>
+          <div className='quick-facts-list'>
+            {ageGroupList}
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
         </div>
-      </div>
-      </Col>
-    )
+        </Col>
+      )
+    }
   }
   
   renderMembers = () => {
@@ -114,36 +141,58 @@ class QuickFacts extends Component {
       marker: {colors: PLOT_COLORS, color: 'white'}
     }]
 
+    if(!this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='members-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Membership</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>Members: </b> {event.member_count}</li>
+              <li><b>Non-Members: </b> {event.non_member_count}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
 
-    // Determine the layout and render
-    const layout = {
-      height: 275,
-      width: 275,
-      showlegend: false,
-      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('first-event-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='members-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Membership</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>Members: </b> {event.member_count}</li>
+              <li><b>Non-Members: </b> {event.non_member_count}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
     }
-
-    return(
-      <Col xs={6} sm={6} md={6} lg={6}>
-      <div className='quick-facts-plot-container'>
-        <h4>Membership</h4>
-        <div className='quick-facts-list'>
-          <ul className="quick-facts-bullets">
-            <li><b>Members: </b> {event.member_count}</li>
-            <li><b>Non-Members: </b> {event.non_member_count}</li>
-          </ul>
-        </div>
-        <div className='quick-facts-plot-area' id="plot-container">
-          <Plot
-          data={data}
-          layout={layout}
-          style={{display: 'inline-block'}}
-          config={{displayModeBar: false}}
-          />
-        </div>
-      </div>
-      </Col>
-    )
   }
   
   renderCapacity = () => {
@@ -165,35 +214,56 @@ class QuickFacts extends Component {
       marker: {colors: PLOT_COLORS, color: 'white'}
     }]
 
-
-    // Determine the layout and render
-    const layout = {
-      height: 275,
-      width: 275,
-      showlegend: false,
-      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+    if(!this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Capacity ({event.capacity})</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>Registered: </b> {event.attendee_count}</li>
+              <li><b>Remaining: </b> {remaining}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('capacity-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Capacity ({event.capacity})</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>Registered: </b> {event.attendee_count}</li>
+              <li><b>Remaining: </b> {remaining}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
     }
-    return(
-      <Col xs={6} sm={6} md={6} lg={6}>
-      <div className='quick-facts-plot-container'>
-        <h4>Capacity ({event.capacity})</h4>
-        <div className='quick-facts-list'>
-          <ul className="quick-facts-bullets">
-            <li><b>Registered: </b> {event.attendee_count}</li>
-            <li><b>Remaining: </b> {remaining}</li>
-          </ul>
-        </div>
-        <div className='quick-facts-plot-area' id="plot-container">
-          <Plot
-          data={data}
-          layout={layout}
-          style={{display: 'inline-block'}}
-          config={{displayModeBar: false}}
-          />
-        </div>
-      </div>
-      </Col>
-    )
   }
 
   renderFirstEvent = () => {
@@ -215,36 +285,56 @@ class QuickFacts extends Component {
       marker: {colors: PLOT_COLORS, color: 'white'}
     }]
 
-
-    // Determine the layout and render
-    const layout = {
-      height: 275,
-      width: 275,
-      showlegend: false,
-      margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+    if(!this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id="first-event-plot">
+        <div className='quick-facts-plot-container'>
+          <h4>First Event</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>First Event: </b> {event.first_event_count}</li>
+              <li><b>Repeat: </b> {repeatAttendees}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('first-event-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id="first-event-plot">
+        <div className='quick-facts-plot-container'>
+          <h4>First Event</h4>
+          <div className='quick-facts-list'>
+            <ul className="quick-facts-bullets">
+              <li><b>First Event: </b> {event.first_event_count}</li>
+              <li><b>Repeat: </b> {repeatAttendees}</li>
+            </ul>
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
     }
-
-    return(
-      <Col xs={6} sm={6} md={6} lg={6}>
-      <div className='quick-facts-plot-container'>
-        <h4>First Event</h4>
-        <div className='quick-facts-list'>
-          <ul className="quick-facts-bullets">
-            <li><b>First Event: </b> {event.first_event_count}</li>
-            <li><b>Repeat: </b> {repeatAttendees}</li>
-          </ul>
-        </div>
-        <div className='quick-facts-plot-area' id="plot-container">
-          <Plot
-          data={data}
-          layout={layout}
-          style={{display: 'inline-block'}}
-          config={{displayModeBar: false}}
-          />
-        </div>
-      </div>
-      </Col>
-    )
   }
 
   render(){
@@ -253,10 +343,10 @@ class QuickFacts extends Component {
     const capacity = this.renderCapacity();
     const firstEvent = this.renderFirstEvent();
     return(
-      <div className='QuickFacts'>
+      <div className='QuickFacts'> 
         <h4>Quick Facts</h4><hr/>
         <Row>
-          {capacity}
+          {this.renderCapacity()}
           {ageGroups}
         </Row><hr/>
         <Row>

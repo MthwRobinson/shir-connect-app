@@ -6,12 +6,13 @@ import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
 
 const PLOT_COLORS = [
-  'rgb(0,73,131)',
-  'rgb(29,154,255)',
-  'rgb(0,87,156)',
-  'rgb(3,143,255)',
-  'rgb(0,101,182)',
-  'rgb(0,115,207)'
+  "#0038b8",
+  "#ff00ff",
+  "#8c69cb",
+  "#ff7bff",
+  "#cea6e1",
+  "#ffb7ff",
+  "#ffebff"
 ]
 
 class QuickFacts extends Component {

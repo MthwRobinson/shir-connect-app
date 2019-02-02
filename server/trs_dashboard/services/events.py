@@ -281,7 +281,8 @@ class Events(object):
                     WHEN c.first_name IS NOT NULL THEN TRUE
                     ELSE FALSE
                 END as is_member,
-                d.first_event_date
+                d.first_event_date,
+                d.events_attended
             FROM {schema}.attendees a
             INNER JOIN {schema}.events b
             on a.event_id = b.id
@@ -289,8 +290,8 @@ class Events(object):
             ON (lower(a.first_name)=lower(c.first_name)
             AND lower(a.last_name)=lower(c.last_name))
             LEFT JOIN {schema}.participants d
-            ON (lower(d.first_name)=lower(c.first_name)
-            AND lower(d.last_name)=lower(c.last_name))
+            ON (lower(a.first_name)=lower(d.first_name)
+            AND lower(a.last_name)=lower(d.last_name))
             where b.id = '{event_id}'
             ORDER BY last_name ASC
         """.format(schema=self.database.schema, event_id=event_id)

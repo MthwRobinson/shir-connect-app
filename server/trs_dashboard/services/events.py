@@ -211,6 +211,7 @@ class Events(object):
                 age_count += 1
 
                 # Update the age group count
+                age_group_found = False 
                 for group in conf.AGE_GROUPS:
                     meets_reqs = True
                     conditions = conf.AGE_GROUPS[group]
@@ -221,10 +222,18 @@ class Events(object):
                         if attendee['age'] >= conditions['max']:
                             meets_reqs = False
                     if meets_reqs:
+                        age_group_found = True
                         if group not in age_groups:
                             age_groups[group] = 1
                         else:
                             age_groups[group] += 1
+
+                # Add to the unknown category, if necessary 
+                if not age_group_found:
+                    if 'Unknown' not in age_groups:
+                        age_groups['Unknown'] = 1
+                    else:
+                        age_groups['Unknown'] += 1
             
             # See if the participant is a member
             if attendee['is_member']:
@@ -272,7 +281,8 @@ class Events(object):
                     WHEN c.first_name IS NOT NULL THEN TRUE
                     ELSE FALSE
                 END as is_member,
-                d.first_event_date
+                d.first_event_date,
+                d.events_attended
             FROM {schema}.attendees a
             INNER JOIN {schema}.events b
             on a.event_id = b.id
@@ -280,8 +290,8 @@ class Events(object):
             ON (lower(a.first_name)=lower(c.first_name)
             AND lower(a.last_name)=lower(c.last_name))
             LEFT JOIN {schema}.participants d
-            ON (lower(d.first_name)=lower(c.first_name)
-            AND lower(d.last_name)=lower(c.last_name))
+            ON (lower(a.first_name)=lower(d.first_name)
+            AND lower(a.last_name)=lower(d.last_name))
             where b.id = '{event_id}'
             ORDER BY last_name ASC
         """.format(schema=self.database.schema, event_id=event_id)

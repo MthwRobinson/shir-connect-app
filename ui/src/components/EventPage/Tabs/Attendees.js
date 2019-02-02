@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Table, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
+import moment from 'moment';
+
 class Attendees extends Component {
   selectMember = (firstName, lastName) => {
     // Switches to the member page
@@ -21,8 +23,10 @@ class Attendees extends Component {
                   Last Name
                   <i className='fa fa-caret-down paging-arrows'></i>
                   </th>
-                  <th className='table-heading'>E-mail</th>
+                  <th className='table-heading'>Member</th>
                   <th className='table-heading'>Age</th>
+                  <th className='table-heading'>Events</th>
+                  <th className='table-heading'>First Event</th>
                 </tr>
               </thead>
             <tbody>
@@ -37,13 +41,16 @@ class Attendees extends Component {
                     )}
                   >
                     <th>{attendee.first_name != null
-                    ? attendee.first_name : '--'}</th>
+                    ? attendee.first_name : ''}</th>
                     <th>{attendee.last_name != null
-                    ? attendee.last_name : '--'}</th>
-                    <th>{attendee.email != null
-                    ? attendee.email : '--'}</th>
+                    ? attendee.last_name : ''}</th>
+                    <th>{attendee.is_member === true ? 'Y' : 'N'}</th>
                     <th>{attendee.age != null
                     ? attendee.age : ''}</th>
+                    <th>{attendee.events_attended != null
+                    ? attendee.events_attended : 0}</th>
+                    <th>{attendee.first_event_date != null
+                    ? moment(attendee.first_event_date).format('YYYY-MM-DD') : ''}</th>
                   </tr>
                 )
               })}

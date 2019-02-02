@@ -211,6 +211,7 @@ class Events(object):
                 age_count += 1
 
                 # Update the age group count
+                age_group_found = False 
                 for group in conf.AGE_GROUPS:
                     meets_reqs = True
                     conditions = conf.AGE_GROUPS[group]
@@ -221,10 +222,18 @@ class Events(object):
                         if attendee['age'] >= conditions['max']:
                             meets_reqs = False
                     if meets_reqs:
+                        age_group_found = True
                         if group not in age_groups:
                             age_groups[group] = 1
                         else:
                             age_groups[group] += 1
+
+                # Add to the unknown category, if necessary 
+                if not age_group_found:
+                    if 'Unknown' not in age_groups:
+                        age_groups['Unknown'] = 1
+                    else:
+                        age_groups['Unknown'] += 1
             
             # See if the participant is a member
             if attendee['is_member']:

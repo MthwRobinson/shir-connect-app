@@ -132,7 +132,7 @@ class Members(object):
 
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
 
-    @demo_mode(['first_name', 'last_name',{'events': ['name']}])
+    @demo_mode(['first_name', 'last_name', 'email', {'events': ['name']}])
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """
         sql = """

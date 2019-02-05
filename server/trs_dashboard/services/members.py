@@ -19,6 +19,7 @@ from werkzeug.utils import secure_filename
 import trs_dashboard.configuration as conf
 from trs_dashboard.database.database import Database
 from trs_dashboard.database.member_loader import MemberLoader
+from trs_dashboard.services.demo_mode import demo_mode
 
 members = Blueprint('members', __name__)
 
@@ -131,6 +132,7 @@ class Members(object):
 
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
 
+    @demo_mode(['first_name', 'last_name',{'events': ['name']}])
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """
         sql = """

@@ -234,7 +234,8 @@ class Members(object):
             return events
         else:
             return []
-
+    
+    @demo_mode([{'results': ['first_name','last_name', 'event_name']}])
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """
         if q:

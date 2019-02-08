@@ -20,6 +20,7 @@ import numpy as np
 
 from trs_dashboard.database.database import Database
 import trs_dashboard.configuration as conf
+from trs_dashboard.services.demo_mode import demo_mode
 
 events = Blueprint('events', __name__)
 
@@ -146,7 +147,8 @@ class Events(object):
         self.logger = daiquiri.getLogger(__name__)
 
         self.database = Database()
-    
+   
+    @demo_mode([{'results': ['name', 'venue_name']}])
     def get_events(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Fetches the most recent events from the database """
         if q:
@@ -168,6 +170,18 @@ class Events(object):
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
+    @demo_mode([
+        'address_1',
+        'address_2',
+        'city',
+        'country',
+        'description',
+        'name',
+        'region',
+        'venue_name',
+        'postal_code',
+        {'attendees': ['email', 'first_name', 'last_name', 'name']}
+    ])
     def get_event(self, event_id):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
@@ -393,6 +407,12 @@ class Events(object):
 
     def build_feature(self, row):
         """ Converts a dataframe row into a geojson feature """
+        # Mask the event name and address if the app is in dev mode
+        if conf.DEMO_MODE:
+            row['event_name'] = 'EVENT_NAME'
+            row['address_1'] = 'ADDRESS'
+            row['city'] = 'CITY'
+
         coordinates = [row['longitude'], row['latitude']]
         day = str(row['start_datetime'])[:10]
         address = ''

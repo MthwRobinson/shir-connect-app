@@ -11,6 +11,10 @@ JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(seconds=900)
 JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(seconds=7200)
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
+# Determines which mode the app will run in
+mode = os.getenv('SHIR_CONNECT_MODE')
+DEMO_MODE = mode == 'DEMO' or False
+
 # Database configurations and secrets
 PG_USER = 'postgres'
 PG_HOST = 'localhost'

@@ -306,7 +306,7 @@ class AgeGroupAttendance extends Component {
                 layout={ {
                   width: width,
                   height: Math.max(300, width/1.7),
-                  title: ageGroup + ' Attendees By ' + group,
+                  title: 'Age Group: ' + ageGroup,
                   titlefont: {family: 'Source Sans Pro'},
                   yaxis: {
                     title: 'Unique Attendees',

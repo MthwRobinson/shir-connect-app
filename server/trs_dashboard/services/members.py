@@ -19,6 +19,7 @@ from werkzeug.utils import secure_filename
 import trs_dashboard.configuration as conf
 from trs_dashboard.database.database import Database
 from trs_dashboard.database.member_loader import MemberLoader
+from trs_dashboard.services.demo_mode import demo_mode
 
 members = Blueprint('members', __name__)
 
@@ -131,8 +132,21 @@ class Members(object):
 
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
 
+    @demo_mode(['first_name', 'last_name', 'email', {'events': ['name']}])
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """
+        # Currently, the service calls for members references them
+        # by first name and last name. This means that the get members
+        # service call breaks in demo mode. We should be able to drop
+        # this block when we switch to referencing members by id
+        if conf.DEMO_MODE:
+            df = self.database.read_table('participants', limit=1, 
+                                          sort='events_attended',
+                                          order='DESC')
+            members = self.database.to_json(df)
+            first_name = members[0]['first_name']
+            last_name = members[0]['last_name']
+
         sql = """
             SELECT DISTINCT
                 CASE
@@ -232,7 +246,8 @@ class Members(object):
             return events
         else:
             return []
-
+    
+    @demo_mode([{'results': ['first_name','last_name', 'event_name']}])
     def get_members(self, limit=None, page=None, order=None, sort=None, q=None):
         """ Pulls a list of members from the database """
         if q:

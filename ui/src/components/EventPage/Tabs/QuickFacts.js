@@ -340,7 +340,6 @@ class QuickFacts extends Component {
   render(){
     const ageGroups = this.renderAgeGroups();
     const members = this.renderMembers();
-    const capacity = this.renderCapacity();
     const firstEvent = this.renderFirstEvent();
     return(
       <div className='QuickFacts'> 

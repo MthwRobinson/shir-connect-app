@@ -13,7 +13,7 @@ EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Determines which mode the app will run in
 mode = os.getenv('SHIR_CONNECT_MODE')
-DEV_MODE = mode == 'DEV' or False
+DEMO_MODE = mode == 'DEMO' or False
 
 # Database configurations and secrets
 PG_USER = 'postgres'

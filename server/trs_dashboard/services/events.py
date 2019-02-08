@@ -407,6 +407,12 @@ class Events(object):
 
     def build_feature(self, row):
         """ Converts a dataframe row into a geojson feature """
+        # Mask the event name and address if the app is in dev mode
+        if conf.DEMO_MODE:
+            row['event_name'] = 'EVENT_NAME'
+            row['address_1'] = 'ADDRESS'
+            row['city'] = 'CITY'
+
         coordinates = [row['longitude'], row['latitude']]
         day = str(row['start_datetime'])[:10]
         address = ''

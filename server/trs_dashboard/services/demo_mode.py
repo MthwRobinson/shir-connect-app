@@ -1,15 +1,15 @@
 """ Decorator that scrambles the output of services so that the 
 app can be shown without exposing sensitive information. """
-from trs_dashboard.configuration import DEV_MODE
+from trs_dashboard.configuration import DEMO_MODE
 
-def demo_mode(fields, dev_mode=False):
+def demo_mode(fields, demo_mode=False):
     """ If the SHIR_CONNECT_MODE environmental variable is set
     to DEMO, the decorator scrambles the output of a service
     to avoid exposing sensistive information. """
     def _scrambler(function):
         def _service(*args, **kwargs):
             response = function(*args, **kwargs)
-            if DEV_MODE or dev_mode:
+            if DEMO_MODE or demo_mode:
                 for field in fields:
                     # Fields that are passed as a string are assumed
                     # to be a string in the dictionary

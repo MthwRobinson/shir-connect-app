@@ -1,6 +1,6 @@
 from trs_dashboard.services.demo_mode import demo_mode
 
-@demo_mode(['first_name','last_name',{'friends': ['name']}], dev_mode=True)
+@demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
 def kangaroo():
     response = {
         'first_name': 'Matt',

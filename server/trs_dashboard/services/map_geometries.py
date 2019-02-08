@@ -10,7 +10,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
 from trs_dashboard.database.database import Database
-from trs_dashboard.configuration import MAP_GROUP
+import trs_dashboard.configuration as conf
 
 map_geometries = Blueprint('map_geometries', __name__)
 
@@ -21,7 +21,7 @@ def map_authorize():
     database = Database()
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have access the map'%(jwt_user)}
         return jsonify(response), 403
     else:
@@ -36,7 +36,7 @@ def geometry(zipcode):
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     layer = map_geometries.get_geometry(zipcode)
@@ -50,7 +50,7 @@ def geometries():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     layers = map_geometries.get_geometries()
@@ -64,7 +64,7 @@ def zip_codes():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if MAP_GROUP not in user['modules']:
+    if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
     zip_codes = map_geometries.get_zip_codes()
@@ -178,4 +178,3 @@ class MapGeometries(object):
         else:
             response = []
         return response
-

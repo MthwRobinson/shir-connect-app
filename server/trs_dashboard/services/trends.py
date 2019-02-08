@@ -15,6 +15,7 @@ import pandas as pd
 
 from trs_dashboard.database.database import Database
 import trs_dashboard.configuration as conf
+from trs_dashboard.services.demo_mode import demo_mode
 
 trends = Blueprint('trends', __name__)
 
@@ -206,6 +207,7 @@ class Trends(object):
             response[age_group]['count'].append(row['distinct_attendees'])
         return response
 
+    @demo_mode([{'results': ['name']}]) 
     def get_participation(self, age_group, top='member', limit=25):
         """ Pulls the top events or attendees by age group """
         event_table = EVENT_TABLE.format(schema=self.database.schema)

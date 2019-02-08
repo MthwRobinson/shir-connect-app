@@ -53,7 +53,6 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
-    this.getEventCounts();
     const locationPromise = this.getEventLocations();
     const zipPromise = this.getZipCodeGeometries();
     const mapPromise = locationPromise
@@ -116,26 +115,7 @@ class EventMap extends Component {
       })
     return response
   }
-
-  getEventCounts = () => {
-    // Pulls event counts by location
-    this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token);
-    let url = '/service/events/cities';
-    let response = axios.get(url, {headers: {Authorization: auth }})
-      .then(res => {
-        const events = res.data.results;
-        this.setState({events: events, eventsLoading: false});
-      })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        }
-      })
-    return response
-  }
-
+  
   getEventLocations = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
@@ -282,65 +262,7 @@ class EventMap extends Component {
     }
   }
 
-  renderEventsArea = () => {
-    // Renders the section that list events by city
-    let eventsArea = null;
-    if(this.state.eventsLoading===true){
-      eventsArea = <div className='event-loading'><Loading /></div>
-    } else {
-      // Creates the list of cities to iterate over
-      let cities = [];
-      for(var city in this.state.events.cities){
-        cities.push(city);
-      }
-      // Creates the list of cities with the number of events in
-      // parentheses. If the city is selected, then a sublist
-      // of events is also displayed
-      eventsArea = (
-        <ul className="fa-ul"> 
-          {cities.map((city, index) => {
-            let expandedList = null
-            // The icon will show a plus if the city is expanded
-            // and a minus otherwise
-            let iconClass = 'bullet-icon fa-li fa';
-            if(this.state.expanded===city){
-              iconClass += ' fa-minus';
-              const cityEvents = this.state.events.cities[city];
-              expandedList = (
-                <ol className='city-secondary-list'>
-                  {cityEvents.map((event, index) => {
-                    return(
-                      <li
-                        onClick={()=>this.selectEvent(event.event_id)}
-                      >{event.event_name}</li>
-                    )
-                  })}
-                </ol>
-              )
-            } else {
-              iconClass += ' fa-plus';
-            }
-
-            return(
-              <li 
-                className='city-list'
-                onClick={()=>this.changeExpanded(city)}
-              >
-                <i className={iconClass}></i>
-                {city} ({this.state.events.counts[city]})
-                {expandedList}
-              </li>
-            )
-          })}
-        </ul>
-      )
-    }
-    return eventsArea
-  }
-
   render() {
-    let eventsArea = this.renderEventsArea();
-
     let mapArea = null;
     if(this.state.mapLoading===true){
       mapArea = (
@@ -374,10 +296,6 @@ class EventMap extends Component {
             </h2><hr/>
           </div>
           <div className='map-container'>
-            <div className='map-summary-area'>
-              <h4>Events by City</h4><hr/>
-              {eventsArea}
-            </div>
             {mapArea}
           </div>
         </div>

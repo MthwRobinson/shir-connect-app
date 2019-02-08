@@ -135,6 +135,18 @@ class Members(object):
     @demo_mode(['first_name', 'last_name', 'email', {'events': ['name']}])
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """
+        # Currently, the service calls for members references them
+        # by first name and last name. This means that the get members
+        # service call breaks in demo mode. We should be able to drop
+        # this block when we switch to referencing members by id
+        if conf.DEMO_MODE:
+            df = self.database.read_table('participants', limit=1, 
+                                          sort='events_attended',
+                                          order='DESC')
+            members = self.database.to_json(df)
+            first_name = members[0]['first_name']
+            last_name = members[0]['last_name']
+
         sql = """
             SELECT DISTINCT
                 CASE

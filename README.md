@@ -1,19 +1,10 @@
-# TRS Analytics Dashboard
-
-## Requirements
-
-1. ETL pipeline to populate a database with data from the Eventbrite API (https://www.eventbrite.com/developer/v3/)
-2. Visualization for TRS business metrics
-3. Select users need access to the database
-4. Users need to be able to export visualizations and upload them to Sharepoint
-5. There needs to be an audit trail that tracks actions by users in the dashboard
-6. Ability to export data in a `.csv` file on a monthly basis
+# Shir Connect 
 
 ## Installation
 
 ### Dependencies
 
-The TRS Dashboard app dependings on a number of Debian dependencies. The dependencies include Postgres, Python virtual environments and node. These can be install by running `sudo sh scripts/install_dependencies.sh`
+Shir Connects on a number of Debian dependencies. The dependencies include Postgres, Python virtual environments and node. These can be install by running `sudo sh scripts/install_dependencies.sh`
 
 In addition, the following environmental variables need to be added to `~/.bashrc`:
 ```
@@ -37,11 +28,11 @@ The formate of the file is:
 {host}:{port}:*:{user}:{password}
 ```
 
-After the setup steps are done, you can start the unit tests by running `py.test --cov=trs\_dashboard` from the `/server` folder.
+After the setup steps are done, you can start the unit tests by running `py.test --cov=shir\_connect` from the `/server` folder.
 
 The Postgres database, which includes both schema and table definitions, can be initialized using the following CLI command:
 ```
-trs_dashboard initialize
+shir_connect initialize
 ```
 
 ### UI
@@ -67,7 +58,7 @@ To enable HTTPS and setup hosting, first run `sudo certbot --nginx -d dreidel-pa
 
 The process to load data from Eventbrite into Postgres can be launched from the CLI using the following command:
 ```
-trs_dashboard load_eventbrite
+shir_connect load_eventbrite
 ```
 This will load all of the Eventbrite data for events that start after the most recent dataload.
 When new data is uploaded, it overwrites the current record.
@@ -76,7 +67,7 @@ All datetimes will be stored in the database as UTC.
 
 The data load can also be run using `sh scripts/load_eventbrite.sh`. To schedule a daily load, run `crontab -e` and add the following line:
 ```
-30 1 * * * /bin/sh /home/ubuntu/trs-dashboard/script/load_eventbrite.sh
+30 1 * * * /bin/sh /home/ubuntu/shir-connect/script/load_eventbrite.sh
 ```
 
 ### Running the Flask App
@@ -85,7 +76,7 @@ The REST API is a Flask app that can be launched from the CLI.
 By default, the app runs on port 5000.
 To start the REST API in development mode, run the following command:
 ```
-trs_dashboard launch_api --debug
+shir_connect launch_api --debug
 ```
 After that, the Flask app will be running on port 5000.
 The Flask app using JSON web tokens (JWT) for authentication.
@@ -104,7 +95,7 @@ That will return the following output.
 The production Flask app runs a WSGI server using gunicorn.
 You can start the production app using the following command.
 ```
-trs_dashboard launch_api --prod
+shir_connect launch_api --prod
 ```
 Note that the WSGI server will run in the context of the terminal session where it is launched.
 For production, the Flask app should be launched using `init.d`, `systemctl` or similar.

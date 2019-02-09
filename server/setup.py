@@ -7,6 +7,7 @@ reqs = [
     'flask',
     'flask_jwt_extended',
     'gunicorn',
+    'kml2geojson',
     'pandas',
     'psycopg2-binary',
     'requests',
@@ -15,7 +16,7 @@ reqs = [
     'xlrd'
 ]
 
-test_reqs = ['pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
+test_reqs = ['ipython', 'pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
 
 setup(
     name='shir_connect',

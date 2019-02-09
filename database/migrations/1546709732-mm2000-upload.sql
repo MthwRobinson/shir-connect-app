@@ -4,7 +4,7 @@
 
 BEGIN;
 
-ALTER TABLE trs_dashboard.members
+ALTER TABLE shir_connect.members
 ADD COLUMN gender text DEFAULT NULL;
 
 COMMIT;
@@ -13,7 +13,7 @@ COMMIT;
 
 BEGIN;
 
-ALTER TABLE trs_dashboard.members
+ALTER TABLE shir_connect.members
 DROP COLUMN gender;
 
 COMMIT;

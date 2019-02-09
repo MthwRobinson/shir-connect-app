@@ -4,7 +4,7 @@
 
 BEGIN;
 
-ALTER TABLE trs_dashboard.users
+ALTER TABLE shir_connect.users
 ADD COLUMN role text DEFAULT 'standard',
 ADD COLUMN modules text[] DEFAULT array[]::text[];
 
@@ -14,7 +14,7 @@ COMMIT;
 
 BEGIN;
 
-ALTER TABLE trs_dashboard.users
+ALTER TABLE shir_connect.users
 DROP COLUMN role,
 DROP COLUMN modules;
 

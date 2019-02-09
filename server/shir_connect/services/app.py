@@ -2,12 +2,12 @@
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
-import trs_dashboard.configuration as conf
-from trs_dashboard.services.events import events
-from trs_dashboard.services.trends import trends
-from trs_dashboard.services.map_geometries import map_geometries
-from trs_dashboard.services.members import members
-from trs_dashboard.services.user_management import user_management
+import shir_connect.configuration as conf
+from shir_connect.services.events import events
+from shir_connect.services.trends import trends
+from shir_connect.services.map_geometries import map_geometries
+from shir_connect.services.members import members
+from shir_connect.services.user_management import user_management
 
 app = Flask(__name__)
 

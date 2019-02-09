@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from trs_dashboard.database.member_loader import MemberLoader
+from shir_connect.database.member_loader import MemberLoader
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 

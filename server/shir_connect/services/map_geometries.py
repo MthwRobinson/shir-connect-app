@@ -9,8 +9,8 @@ from flask import Blueprint, abort, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
-from trs_dashboard.database.database import Database
-import trs_dashboard.configuration as conf
+from shir_connect.database.database import Database
+import shir_connect.configuration as conf
 
 map_geometries = Blueprint('map_geometries', __name__)
 

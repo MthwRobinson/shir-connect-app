@@ -1,6 +1,6 @@
 import datetime
 
-from trs_dashboard.etl.data_loader import DataLoader
+from shir_connect.etl.data_loader import DataLoader
 
 def test_data_loader():
     data_loader = DataLoader()

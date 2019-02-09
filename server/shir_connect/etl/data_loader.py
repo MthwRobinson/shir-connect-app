@@ -7,8 +7,8 @@ import time
 import arrow
 import daiquiri
 
-from trs_dashboard.database.database import Database
-from trs_dashboard.etl.eventbrite import Eventbrite
+from shir_connect.database.database import Database
+from shir_connect.etl.eventbrite import Eventbrite
 
 class DataLoader(object):
     """ Loads data from multiple sources into Postgres """

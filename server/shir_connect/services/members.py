@@ -16,10 +16,10 @@ import pandas as pd
 import numpy as np
 from werkzeug.utils import secure_filename
 
-import trs_dashboard.configuration as conf
-from trs_dashboard.database.database import Database
-from trs_dashboard.database.member_loader import MemberLoader
-from trs_dashboard.services.demo_mode import demo_mode
+import shir_connect.configuration as conf
+from shir_connect.database.database import Database
+from shir_connect.database.member_loader import MemberLoader
+from shir_connect.services.demo_mode import demo_mode
 
 members = Blueprint('members', __name__)
 

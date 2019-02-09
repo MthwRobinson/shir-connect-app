@@ -3,8 +3,8 @@ import json
 
 import pandas as pd
 
-from trs_dashboard.services.app import app
-from trs_dashboard.services.user_management import UserManagement
+from shir_connect.services.app import app
+from shir_connect.services.user_management import UserManagement
 
 CLIENT = app.test_client()
 

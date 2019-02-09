@@ -7,7 +7,7 @@ import daiquiri
 import numpy as np
 import pandas as pd 
 
-from trs_dashboard.database.database import Database
+from shir_connect.database.database import Database
 
 class MemberLoader(object):
     """

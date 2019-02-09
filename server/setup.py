@@ -7,6 +7,7 @@ reqs = [
     'flask',
     'flask_jwt_extended',
     'gunicorn',
+    'kml2geojson',
     'pandas',
     'psycopg2-binary',
     'requests',
@@ -15,10 +16,10 @@ reqs = [
     'xlrd'
 ]
 
-test_reqs = ['pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
+test_reqs = ['ipython', 'pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
 
 setup(
-    name='trs_dashboard',
+    name='shir_connect',
     description='etl pipeline and dashboard for temple rodef shalom',
     author='Temple Rodef Shalom',
     author_email='nsmuckler@templerodefshalom.org',
@@ -29,6 +30,6 @@ setup(
         'test': test_reqs
     },
     entry_points = {
-        'console_scripts':'trs_dashboard=trs_dashboard.__main__:main'
+        'console_scripts':'shir_connect=shir_connect.__main__:main'
     }
 )

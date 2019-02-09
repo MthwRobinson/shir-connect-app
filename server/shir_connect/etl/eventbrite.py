@@ -6,7 +6,7 @@ import urllib
 import daiquiri
 import requests
 
-import trs_dashboard.configuration as conf
+import shir_connect.configuration as conf
 
 class Eventbrite(object):
     """ Makes Eventbrite REST calls using an OAUTH token """

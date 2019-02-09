@@ -7,5 +7,5 @@ fi
 touch $LOCK
 echo Eventbrite load is starting
 . $HOME/set_environment.sh
-/home/ubuntu/venv/trs_dashboard/bin/trs_dashboard load_eventbrite
+/home/ubuntu/venv/shir_connect/bin/shir_connect load_eventbrite
 rm $LOCK

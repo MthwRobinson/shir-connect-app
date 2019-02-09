@@ -1,6 +1,6 @@
 """ Decorator that scrambles the output of services so that the 
 app can be shown without exposing sensitive information. """
-from trs_dashboard.configuration import DEMO_MODE
+from shir_connect.configuration import DEMO_MODE
 
 def demo_mode(fields, demo_mode=False):
     """ If the SHIR_CONNECT_MODE environmental variable is set

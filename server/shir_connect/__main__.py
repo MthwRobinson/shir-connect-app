@@ -8,10 +8,10 @@ import daiquiri
 from flask.cli import FlaskGroup
 from gunicorn.app.wsgiapp import WSGIApplication
 
-from trs_dashboard.database.database import Database
-from trs_dashboard.etl.data_loader import DataLoader
-from trs_dashboard.etl.geometries import Geometries
-from trs_dashboard.services.app import app
+from shir_connect.database.database import Database
+from shir_connect.etl.data_loader import DataLoader
+from shir_connect.etl.geometries import Geometries
+from shir_connect.services.app import app
 
 # Configure logging
 daiquiri.setup(level=logging.INFO)

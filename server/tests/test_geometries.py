@@ -1,4 +1,4 @@
-from trs_dashboard.etl.geometries import Geometries
+from shir_connect.etl.geometries import Geometries
 
 def test_load_zip_code():
     geo = Geometries()

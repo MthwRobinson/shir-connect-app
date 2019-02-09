@@ -1,4 +1,4 @@
-from trs_dashboard.etl.eventbrite import Eventbrite
+from shir_connect.etl.eventbrite import Eventbrite
 
 def test_token():
     eventbrite = Eventbrite()

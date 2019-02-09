@@ -1,4 +1,4 @@
-from trs_dashboard.services.demo_mode import demo_mode
+from shir_connect.services.demo_mode import demo_mode
 
 @demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
 def kangaroo():

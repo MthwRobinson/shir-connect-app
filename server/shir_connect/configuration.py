@@ -19,7 +19,7 @@ DEMO_MODE = mode == 'DEMO' or False
 PG_USER = 'postgres'
 PG_HOST = 'localhost'
 PG_DATABASE = 'postgres'
-PG_SCHEMA = 'trs_dashboard'
+PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',
     'members_view.sql',

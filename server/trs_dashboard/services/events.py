@@ -18,9 +18,9 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 import numpy as np
 
-from trs_dashboard.database.database import Database
-import trs_dashboard.configuration as conf
-from trs_dashboard.services.demo_mode import demo_mode
+from shir_connect.database.database import Database
+import shir_connect.configuration as conf
+from shir_connect.services.demo_mode import demo_mode
 
 events = Blueprint('events', __name__)
 

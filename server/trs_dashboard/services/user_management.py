@@ -22,8 +22,8 @@ import pandas as pd
 import numpy as np
 import xkcdpass.xkcd_password as xkcd
 
-import trs_dashboard.configuration as conf
-from trs_dashboard.database.database import Database
+import shir_connect.configuration as conf
+from shir_connect.database.database import Database
 
 user_management = Blueprint('user_management', __name__)
 

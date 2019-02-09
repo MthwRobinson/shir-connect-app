@@ -9,7 +9,7 @@ import kml2geojson
 import pandas as pd
 import requests
 
-from trs_dashboard.database.database import Database
+from shir_connect.database.database import Database
 
 class Geometries(object):
     """ Class for parsing and loading geojson files """

@@ -1,4 +1,4 @@
-from trs_dashboard.database.database import Database
+from shir_connect.database.database import Database
 
 def test_initialize():
     database = Database()

@@ -84,7 +84,6 @@ class Members extends Component {
 
       // Construct the URL parameters
       let url = '/service/members?limit='+LIMIT;
-      url += '&sort=events_attended&order=DESC';
       url += '&page='+page;
       url += '&q='+this.state.query;
       url += '&sort='+sortCol;
@@ -146,6 +145,19 @@ class Members extends Component {
       this.getMembers(1, this.state.sortColumn, this.state.sortOrder);
     }
 
+    handleSort = (sortColumn) => {
+      // Changes the sort order of the columns
+      let sortOrder = this.state.sortOrder;
+      if(sortColumn===this.state.sortColumn){
+        if(this.state.sortOrder==='asc'){
+          sortOrder = 'desc';
+        } else {
+          sortOrder = 'asc';
+        }
+      }
+      this.getMembers(1, sortColumn, sortOrder);
+    }
+
     handleQuery(event){
       // Updates the query value in the state
       this.setState({
@@ -187,20 +199,50 @@ class Members extends Component {
 
     renderTable = () => {
       // Creates the table with member information
+      let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
+      const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
+
       return(
         <div>
           <Row className='event-table'>
             <Table responsive header hover>
               <thead>
                 <tr>
-                  <th className='table-heading'>First Name</th>
-                  <th className='table-heading'>Last Name</th>
-                  <th className='table-heading'>
-                    Events
-                    <i className='fa fa-caret-down paging-arrows'></i>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('first_name')}>
+                    First Name
+                    {this.state.sortColumn === 'first_name'
+                    ? <i className={arrowClass}></i>
+                    : null}
                   </th>
-                  <th className='table-heading'>Most Recent</th>
-                  <th className='table-heading'>Event Name</th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('last_name')}>
+                    Last Name
+                    {this.state.sortColumn === 'last_name'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('events_attended')}>
+                    Events
+                    {this.state.sortColumn === 'events_attended'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('last_event_date')}>
+                    Most Recent
+                    {this.state.sortColumn === 'last_event_date'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('event_name')}>
+                    Event Name
+                    {this.state.sortColumn === 'event_name'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
                 </tr>
               </thead>
               <tbody>

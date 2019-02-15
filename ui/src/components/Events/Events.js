@@ -79,9 +79,9 @@ class Events extends Component {
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token)
-      let url = '/service/events?limit='+LIMIT;
 
-      // Determine the correct page to load
+      // Construct the URL parameters
+      let url = '/service/events?limit='+LIMIT;
       url += '&page='+page
       url += '&q='+this.state.query;
       url += '&order='+sortOrder;
@@ -142,20 +142,19 @@ class Events extends Component {
       // Handles the submit action in the search bar
       event.preventDefault();
       this.setState({page: 1});
-      this.getEvents(1);
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder);
     }
 
     handleSort = (sortColumn) => {
       // Changes the sort order of the columns
-      let sortOrder = 'asc';
+      let sortOrder = this.state.sortOrder;
       if(sortColumn===this.state.sortColumn){
         if(this.state.sortOrder==='asc'){
           sortOrder = 'desc';
+        } else {
+          sortOrder = 'asc';
         }
-      } else {
-        sortOrder = this.state.sortOrder;
       }
-
       this.getEvents(1, sortColumn, sortOrder);
     }
 
@@ -200,10 +199,10 @@ class Events extends Component {
     }
 
     renderTable = () => {
+      // Creates the table with event information
       let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
       const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
     
-      // Creates the table with event information
       return(
         <div>
           <Row className='event-table'>
@@ -215,28 +214,28 @@ class Events extends Component {
                     Event
                     {this.state.sortColumn === 'name'
                      ? <i className={arrowClass}></i>
-                     : null }
+                     : null}
                   </th>
                   <th className='table-heading'
                       onClick={()=>this.handleSort('start_datetime')}>
                     Start
                     {this.state.sortColumn === 'start_datetime'
                      ? <i className={arrowClass}></i>
-                     : null }
+                     : null}
                   </th>
                   <th className='table-heading'
                       onClick={()=>this.handleSort('venue_name')}>
                     Venue
                     {this.state.sortColumn === 'venue_name'
                      ? <i className={arrowClass}></i>
-                     : null }
+                     : null}
                   </th>
                   <th className='table-heading'
                       onClick={()=>this.handleSort('attendee_count')}>
                     Attendees
                     {this.state.sortColumn === 'attendee_count'
                      ? <i className={arrowClass}></i>
-                     : null }
+                     : null}
                   </th>
                 </tr>
               </thead>

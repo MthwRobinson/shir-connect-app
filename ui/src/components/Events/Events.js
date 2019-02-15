@@ -44,7 +44,7 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      this.getEvents('initial');
+      this.getEvents();
       refreshAccessToken();
     }
 
@@ -73,7 +73,7 @@ class Events extends Component {
         })
     }
 
-    getEvents = (fetchType, sortCol='start_datetime', sortOrder='desc') => {
+    getEvents = (page=1, sortCol=null, sortOrder=null) => {
       // Pulls events to display in a table
       this.setState({loading: true});
       const token = getAccessToken();
@@ -81,18 +81,10 @@ class Events extends Component {
       let url = '/service/events?limit='+LIMIT;
 
       // Determine the correct page to load
-      if(fetchType==='search'){
-        url += '&page=1';
-      } else if(fetchType==='up'){
-        url += '&page='+(this.state.page+1); 
-      } else if(fetchType==='down') {
-        url += '&page='+(this.state.page-1); 
-      } else {
-        url += '&page='+this.state.page;
-      }
+      url += '&page='+page
       url += '&q='+this.state.query;
       
-      axios.get(url, { headers: { Authorization: auth }})
+      axios.get(url, {headers: {Authorization: auth}})
         .then(res => {
           let events = [];
           for(var i=0; i<res.data.results.length; i++){
@@ -103,6 +95,7 @@ class Events extends Component {
             event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
+
           const pages = parseInt(res.data.pages, 10);
           const count = parseInt(res.data.count, 10);
 
@@ -128,13 +121,13 @@ class Events extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getEvents('up');
+          this.getEvents(page:page);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getEvents('down');
+          this.getEvents(page:page);
         }
       }
     }
@@ -143,7 +136,7 @@ class Events extends Component {
       // Handles the submit action in the search bar
       event.preventDefault();
       this.setState({page: 1});
-      this.getEvents('search');
+      this.getEvents(page:1);
     }
 
     handleQuery(event){

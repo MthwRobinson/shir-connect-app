@@ -106,7 +106,10 @@ class Events extends Component {
             events: events,
             count: count,
             pages: pages,
-            loading: false
+            page: page,
+            loading: false,
+            sortColumn: sortCol,
+            sortOrder: sortOrder
           });
         })
         .catch(err => {
@@ -140,6 +143,20 @@ class Events extends Component {
       event.preventDefault();
       this.setState({page: 1});
       this.getEvents(page:1);
+    }
+
+    handleSort = (sortColumn) => {
+      // Changes the sort order of the columns
+      let sortOrder = 'asc';
+      if(sortColumn===this.state.sortColumn){
+        if(this.state.sortOrder==='asc'){
+          sortOrder = 'desc';
+        }
+      } else {
+        sortOrder = this.state.sortOrder;
+      }
+
+      this.getEvents(1, sortColumn, sortOrder);
     }
 
     handleQuery(event){
@@ -193,10 +210,19 @@ class Events extends Component {
             <Table responsive header hover>
               <thead>
                 <tr>
-                  <th className='table-heading'>Event</th>
-                  <th className='table-heading'>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('name')}>
+                    Event
+                    {this.state.sortColumn === 'name'
+                     ? <i className={arrowClass}></i>
+                     : null }
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('start_datetime')}>
                     Start
-                    <i className={arrowClass}></i>
+                    {this.state.sortColumn === 'start_datetime'
+                     ? <i className={arrowClass}></i>
+                     : null }
                   </th>
                   <th className='table-heading'>Venue</th>
                   <th className='table-heading'>Attendees</th>

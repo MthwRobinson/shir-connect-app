@@ -36,7 +36,8 @@ class Events extends Component {
         count: 0,
         loading: true,
         query: '',
-        order: 'desc'
+        sortColumn: 'start_datetime',
+        sortOrder: 'desc'
       }
 
       // Bindings for search bar
@@ -73,7 +74,7 @@ class Events extends Component {
         })
     }
 
-    getEvents = (page=1, sortCol=null, sortOrder=null) => {
+    getEvents = (page=1, sortCol='start_datetime', sortOrder='desc') => {
       // Pulls events to display in a table
       this.setState({loading: true});
       const token = getAccessToken();
@@ -83,6 +84,8 @@ class Events extends Component {
       // Determine the correct page to load
       url += '&page='+page
       url += '&q='+this.state.query;
+      url += '&order='+sortOrder;
+      url += '&sort='+sortCol;
       
       axios.get(url, {headers: {Authorization: auth}})
         .then(res => {
@@ -180,6 +183,9 @@ class Events extends Component {
     }
 
     renderTable = () => {
+      let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
+      const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
+    
       // Creates the table with event information
       return(
         <div>
@@ -190,7 +196,7 @@ class Events extends Component {
                   <th className='table-heading'>Event</th>
                   <th className='table-heading'>
                     Start
-                    <i className='fa fa-caret-down paging-arrows'></i>
+                    <i className={arrowClass}></i>
                   </th>
                   <th className='table-heading'>Venue</th>
                   <th className='table-heading'>Attendees</th>

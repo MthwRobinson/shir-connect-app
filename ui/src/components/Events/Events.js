@@ -224,8 +224,20 @@ class Events extends Component {
                      ? <i className={arrowClass}></i>
                      : null }
                   </th>
-                  <th className='table-heading'>Venue</th>
-                  <th className='table-heading'>Attendees</th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('venue_name')}>
+                    Venue
+                    {this.state.sortColumn === 'venue_name'
+                     ? <i className={arrowClass}></i>
+                     : null }
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('attendee_count')}>
+                    Attendees
+                    {this.state.sortColumn === 'attendee_count'
+                     ? <i className={arrowClass}></i>
+                     : null }
+                  </th>
                 </tr>
               </thead>
               <tbody>

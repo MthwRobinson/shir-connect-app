@@ -35,7 +35,8 @@ class Events extends Component {
         page: 1,
         count: 0,
         loading: true,
-        query: ''
+        query: '',
+        order: 'desc'
       }
 
       // Bindings for search bar
@@ -72,22 +73,12 @@ class Events extends Component {
         })
     }
 
-    getEvents = (fetchType) => {
+    getEvents = (fetchType, sortCol='start_datetime', sortOrder='desc') => {
       // Pulls events to display in a table
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token)
       let url = '/service/events?limit='+LIMIT;
-
-      // Load settings from session storage
-      const eventPage = sessionStorage.getItem('eventPage');
-      const eventPages = sessionStorage.getItem('eventPages');
-      const eventQuery = sessionStorage.getItem('eventQuery');
-      const eventCount = sessionStorage.getItem('eventCount');
-      let settingsLoaded = false
-      if(eventPage&&eventPages&&eventCount){
-        settingsLoaded = true
-      }
 
       // Determine the correct page to load
       if(fetchType==='search'){
@@ -96,28 +87,10 @@ class Events extends Component {
         url += '&page='+(this.state.page+1); 
       } else if(fetchType==='down') {
         url += '&page='+(this.state.page-1); 
-      } else if(fetchType==='initial'&&settingsLoaded){
-        url += '&page='+eventPage;
-        this.setState({ 
-          page: parseInt(eventPage, 10),
-          pages: parseInt(eventPages, 10),
-          count: parseInt(eventCount, 10),
-          query: eventQuery
-        });
       } else {
         url += '&page='+this.state.page;
       }
-
-      // Parse the event query
-      if(fetchType==='initial'&&settingsLoaded&&eventQuery){
-        if(eventQuery.trim().length>0){
-          url += '&q='+eventQuery;
-        }
-      } else {
-        if(this.state.query.trim().length>0){
-          url += '&q='+this.state.query;
-        }
-      }
+      url += '&q='+this.state.query;
       
       axios.get(url, { headers: { Authorization: auth }})
         .then(res => {
@@ -132,12 +105,6 @@ class Events extends Component {
           }
           const pages = parseInt(res.data.pages, 10);
           const count = parseInt(res.data.count, 10);
-
-          // Save settings in session storage and update state
-          sessionStorage.setItem('eventPages', pages);
-          sessionStorage.setItem('eventPage', this.state.page);
-          sessionStorage.setItem('eventQuery', this.state.query);
-          sessionStorage.setItem('eventCount', count);
 
           this.setState({
             events: events,

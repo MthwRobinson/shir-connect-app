@@ -127,13 +127,13 @@ class Events extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getEvents(page:page);
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getEvents(page:page);
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
         }
       }
     }
@@ -142,7 +142,7 @@ class Events extends Component {
       // Handles the submit action in the search bar
       event.preventDefault();
       this.setState({page: 1});
-      this.getEvents(page:1);
+      this.getEvents(1);
     }
 
     handleSort = (sortColumn) => {

@@ -297,7 +297,7 @@ class Database(object):
                 conditions.append(search)
             sql += " WHERE " + " OR ".join(conditions)
         if sort:
-            sql += " ORDER BY %s %s "%(sort, order)
+            sql += " ORDER BY %s %s NULLS LAST "%(sort, order)
         if limit:
             sql += " LIMIT %s "%(limit)
         if page and limit:

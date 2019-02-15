@@ -35,7 +35,9 @@ class Events extends Component {
         page: 1,
         count: 0,
         loading: true,
-        query: ''
+        query: '',
+        sortColumn: 'start_datetime',
+        sortOrder: 'desc'
       }
 
       // Bindings for search bar
@@ -43,7 +45,7 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      this.getEvents('initial');
+      this.getEvents();
       refreshAccessToken();
     }
 
@@ -72,54 +74,20 @@ class Events extends Component {
         })
     }
 
-    getEvents = (fetchType) => {
+    getEvents = (page=1, sortCol='start_datetime', sortOrder='desc') => {
       // Pulls events to display in a table
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token)
+
+      // Construct the URL parameters
       let url = '/service/events?limit='+LIMIT;
-
-      // Load settings from session storage
-      const eventPage = sessionStorage.getItem('eventPage');
-      const eventPages = sessionStorage.getItem('eventPages');
-      const eventQuery = sessionStorage.getItem('eventQuery');
-      const eventCount = sessionStorage.getItem('eventCount');
-      let settingsLoaded = false
-      if(eventPage&&eventPages&&eventCount){
-        settingsLoaded = true
-      }
-
-      // Determine the correct page to load
-      if(fetchType==='search'){
-        url += '&page=1';
-      } else if(fetchType==='up'){
-        url += '&page='+(this.state.page+1); 
-      } else if(fetchType==='down') {
-        url += '&page='+(this.state.page-1); 
-      } else if(fetchType==='initial'&&settingsLoaded){
-        url += '&page='+eventPage;
-        this.setState({ 
-          page: parseInt(eventPage, 10),
-          pages: parseInt(eventPages, 10),
-          count: parseInt(eventCount, 10),
-          query: eventQuery
-        });
-      } else {
-        url += '&page='+this.state.page;
-      }
-
-      // Parse the event query
-      if(fetchType==='initial'&&settingsLoaded&&eventQuery){
-        if(eventQuery.trim().length>0){
-          url += '&q='+eventQuery;
-        }
-      } else {
-        if(this.state.query.trim().length>0){
-          url += '&q='+this.state.query;
-        }
-      }
+      url += '&page='+page
+      url += '&q='+this.state.query;
+      url += '&order='+sortOrder;
+      url += '&sort='+sortCol;
       
-      axios.get(url, { headers: { Authorization: auth }})
+      axios.get(url, {headers: {Authorization: auth}})
         .then(res => {
           let events = [];
           for(var i=0; i<res.data.results.length; i++){
@@ -130,20 +98,18 @@ class Events extends Component {
             event.end = end.format('MM/DD/YY, h:mm a');
             events.push(event);
           }
+
           const pages = parseInt(res.data.pages, 10);
           const count = parseInt(res.data.count, 10);
-
-          // Save settings in session storage and update state
-          sessionStorage.setItem('eventPages', pages);
-          sessionStorage.setItem('eventPage', this.state.page);
-          sessionStorage.setItem('eventQuery', this.state.query);
-          sessionStorage.setItem('eventCount', count);
 
           this.setState({
             events: events,
             count: count,
             pages: pages,
-            loading: false
+            page: page,
+            loading: false,
+            sortColumn: sortCol,
+            sortOrder: sortOrder
           });
         })
         .catch(err => {
@@ -161,13 +127,13 @@ class Events extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getEvents('up');
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getEvents('down');
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
         }
       }
     }
@@ -176,7 +142,20 @@ class Events extends Component {
       // Handles the submit action in the search bar
       event.preventDefault();
       this.setState({page: 1});
-      this.getEvents('search');
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder);
+    }
+
+    handleSort = (sortColumn) => {
+      // Changes the sort order of the columns
+      let sortOrder = this.state.sortOrder;
+      if(sortColumn===this.state.sortColumn){
+        if(this.state.sortOrder==='asc'){
+          sortOrder = 'desc';
+        } else {
+          sortOrder = 'asc';
+        }
+      }
+      this.getEvents(1, sortColumn, sortOrder);
     }
 
     handleQuery(event){
@@ -221,19 +200,43 @@ class Events extends Component {
 
     renderTable = () => {
       // Creates the table with event information
+      let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
+      const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
+    
       return(
         <div>
           <Row className='event-table'>
             <Table responsive header hover>
               <thead>
                 <tr>
-                  <th className='table-heading'>Event</th>
-                  <th className='table-heading'>
-                    Start
-                    <i className='fa fa-caret-down paging-arrows'></i>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('name')}>
+                    Event
+                    {this.state.sortColumn === 'name'
+                     ? <i className={arrowClass}></i>
+                     : null}
                   </th>
-                  <th className='table-heading'>Venue</th>
-                  <th className='table-heading'>Attendees</th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('start_datetime')}>
+                    Start
+                    {this.state.sortColumn === 'start_datetime'
+                     ? <i className={arrowClass}></i>
+                     : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('venue_name')}>
+                    Venue
+                    {this.state.sortColumn === 'venue_name'
+                     ? <i className={arrowClass}></i>
+                     : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('attendee_count')}>
+                    Attendees
+                    {this.state.sortColumn === 'attendee_count'
+                     ? <i className={arrowClass}></i>
+                     : null}
+                  </th>
                 </tr>
               </thead>
               <tbody>

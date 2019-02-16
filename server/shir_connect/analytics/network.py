@@ -10,7 +10,7 @@ import networkx.algorithms.approximation as approx
 
 from shir_connect.services.events import Events
 
-class Network(object):
+class Network():
     """ Pulls in data from the events database and
     performs social network analysis. """
     def __init__(self):
@@ -18,7 +18,7 @@ class Network(object):
         self.logger = daiquiri.getLogger(__name__)
 
         self.events_manager = Events()
-
+        self.network = None
         self.metrics = {
             'node_connectivity': self.node_connectivity,
             'edge_connectivity': self.edge_connectivity,
@@ -31,7 +31,7 @@ class Network(object):
         events = self.events_manager.database.read_table(
             'event_aggregates',
             columns=['id', 'start_datetime'],
-            where=[('start_datetime',{'>=': start, '<': end})],
+            where=[('start_datetime', {'>=': start, '<': end})],
 
         )
         return events
@@ -41,7 +41,7 @@ class Network(object):
         the specified data and begging <lag> days before
         the date. """
         if not metrics:
-            metrics = [x for x in self.metrics.keys()]
+            metrics = list(self.metrics.keys())
         elif isinstance(metrics, str):
             metrics = [metrics]
 
@@ -56,7 +56,7 @@ class Network(object):
                 evaluation[metric] = value
         return evaluation
 
-    def build_network(self, date, lag,  max_attendees=None):
+    def build_network(self, date, lag, max_attendees=None):
         """ Builds the congregational co-attendance network
         ending at the specified date and ending <lag> days later
 
@@ -70,7 +70,6 @@ class Network(object):
         Returns
         -------
             sets the network attribute to be a network x graph
-        
         """
         network = nx.Graph()
         # Determine the start and end dates for the pull
@@ -93,7 +92,7 @@ class Network(object):
         for event_id in events['id']:
             attendees = self.events_manager.get_attendees(event_id)
             if max_attendees:
-                if len(attendees) >  max_attendees:
+                if len(attendees) > max_attendees:
                     continue
             names = [x['name'].lower() for x in attendees]
             names = list(set(names)) # Drops duplicates
@@ -106,8 +105,8 @@ class Network(object):
     def weighted_density(network):
         """ Finds the density of the graph and scales it by the
         number of nodes in the graph. """
-        n = len(network.nodes)
-        return n * nx.density(network)
+        num_nodes = len(network.nodes)
+        return num_nodes * nx.density(network)
 
     @staticmethod
     def node_connectivity(network):

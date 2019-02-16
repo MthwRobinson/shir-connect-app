@@ -42,6 +42,8 @@ class Network(object):
         the date. """
         if not metrics:
             metrics = [x for x in self.metrics.keys()]
+        elif isinstance(metrics, str):
+            metrics = [metrics]
 
         biggest_subgraph = self.biggest_subgraph(self.network)
         evaluation = {}
@@ -54,14 +56,41 @@ class Network(object):
                 evaluation[metric] = value
         return evaluation
 
-    def build_network(self, start, end, max_attendees=None):
+    def build_network(self, date, lag,  max_attendees=None):
         """ Builds the congregational co-attendance network
-        based on events in the specified range. """
+        ending at the specified date and ending <lag> days later
+
+        Parameters
+        ----------
+            date: the start date in 'YYYY-MM-DD' format
+            lag: int, the number of days to go back
+            max_attendees: int, ignores events that have
+                more than the max number of attendees
+
+        Returns
+        -------
+            sets the network attribute to be a network x graph
+        
+        """
         network = nx.Graph()
-        start = "'{}'".format(start)
-        end = "'{}'".format(end)
-        event = self.get_events(start, end)
-        for event_id in event['id']:
+        # Determine the start and end dates for the pull
+        split_date = date.split('-')
+        year = int(split_date[0])
+        month = int(split_date[1])
+        day = int(split_date[2])
+        end_datetime = datetime.datetime(year, month, day)
+        end = "'{}'".format(date)
+        start_datetime = end_datetime - datetime.timedelta(days=lag)
+        start = "'{}'".format(str(start_datetime)[:10])
+
+        # Build the network G(V,E) where V is the set of participants
+        # and an edge exists between two vertices if they have
+        # attended the same events
+        events = self.get_events(start, end)
+        msg = '\nStart: {date} \nLag: {lag} days \nEvent Count: {count}'
+        msg = msg.format(date=date, lag=lag, count=len(events))
+        self.logger.info(msg)
+        for event_id in events['id']:
             attendees = self.events_manager.get_attendees(event_id)
             if max_attendees:
                 if len(attendees) >  max_attendees:
@@ -95,7 +124,8 @@ class Network(object):
     @staticmethod
     def biggest_subgraph(network):
         """ Finds the biggest fully connected subgraph of the network. """
-        graphs = list(nx.connected_component_subgraphs(network))
+        connected_components = nx.connected_components(network)
+        graphs = [network.subgraph(x).copy() for x in connected_components]
         sizes = [len(x.nodes) for x in graphs]
         idx = sizes.index(max(sizes))
         biggest_graph = graphs[idx]

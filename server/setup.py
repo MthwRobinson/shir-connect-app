@@ -8,6 +8,8 @@ reqs = [
     'flask_jwt_extended',
     'gunicorn',
     'kml2geojson',
+    'matplotlib',
+    'networkx',
     'pandas',
     'psycopg2-binary',
     'requests',

@@ -275,8 +275,33 @@ class Database(object):
                 return None
 
     def read_table(self, table, columns=None, sort=None, order='desc', 
-        limit=None, page=None, query=None):
-        """ Reads a table into a dataframe """
+        limit=None, page=None, query=[], where=[]):
+        """ Reads a table into a dataframe.
+        
+        Parameters
+        ----------
+            table: string, the name of table in the database
+            columns: list[string], which columns we want to pull
+            sort: string, the column to sort by
+            order: 'asc' or 'desc', the sort order
+            limit: int, the number of rows to return
+            page: int, which page of results we want (determined)
+                by the limit
+            query: list of tuples, the first element in the tuple
+                is the field to search over and the second element
+                is the search term
+            where: list of tuples, the first element is the field
+                the condition applies to and the second element
+                is the condition. the condtions have the form
+                options for the condition are '<=', '<', '=',
+                '>', '>=' 
+                (ex. [('start_datetime, {'leq': '2018-01-01'})])
+
+        Returns
+        -------
+            a dataframe with the results of the query
+        
+        """
         if not columns:
             cols = '*'
         else:
@@ -285,17 +310,39 @@ class Database(object):
             SELECT {cols}
             FROM {schema}.{table}
         """.format(cols=cols, schema=self.schema, table=table)
-        if query:
-            field = query[0]
-            search_terms = query[1].split()
-            conditions = []
-            for term in search_terms:
-                search = " lower(%s) like lower('%s%s%s') "%(
-                    field, 
-                    '%', term, '%'
-                )
-                conditions.append(search)
-            sql += " WHERE " + " OR ".join(conditions)
+        if query or where:
+            clauses = []
+            # Add the conditions from the search term
+            if query:
+                query_conditions = []
+                field = query[0]
+                search_terms = query[1].split()
+                for term in search_terms:
+                    search = " lower(%s) like lower('%s%s%s') "%(
+                        field, 
+                        '%', term, '%'
+                    )
+                    query_conditions.append(search)
+                query_clause = " OR ".join(query_conditions)
+                clauses.append("({})".format(query_clause))
+
+            # Add the condtions from the where argument
+            where_conditions = []
+            for item in where:
+                column = item[0]
+                conditions = item[1]
+                for equality in conditions:
+                    value = conditions[equality]
+                    condition = " {col} {equality} {value} ".format(
+                        col=column,
+                        equality=equality,
+                        value=value
+                    )
+                    where_conditions.append(condition)
+            if where_conditions:
+                where_clause = " AND ".join(where_conditions)
+                clauses.append(where_clause)
+            sql += " WHERE " + " AND ".join(clauses)
         if sort:
             sql += " ORDER BY %s %s NULLS LAST "%(sort, order)
         if limit:

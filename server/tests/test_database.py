@@ -21,10 +21,15 @@ def test_read_table():
 
     df = database.read_table(
         'event_aggregates', 
-        query=('name', 'Rodef 2100'), 
+        query=('name', 'Rodef 2100'),
+        where=[('start_datetime',{'>=': "'2018-01-01'"})],
         limit=10
     )
     assert len(df) > 0
+    for i in df.index:
+        row = df.loc[i]
+        assert str(row['start_datetime']) >= '2018-01-01'
+        assert '2100' in row['name'] or 'rodef' in row['name'].lower()
 
     count = database.count_rows('event_aggregates', query=('name', 'Rodef 2100'))
     assert count > 0

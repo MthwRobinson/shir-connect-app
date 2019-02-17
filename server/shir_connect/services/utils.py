@@ -32,22 +32,27 @@ def demo_mode(fields, demo_mode=False):
         return _service
     return _scrambler
 
-def validate_inputs(fields=None):
+def validate_inputs(fields={}):
     """ Validates the arguments and query parameters for the REST
     service calls to protect against SQL injection attacks.
 
     Parameters
     ----------
         fields, a dictionary specifying the which fields have
-            restrictions and what those restrictions are. example:
+            restrictions and what those restrictions are. if the
+            field begins with request., it is assumed that it
+            is a query parameter. available types are int and str 
+            example:
                 fields = {
                     "event_id": {"type": "int"},
-                    "request.limit": {"type": "int", "min": 0, "max": 25}
+                    "request.query": {"type": "str", "min": 0, "max": 25}
                 }
 
     Returns
     -------
-        valid, a boolean that indicates whether the inputs are valid
+       response, the json response for the service if the inputs are
+            valid and a response with status code 422 if the inputs
+            are not valid
     """
     def _validator(function):
         def _service(*args, **kwargs):
@@ -55,6 +60,7 @@ def validate_inputs(fields=None):
             # Validate the request arguments. These are the same
             # in a bunch of the services so we don't make you specify
             # them in fields
+            import ipdb; ipdb.set_trace()
             limit = request.args.get('limit')
             if limit:
                 valid = validate_int(limit, 25)
@@ -75,6 +81,7 @@ def validate_inputs(fields=None):
             if query:
                 valid = len(query) < 40
                 results.append(valid)
+
 
             valid_call = min(results)
             if valid_call:

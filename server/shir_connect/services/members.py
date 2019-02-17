@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.member_loader import MemberLoader
-from shir_connect.services.demo_mode import demo_mode
+from shir_connect.services.utils import demo_mode
 
 members = Blueprint('members', __name__)
 

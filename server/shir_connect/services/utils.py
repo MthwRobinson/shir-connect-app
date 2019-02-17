@@ -1,5 +1,6 @@
-""" Decorator that scrambles the output of services so that the 
-app can be shown without exposing sensitive information. """
+""" Utilities for user for use with the Shir Connect REST services.
+Most are deocrators that modify the functions that define the
+REST calls. """
 from shir_connect.configuration import DEMO_MODE
 
 def demo_mode(fields, demo_mode=False):

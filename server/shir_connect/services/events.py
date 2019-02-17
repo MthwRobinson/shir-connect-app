@@ -20,7 +20,7 @@ import numpy as np
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.demo_mode import demo_mode
+from shir_connect.services.utils import demo_mode
 
 events = Blueprint('events', __name__)
 

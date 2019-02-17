@@ -15,7 +15,7 @@ import pandas as pd
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.demo_mode import demo_mode
+from shir_connect.services.utils import demo_mode
 
 trends = Blueprint('trends', __name__)
 

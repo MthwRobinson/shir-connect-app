@@ -1,4 +1,9 @@
+from flask import jsonify
+
 import shir_connect.services.utils as utils 
+from shir_connect.services.app import app
+
+CLIENT = app.test_client()
 
 @utils.demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
 def kangaroo():
@@ -22,6 +27,42 @@ def test_demo_mode():
     assert response['friends'][0]['occupation'] == 'Dinosaur'
     assert response['friends'][1]['name'] != 'Eric'
     assert response['friends'][1]['occupation'] == 'Guy on a buffalo'
+
+def validate_inputs():
+    url = '/service/test/test'
+    response = CLIENT.get(url)
+    assert response.status_code == 200
+
+    response = CLIENT.get(url + '?limit=25')
+    assert response.status_code == 200
+    response = CLIENT.get(url + '?limit=26')
+    assert response.status_code == 422
+    response = CLIENT.get(url + '?limit=carl')
+    assert response.status_code == 422
+    
+    response = CLIENT.get(url + '?page=25')
+    assert response.status_code == 200
+    response = CLIENT.get(url + '?page=carl')
+    assert response.status_code == 422
+    
+    response = CLIENT.get(url + '?order=desc')
+    assert response.status_code == 200
+    response = CLIENT.get(url + '?order=asc')
+    assert response.status_code == 200
+    response = CLIENT.get(url + '?order=carl')
+    assert response.status_code == 422
+    
+    response = CLIENT.get(url + '?sort=blah')
+    assert response.status_code == 200
+    sort = 'carl!!' * 5
+    response = CLIENT.get(url + '?sort=' + sort)
+    assert response.status_code == 422 
+    
+    response = CLIENT.get(url + '?q=blah')
+    assert response.status_code == 200
+    q = 'carl!!' * 10 
+    response = CLIENT.get(url + '?q=' + q)
+    assert response.status_code == 422 
 
 def test_validate_int():
     value = 9

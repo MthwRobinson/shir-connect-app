@@ -105,6 +105,11 @@ def test_events():
     assert 'count' in response.json
     assert 'pages' in response.json
     
+    # Make sure input validation is working 
+    url = '/service/events?limit=30&page=2'
+    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    assert response.status_code == 422 
+    
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None

@@ -7,6 +7,7 @@ from shir_connect.services.events import events
 from shir_connect.services.trends import trends
 from shir_connect.services.map_geometries import map_geometries
 from shir_connect.services.members import members
+import shir_connect.services.utils as utils
 from shir_connect.services.user_management import user_management
 
 app = Flask(__name__)
@@ -24,3 +25,11 @@ app.register_blueprint(members)
 app.register_blueprint(user_management)
 
 jwt = JWTManager(app)
+
+@app.route('/service/test/<name>')
+@utils.validate_inputs(name)
+def test_route():
+    """ This route is for use in the unit tests, and also to verify
+    that the REST platform is working without connecting to the 
+    database and/or having to pass in credentials. """
+    return jsonify({'message': 'hello world!'}), 200

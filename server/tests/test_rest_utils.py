@@ -1,6 +1,6 @@
-from shir_connect.services.utils import demo_mode
+import shir_connect.services.utils as utils 
 
-@demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
+@utils.demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
 def kangaroo():
     response = {
         'first_name': 'Matt',
@@ -22,3 +22,16 @@ def test_demo_mode():
     assert response['friends'][0]['occupation'] == 'Dinosaur'
     assert response['friends'][1]['name'] != 'Eric'
     assert response['friends'][1]['occupation'] == 'Guy on a buffalo'
+
+def test_validate_int():
+    value = 9
+    valid = utils.validate_int(value, max_value=8)
+    assert not valid 
+    valid = utils.validate_int(value, max_value=10)
+    assert valid
+    valid = utils.validate_int(value)
+    assert valid
+    
+    value = 'koala'
+    valid = utils.validate_int(value)
+    assert not valid

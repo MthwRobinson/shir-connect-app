@@ -5,12 +5,13 @@ Includes:
     1. Flask route with /map path
     2. MapGeometries class for database calls
 """
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, abort, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
+from shir_connect.services.utils import validate_inputs
 
 map_geometries = Blueprint('map_geometries', __name__)
 
@@ -30,6 +31,7 @@ def map_authorize():
 
 @map_geometries.route('/service/map/geometry/<zipcode>', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={'zipcode': {'type': 'int'}})
 def geometry(zipcode):
     """ Retrieves a zip code geometry from the database """
     map_geometries = MapGeometries()

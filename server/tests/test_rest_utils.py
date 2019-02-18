@@ -5,7 +5,7 @@ from shir_connect.services.app import app
 
 CLIENT = app.test_client()
 
-@utils.demo_mode(['first_name','last_name',{'friends': ['name']}], demo_mode=True)
+@utils.demo_mode(['first_name','last_name',{'friends': ['name']}], demo=True)
 def kangaroo():
     response = {
         'first_name': 'Matt',

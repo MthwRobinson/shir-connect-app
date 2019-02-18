@@ -20,12 +20,13 @@ import numpy as np
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.demo_mode import demo_mode
+from shir_connect.services.utils import demo_mode, validate_inputs
 
 events = Blueprint('events', __name__)
 
 @events.route('/service/event/<event_id>', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={'event_id': {'type': 'int'}})
 def get_event(event_id):
     """ Pulls the information for an event from the database """
     event_manager = Events()
@@ -45,6 +46,7 @@ def get_event(event_id):
 
 @events.route('/service/events', methods=['GET'])
 @jwt_required
+@validate_inputs()
 def get_events():
     """ Pulls events from the database """
     event_manager = Events()

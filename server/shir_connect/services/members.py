@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.member_loader import MemberLoader
-from shir_connect.services.utils import demo_mode
+from shir_connect.services.utils import demo_mode, validate_inputs
 
 members = Blueprint('members', __name__)
 
@@ -39,6 +39,10 @@ def member_authorize():
 
 @members.route('/service/member', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={
+    'firstName': {'type': 'str', 'max': 30},
+    'lastName': {'type': 'str', 'max': 30}
+})
 def get_member():
     """ Pulls a members information from the database """
     member_manager = Members()
@@ -67,6 +71,7 @@ def get_member():
 
 @members.route('/service/members', methods=['GET'])
 @jwt_required
+@validate_inputs()
 def get_members():
     """ Pulls the list of members from the database """
     member_manager = Members()

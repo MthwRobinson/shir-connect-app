@@ -15,7 +15,7 @@ import pandas as pd
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.utils import demo_mode
+from shir_connect.services.utils import demo_mode, validate_inputs
 
 trends = Blueprint('trends', __name__)
 
@@ -84,6 +84,7 @@ def average_attendance():
 
 @trends.route('/service/trends/age-group-attendance', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={'request.groupBy': {'type': 'str', 'max': 20}})
 def age_group_attendees():
     """ Finds a distinct count of attendees by age group and year """
     trends = Trends()
@@ -102,6 +103,7 @@ def age_group_attendees():
 
 @trends.route('/service/trends/participation/<age_group>', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={'request.top': {'type': 'str', 'max': 20}})
 def participation(age_group):
     """ Finds the top events or participants by age group """
     trends = Trends()

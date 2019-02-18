@@ -56,7 +56,7 @@ def validate_inputs(fields={}):
     """
     def _validator(function):
         def _service(*args, **kwargs):
-            results = []
+            results = [True]
             # Validate the request arguments. These are the same
             # in a bunch of the services so we don't make you specify
             # them in fields
@@ -114,7 +114,14 @@ def validate_inputs(fields={}):
                 msg = {'message': 'bad request'}
                 response = jsonify(msg), 422
             return response
-        return _service
+
+        # This sets the name of _service back to the original
+        # name of the function. Without this, flask will error
+        # out because it will try to register two functions
+        # with the same name
+        _service.__name__ = function.__name__
+        _service.__qualname__ = function.__qualname__
+        return _service 
     return _validator
 
 def validate_int(value, max_value=None):

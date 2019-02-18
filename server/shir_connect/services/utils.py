@@ -5,28 +5,28 @@ from flask import jsonify, request
 
 from shir_connect.configuration import DEMO_MODE
 
-def demo_mode(fields, demo_mode=False):
+def demo_mode(fields, demo=False):
     """ If the SHIR_CONNECT_MODE environmental variable is set
     to DEMO, the decorator scrambles the output of a service
     to avoid exposing sensistive information. """
     def _scrambler(function):
         def _service(*args, **kwargs):
             response = function(*args, **kwargs)
-            if DEMO_MODE or demo_mode:
+            if DEMO_MODE or demo:
                 for field in fields:
                     # Fields that are passed as a string are assumed
                     # to be a string in the dictionary
-                    if type(field) == str:
+                    if isinstance(field, str):
                         response[field] = field.upper()
                     # Fields that are passed as a dictionary are
                     # assumed to be lists
-                    elif type(field) == dict:
+                    elif isinstance(field, dict):
                         name = list(field.keys())[0]
                         keys = field[name]
                         for i, item in enumerate(response[name]):
                             for key in keys:
                                 prefix = name.upper()
-                                postfix = key.upper() 
+                                postfix = key.upper()
                                 item[key] = '_'.join([prefix, postfix, str(i)])
             return response
         return _service
@@ -41,7 +41,7 @@ def validate_inputs(fields={}):
         fields, a dictionary specifying the which fields have
             restrictions and what those restrictions are. if the
             field begins with request., it is assumed that it
-            is a query parameter. available types are int and str 
+            is a query parameter. available types are int and str
             example:
                 fields = {
                     "event_id": {"type": "int"},
@@ -61,7 +61,7 @@ def validate_inputs(fields={}):
             # in a bunch of the services so we don't make you specify
             # them in fields
             limit = request.args.get('limit')
-            if limit: 
+            if limit:
                 valid = validate_int(limit, 25)
                 results.append(valid)
             page = request.args.get('page')
@@ -121,7 +121,7 @@ def validate_inputs(fields={}):
         # with the same name
         _service.__name__ = function.__name__
         _service.__qualname__ = function.__qualname__
-        return _service 
+        return _service
     return _validator
 
 def validate_int(value, max_value=None):

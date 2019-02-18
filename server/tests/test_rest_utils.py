@@ -28,11 +28,19 @@ def test_demo_mode():
     assert response['friends'][1]['name'] != 'Eric'
     assert response['friends'][1]['occupation'] == 'Guy on a buffalo'
 
-def validate_inputs():
+def test_validate_inputs():
     url = '/service/test/test'
     response = CLIENT.get(url)
+    assert response.status_code == 422
+    
+    url = '/service/test/101'
+    response = CLIENT.get(url)
+    assert response.status_code == 422
+    
+    url = '/service/test/100'
+    response = CLIENT.get(url)
     assert response.status_code == 200
-
+    
     response = CLIENT.get(url + '?limit=25')
     assert response.status_code == 200
     response = CLIENT.get(url + '?limit=26')
@@ -63,6 +71,18 @@ def validate_inputs():
     q = 'carl!!' * 10 
     response = CLIENT.get(url + '?q=' + q)
     assert response.status_code == 422 
+    
+    response = CLIENT.get(url + '?name=carl')
+    assert response.status_code == 200
+    response = CLIENT.get(url + '?name=carlaaaaa')
+    assert response.status_code == 422 
+    
+    response = CLIENT.get(url + '?count=carl')
+    assert response.status_code == 422
+    response = CLIENT.get(url + '?count=22')
+    assert response.status_code == 422
+    response = CLIENT.get(url + '?name=20')
+    assert response.status_code == 200 
 
 def test_validate_int():
     value = 9

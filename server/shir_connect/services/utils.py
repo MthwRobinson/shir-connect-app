@@ -60,9 +60,8 @@ def validate_inputs(fields={}):
             # Validate the request arguments. These are the same
             # in a bunch of the services so we don't make you specify
             # them in fields
-            import ipdb; ipdb.set_trace()
             limit = request.args.get('limit')
-            if limit:
+            if limit: 
                 valid = validate_int(limit, 25)
                 results.append(valid)
             page = request.args.get('page')
@@ -82,6 +81,31 @@ def validate_inputs(fields={}):
                 valid = len(query) < 40
                 results.append(valid)
 
+            for field in fields:
+                if field.startswith('request'):
+                    param = field.split('.')[1]
+                    value = request.args.get(param)
+                    if not value:
+                        continue
+                else:
+                    if field in kwargs:
+                        value = kwargs[field]
+                    else:
+                        continue
+
+                restrictions = fields[field]
+                if 'max' in restrictions:
+                    max_value = restrictions['max']
+                else:
+                    max_value = None
+                if restrictions['type'] == 'int':
+                    valid = validate_int(value, max_value)
+                elif restrictions['type'] == 'str':
+                    if max_value:
+                        valid = len(value) < max_value
+                    else:
+                        valid = True
+                results.append(valid)
 
             valid_call = min(results)
             if valid_call:
@@ -100,7 +124,7 @@ def validate_int(value, max_value=None):
     try:
         value = int(value)
     except ValueError:
-        valid = False
+        return False
 
     if max_value:
         if value > max_value:

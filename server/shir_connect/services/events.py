@@ -26,6 +26,7 @@ events = Blueprint('events', __name__)
 
 @events.route('/service/event/<event_id>', methods=['GET'])
 @jwt_required
+@validate_inputs(fields={'event_id': {'type': 'int'}})
 def get_event(event_id):
     """ Pulls the information for an event from the database """
     event_manager = Events()
@@ -45,7 +46,7 @@ def get_event(event_id):
 
 @events.route('/service/events', methods=['GET'])
 @jwt_required
-@validate_inputs(fields={'moo':'you'})
+@validate_inputs()
 def get_events():
     """ Pulls events from the database """
     event_manager = Events()

@@ -221,13 +221,13 @@ class Events(object):
         age_groups = {}
         for attendee in event['attendees']:
             # Compile age group information
+            age_group_found = False 
             if attendee['age']:
                 # Updates for the average age
                 total_age += attendee['age']
                 age_count += 1
 
                 # Update the age group count
-                age_group_found = False 
                 for group in conf.AGE_GROUPS:
                     meets_reqs = True
                     conditions = conf.AGE_GROUPS[group]
@@ -244,12 +244,12 @@ class Events(object):
                         else:
                             age_groups[group] += 1
 
-                # Add to the unknown category, if necessary 
-                if not age_group_found:
-                    if 'Unknown' not in age_groups:
-                        age_groups['Unknown'] = 1
-                    else:
-                        age_groups['Unknown'] += 1
+            # Add to the unknown category, if necessary
+            if not age_group_found:
+                if 'Unknown' not in age_groups:
+                    age_groups['Unknown'] = 1
+                else:
+                    age_groups['Unknown'] += 1
             
             # See if the participant is a member
             if attendee['is_member']:
@@ -284,31 +284,39 @@ class Events(object):
     def get_attendees(self, event_id):
         """ Pulls the list of the attendees for the event """
         sql = """
-
-            SELECT DISTINCT
-                c.id as member_id,
-                a.first_name,
-                a.last_name,
-                a.email,
-                c.postal_code,
-                a.name,
-                date_part('year', now()) - date_part('year', birth_date) as age,
-                CASE 
-                    WHEN c.first_name IS NOT NULL THEN TRUE
+            SELECT
+                first_name,
+                last_name,
+                max(age) as age,
+                CASE
+                    WHEN max(is_member) = 1 THEN TRUE
                     ELSE FALSE
-                END as is_member,
-                d.first_event_date,
-                d.events_attended
-            FROM {schema}.attendees a
-            INNER JOIN {schema}.events b
-            on a.event_id = b.id
-            LEFT JOIN {schema}.members_view c
-            ON (lower(a.first_name)=lower(c.first_name)
-            AND lower(a.last_name)=lower(c.last_name))
-            LEFT JOIN {schema}.participants d
-            ON (lower(a.first_name)=lower(d.first_name)
-            AND lower(a.last_name)=lower(d.last_name))
-            where b.id = '{event_id}'
+                end as is_member,
+                max(first_event_date) as first_event_date,
+                max(events_attended) as events_attended
+            FROM(
+                SELECT DISTINCT
+                    INITCAP(a.first_name) as first_name,
+                    INITCAP(a.last_name) as last_name,
+                    date_part('year', now()) - date_part('year', birth_date) as age,
+                    CASE 
+                        WHEN c.first_name IS NOT NULL THEN 1
+                        ELSE 0
+                    END as is_member,
+                    d.first_event_date,
+                    d.events_attended
+                FROM {schema}.attendees a
+                INNER JOIN {schema}.events b
+                on a.event_id = b.id
+                LEFT JOIN {schema}.members_view c
+                ON (lower(a.first_name)=lower(c.first_name)
+                AND lower(a.last_name)=lower(c.last_name))
+                LEFT JOIN {schema}.participants d
+                ON (lower(a.first_name)=lower(d.first_name)
+                AND lower(a.last_name)=lower(d.last_name))
+                where b.id = '{event_id}'
+            ) x
+            GROUP BY first_name, last_name
             ORDER BY last_name ASC
         """.format(schema=self.database.schema, event_id=event_id)
         df = pd.read_sql(sql, self.database.connection)

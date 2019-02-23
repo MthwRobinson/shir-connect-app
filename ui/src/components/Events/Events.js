@@ -152,6 +152,20 @@ class Events extends Component {
                      searchTerms);
     }
 
+    handleRemoveTerm = (removeTerm) => {
+      // Removes search term from the search terms list
+      let searchTerms = [...this.state.searchTerms];
+      let updatedTerms = [];
+      for(let term of searchTerms){
+        if(term!==removeTerm){
+          updatedTerms.push(term)
+        }
+      }
+      this.setState({page: 1, searchTerms: updatedTerms, query: ''});
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     updatedTerms);
+    }
+
     handleSort = (sortColumn) => {
       // Changes the sort order of the columns
       let sortOrder = this.state.sortOrder;
@@ -289,7 +303,10 @@ class Events extends Component {
       for(let searchTerm of this.state.searchTerms){
         searchTermPills.push(<div className='pull-right search-term-pill'>
           <b>{searchTerm}</b>
-          <i className="fa fa-times pull-right event-icons search-term-times"></i>
+          <i 
+            className="fa fa-times pull-right event-icons search-term-times"
+            onClick={()=>this.handleRemoveTerm(searchTerm)}>
+          </i>
         </div>)
       }
 

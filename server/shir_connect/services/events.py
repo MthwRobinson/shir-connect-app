@@ -298,7 +298,7 @@ class Events(object):
                 SELECT DISTINCT
                     INITCAP(a.first_name) as first_name,
                     INITCAP(a.last_name) as last_name,
-                    date_part('year', now()) - date_part('year', birth_date) as age,
+                    DATE_PART('year', AGE(now(), birth_date)) as age,
                     CASE 
                         WHEN c.first_name IS NOT NULL THEN 1
                         ELSE 0

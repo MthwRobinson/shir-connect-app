@@ -162,9 +162,7 @@ class Members(object):
                     WHEN a.last_name IS NOT NULL then INITCAP(a.last_name)
                     ELSE INITCAP(c.last_name)
                 END as last_name,
-                date_part('year', now()) 
-                        - date_part('year', birth_date
-                ) as age,
+                DATE_PART('year', AGE(now(), birth_date)) as age,
                 CASE
                     WHEN c.email IS NOT NULL THEN c.email
                     ELSE a.email

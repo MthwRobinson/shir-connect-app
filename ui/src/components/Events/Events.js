@@ -36,6 +36,7 @@ class Events extends Component {
         count: 0,
         loading: true,
         query: '',
+        searchTerms: [],
         sortColumn: 'start_datetime',
         sortOrder: 'desc'
       }
@@ -74,8 +75,17 @@ class Events extends Component {
         })
     }
 
-    getEvents = (page=1, sortCol='start_datetime', sortOrder='desc') => {
+    getEvents = (page=1, sortCol='start_datetime', 
+                 sortOrder='desc', searchTerms=[]) => {
       // Pulls events to display in a table
+      // Params
+      // ------
+      //   page: int
+      //   sortCol: the column to sort on. must
+      //     be a valid column in the events table
+      //   sortOrder: the order of sort. must be asc or desc
+      //   searchTerm: an array of search terms to apply. all search 
+      //   terms are applied as an AND condition
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token)
@@ -83,7 +93,7 @@ class Events extends Component {
       // Construct the URL parameters
       let url = '/service/events?limit='+LIMIT;
       url += '&page='+page
-      url += '&q='+this.state.query;
+      url += '&q='+searchTerms.join(' ');
       url += '&order='+sortOrder;
       url += '&sort='+sortCol;
       
@@ -127,22 +137,41 @@ class Events extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder,
+                         this.state.searchTerms);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getEvents(page, this.state.sortColumn, this.state.sortOrder);
+          this.getEvents(page, this.state.sortColumn, this.state.sortOrder,
+                         this.state.searchTerms);
         }
       }
     }
 
-    handleSubmit = (event) => {
+    handleSearch = (event) => {
       // Handles the submit action in the search bar
       event.preventDefault();
-      this.setState({page: 1});
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder);
+      let searchTerms = [...this.state.searchTerms];
+      searchTerms.push(this.state.query);
+      this.setState({page: 1, searchTerms: searchTerms, query: ''});
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     searchTerms);
+    }
+
+    handleRemoveTerm = (removeTerm) => {
+      // Removes search term from the search terms list
+      let searchTerms = [...this.state.searchTerms];
+      let updatedTerms = [];
+      for(let term of searchTerms){
+        if(term!==removeTerm){
+          updatedTerms.push(term)
+        }
+      }
+      this.setState({page: 1, searchTerms: updatedTerms, query: ''});
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     updatedTerms);
     }
 
     handleSort = (sortColumn) => {
@@ -155,7 +184,7 @@ class Events extends Component {
           sortOrder = 'asc';
         }
       }
-      this.getEvents(1, sortColumn, sortOrder);
+      this.getEvents(1, sortColumn, sortOrder, this.state.searchTerms);
     }
 
     handleQuery(event){
@@ -264,6 +293,22 @@ class Events extends Component {
       )
     }
 
+    renderSearchTermPills = () => {
+      // Renders the pill buttons for the active search terms
+      let searchTermPills = [];
+      for(let searchTerm of this.state.searchTerms){
+        searchTermPills.push(<div className='pull-right search-term-pill'>
+          <b>{searchTerm}</b>
+          <i 
+            className="fa fa-times pull-right event-icons search-term-times"
+            onClick={()=>this.handleRemoveTerm(searchTerm)}>
+          </i>
+        </div>)
+      }
+      return searchTermPills
+
+    }
+
     render() {
       let table = null
       if(this.state.loading){
@@ -277,6 +322,7 @@ class Events extends Component {
       }
 
       let pageCount = this.renderPageCount();
+      let searchTermPills = this.renderSearchTermPills();
 
       return (
         <div>
@@ -299,7 +345,7 @@ class Events extends Component {
             <div className='event-header'>
               {pageCount}
               <div className='pull-right'>
-                <Form onSubmit={this.handleSubmit} inline>
+                <Form onSubmit={this.handleSearch} inline>
                   <FormGroup>
                     <FormControl 
                       value={this.state.query}
@@ -315,6 +361,7 @@ class Events extends Component {
                 </Form>
                 <ReactToolTip />
               </div>
+              {searchTermPills}
             </div>
               {table}
           </div>

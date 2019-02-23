@@ -323,7 +323,7 @@ class Database(object):
                         '%', term, '%'
                     )
                     query_conditions.append(search)
-                query_clause = " OR ".join(query_conditions)
+                query_clause = " AND ".join(query_conditions)
                 clauses.append("({})".format(query_clause))
 
             # Add the condtions from the where argument
@@ -369,7 +369,7 @@ class Database(object):
                     '%', term, '%'
                 )
                 conditions.append(search)
-            sql += " WHERE " + " OR ".join(conditions)
+            sql += " WHERE " + " AND ".join(conditions)
         df = pd.read_sql(sql, self.connection)
         count = df.loc[0]['total']
         return count

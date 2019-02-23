@@ -33,6 +33,7 @@ class Members extends Component {
         page: 1,
         count: 0,
         query: '',
+        searchTerms: [],
         loading: true,
         showUpload: false,
         uploadLoading: false,
@@ -76,8 +77,17 @@ class Members extends Component {
       this.props.history.push(url);
     }
 
-    getMembers = (page=1, sortCol='events_attended', sortOrder='desc') => {
-      // Pulls members to display in the table
+    getMembers = (page=1, sortCol='events_attended', 
+                  sortOrder='desc', searchTerms=[]) => {
+      // Pulls members to display in the table 
+      // Params 
+      // ------
+      //   page: int
+      //   sortCol: the column to sort on. must
+      //     be a valid column in the members table
+      //   sortOrder: the order of sort. must be asc or desc
+      //   searchTerm: an array of search terms to apply. all search 
+      //   terms are applied as an AND condition
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token);
@@ -85,7 +95,7 @@ class Members extends Component {
       // Construct the URL parameters
       let url = '/service/members?limit='+LIMIT;
       url += '&page='+page;
-      url += '&q='+this.state.query;
+      url += '&q='+searchTerms.join(' ');
       url += '&sort='+sortCol;
       url += '&order='+sortOrder;
 
@@ -127,22 +137,41 @@ class Members extends Component {
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getMembers(page, this.state.sortColumn, this.state.sortOrder);
+          this.getMembers(page, this.state.sortColumn, 
+                          this.state.sortOrder, this.state.searchTerms);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getMembers(page, this.state.sortColumn, this.state.sortOrder);
+          this.getMembers(page, this.state.sortColumn, 
+                          this.state.sortOrder, this.state.searchTerms);
         }
       }
     }
 
-    handleSubmit = (event) => {
+    handleSearch = (event) => {
       // Handles the submit action in the search bar
       event.preventDefault();
-      this.setState({page: 1});
-      this.getMembers(1, this.state.sortColumn, this.state.sortOrder);
+      let searchTerms = [...this.state.searchTerms];
+      searchTerms.push(this.state.query);
+      this.setState({page: 1, searchTerms: searchTerms, query: ''});
+      this.getMembers(1, this.state.sortColumn, 
+                      this.state.sortOrder, searchTerms);
+    }
+
+    handleRemoveTerm = (removeTerm) => {
+      // Removes search term from the search terms list
+      let searchTerms = [...this.state.searchTerms];
+      let updatedTerms = [];
+      for(let term of searchTerms){
+        if(term!==removeTerm){
+          updatedTerms.push(term)
+        }
+      }
+      this.setState({page: 1, searchTerms: updatedTerms, query: ''})
+      this.getMembers(1, this.state.sortColumn,
+                     this.state.sortOrder, updatedTerms)
     }
 
     handleSort = (sortColumn) => {
@@ -155,7 +184,7 @@ class Members extends Component {
           sortOrder = 'asc';
         }
       }
-      this.getMembers(1, sortColumn, sortOrder);
+      this.getMembers(1, sortColumn, sortOrder, this.state.searchTerms);
     }
 
     handleQuery(event){
@@ -386,6 +415,21 @@ class Members extends Component {
         </div>
       )
     }
+
+    renderSearchTermPills = () => {
+      // Renders the pill buttons for the active search terms
+      let searchTermPills = [];
+      for(let searchTerm of this.state.searchTerms){
+        searchTermPills.push(<div className='pull-right search-term-pill'>
+          <b>{searchTerm}</b>
+          <i 
+            className="fa fa-times pull-right event-icons search-term-times"
+            onClick={()=>this.handleRemoveTerm(searchTerm)}>
+          </i>
+        </div>)
+      }
+      return searchTermPills
+    }
   
 
     render() {
@@ -403,6 +447,7 @@ class Members extends Component {
       }
 
       let pageCount = this.renderPageCount();
+      let searchTermPills = this.renderSearchTermPills();
 
       let uploadButton = null
       if(this.state.userRole==='admin'){
@@ -432,7 +477,7 @@ class Members extends Component {
             <div className='event-header'>
               {pageCount}
               <div className='pull-right'>
-                <Form onSubmit={this.handleSubmit} inline>
+                <Form onSubmit={this.handleSearch} inline>
                   <FormGroup>
                     <FormControl 
                       value={this.state.query}
@@ -448,6 +493,7 @@ class Members extends Component {
                   <ReactToolTip />
                 </Form>
               </div>
+              {searchTermPills}
             </div>
             {table}
           </div>

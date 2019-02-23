@@ -78,6 +78,14 @@ class Events extends Component {
     getEvents = (page=1, sortCol='start_datetime', 
                  sortOrder='desc', searchTerms=[]) => {
       // Pulls events to display in a table
+      // Params
+      // ------
+      //   page: int
+      //   sortCol: the column to sort on. must
+      //     be a valid column in the events table
+      //   sortOrder: the order of sort. must be asc or desc
+      //   searchTerm: an array of search terms to apply. all search 
+      //   terms are applied as an AND condition
       this.setState({loading: true});
       const token = getAccessToken();
       const auth = 'Bearer '.concat(token)

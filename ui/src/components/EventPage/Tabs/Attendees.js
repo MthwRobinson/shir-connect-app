@@ -18,6 +18,7 @@ class Attendees extends Component {
             <Table reponsive header hover>
               <thead>
                 <tr>
+                  <th className='table-heading'>#</th>
                   <th className='table-heading'>First Name</th>
                   <th className='table-heading'>
                   Last Name
@@ -40,6 +41,7 @@ class Attendees extends Component {
                       attendee.last_name
                     )}
                   >
+                    <th>{index+1}</th>
                     <th>{attendee.first_name != null
                     ? attendee.first_name : ''}</th>
                     <th>{attendee.last_name != null

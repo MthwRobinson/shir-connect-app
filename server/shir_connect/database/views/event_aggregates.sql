@@ -49,7 +49,15 @@ LEFT JOIN(
     event_id, 
     SUM(cost) AS total_fees,
     COUNT(*) AS attendee_count
-  FROM {schema}.attendees
+  FROM (
+    SELECT DISTINCT 
+      event_id,
+      max(cost) as cost,
+      lower(first_name),
+      lower(last_name)
+    FROM {schema}.attendees
+    GROUP BY lower(first_name), lower(last_name), event_id
+  ) x
   GROUP BY event_id
 ) c ON a.id=c.event_id
 ORDER BY start_datetime desc

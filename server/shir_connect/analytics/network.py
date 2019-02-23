@@ -94,8 +94,9 @@ class Network():
             if max_attendees:
                 if len(attendees) > max_attendees:
                     continue
-            attendees = [x for x in attendees if x['name']]
-            names = [x['name'].lower() for x in attendees]
+            attendees = [x for x in attendees if x['first_name']]
+            names = [' '.join([x['first_name'], x['last_name']]).lower() 
+                    for x in attendees]
             names = list(set(names)) # Drops duplicates
             pairs = itertools.combinations(names, 2)
             for pair in pairs:

@@ -218,7 +218,7 @@ class QuickFacts extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Capacity ({event.capacity})</h4>
+          <h4>Capacity ({event.attendee_count}/{event.capacity})</h4>
           <div className='quick-facts-list'>
             <ul className="quick-facts-bullets">
               <li><b>Registered: </b> {event.attendee_count}</li>
@@ -245,7 +245,7 @@ class QuickFacts extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Capacity ({event.capacity})</h4>
+          <h4>Capacity ({event.attendee_count}/{event.capacity})</h4>
           <div className='quick-facts-list'>
             <ul className="quick-facts-bullets">
               <li><b>Registered: </b> {event.attendee_count}</li>

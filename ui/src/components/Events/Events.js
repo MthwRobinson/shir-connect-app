@@ -293,6 +293,22 @@ class Events extends Component {
       )
     }
 
+    renderSearchTermPills = () => {
+      // Renders the pill buttons for the active search terms
+      let searchTermPills = [];
+      for(let searchTerm of this.state.searchTerms){
+        searchTermPills.push(<div className='pull-right search-term-pill'>
+          <b>{searchTerm}</b>
+          <i 
+            className="fa fa-times pull-right event-icons search-term-times"
+            onClick={()=>this.handleRemoveTerm(searchTerm)}>
+          </i>
+        </div>)
+      }
+      return searchTermPills
+
+    }
+
     render() {
       let table = null
       if(this.state.loading){
@@ -306,17 +322,7 @@ class Events extends Component {
       }
 
       let pageCount = this.renderPageCount();
-
-      let searchTermPills = [];
-      for(let searchTerm of this.state.searchTerms){
-        searchTermPills.push(<div className='pull-right search-term-pill'>
-          <b>{searchTerm}</b>
-          <i 
-            className="fa fa-times pull-right event-icons search-term-times"
-            onClick={()=>this.handleRemoveTerm(searchTerm)}>
-          </i>
-        </div>)
-      }
+      let searchTermPills = this.renderSearchTermPills();
 
       return (
         <div>

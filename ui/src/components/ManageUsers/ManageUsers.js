@@ -777,6 +777,10 @@ class ManageUsers extends Component {
               <h2>
                 Manage Users
                 <i
+                  className="fa fa-home pull-right event-icons"
+                  onClick={()=>this.props.history.push('/')}
+                ></i>
+                <i
                   className='fa fa-plus pull-right event-icons'
                   data-tip='Add a user.'
                   onClick={()=>this.openAddWindow()}

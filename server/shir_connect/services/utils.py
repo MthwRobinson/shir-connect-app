@@ -137,3 +137,15 @@ def validate_int(value, max_value=None):
         if value > max_value:
             valid = False
     return valid
+
+def _get_cookie_from_response(response, cookie_name):
+    cookie_headers = response.headers.getlist('Set-Cookie')
+    for header in cookie_headers:
+        attributes = header.split(';')
+        if cookie_name in attributes[0]:
+            cookie = {}
+            for attr in attributes:
+                split = attr.split('=')
+                cookie[split[0].strip().lower()] = split[1] if len(split) > 1 else True
+                return cookie
+    return None

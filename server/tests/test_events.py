@@ -5,6 +5,7 @@ import pandas as pd
 
 from shir_connect.services.app import app
 from shir_connect.services.user_management import UserManagement
+import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
@@ -23,20 +24,15 @@ def test_event():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # JWT must be present in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # User must have access to events
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['events'])
 
     # Success
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
 
@@ -60,9 +56,13 @@ def test_event():
         'is_member' in attendee
 
     url = '/service/event/8675309'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 404
     assert type(response.json) == dict
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -73,6 +73,10 @@ def test_events():
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
     
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
+    
     # User must be authenticated
     response = CLIENT.get('/service/events?limit=25')
     assert response.status_code == 401
@@ -82,23 +86,15 @@ def test_events():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
-    # JWT must be in the header
     url = '/service/events?limit=25&page=2'
     url += '&sort=start_datetime&order=desc'
     url += '&q=trsty'
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-    
-    # User must have access to events
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
-    assert response.status_code == 403
     user_management.update_access('unittestuser', ['events'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     assert len(response.json['results']) == 25
@@ -107,8 +103,12 @@ def test_events():
     
     # Make sure input validation is working 
     url = '/service/events?limit=30&page=2'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 422 
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -119,30 +119,25 @@ def test_event_locations():
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
     
-    # User must be authenticated
-    response = CLIENT.get('/service/events?limit=25')
-    assert response.status_code == 401
-    
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestuser',
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # Request must have a header
     url = '/service/events/locations'
     response = CLIENT.get(url)
-    assert response.status_code == 401
+    assert response.status_code in [401, 403]
     
     # User must have access to events
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for result in response.json['results']:
@@ -153,6 +148,10 @@ def test_event_locations():
         assert type(result['properties']['title']) == str
         assert type(result['properties']['icon']) == str
         assert type(result['properties']['description']) == str
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -172,21 +171,16 @@ def test_event_cities():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Request must have JWT in the header
-    url = '/service/events/cities'
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # User must have access to events
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    url = '/service/events/cities'
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == dict
     for city in response.json['results']['cities']:
@@ -194,6 +188,10 @@ def test_event_cities():
     for city in response.json['results']['counts']:
         assert type(response.json['results']['counts'][city]) == str
     assert type(response.json['count']) == str
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -214,22 +212,26 @@ def test_export_event_aggregates():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
 
     # User must have access to events
     url = '/service/events/export?q=trsty'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['events'])
 
     # Success!
     url = '/service/events/export?q=trsty'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
 
     csv = StringIO(response.data.decode('utf-8'))
     df = pd.read_csv(csv)
     assert len(df) > 0
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
 
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

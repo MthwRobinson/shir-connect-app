@@ -126,12 +126,8 @@ def test_event_locations():
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
-    # Request must have a header
-    url = '/service/events/locations'
-    response = CLIENT.get(url)
-    assert response.status_code in [401, 403]
-    
     # User must have access to events
+    url = '/service/events/locations'
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])

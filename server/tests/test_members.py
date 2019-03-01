@@ -6,6 +6,7 @@ import pandas as pd
 from shir_connect.services.app import app
 from shir_connect.services.members import Members
 from shir_connect.services.user_management import UserManagement
+import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
@@ -24,19 +25,22 @@ def test_member_authorize():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # The user must have access to members
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser',['members'])
     
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert 'role' in response.json
     assert 'password' not in response.json
+
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -56,27 +60,27 @@ def test_members():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
-    # The JWT must be in the header of the request
     url = '/service/members?limit=25&page=2'
     url += '&sort=last_event_date&order=desc'
     url += '&q=smuckler'
-    response = CLIENT.get(url)
-    assert response.status_code == 401
     
     # The user must have access to members
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser',['members'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     assert 'count' in response.json
     assert 'pages' in response.json
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -97,26 +101,25 @@ def test_member():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # The user must have access to members
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser',['members'])
 
     # The parametes must include first name and last name
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 404
     
     # The parametes must include first name and last name
     url += '?firstName=danielle'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 404
     
     # Success!
     url += '&lastName=agress'
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert 'first_name' in response.json
     assert 'last_name' in response.json
@@ -125,6 +128,10 @@ def test_member():
     assert 'is_member' in response.json
     assert 'events' in response.json
     assert type(response.json['events']) == list
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -145,17 +152,27 @@ def test_member_upload():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
+
     # The user must have access to members
-    response = CLIENT.post(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.post(url, headers={
+        'Cookies': 'access_token_cookie=%s'%(jwt),
+        'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 403
     user_management.update_role('unittestuser', 'admin')
     
     # Uh oh! Bad file
-    response = CLIENT.post(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.post(url, headers={
+        'Cookies': 'access_token_cookie=%s'%(jwt),
+        'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 400
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
 
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

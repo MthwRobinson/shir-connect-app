@@ -1,5 +1,6 @@
 from shir_connect.services.app import app
 from shir_connect.services.user_management import UserManagement
+import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
@@ -18,20 +19,19 @@ def test_map_authorize():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # The JWT must be present in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # The user must have access to the map module
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
+    assert response.status_code == 200
+
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
     assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
@@ -53,20 +53,15 @@ def test_zip_geometry():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # The JWT must be present in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # The user must have access to the map module
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert 'id' in response.json
     assert 'type' in response.json
@@ -75,6 +70,10 @@ def test_zip_geometry():
     assert type(response.json['source']['data']) == dict
     assert 'paint' in response.json
     assert 'description' in response.json['source']['data']['features'][0]['properties']
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -95,22 +94,21 @@ def test_zip_codes():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # The JWT must be present in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # The user must have access to the mpa
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == list
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -131,20 +129,15 @@ def test_all_geometries():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # The JWT must be present in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
 
     # The user must have access to the map
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['map'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     for key in response.json:
         layer = response.json[key]
@@ -155,6 +148,10 @@ def test_all_geometries():
         assert type(layer['source']['data']) == dict
         assert 'paint' in layer
         assert 'description' in layer['source']['data']['features'][0]['properties']
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

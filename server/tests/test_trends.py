@@ -5,6 +5,7 @@ import pandas as pd
 
 from shir_connect.services.app import app
 from shir_connect.services.user_management import UserManagement
+import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
@@ -19,26 +20,25 @@ def test_monthly_revenue():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-   
-    # JWT needs to be included in the response header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
 
     # User must have access to trends
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['trends'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for result in response.json['results']:
         assert 'revenue' in result
         assert 'yr' in result
         assert 'mn' in result
+
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -55,26 +55,25 @@ def test_avg_attendance():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
    
-    # JWT need to be in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-
     # User must have access to trends
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['trends'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for result in response.json['results']:
         assert 'day_of_week' in result
         assert 'day_order' in result
         assert 'avg_attendance' in result
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -91,20 +90,15 @@ def test_year_group_attendees():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-   
-    # JWT must be in the response header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # User must have access to trends
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['trends'])
 
     # Success!
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json) == dict
     for key in response.json:
@@ -119,6 +113,10 @@ def test_year_group_attendees():
         assert 'group' in response.json[key]
         assert 'count' in response.json[key]
     
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
+
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
@@ -134,19 +132,14 @@ def test_participation():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-   
-    # JWT must be in the header
-    response = CLIENT.get(url)
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     
     # User must have access to the trends page 
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
     user_management.update_access('unittestuser', ['trends'])
 
-    response = CLIENT.get(url, headers={'Authorization': 'Bearer %s'%(jwt)})
+    response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 200
     assert type(response.json['results']) == list
     for item in response.json['results']:
@@ -161,6 +154,11 @@ def test_participation():
         assert 'id' in item
         assert 'name' in item
         assert 'total' in item
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
+
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')

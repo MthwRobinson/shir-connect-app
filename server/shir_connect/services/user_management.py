@@ -18,6 +18,7 @@ from flask_jwt_extended import (
     jwt_refresh_token_required,
     jwt_required,
     set_access_cookies,
+    set_refresh_cookies,
     unset_jwt_cookies
 )
 import pandas as pd
@@ -121,6 +122,7 @@ def user_authenticate():
         refresh_token = create_refresh_token(identity=username)
         response = jsonify({'login': True})
         set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
         return response, 200
     else:
         msg = 'authentication failed for user %s'%(auth_user['username'])
@@ -140,10 +142,9 @@ def user_refresh():
     """ Creates a refreshed access token for the user """
     username = get_jwt_identity()
     access_token = create_access_token(identity=username)
-    response = {
-        'jwt': access_token
-    }
-    return jsonify(response), 200
+    response = jsonify({'refresh': True})
+    set_access_cookies(response, access_token)
+    return response, 200
 
 @user_management.route('/service/user/authorize', methods=['GET'])
 @jwt_required

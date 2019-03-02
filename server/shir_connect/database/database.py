@@ -334,9 +334,10 @@ class Database(object):
             df = pd.read_sql(sql, self.connection)
             return df
     
-    def count_rows(self, table, query=None):
-        """ Reads a table into a dataframe """
-        count = self.read_table(table=table, query=query, count=True)
+    def count_rows(self, table, query=[], where=[]):
+        """ Returns the number of rows, given a query. """
+        count = self.read_table(table=table, query=query,
+                                where=where, count=True)
         return count
 
     def to_json(self, df):
@@ -363,7 +364,6 @@ def _build_query_clauses(query=None):
     -------
         list, a list of SQL clauses 
     """
-
     clauses = []
     # Add the conditions from the search term
     if query:

@@ -4,10 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
-import { 
-  getAccessToken, 
-  refreshAccessToken 
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
 import Header from './../Header/Header';
 import ModuleCard from './../ModuleCard/ModuleCard';
 import Loading from './../Loading/Loading';
@@ -32,28 +29,22 @@ class Home extends Component {
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
-      const token = getAccessToken();
-      if(!token){
-        this.navigate('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        axios.get('/service/user/authorize', { headers: { Authorization: auth }})
-          .then(res => {
-            this.setState({
-              name: res.data.id,
-              modules: res.data.modules,
-              loading: false
-            });
+      axios.get('/service/user/authorize')
+        .then(res => {
+          this.setState({
+            name: res.data.id,
+            modules: res.data.modules,
+            loading: false
+          });
 
-            // Refresh the token to keep the session active
-            refreshAccessToken();
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-      }
+          // Refresh the token to keep the session active
+          refreshAccessToken();
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
     }
 
     renderModuleCards(){

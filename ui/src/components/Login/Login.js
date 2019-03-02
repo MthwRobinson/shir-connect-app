@@ -12,11 +12,7 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
-import {
-  clearStorage,
-  setAccessToken, 
-  setRefreshToken 
-} from './../../utilities/authentication';
+import { logout } from './../../utilities/authentication';
 import Header from './../Header/Header';
 
 import './Login.css';
@@ -39,31 +35,23 @@ class Login extends Component {
 
     componentDidMount(){
       // Clear any information from local storage
-      clearStorage();
+      logout();
     }
 
     handleSubmit = (event) => {
-      // Authenticates with the service and stores the JWT
-      // in local storage if authentication is successful
+      // Prevents the app from refreshing on submit
+      event.preventDefault();
       axios.post('/service/user/authenticate', {
         username: this.state.userName, 
         password: this.state.password
       })
         .then(res => {
-          const refreshToken = res.data.refresh_token;
-          setRefreshToken(refreshToken);
-          const accessToken = res.data.jwt;
-          setAccessToken(accessToken);
-
-          localStorage.setItem('trsToken', res.data.jwt);
           this.setState({authenticated: true});
           this.props.history.push('/')
         })
         .catch(err => {
           this.setState({attempted: true});
         })
-      // Prevents the app from refreshing on submit
-      event.preventDefault();
     }
 
     handleUserName(event) {

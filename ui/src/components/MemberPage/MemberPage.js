@@ -7,10 +7,7 @@ import CalendarHeatmap from 'react-calendar-heatmap';
 import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
-import {
-  getAccessToken,
-  refreshAccessToken
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -45,8 +42,6 @@ class MemberPage extends Component {
 
   getMember = () => {
     this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token)
     const searchTerms = this.props.location.search.split('?')[1].split('&');
     let params = {}
     for(let i=0; i<searchTerms.length; i++){
@@ -57,7 +52,7 @@ class MemberPage extends Component {
     let url = '/service/member?';
     url += 'firstName=' + params.firstName;
     url += '&lastName=' + params.lastName;
-    axios.get(url, { headers: { Authorization: auth }})
+    axios.get(url)
       .then(res => {
         res.data.name = res.data.first_name 
         res.data.name += ' ' + res.data.last_name;

@@ -3,10 +3,7 @@ import React, { Component } from 'react';
 import { Nav } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
-import {
-  getAccessToken,
-  refreshAccessToken,
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
 import Attendees from './Tabs/Attendees';
 import EventInfo from './Tabs/EventInfo';
 import Header from './../Header/Header';
@@ -35,11 +32,9 @@ class EventPage extends Component {
 
   getEvent = () => {
     this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token)
     const eventId = this.props.location.search.split('=')[1];
     let url = '/service/event/' + eventId;
-    axios.get(url, { headers: { Authorization: auth }})
+    axios.get(url)
       .then(res => {
         this.setState({
           event: res.data,

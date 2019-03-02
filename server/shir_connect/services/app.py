@@ -14,8 +14,9 @@ app = Flask(__name__)
 
 # Set JSON web token configurations
 app.config['JWT_SECRET_KEY'] = conf.JWT_SECRET_KEY
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = conf.JWT_ACCESS_TOKEN_EXPIRES
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = conf.JWT_REFRESH_TOKEN_EXPIRES
+app.config['JWT_TOKEN_LOCATION'] = conf.JWT_TOKEN_LOCATION
+app.config['JWT_COOKIE_SECURE'] = conf.JWT_COOKIE_SECURE
+app.config['JWT_COOKIE_CSRF_PROTECT'] = conf.JWT_COOKIE_CSRF_PROTECT
 
 # Register end points with the appp
 app.register_blueprint(events)

@@ -14,7 +14,7 @@ import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
 
 import {
-  getAccessToken,
+  getCSRFToken,
   refreshAccessToken
 } from './../../utilities/authentication'; 
 import Header from './../Header/Header';
@@ -54,10 +54,8 @@ class Members extends Component {
     checkAccess = () => {
       // Checks to make sure the user has access to the 
       // member access group
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
       const url = '/service/member/authorize';
-      axios.get(url, {headers: {Authorization: auth }})
+      axios.get(url)
         .then(res => {
           this.setState({userRole: res.data.role});
           // Refresh the token to keep the session active
@@ -89,9 +87,6 @@ class Members extends Component {
       //   searchTerm: an array of search terms to apply. all search 
       //   terms are applied as an AND condition
       this.setState({loading: true});
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
-
       // Construct the URL parameters
       let url = '/service/members?limit='+LIMIT;
       url += '&page='+page;
@@ -99,7 +94,7 @@ class Members extends Component {
       url += '&sort='+sortCol;
       url += '&order='+sortOrder;
 
-      axios.get(url, {headers: {Authorization: auth}})
+      axios.get(url)
         .then(res => {
           let members = [];
           for(var i=0; i<res.data.results.length; i++){
@@ -316,12 +311,11 @@ class Members extends Component {
       data.append('file', file);
 
       // Post the data
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
+      const csrfToken = getCSRFToken();
       const url = '/service/members/upload';
       axios.post(url, data, {
           headers: {
-            'Authorization': auth,
+            'X-CSRF-TOKEN': csrfToken,
             'Content-Type': 'application/vnd.ms-excel'
           }
       }).then(res => {

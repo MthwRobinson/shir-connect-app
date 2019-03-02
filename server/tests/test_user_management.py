@@ -1,5 +1,6 @@
 from shir_connect.services.app import app
 from shir_connect.services.user_management import UserManagement
+import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
@@ -14,24 +15,24 @@ def test_add_user():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header  is required to register a user
-    response = CLIENT.post('/service/user')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # Only an admin can register a user
     response = CLIENT.post('/service/user',
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
     user_management.update_role('unittestadmin', 'admin')
 
     # JSON body is required to register a user
-    response = CLIENT.post('/service/user',
-        headers={'Authorization': 'Bearer %s'%(jwt)}
-    )
+    response = CLIENT.post('/service/user', headers={
+        'Cookies': 'access_token_cookie=%s'%(jwt),
+        'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 400
 
     # Success!
@@ -41,8 +42,10 @@ def test_add_user():
             role='standard',
             modules=['events','map']
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
-    )
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 201
     assert 'password' in response.json
     user = user_management.get_user('unittestuser')
@@ -53,9 +56,15 @@ def test_add_user():
     # Can't register the same user twice
     response = CLIENT.post('/service/user', 
         json=dict(username='unittestuser', password='testPassword!'),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
-    )
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 400
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
 
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -77,25 +86,31 @@ def test_delete_user():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header  is required to delete a user
-    response = CLIENT.delete('/service/user/unittestuser')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # Only an admin can delete a user
     response = CLIENT.delete('/service/user/unittestuser',
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
     user_management.update_role('unittestadmin', 'admin')
 
     # Success!
     response = CLIENT.delete('/service/user/unittestuser',
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 204
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user = user_management.get_user('unittestuser')
     assert user == None
@@ -131,44 +146,38 @@ def test_user_authenticate():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    refresh_token = response.json['refresh_token']
-
-    # JWT header must be present to authorize
-    response = CLIENT.get('/service/user/authorize')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    refresh_jwt = utils._get_cookie_from_response(response, 'refresh_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
 
     # Success!
     response = CLIENT.get('/service/user/authorize', headers={
-        'Authorization': 'Bearer %s'%(jwt)
+        'Cookies': 'access_token_cookie=%s'%(jwt),
+        'X-CSRF-TOKEN': csrf['csrf_access_token']
     })
     assert response.status_code == 200
     assert response.json['id'] == 'unittestuser'
-    
-    # Need a refresh token to refresh
-    response = CLIENT.get('/service/user/refresh')
-    assert response.status_code == 401
-
-    # Needs to be a refresh token, not an access token
-    response = CLIENT.get('/service/user/refresh', headers={
-        'Authorization': 'Bearer %s'%(jwt)
-    })
-    assert response.status_code == 422
    
     # Success!
     response = CLIENT.get('/service/user/refresh', headers={
-        'Authorization': 'Bearer %s'%(refresh_token)
+        'Cookies': 'access_token_cookie=%s;refresh_token_cookie=%s'%(jwt, refresh_jwt),
+        'X-CSRF-TOKEN': csrf['csrf_access_token']
     })
     assert response.status_code == 200
-    new_jwt = response.json['jwt']
+    jwt = utils._get_cookie_from_response(response, 'refresh_token_cookie')
+    refresh_jwt = utils._get_cookie_from_response(response, 'refresh_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # Make sure the refreshed token works
     response = CLIENT.get('/service/user/authorize', headers={
-        'Authorization': 'Bearer %s'%(jwt)
+        'Cookies': 'access_token_cookie=%s'%(jwt)
     })
     assert response.status_code == 200
     assert response.json['id'] == 'unittestuser'
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
 
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -184,17 +193,15 @@ def test_change_password():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-
-    # Authorization header required to change password
-    response = CLIENT.post('/service/user/change-password')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # JSON body is required to update password
     response = CLIENT.post('/service/user/change-password', 
-        headers={'Authorization': 'Bearer %s'%(jwt)}
-    )
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+    })
     assert response.status_code == 400
     
     # Old password must be correct to change password
@@ -204,7 +211,10 @@ def test_change_password():
             new_password='updatedtestPassword!',
             new_password2='updatedtestPassword!'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -215,7 +225,10 @@ def test_change_password():
             new_password='wrongupdatedtestPassword!',
             new_password2='updatedtestPassword!'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -226,7 +239,10 @@ def test_change_password():
             new_password='updatedtestPassword!',
             new_password2='updatedtestPassword!'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 201
 
@@ -235,6 +251,10 @@ def test_change_password():
         username='unittestuser',
         password='updatedtestpassowrd'
     )
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -250,19 +270,19 @@ def test_authorize():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-
-    # Authorization header required to change password
-    response = CLIENT.get('/service/user/authorize')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # Success!
     response = CLIENT.get('/service/user/authorize', 
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={'Cookies': 'access_token_cookie=%s'%(jwt)}
     )
     assert response.status_code == 200
     assert 'password' not in response.json
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -280,12 +300,8 @@ def test_update_role():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header required to change password
-    response = CLIENT.post('/service/user/update-role')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # User must be an admin to update roles
     response = CLIENT.post('/service/user/update-role', 
@@ -293,7 +309,10 @@ def test_update_role():
             username='unittestuser',
             role='admin'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
 
@@ -303,7 +322,10 @@ def test_update_role():
         json=dict(
             role='admin'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -312,7 +334,10 @@ def test_update_role():
         json=dict(
             username='unittestuser'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -322,11 +347,18 @@ def test_update_role():
             username='unittestuser',
             role='admin'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 201
     unittestuser = user_management.get_user('unittestuser')
     assert unittestuser['role'] == 'admin'
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -348,12 +380,8 @@ def test_update_access():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header required to change password
-    response = CLIENT.post('/service/user/update-access')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # User must be an admin to update roles
     response = CLIENT.post('/service/user/update-access', 
@@ -361,7 +389,10 @@ def test_update_access():
             username='unittestuser',
             modules=['events','map']
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
 
@@ -371,7 +402,10 @@ def test_update_access():
         json=dict(
             modules=['events','map']
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -380,7 +414,10 @@ def test_update_access():
         json=dict(
             username='unittestuser'
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
@@ -390,12 +427,19 @@ def test_update_access():
             username='unittestuser',
             modules=['events','map']
         ),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 201
     unittestuser = user_management.get_user('unittestuser')
     assert 'events' in unittestuser['modules']
     assert 'map' in unittestuser['modules']
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
@@ -417,17 +461,16 @@ def test_reset_password():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header required to change password
-    response = CLIENT.post('/service/user/reset-password')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # User must be an admin to update roles
     response = CLIENT.post('/service/user/reset-password', 
         json=dict(username='unittestuser'),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
 
@@ -435,14 +478,20 @@ def test_reset_password():
     # Username must be in the post body
     response = CLIENT.post('/service/user/reset-password', 
         json=dict(password='testPASSWORD@'),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 400
     
     # Success!
     response = CLIENT.post('/service/user/reset-password', 
         json=dict(username='unittestuser'),
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 201
     assert 'password' in response.json
@@ -453,6 +502,10 @@ def test_reset_password():
     user_management.delete_user('unittestuser')
     user = user_management.get_user('unittestuser')
     assert user == None
+    
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestadmin')
     user = user_management.get_user('unittestadmin')
@@ -468,23 +521,22 @@ def test_list_users():
         password='testPassword!'
     ))
     assert response.status_code == 200
-    assert type(response.json['jwt']) == str
-    jwt = response.json['jwt']
-    
-    # Authorization header required to change password
-    response = CLIENT.get('/service/users/list')
-    assert response.status_code == 401
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
     
     # User must be an admin to update roles
     response = CLIENT.get('/service/users/list', 
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        }
     )
     assert response.status_code == 403
 
     user_management.update_role('unittestadmin', 'admin')
     # Success!
     response = CLIENT.get('/service/users/list', 
-        headers={'Authorization': 'Bearer %s'%(jwt)}
+        headers={'Cookies': 'access_token_cookie=%s'%(jwt)}
     )
     assert response.status_code == 200
     users = response.json
@@ -493,6 +545,10 @@ def test_list_users():
         assert 'role' in user
         assert 'modules' in user
         assert 'password' not in user
+
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
     
     user_management.delete_user('unittestadmin')
     user = user_management.get_user('unittestadmin')

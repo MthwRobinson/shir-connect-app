@@ -1,63 +1,27 @@
 // Implements helper functions for the user authentication workflow
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
-//----------------
-// ACCESS TOKENS
-//----------------
-function setAccessToken(accessToken){
-  // Sets the access token in local storage
-  localStorage.setItem('accessToken', accessToken);
+
+function getCSRFToken(){
+  // Pulls the CSRF token from cookies
+  return Cookies.get('csrf_access_token');
 }
-export { setAccessToken };
-
-function getAccessToken(){
-  // Pulls the access token from local storage
-  return localStorage.getItem('accessToken');
-}
-export { getAccessToken }
-
-//----------------
-// REFRESH TOKENS
-//----------------
-
-function setRefreshToken(refreshToken){
-  // Sets the refresh token in local storage
-  localStorage.setItem('refreshToken', refreshToken);
-}
-export { setRefreshToken };
-
-function getRefreshToken(){
-  // Pulls the refresh token from local storage
-  return localStorage.getItem('refreshToken');
-}
+export { getCSRFToken }
 
 function refreshAccessToken(){
   // Refreshes the access token
-  const refreshToken = getRefreshToken();
-  const auth = 'Bearer '.concat(refreshToken);
   const url = '/service/user/refresh';
-  axios.get(url, {headers: {Authorization: auth}})
-    .then(res => {
-      const accessToken = res.data.jwt;
-      setAccessToken(accessToken);
-    })
+  axios.get(url)
 }
 export { refreshAccessToken }
 
-//------------------
-// LOGOUT FUNCTIONS
-//------------------
-
-function clearStorage() {
-  // Clears the JWT from local storage
-  localStorage.clear();
-  sessionStorage.clear();
+function logout() {
+  // Clears the JWT and CSRF token from browser cookies
+  const url = '/service/user/logout';
+  axios.post(url)
 }
-export { clearStorage };
-
-//-------------------
-// MAPBOX TOKEN 
-// ------------------
+export { logout };
 
 function getMapBoxToken() {
   return 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';

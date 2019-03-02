@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import {
-  getAccessToken,
   getMapBoxToken,
   refreshAccessToken
 } from './../../utilities/authentication';
@@ -74,10 +73,8 @@ class EventMap extends Component {
   checkAccess = () => {
     // Checks to make sure the user has access to the 
     // map access group
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token);
     const url = '/service/map/authorize';
-    let response = axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url)
       .then(res => {
         // Refresh the token to keep the session active
         refreshAccessToken();
@@ -100,10 +97,8 @@ class EventMap extends Component {
   getZipCodeGeometries = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token);
     const url = '/service/map/geometries';
-    let response = axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url)
       .then(res => {
         let features = res.data;
         this.setState({zipLayers: features});
@@ -119,10 +114,8 @@ class EventMap extends Component {
   getEventLocations = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token);
     let url = '/service/events/locations';
-    let response = axios.get(url, {headers: {Authorization: auth }})
+    let response = axios.get(url)
       .then(res => {
         let features = res.data.results;
         features.push(TRS_LOCATION);
@@ -161,29 +154,23 @@ class EventMap extends Component {
   addAllZipGeometries = () => {
     // Adds map geometries for any zip code
     // with members or events
-    const token = getAccessToken();
-    if(!token){
-      this.history.push('/login');
-    } else {
-      const auth = 'Bearer '.concat(token);
-      const url = '/service/map/zipcodes';
-      let response = axios.get(url, {headers:{ Authorization: auth}})
-        .then(res => {
-          const zipCodes = res.data;
-          for(let i=0; i<zipCodes.length; i++){
-            const zipCode = parseInt(zipCodes[i], 10);
-            if(zipCode in this.state.zipLayers){
-              this.addZipGeometry(this.state.map, zipCode);
-            }
+    const url = '/service/map/zipcodes';
+    let response = axios.get(url)
+      .then(res => {
+        const zipCodes = res.data;
+        for(let i=0; i<zipCodes.length; i++){
+          const zipCode = parseInt(zipCodes[i], 10);
+          if(zipCode in this.state.zipLayers){
+            this.addZipGeometry(this.state.map, zipCode);
           }
-        })
-        .catch(err=>{
-          if(err.response.status===401){
-            this.history.push('/login');
-          }
-        })
-        return response
-    }
+        }
+      })
+      .catch(err=>{
+        if(err.response.status===401){
+          this.history.push('/login');
+        }
+      })
+      return response
   }
 
   addZipGeometry = (map, zipCode) => {

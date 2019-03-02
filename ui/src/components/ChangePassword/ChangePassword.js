@@ -10,9 +10,9 @@ import {
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
-import {
-  getAccessToken,
-  refreshAccessToken
+import { 
+  refreshAccessToken,
+  getCSRFToken
 } from './../../utilities/authentication';
 import Header from './../Header/Header';
 
@@ -40,43 +40,34 @@ class ChangePassword extends Component {
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        axios.get('/service/user/authorize', { headers: { Authorization: auth }})
-          .then(res => {
-            this.setState({
-              name: res.data.id,
-              loading: false
-            });
+      axios.get('/service/user/authorize')
+        .then(res => {
+          this.setState({
+            name: res.data.id,
+            loading: false
+          });
 
-            // Refresh the access token to keep the seesion active
-            refreshAccessToken();
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-      }
+          // Refresh the access token to keep the seesion active
+          refreshAccessToken();
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
     }
 
     handleSubmit = (event) => {
       // Authenticates with the service and stores the JWT
       // in local storage if authentication is successful
+      event.preventDefault();
       this.setState({updated: false, mismatch: false, attempted: false});
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
-      axios.post('/service/user/change-password', 
-        {
+      const csrfToken = getCSRFToken();
+      axios.post('/service/user/change-password', {
           old_password: this.state.oldPassword, 
           new_password: this.state.newPassword,
           new_password2: this.state.newPassword2
-        },
-        {headers: { Authorization: auth }}
-      )
+      }, {headers: { 'X-CSRF-TOKEN': csrfToken }})
         .then(res => {
           this.setState({
             updated: true, 
@@ -96,8 +87,6 @@ class ChangePassword extends Component {
             }
           }
         })
-      // Prevents the app from refreshing on submit
-      event.preventDefault();
     }
 
     handleOldPassword(event) {

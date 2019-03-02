@@ -7,10 +7,7 @@ import SlidingPane from 'react-sliding-pane';
 import Modal from 'react-modal';
 import axios from 'axios';
 
-import { 
-  clearStorage,
-  getAccessToken
-} from './../../utilities/authentication';
+import { logout } from './../../utilities/authentication';
 
 import './Header.css';
 
@@ -35,10 +32,8 @@ class Header extends Component {
   checkAccess() {
     // Checks to make sure the role of the user
     if(this.props.history.location.pathname!=='/login'){
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
       const url = '/service/user/authorize';
-      axios.get(url, {headers: {Authorization: auth }})
+      axios.get(url)
         .then(res => {
           this.setState({
             modules: res.data.modules,
@@ -131,7 +126,7 @@ class Header extends Component {
 
   logout = () => {
     // Clears browser storage and redirects to the sign-in page
-    clearStorage();
+    logout();
     this.setState({paneOpen: false})
   }
 

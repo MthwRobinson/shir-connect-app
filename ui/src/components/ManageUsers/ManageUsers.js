@@ -16,7 +16,7 @@ import Modal from 'react-responsive-modal';
 import { withRouter } from 'react-router-dom';
 
 import { 
-  getAccessToken,
+  getCSRFToken,
   refreshAccessToken
 } from './../../utilities/authentication';
 import Header from './../Header/Header';
@@ -88,26 +88,20 @@ class ManageUsers extends Component {
     getUsers = () => {
       // Pulls a list of users from the database
       this.setState({loading: true});
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        axios.get('/service/users/list', { headers: { Authorization: auth }})
-          .then(res => {
-            this.setState({
-              users: res.data,
-              loading: false
-            });
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            } else if(err.response.status===403){
-              this.navigate('/forbidden');
-            }
-          })
-      }
+      axios.get('/service/users/list')
+        .then(res => {
+          this.setState({
+            users: res.data,
+            loading: false
+          });
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          } else if(err.response.status===403){
+            this.navigate('/forbidden');
+          }
+        })
     }
 
     addUser = () => {
@@ -116,155 +110,132 @@ class ManageUsers extends Component {
         loading: true,
         addUserError: false
       });
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        // Build the post body
-        let modules = [];
-        if(this.state.events){
-          modules.push('events');
-        }
-        if(this.state.members){
-          modules.push('members');
-        }
-        if(this.state.trends){
-          modules.push('trends');
-        }
-        if(this.state.map){
-          modules.push('map');
-        }
-        const data = {
-          username: this.state.username,
-          role: this.state.role,
-          modules: modules
-        } 
-
-        axios.post('/service/user',
-          data,
-          {headers: { Authorization: auth }})
-          .then(res => {
-            this.getUsers();
-            this.setState({password: res.data.password})
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            } else if(err.response.status===400){
-              this.getUsers();
-              this.setState({addUserError: true})
-            }
-          })
+      const csrfToken = getCSRFToken();
+      // Build the post body
+      let modules = [];
+      if(this.state.events){
+        modules.push('events');
       }
+      if(this.state.members){
+        modules.push('members');
+      }
+      if(this.state.trends){
+        modules.push('trends');
+      }
+      if(this.state.map){
+        modules.push('map');
+      }
+      const data = {
+        username: this.state.username,
+        role: this.state.role,
+        modules: modules
+      } 
+
+      axios.post('/service/user', data, {headers: {'X-CSRF-TOKEN': csrfToken}})
+        .then(res => {
+          this.getUsers();
+          this.setState({password: res.data.password})
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          } else if(err.response.status===400){
+            this.getUsers();
+            this.setState({addUserError: true})
+          }
+        })
     }
 
     deleteUser = () => {
       // Deletes the selected user
       this.setState({loading: true});
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        this.setState({deleteModalOpen: false});
-        const auth = 'Bearer '.concat(token);
-        const url = '/service/user/' + this.state.deleteUsername;
-        axios.delete(url, {headers: { Authorization: auth }})
-          .then(res => {
-            this.getUsers();
-            this.setState({ deleteUsername: '' });
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-      }
+      const csrfToken = getCSRFToken();
+      this.setState({deleteModalOpen: false});
+      const url = '/service/user/' + this.state.deleteUsername;
+      axios.delete(url, {headers:{'X-CSRF-TOKEN': csrfToken}})
+        .then(res => {
+          this.getUsers();
+          this.setState({ deleteUsername: '' });
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
     }
   
     modifyUser = () => {
       // Posts updated user roles and modules
       this.setState({loading: true});
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        this.closeModWindow();
-        const auth = 'Bearer '.concat(token);
-        // Build the post body
-        let modules = [];
-        if(this.state.modEvents){
-          modules.push('events');
-        }
-        if(this.state.modMembers){
-          modules.push('members');
-        }
-        if(this.state.modTrends){
-          modules.push('trends');
-        }
-        if(this.state.modMap){
-          modules.push('map');
-        }
-        const data = {
-          username: this.state.modUsername,
-          modules: modules
-        } 
-
-        // Update the access for the user
-        const updateAccess = axios.post('/service/user/update-access',
-          data,
-          {headers: { Authorization: auth }})
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-
-        // Update the role for the user
-        const roleData = {
-          username: this.state.modUsername,
-          role: this.state.modRole
-        }
-        const updateRole = axios.post('/service/user/update-role',
-          roleData,
-          {headers: {Authorization: auth}})
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-
-        // Update the users in the table
-        Promise.all([updateAccess, updateRole])
-          .then(() => {
-            this.getUsers();
-          })
+      const csrfToken = getCSRFToken();
+      this.closeModWindow();
+      // Build the post body
+      let modules = [];
+      if(this.state.modEvents){
+        modules.push('events');
       }
+      if(this.state.modMembers){
+        modules.push('members');
+      }
+      if(this.state.modTrends){
+        modules.push('trends');
+      }
+      if(this.state.modMap){
+        modules.push('map');
+      }
+      const data = {
+        username: this.state.modUsername,
+        modules: modules
+      } 
+
+      // Update the access for the user
+      const updateAccess = axios.post('/service/user/update-access',
+        data,
+        {headers: {'X-CSRF-TOKEN': csrfToken}})
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
+
+      // Update the role for the user
+      const roleData = {
+        username: this.state.modUsername,
+        role: this.state.modRole
+      }
+      const updateRole = axios.post('/service/user/update-role',
+        roleData,
+        {headers: {'X-CSRF-TOKEN': csrfToken}})
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
+
+      // Update the users in the table
+      Promise.all([updateAccess, updateRole])
+        .then(() => {
+          this.getUsers();
+        })
     }
   
     resetPassword = () => {
       // Resets a user's password
-      const token = getAccessToken();
-      if(!token){
-        this.this.history.push('/login');
-      } else {
-        const auth = 'Bearer '.concat(token);
-        // Build the post body
-        const data = {username: this.state.resetUsername} 
-
-        // Update the password for the user
-        axios.post('/service/user/reset-password',
-          data,
-          {headers: { Authorization: auth }})
-          .then( res => {
-            this.setState({resetPassword: res.data.password})
-          })
-          .catch( err => {
-            if(err.response.status===401){
-              this.navigate('/login');
-            }
-          })
-      }
+      const csrfToken = getCSRFToken();
+      // Build the post body
+      const data = {username: this.state.resetUsername} 
+      // Update the password for the user
+      axios.post('/service/user/reset-password',
+        data,
+        {headers: {'X-CSRF-TOKEN': csrfToken}})
+        .then( res => {
+          this.setState({resetPassword: res.data.password})
+        })
+        .catch( err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          }
+        })
     }
 
     //------------------

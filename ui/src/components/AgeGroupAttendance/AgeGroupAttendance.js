@@ -14,7 +14,6 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
-import { getAccessToken } from './../../utilities/authentication';
 import Loading from './../Loading/Loading';
 
 import './AgeGroupAttendance.css';
@@ -130,13 +129,11 @@ class AgeGroupAttendance extends Component {
   getTopParticipants = (ageGroup, topCategory) => {
     // Gets the top participants by age group
     this.setState({topLoading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token)
     let url = '/service/trends/participation/' + ageGroup;
     if(topCategory==='Events'){
       url += '?top=event';
     }
-    axios.get(url, { headers: { Authorization: auth }})
+    axios.get(url)
       .then(res => {
         this.setState({
           top: res.data.results,
@@ -153,12 +150,10 @@ class AgeGroupAttendance extends Component {
 
   getAttendance = (ageGroup, groupBy) => {
     this.setState({loading: true});
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token)
     const group = groupBy.toLowerCase();
     let url = '/service/trends/age-group-attendance';
     url += '?groupBy=' + group;
-    axios.get(url, { headers: { Authorization: auth }})
+    axios.get(url)
       .then(res => {
         const ageGroups = Object.keys(res.data);
         this.setState({

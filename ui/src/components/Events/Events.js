@@ -14,10 +14,7 @@ import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
 
-import {
-  getAccessToken,
-  refreshAccessToken 
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
 
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
@@ -52,13 +49,11 @@ class Events extends Component {
 
     downloadCSV = () => {
       // Downloads the events information csv
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token);
       let url = '/service/events/export';
       if(this.state.query.trim().length>0){
         url += '?q='+this.state.query;
       }
-      axios.get(url, {headers: {Authorization: auth}})
+      axios.get(url)
         .then(res => {
           let filename = 'trs_events';
           if(this.state.query.trim().length>0){
@@ -87,9 +82,6 @@ class Events extends Component {
       //   searchTerm: an array of search terms to apply. all search 
       //   terms are applied as an AND condition
       this.setState({loading: true});
-      const token = getAccessToken();
-      const auth = 'Bearer '.concat(token)
-
       // Construct the URL parameters
       let url = '/service/events?limit='+LIMIT;
       url += '&page='+page
@@ -97,7 +89,7 @@ class Events extends Component {
       url += '&order='+sortOrder;
       url += '&sort='+sortCol;
       
-      axios.get(url, {headers: {Authorization: auth}})
+      axios.get(url)
         .then(res => {
           let events = [];
           for(var i=0; i<res.data.results.length; i++){

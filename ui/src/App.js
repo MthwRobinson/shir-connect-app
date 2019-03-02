@@ -1,10 +1,6 @@
 // Main app component. Includes routing logic
 import React, { Component } from 'react';
-import { 
-  BrowserRouter as Router,
-  Redirect,
-  Route 
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';

@@ -1,5 +1,6 @@
 // Implements helper functions for the user authentication workflow
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 //----------------
 // ACCESS TOKENS
@@ -15,6 +16,12 @@ function getAccessToken(){
   return localStorage.getItem('accessToken');
 }
 export { getAccessToken }
+
+function getCSRFToken(){
+  // Pulls the CSRF token from cookies
+  return Cookies.get('csrf_access_token');
+}
+export { getCSRFToken }
 
 //----------------
 // REFRESH TOKENS
@@ -52,7 +59,7 @@ export { clearStorage };
 function logout() {
   // Clears the JWT and CSRF token from browser cookies
   const url = '/service/user/logout';
-  axios.get(url)
+  axios.post(url)
 }
 export { logout };
 

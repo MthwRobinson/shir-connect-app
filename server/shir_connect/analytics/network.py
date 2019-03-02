@@ -8,6 +8,7 @@ import daiquiri
 import networkx as nx
 import networkx.algorithms.approximation as approx
 
+from shir_connect.database.database import Database
 from shir_connect.services.events import Events
 
 class Network():
@@ -17,12 +18,14 @@ class Network():
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
 
+        self.database = Database()
         self.events_manager = Events()
         self.network = None
         self.metrics = {
             'node_connectivity': self.node_connectivity,
             'edge_connectivity': self.edge_connectivity,
-            'weighted_density': self.weighted_density
+            'density': self.density,
+            'membership_scaled_density': self.membership_scaled_density
         }
 
     def get_events(self, start, end):
@@ -36,7 +39,7 @@ class Network():
         )
         return events
 
-    def evaluate_network(self, metrics=None):
+    def evaluate_network(self, metrics=None, date=None):
         """ Constructs a co-attendance network ending at
         the specified data and begging <lag> days before
         the date. """
@@ -73,6 +76,7 @@ class Network():
         """
         network = nx.Graph()
         # Determine the start and end dates for the pull
+        self.date = date
         split_date = date.split('-')
         year = int(split_date[0])
         month = int(split_date[1])
@@ -104,11 +108,19 @@ class Network():
             self.network = network
 
     @staticmethod
-    def weighted_density(network):
-        """ Finds the density of the graph and scales it by the
-        number of nodes in the graph. """
-        num_nodes = len(network.nodes)
-        return num_nodes * nx.density(network)
+    def density(network):
+        """ Finds the density of the graph. """
+        return nx.density(network) * 100
+
+    def membership_scaled_density(self, network):
+        """ Finds the density of the network scaled by the number of members. """
+        date = "'{}'".format(self.date)
+        member_count = self.database.count_rows('members', where=[('membership_date',
+                                                                  {'<=': date})])
+        actual_connections = len(network.edges)
+        potential_connections = (member_count*(member_count-1))/2
+        density = actual_connections / potential_connections
+        return float(density) * 100
 
     @staticmethod
     def node_connectivity(network):

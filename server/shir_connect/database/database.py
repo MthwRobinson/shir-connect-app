@@ -275,7 +275,7 @@ class Database(object):
                 return None
 
     def read_table(self, table, columns=None, sort=None, order='desc', 
-        limit=None, page=None, query=[], where=[]):
+        limit=None, page=None, query=[], where=[], count=False):
         """ Reads a table into a dataframe.
         
         Parameters
@@ -285,8 +285,8 @@ class Database(object):
             sort: string, the column to sort by
             order: 'asc' or 'desc', the sort order
             limit: int, the number of rows to return
-            page: int, which page of results we want (determined)
-                by the limit
+            page: int, which page of results we want (determined
+                by the limit)
             query: list of tuples, the first element in the tuple
                 is the field to search over and the second element
                 is the search term
@@ -296,6 +296,8 @@ class Database(object):
                 options for the condition are '<=', '<', '=',
                 '>', '>=' 
                 (ex. [('start_datetime, {'leq': '2018-01-01'})])
+            count: bool, if true, returns the count of the query
+                rather than a results table
 
         Returns
         -------
@@ -350,28 +352,21 @@ class Database(object):
         if page and limit:
             offset = (page-1)*limit
             sql += " OFFSET %s "%(offset)
-        df = pd.read_sql(sql, self.connection)
-        return df
+        if count:
+            count_sql = """
+                SELECT COUNT(*) as count
+                FROM ({sql}) x
+            """.format(sql=sql)
+            df = pd.read_sql(count_sql, self.connection)
+            return df.loc[0]['count']
+        else:
+            df = pd.read_sql(sql, self.connection)
+            return df
+            
     
     def count_rows(self, table, query=None):
         """ Reads a table into a dataframe """
-        sql = """
-            SELECT count(*) as total
-            FROM {schema}.{table}
-        """.format(schema=self.schema, table=table)
-        if query:
-            field = query[0]
-            search_terms = query[1].split()
-            conditions = []
-            for term in search_terms:
-                search = " lower(%s) like lower('%s%s%s') "%(
-                    field, 
-                    '%', term, '%'
-                )
-                conditions.append(search)
-            sql += " WHERE " + " AND ".join(conditions)
-        df = pd.read_sql(sql, self.connection)
-        count = df.loc[0]['total']
+        count = self.read_table(table=table, query=query, count=True)
         return count
 
     def to_json(self, df):

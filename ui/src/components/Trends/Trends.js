@@ -3,10 +3,7 @@ import axios from 'axios';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import {
-  getAccessToken,
-  refreshAccessToken
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
 import AgeGroupAttendance from './../AgeGroupAttendance/AgeGroupAttendance';
 import Header from './../Header/Header';
 
@@ -20,10 +17,8 @@ class Trends extends Component {
   componentDidMount(){
     // Checks to make sure the user has access to the 
     // trends access group
-    const token = getAccessToken();
-    const auth = 'Bearer '.concat(token);
     const url = '/service/trends/authorize';
-    axios.get(url, {headers: {Authorization: auth }})
+    axios.get(url)
       .then(res => {
         // Refresh the token to keep the session active
         refreshAccessToken();

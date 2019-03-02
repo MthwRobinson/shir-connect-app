@@ -33,14 +33,8 @@ function getRefreshToken(){
 
 function refreshAccessToken(){
   // Refreshes the access token
-  const refreshToken = getRefreshToken();
-  const auth = 'Bearer '.concat(refreshToken);
   const url = '/service/user/refresh';
-  axios.get(url, {headers: {Authorization: auth}})
-    .then(res => {
-      const accessToken = res.data.jwt;
-      setAccessToken(accessToken);
-    })
+  axios.get(url)
 }
 export { refreshAccessToken }
 
@@ -49,11 +43,18 @@ export { refreshAccessToken }
 //------------------
 
 function clearStorage() {
-  // Clears the JWT from local storage
-  localStorage.clear();
-  sessionStorage.clear();
+  // Clears the JWT and CSRF token from browser cookies
+  const url = '/service/user/logout';
+  axios.get(url)
 }
 export { clearStorage };
+
+function logout() {
+  // Clears the JWT and CSRF token from browser cookies
+  const url = '/service/user/logout';
+  axios.get(url)
+}
+export { logout };
 
 //-------------------
 // MAPBOX TOKEN 

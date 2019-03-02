@@ -7,8 +7,8 @@ HOMEPATH = os.path.expanduser('~')
 
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(seconds=900)
-JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(seconds=7200)
+JWT_ACCESS_TOKEN_EXPIRES = 30*60 # Expire access tokens after 30 mins 
+JWT_REFRESH_TOKEN_EXPIRES = 8*60*60 # Expire refresh tokens after 8 hours
 JWT_TOKEN_LOCATION = ['cookies']
 # Disable HTTPS only for local development because localhost uses HTTP
 JWT_COOKIE_SECURE = os.getenv('SHIR_CONNECT_ENV') != 'LOCAL'

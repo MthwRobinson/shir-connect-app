@@ -121,8 +121,10 @@ def user_authenticate():
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
         response = jsonify({'login': True})
-        set_access_cookies(response, access_token)
-        set_refresh_cookies(response, refresh_token)
+        set_access_cookies(response, access_token, 
+                           max_age=conf.JWT_ACCESS_TOKEN_EXPIRES)
+        set_refresh_cookies(response, refresh_token,
+                            max_age=conf.JWT_REFRESH_TOKEN_EXPIRES)
         return response, 200
     else:
         msg = 'authentication failed for user %s'%(auth_user['username'])
@@ -143,7 +145,8 @@ def user_refresh():
     username = get_jwt_identity()
     access_token = create_access_token(identity=username)
     response = jsonify({'refresh': True})
-    set_access_cookies(response, access_token)
+    set_access_cookies(response, access_token,
+                       max_age=conf.JWT_ACCESS_TOKEN_EXPIRES)
     return response, 200
 
 @user_management.route('/service/user/authorize', methods=['GET'])

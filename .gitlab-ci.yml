@@ -12,4 +12,4 @@ test:
     - cd server
     - pip install -e .[test]
     - py.test --cov=shir_connect
-  coverage: '^TOTAL\s+\d+\s+\d+\s+(\d+\%)$'
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)$/'

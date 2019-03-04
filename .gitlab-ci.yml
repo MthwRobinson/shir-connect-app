@@ -8,5 +8,5 @@ test:
   script:
     - echo "13.58.50.14:5432:*:postgres:$POSTGRES_PASSWORD" >> ~/.pgpass
     - cd server
-    - pip install -e .
+    - pip install -e .[test]
     - py.test --cov=shir_connect

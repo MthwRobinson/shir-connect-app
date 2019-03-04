@@ -1,4 +1,5 @@
-# Shir Connect 
+# Shir Connect
+[![coverage report](https://gitlab.com/fiddler-analytics/shir-connect/badges/master/coverage.svg)](https://gitlab.com/fiddler-analytics/shir-connect/commits/master)
 
 ## Installation
 

@@ -1,5 +1,5 @@
 test:
-  image: alpine-python3
+  image: python:3.6
   before_script:
     - apt-get -qq update
     - apt-get -qq install -y python-virtualenv python3-pip

@@ -1,0 +1,7 @@
+test:
+  script:
+    - echo "13.58.50.14:5432:*:postgres:$POSTGRES_PASSWORD" >> ~/.pgpass
+    - apt-get install -y python-dev python-pip
+    - cd server
+    - pip install -e .
+    - py.test --cov=shir_connect

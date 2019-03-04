@@ -13,4 +13,5 @@ def test_evaluate_network():
     metrics = network.evaluate_network()
     assert type(metrics['edge_connectivity']) == int
     assert type(metrics['node_connectivity']) == int
-    assert type(metrics['weighted_density']) == float
+    assert type(metrics['density']) == float
+    assert type(metrics['membership_scaled_density']) == float

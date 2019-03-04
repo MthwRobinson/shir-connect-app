@@ -275,7 +275,7 @@ class Database(object):
                 return None
 
     def read_table(self, table, columns=None, sort=None, order='desc', 
-        limit=None, page=None, query=[], where=[]):
+        limit=None, page=None, query=[], where=[], count=False):
         """ Reads a table into a dataframe.
         
         Parameters
@@ -285,8 +285,8 @@ class Database(object):
             sort: string, the column to sort by
             order: 'asc' or 'desc', the sort order
             limit: int, the number of rows to return
-            page: int, which page of results we want (determined)
-                by the limit
+            page: int, which page of results we want (determined
+                by the limit)
             query: list of tuples, the first element in the tuple
                 is the field to search over and the second element
                 is the search term
@@ -296,6 +296,8 @@ class Database(object):
                 options for the condition are '<=', '<', '=',
                 '>', '>=' 
                 (ex. [('start_datetime, {'leq': '2018-01-01'})])
+            count: bool, if true, returns the count of the query
+                rather than a results table
 
         Returns
         -------
@@ -311,37 +313,8 @@ class Database(object):
             FROM {schema}.{table}
         """.format(cols=cols, schema=self.schema, table=table)
         if query or where:
-            clauses = []
-            # Add the conditions from the search term
-            if query:
-                query_conditions = []
-                field = query[0]
-                search_terms = query[1].split()
-                for term in search_terms:
-                    search = " lower(%s) like lower('%s%s%s') "%(
-                        field, 
-                        '%', term, '%'
-                    )
-                    query_conditions.append(search)
-                query_clause = " AND ".join(query_conditions)
-                clauses.append("({})".format(query_clause))
-
-            # Add the condtions from the where argument
-            where_conditions = []
-            for item in where:
-                column = item[0]
-                conditions = item[1]
-                for equality in conditions:
-                    value = conditions[equality]
-                    condition = " {col} {equality} {value} ".format(
-                        col=column,
-                        equality=equality,
-                        value=value
-                    )
-                    where_conditions.append(condition)
-            if where_conditions:
-                where_clause = " AND ".join(where_conditions)
-                clauses.append(where_clause)
+            clauses = _build_query_clauses(query)
+            clauses += _build_where_conditions(where)
             sql += " WHERE " + " AND ".join(clauses)
         if sort:
             sql += " ORDER BY %s %s NULLS LAST "%(sort, order)
@@ -350,28 +323,21 @@ class Database(object):
         if page and limit:
             offset = (page-1)*limit
             sql += " OFFSET %s "%(offset)
-        df = pd.read_sql(sql, self.connection)
-        return df
+        if count:
+            count_sql = """
+                SELECT COUNT(*) as count
+                FROM ({sql}) x
+            """.format(sql=sql)
+            df = pd.read_sql(count_sql, self.connection)
+            return df.loc[0]['count']
+        else:
+            df = pd.read_sql(sql, self.connection)
+            return df
     
-    def count_rows(self, table, query=None):
-        """ Reads a table into a dataframe """
-        sql = """
-            SELECT count(*) as total
-            FROM {schema}.{table}
-        """.format(schema=self.schema, table=table)
-        if query:
-            field = query[0]
-            search_terms = query[1].split()
-            conditions = []
-            for term in search_terms:
-                search = " lower(%s) like lower('%s%s%s') "%(
-                    field, 
-                    '%', term, '%'
-                )
-                conditions.append(search)
-            sql += " WHERE " + " AND ".join(conditions)
-        df = pd.read_sql(sql, self.connection)
-        count = df.loc[0]['total']
+    def count_rows(self, table, query=[], where=[]):
+        """ Returns the number of rows, given a query. """
+        count = self.read_table(table=table, query=query,
+                                where=where, count=True)
         return count
 
     def to_json(self, df):
@@ -384,3 +350,62 @@ class Database(object):
         results = self.to_json(df)
         response = {'results': results}
         return response
+
+def _build_query_clauses(query=None):
+    """  Builds query conditions for the read_table method
+
+    Parameters
+    ----------
+        query: list of tuples, the first element in the tuple
+            is the field to search over and the second element
+            is the search term
+
+    Returns
+    -------
+        list, a list of SQL clauses 
+    """
+    clauses = []
+    # Add the conditions from the search term
+    if query:
+        query_conditions = []
+        field = query[0]
+        search_terms = query[1].split()
+        for term in search_terms:
+            search = " lower(%s) like lower('%s%s%s') "%(
+                field, 
+                '%', term, '%'
+            )
+            query_conditions.append(search)
+        query_clause = " AND ".join(query_conditions)
+        clauses.append("({})".format(query_clause))
+    return clauses
+
+def _build_where_conditions(where):
+    """ Builds where conditions for the read_table method
+
+    Parameters
+    ----------
+        where: list of tuples, the first element is the field
+            the condition applies to and the second element
+            is the condition. the condtions have the form
+            options for the condition are '<=', '<', '=',
+            '>', '>=' 
+            (ex. [('start_datetime, {'leq': '2018-01-01'})])
+
+    Returns
+    -------
+        list, a list of SQL clauses
+    """
+    where_conditions = []
+    for item in where:
+        column = item[0]
+        conditions = item[1]
+        for equality in conditions:
+            value = conditions[equality]
+            condition = " {col} {equality} {value} ".format(
+                col=column,
+                equality=equality,
+                value=value
+            )
+            where_conditions.append(condition)
+    return where_conditions

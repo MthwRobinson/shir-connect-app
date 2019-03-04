@@ -6,9 +6,9 @@ test:
     - python3 -m venv test_environment
     - . test_environment/bin/activate
   script:
+    - echo $SHIR_CONNECT_ENV
     - echo "13.58.50.14:5432:*:postgres:$POSTGRES_PASSWORD" >> ~/.pgpass
     - chmod 0600 ~/.pgpass
-    - export PGPASSFILE=~/.pgpass
     - cd server
     - pip install -e .[test]
     - py.test --cov=shir_connect

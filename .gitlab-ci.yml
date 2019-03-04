@@ -1,8 +1,8 @@
 test:
   before_script:
-    - apt-get -qq update && apt-get -qq install -y python3.6
+    - apt-get -qq update && apt-get -qq install -y python3
     - apt-get -qq update
-    - apt-get -qq install -y python3.6 python-virtualenv python3-pip
+    - apt-get -qq install -y python3 python-virtualenv python3-pip
     - python3 -m venv test_environment
     - . test_environment/bin/activate
   script:

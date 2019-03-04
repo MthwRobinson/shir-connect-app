@@ -21,7 +21,7 @@ EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Database configurations and secrets
 PG_USER = 'postgres'
-PG_HOST = 'localhost'
+PG_HOST = 'localhost' if mode == 'TEST' else '13.58.50.14'
 PG_DATABASE = 'postgres'
 PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [

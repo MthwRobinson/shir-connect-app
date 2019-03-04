@@ -1,10 +1,10 @@
 test:
   before_script:
-    - apt-get -qq update && apt-get -qq install -y python
+    - apt-get -qq update && apt-get -qq install -y python3.6
     - apt-get -qq update
-    - apt-get -qq install -y python python-virtualenv python-pip
-    - virtualenv venv
-    - . venv/bin/activate
+    - apt-get -qq install -y python3.6 python-virtualenv python3-pip
+    - python3 -m venv test_environment
+    - . test_environment/bin/activate
   script:
     - echo "13.58.50.14:5432:*:postgres:$POSTGRES_PASSWORD" >> ~/.pgpass
     - cd server

@@ -28,8 +28,18 @@
         dest: "{{ shir_connect }}"
         update: yes
 
+    - name: Run database mirgrations
+      shell: "shmig -t postgresql -d postgres up"
+      args:
+        chdir: "{{ shir_connect }}/database"
+
+    - name: Update materialized views
+      shell: "{{ path }}/venv/shir_connect/bin/shir_connect initialized --drop_views"
+
+    - name: Install new Python dependencies
+      shell: "{{ path }}/venv/shir_connect/bin/pip install -e ."
+      args:
+        chdir: "{{ shir_connect }}/server"
+
     - name: Restarting all PM2 processes
       shell: "{{ pm2 }} start all"
-
-
-

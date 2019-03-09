@@ -107,6 +107,10 @@ For production, the Flask app should be launched using `init.d`, `systemctl` or 
 
 There is a webhook that posts comments to Asana issues when you include "#{issue}" number in the commit.
 
+### Slack Webhook
+
+We have a slack webhook now.
+
 ### Database migrations
 
 Database migrations are implemented using shmig.

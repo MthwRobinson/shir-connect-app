@@ -34,7 +34,7 @@
         chdir: "{{ shir_connect }}/database"
 
     - name: Update materialized views
-      shell: "{{ path }}/venv/shir_connect/bin/shir_connect initialized --drop_views"
+      shell: "{{ path }}/venv/shir_connect/bin/shir_connect initialize --drop_views"
 
     - name: Install new Python dependencies
       shell: "{{ path }}/venv/shir_connect/bin/pip install -e ."

@@ -103,6 +103,10 @@ For production, the Flask app should be launched using `init.d`, `systemctl` or 
 
 ## DevOps Tasks
 
+### Asana Integration
+
+There is a webhook that posts comments to Asana issues when you include "#{issue}" number in the commit.
+
 ### Database migrations
 
 Database migrations are implemented using shmig.

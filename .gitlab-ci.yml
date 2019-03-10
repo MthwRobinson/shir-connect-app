@@ -24,6 +24,9 @@ deploy_dev:
   image: ubuntu:latest
   when: manual
   before_script:
+    - echo $SSH_PRIVATE >> $HOME/.ssh/id_rsa
+    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
+    - ssh-agent bash -s
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - sudo apt-get update && sudo apt-get -y install curl
     - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash

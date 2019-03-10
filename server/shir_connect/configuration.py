@@ -2,8 +2,8 @@
 import datetime
 import os
 
-# Paths
 HOMEPATH = os.path.expanduser('~')
+SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')
 
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
@@ -11,7 +11,7 @@ JWT_ACCESS_TOKEN_EXPIRES = 30*60 # Expire access tokens after 30 mins
 JWT_REFRESH_TOKEN_EXPIRES = 8*60*60 # Expire refresh tokens after 8 hours
 JWT_TOKEN_LOCATION = ['cookies']
 # Disable HTTPS only for local development because localhost uses HTTP
-JWT_COOKIE_SECURE = os.getenv('SHIR_CONNECT_ENV') != 'LOCAL'
+JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'LOCAL'
 JWT_COOKIE_CSRF_PROTECT = True
 
 # Application environmental variables 
@@ -21,7 +21,7 @@ EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Database configurations and secrets
 PG_USER = 'postgres'
-PG_HOST = 'localhost' if mode == 'TEST' else '13.58.50.14'
+PG_HOST = '13.58.50.14' if SHIR_CONNECT_ENV == 'TEST' else 'localhost'
 PG_DATABASE = 'postgres'
 PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [

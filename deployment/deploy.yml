@@ -1,0 +1,45 @@
+---
+- hosts: "{{ host }}"
+  become_user: "{{ user }}"
+  vars:
+    path: "$HOME"
+    node: "{{ path }}/.nvm/versions/node/v11.0.0"
+    pm2: "{{ node }}/bin/pm2 "
+    shir_connect: "{{ path }}/shir-connect"
+    project_dir: "{{ project_dir }}"
+  tasks:
+    - name: Stopping all running PM2 processes
+      shell: "{{ pm2 }} stop all"
+    
+    - name: Remove current UI build
+      file:
+        path: "{{ shir_connect }}/ui/build"
+        state: absent
+
+    - name: Transferring updated UI build
+      copy:
+        src: "{{ project_dir }}/ui/build"
+        dest: "{{ shir_connect }}/ui/"
+
+    - name: Pull the latest code from GitLab
+      git:
+        repo: git@gitlab.com:fiddler-analytics/shir-connect.git
+        version: "{{ branch }}"
+        dest: "{{ shir_connect }}"
+        update: yes
+
+    - name: Run database mirgrations
+      shell: "shmig -t postgresql -d postgres up"
+      args:
+        chdir: "{{ shir_connect }}/database"
+
+    - name: Update materialized views
+      shell: "{{ path }}/venv/shir_connect/bin/shir_connect initialize --drop_views"
+
+    - name: Install new Python dependencies
+      shell: "{{ path }}/venv/shir_connect/bin/pip install -e ."
+      args:
+        chdir: "{{ shir_connect }}/server"
+
+    - name: Restarting all PM2 processes
+      shell: "{{ pm2 }} start all"

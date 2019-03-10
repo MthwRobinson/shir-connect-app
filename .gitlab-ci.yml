@@ -58,7 +58,7 @@ deploy_dev:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR 
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR
 
 deploy_prod:
   stage: deploy_prod
@@ -99,4 +99,4 @@ deploy_prod:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=prod -e user=ubuntu -e local_user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR 
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=prod -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR

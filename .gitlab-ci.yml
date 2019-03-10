@@ -5,6 +5,7 @@ stages:
 test:
   image: python:3.6
   stage: test
+  allow_failure: false
   before_script:
     - apt-get -qq update
     - apt-get -qq install -y python-virtualenv python3-pip

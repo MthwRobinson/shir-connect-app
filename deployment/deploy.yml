@@ -18,7 +18,7 @@
 
     - name: Transferring updated UI build
       copy:
-        src: "{{ project_dir }}/ui/build"
+        src: "{{ project_dir }}/shir-connect/ui/build"
         dest: "{{ shir_connect }}/ui/"
 
     - name: Pull the latest code from GitLab

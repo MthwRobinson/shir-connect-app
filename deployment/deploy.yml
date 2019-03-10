@@ -2,11 +2,10 @@
 - hosts: "{{ host }}"
   become_user: "{{ user }}"
   vars:
-    path: "/home/{{ user }}/"
-    local_path: "/home/{{ local_user }}/"
-    node: "{{ path }}/.nvm/versions/node/v11.0.0/"
+    path: "$HOME"
+    node: "{{ path }}/.nvm/versions/node/v11.0.0"
     pm2: "{{ node }}/bin/pm2 "
-    shir_connect: "{{ path }}/shir-connect/"
+    shir_connect: "{{ path }}/shir-connect"
   tasks:
     - name: Stopping all running PM2 processes
       shell: "{{ pm2 }} stop all"
@@ -18,7 +17,7 @@
 
     - name: Transferring updated UI build
       copy:
-        src: "{{ local_path }}/shir-connect/ui/build"
+        src: "{{ path }}/shir-connect/ui/build"
         dest: "{{ shir_connect }}/ui/"
 
     - name: Pull the latest code from GitLab

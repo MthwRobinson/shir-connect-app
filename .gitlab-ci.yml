@@ -27,6 +27,7 @@ deploy_dev:
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - sudo apt-get update && sudo apt-get -y install curl
     - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+    - export NVM_DIR="/root/.nvm"
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0

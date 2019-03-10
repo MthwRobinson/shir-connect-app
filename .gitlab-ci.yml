@@ -24,6 +24,7 @@ deploy_dev:
   image: ubuntu:latest
   when: manual
   before_script:
+    # Install open ssh and add remote server to known hosts
     - mkdir $HOME/.ssh
     - chmod 0700 $HOME/.ssh
     - echo $SSH_PRIVATE >> $HOME/.ssh/id_rsa
@@ -31,6 +32,9 @@ deploy_dev:
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - apt-get update && sudo apt-get install -y openssh-server
     - ssh-agent bash -s
+    - ssh-keyscan -R 13.58.50.14
+
+    # Install NVM and NPM
     - sudo apt-get update && sudo apt-get -y install curl
     - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
     - export NVM_DIR="/root/.nvm"
@@ -38,6 +42,8 @@ deploy_dev:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+
+    # Install Ansible
     - sudo apt-get update
     - sudo apt-get -y install software-properties-common
     - sudo apt-add-repository --yes --update ppa:ansible/ansible

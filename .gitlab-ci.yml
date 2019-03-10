@@ -63,7 +63,8 @@ deploy_dev:
 deploy_prod:
   stage: deploy_prod
   image: ubuntu:latest
-  only: tags
+  only: 
+    - tags
   when: manual
   before_script:
     # Install open ssh and add remote server to known hosts

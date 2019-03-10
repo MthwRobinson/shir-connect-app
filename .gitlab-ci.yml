@@ -25,14 +25,13 @@ deploy_dev:
   when: manual
   before_script:
     # Install open ssh and add remote server to known hosts
-    - mkdir $HOME/.ssh
-    - chmod 0700 $HOME/.ssh
-    - echo $SSH_PRIVATE | ssh-add - 
-    - chmod 0400 $HOME/.ssh/id_rsa
-    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
-    - chmod 0400 $HOME/.ssh/id_rsa.pub
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - apt-get update && sudo apt-get install -y openssh-server
+    - mkdir -p $HOME/.ssh
+    - echo "$SSH_PRIVATE" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 0600 $HOME/.ssh/id_rsa
+    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
+    - chmod 0600 $HOME/.ssh/id_rsa.pub
     - ssh-agent bash -s
     - ssh-keyscan -H 13.58.50.14 >> $HOME/.ssh/known_hosts
 

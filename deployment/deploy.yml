@@ -3,13 +3,12 @@
   become_user: "{{ user }}"
   vars:
     path: "$HOME"
-    node: "{{ path }}/.nvm/versions/node/v11.0.0"
-    pm2: "{{ node }}/bin/pm2 "
+    node_version: "{{ node_version }}"
     shir_connect: "{{ path }}/shir-connect"
     project_dir: "{{ project_dir }}"
   tasks:
     - name: Stopping all running PM2 processes
-      shell: "{{ pm2 }} stop all"
+      shell: 'bash -ic "pm2 stop all"'
     
     - name: Remove current UI build
       file:
@@ -42,4 +41,4 @@
         chdir: "{{ shir_connect }}/server"
 
     - name: Restarting all PM2 processes
-      shell: "{{ pm2 }} start all"
+      shell: 'bash -ic "pm2 start all"'

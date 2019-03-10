@@ -32,7 +32,7 @@ deploy_dev:
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - apt-get update && sudo apt-get install -y openssh-server
     - ssh-agent bash -s
-    - ssh-keyscan -R 13.58.50.14
+    - ssh-keyscan -H 13.58.50.14 >> $HOME/.ssh/known_hosts
 
     # Install NVM and NPM
     - sudo apt-get update && sudo apt-get -y install curl

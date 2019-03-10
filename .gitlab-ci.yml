@@ -24,6 +24,8 @@ deploy_dev:
   image: ubuntu:latest
   when: manual
   before_script:
+    - mkdir $HOME/.ssh
+    - chmod 0700 $HOME/.ssh
     - echo $SSH_PRIVATE >> $HOME/.ssh/id_rsa
     - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
     - ssh-agent bash -s

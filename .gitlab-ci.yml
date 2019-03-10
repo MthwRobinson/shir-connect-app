@@ -24,6 +24,7 @@ deploy_dev:
   image: ubuntu:latest
   when: manual
   before_script:
+    - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
     - sudo apt-get install curl
     - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
     - nvm install node

@@ -27,7 +27,7 @@ deploy_dev:
     # Install open ssh and add remote server to known hosts
     - mkdir $HOME/.ssh
     - chmod 0700 $HOME/.ssh
-    - echo $SSH_PRIVATE >> $HOME/.ssh/id_rsa
+    - echo $SSH_PRIVATE | ssh-add - 
     - chmod 0400 $HOME/.ssh/id_rsa
     - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
     - chmod 0400 $HOME/.ssh/id_rsa.pub

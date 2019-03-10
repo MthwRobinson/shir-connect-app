@@ -36,10 +36,10 @@ deploy_dev:
     - sudo apt-get -y install software-properties-common
     - sudo apt-add-repository --yes --update ppa:ansible/ansible
     - sudo apt-get -y install ansible
-    - echo "[dev]" >> /etc/ansible/hosts
-    - echo "ubuntu@13.58.50.14" >> etc/ansible/hosts
+    - echo "[dev]" >> $HOME/hosts
+    - echo "ubuntu@13.58.50.14" >> $HOME/hosts
   script:
     - cd ui
     - npm run build
     - cd ../deployment
-    - ansible-playbook deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e $CI_COMMIT_SHA
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e $CI_COMMIT_SHA

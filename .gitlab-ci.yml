@@ -40,6 +40,7 @@ deploy_dev:
     - echo "ubuntu@13.58.50.14" >> $HOME/hosts
   script:
     - cd ui
+    - npm install
     - npm run build
     - cd ../deployment
     - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e $CI_COMMIT_SHA

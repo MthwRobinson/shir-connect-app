@@ -11,7 +11,6 @@ test:
     - python3 -m venv test_environment
     - . test_environment/bin/activate
   script:
-    - pwd
     - echo $SHIR_CONNECT_ENV
     - echo "13.58.50.14:5432:*:postgres:${POSTGRES_PASSWORD}" >> ~/.pgpass
     - chmod 0600 ~/.pgpass
@@ -57,4 +56,4 @@ deploy_dev:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e $CI_COMMIT_SHA
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e local_user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR 

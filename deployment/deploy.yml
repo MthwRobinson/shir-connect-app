@@ -6,6 +6,7 @@
     node: "{{ path }}/.nvm/versions/node/v11.0.0"
     pm2: "{{ node }}/bin/pm2 "
     shir_connect: "{{ path }}/shir-connect"
+    project_dir: "{{ project_dir }}"
   tasks:
     - name: Stopping all running PM2 processes
       shell: "{{ pm2 }} stop all"
@@ -17,7 +18,7 @@
 
     - name: Transferring updated UI build
       copy:
-        src: "{{ path }}/shir-connect/ui/build"
+        src: "{{ project_dir }}/ui/build"
         dest: "{{ shir_connect }}/ui/"
 
     - name: Pull the latest code from GitLab

@@ -16,7 +16,7 @@
         state: present
 
     - name: Install Lets Encrypt repo
-      shell: "sudo add-apt-repository -y ppa:certbot/certbot"
+      shell: "add-apt-repository -y ppa:certbot/certbot"
 
     - name: Update apt-cache
       apt:
@@ -34,3 +34,35 @@
           - python3-venv
           - software-properties-common
           - python-certbot-nginx
+
+    - name: Install NVM
+      become_user: ubuntu
+      shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
+
+    - name: Add NVM environment to .bashrc
+      become_user: ubuntu
+      shell: echo export NVM_DIR="/root/.nvm" > $HOME/.bashrc 
+    
+    - name: Source NVM in .bashrc
+      become_user: ubuntu
+      shell: echo "source $HOME/.nvm/nvm.sh" >> $HOME/.bashrc
+
+    - name: Install node
+      become_user: ubuntu
+      shell:  export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && nvm install node && nvm install --lts && nvm use --lts
+
+    - name: Install PM2 and node server
+      become_user: ubuntu
+      shell: export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && npm install -g serve pm2
+
+    - name: Update postgres password
+      become_user: postgres
+      shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
+
+    - name: Setup .pgpass file
+      become_user: ubuntu
+      shell: echo "localhost:5432:*:postgres:{{ password }}" > $HOME/.pgpass
+
+    - name: Set permissions on .pgpass file
+      become_user: ubuntu
+      shell: chmod 0600 $HOME/.pgpass

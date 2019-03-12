@@ -1,0 +1,36 @@
+---
+- hosts: "{{ host }}"
+  become: yes
+  tasks:
+    - name: Add postgres key
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+    - name: Add postgres apt repo
+      shell: sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
+
+    - name: Download nginx key
+      apt_key: 
+        url: http://nginx.org/keys/nginx_signing.key
+        state: present
+
+    - name: Install Lets Encrypt repo
+      shell: "sudo add-apt-repository -y ppa:certbot/certbot"
+
+    - name: Update apt-cache
+      apt:
+        update_cache: yes
+
+    - name: Install base packages
+      apt: 
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - postgresql-10
+          - nginx
+          - python-pip
+          - python3-venv
+          - software-properties-common
+          - python-certbot-nginx

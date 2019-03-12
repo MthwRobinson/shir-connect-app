@@ -2,15 +2,15 @@
 - hosts: "{{ host }}"
   become: yes
   tasks:
-    - name: Add postgres key
+    - name: Add PostgreSQL apt key
       apt_key:
         url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
         state: present
 
-    - name: Add postgres apt repo
+    - name: Add PostgreSQL apt repo
       shell: sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
 
-    - name: Download nginx key
+    - name: Download Nginx key
       apt_key: 
         url: http://nginx.org/keys/nginx_signing.key
         state: present
@@ -51,11 +51,11 @@
       become_user: ubuntu
       shell:  export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && nvm install node && nvm install --lts && nvm use --lts
 
-    - name: Install PM2 and node server
+    - name: Install PM2 and node serve
       become_user: ubuntu
       shell: export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && npm install -g serve pm2
 
-    - name: Update postgres password
+    - name: Update PostgreSQL password
       become_user: postgres
       shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
 

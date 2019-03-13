@@ -150,10 +150,13 @@
     - name: Set up Let's Encrypt certs
       shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
 
-    - name: Setup NGINX config in conf.d
+    - name: Setup NGINX config
       template:
         src: templates/server.conf
         dest: "/etc/nginx/conf.d/server.conf"
+
+    - name: Restart nginx
+      shell: systemctl restart nginx
 
     - name: Setup cron schedule for database load
       become_user: ubuntu
@@ -163,3 +166,7 @@
         hour: 4
         weekday: "*"
         job: /bin/sh $HOME/shir-connect/scripts/load_eventbrite.sh >> $HOME/logs/eventbrite_load.log 2>&1
+
+    - name: Set Shir Connect environmental variables
+      become_user: ubuntu
+      shell: "export EVENTBRITE_OAUTH={{ eventbrite }} && export JWT_SECRET_KEY={{ jwt }}"

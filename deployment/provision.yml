@@ -154,3 +154,12 @@
       template:
         src: templates/server.conf
         dest: "/etc/nginx/conf.d/server.conf"
+
+    - name: Setup cron schedule for database load
+      become_user: ubuntu
+      cron:
+        name: eventbrite dataload
+        minute: 0
+        hour: 4
+        weekday: "*"
+        job: /bin/sh $HOME/shir-connect/scripts/load_eventbrite.sh >> $HOME/logs/eventbrite_load.log 2>&1

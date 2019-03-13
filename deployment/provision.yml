@@ -1,6 +1,9 @@
 ---
 - hosts: "{{ host }}"
   become: yes
+  vars:
+    shir_connect: $HOME/shir-connect
+    local_user: "{{ local_user }}"
   tasks:
     - name: Add PostgreSQL apt key
       apt_key:
@@ -58,6 +61,42 @@
     - name: Update PostgreSQL password
       become_user: postgres
       shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
+    
+    - name: Move GitLab private key
+      become_user: ubuntu
+      copy:
+        src: "/home/{{ local_user }}/.ssh/gitlab"
+        dest: $HOME/.ssh/id_rsa
+
+    - name: Set permission on private key
+      become_user: ubuntu
+      shell: chmod 0600 $HOME/.ssh/id_rsa 
+
+    - name: Move GitLab public key
+      become_user: ubuntu
+      copy:
+        src: "/home/{{ local_user }}/.ssh/gitlab.pub"
+        dest: $HOME/.ssh/id_rsa.pub
+
+    - name: Add GitHub to known hosts
+      become_user: ubuntu
+      shell: "ssh-keyscan -H github.com > $HOME/.ssh/known_hosts"
+    
+    - name: Add GitLab to known hosts
+      become_user: ubuntu
+      shell: "ssh-keyscan -H gitlab.com >> $HOME/.ssh/known_hosts"
+
+    - name: Clone the shmig repository
+      become_user: ubuntu
+      git:
+        repo: git@github.com:mbucc/shmig.git
+        dest: $HOME/shmig
+
+    - name: Install shmig
+      become_user: ubuntu
+      shell: "sudo make install"
+      args:
+        chdir: $HOME/shmig
 
     - name: Setup .pgpass file
       become_user: ubuntu
@@ -66,3 +105,43 @@
     - name: Set permissions on .pgpass file
       become_user: ubuntu
       shell: chmod 0600 $HOME/.pgpass
+
+    - name: Pull the latest shir connect code
+      become_user: ubuntu
+      git:
+        repo: git@gitlab.com:fiddler-analytics/shir-connect.git
+        version: master
+        dest: "{{ shir_connect }}"
+        update: yes
+
+    - name: Create directory for virtual environments
+      become_user: ubuntu
+      file:
+        path: $HOME/venv
+        state: directory
+
+    - name: Create a virtual environment for Shir Connect
+      become_user: ubuntu
+      shell: /usr/bin/python3 -m venv shir_connect
+      args:
+        chdir: $HOME/venv
+
+    - name: Installed the Shir Connect backend application
+      become_user: ubuntu
+      shell: $HOME/venv/shir_connect/bin/pip install -e .
+      args:
+        chdir: "{{ shir_connect }}/server"
+
+    - name: Build the database tables
+      become_user: ubuntu
+      shell: $HOME/venv/shir_connect/bin/shir_connect initialize 
+
+    - name: Run all database migrations
+      become_user: ubuntu
+      shell: "shmig -t postgresql -d postgres up"
+      args:
+        chdir: "{{ shir_connect }}/database"
+
+    - name: Update materialized views
+      become_user: ubuntu
+      shell: $HOME/venv/shir_connect/bin/shir_connect initialize --drop_views

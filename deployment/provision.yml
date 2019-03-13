@@ -5,6 +5,7 @@
     shir_connect: $HOME/shir-connect
     local_user: "{{ local_user }}"
     subdomain: "{{ host }}"
+    project_dir: "{{ project_dir }}"
   tasks:
     - name: Add PostgreSQL apt key
       apt_key:
@@ -45,11 +46,11 @@
 
     - name: Add NVM environment to .bashrc
       become_user: ubuntu
-      shell: echo export NVM_DIR="/root/.nvm" > $HOME/.bashrc 
+      shell: echo export NVM_DIR="$HOME/.nvm" > $HOME/.bashrc
 
     - name: Source NVM in .bashrc
       become_user: ubuntu
-      shell: echo "source $HOME/.nvm/nvm.sh" >> $HOME/.bashrc
+      shell: echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.bashrc
 
     - name: Install node
       become_user: ubuntu
@@ -155,9 +156,6 @@
         src: templates/server.conf
         dest: "/etc/nginx/conf.d/server.conf"
 
-    - name: Restart nginx
-      shell: systemctl restart nginx
-
     - name: Setup cron schedule for database load
       become_user: ubuntu
       cron:
@@ -167,6 +165,27 @@
         weekday: "*"
         job: /bin/sh $HOME/shir-connect/scripts/load_eventbrite.sh >> $HOME/logs/eventbrite_load.log 2>&1
 
-    - name: Set Shir Connect environmental variables
+    - name: Set shir connect environmental variables
       become_user: ubuntu
-      shell: "export EVENTBRITE_OAUTH={{ eventbrite }} && export JWT_SECRET_KEY={{ jwt }}"
+      shell: echo "export eventbrite_oauth={{ eventbrite }}" >> $HOME/.bashrc && echo "export jwt_secret_key={{ jwt }}" >> $HOME/.bashrc
+
+    - name: Transfer ui build
+      become_user: ubuntu
+      copy:
+        src: "{{ project_dir }}/ui/build"
+        dest: $HOME/shir-connect/ui/
+
+    - name: Start rest platform on pm2
+      become_user: ubuntu
+      shell: . $HOME/venv/shir_connect/bin/activate && bash -ic 'pm2 start "gunicorn -b 0.0.0.0:5000 app:app"'
+      args:
+        chdir: $HOME/shir-connect/server/shir_connect/services
+
+    - name: Start the Front End on PM2
+      become_user: ubuntu
+      shell: bash -ic 'PORT=3000 pm2 start "serve -s build"'
+      args:
+        chdir: $HOME/shir-connect/ui
+
+    - name: Restart nginx
+      shell: systemctl restart nginx

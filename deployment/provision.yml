@@ -4,6 +4,7 @@
   vars:
     shir_connect: $HOME/shir-connect
     local_user: "{{ local_user }}"
+    subdomain: "{{ host }}"
   tasks:
     - name: Add PostgreSQL apt key
       apt_key:
@@ -13,12 +14,12 @@
     - name: Add PostgreSQL apt repo
       shell: sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
 
-    - name: Download Nginx key
+    - name: Download NGINX key
       apt_key: 
         url: http://nginx.org/keys/nginx_signing.key
         state: present
 
-    - name: Install Lets Encrypt repo
+    - name: Install Let's Encrypt repo
       shell: "add-apt-repository -y ppa:certbot/certbot"
 
     - name: Update apt-cache
@@ -45,7 +46,7 @@
     - name: Add NVM environment to .bashrc
       become_user: ubuntu
       shell: echo export NVM_DIR="/root/.nvm" > $HOME/.bashrc 
-    
+
     - name: Source NVM in .bashrc
       become_user: ubuntu
       shell: echo "source $HOME/.nvm/nvm.sh" >> $HOME/.bashrc
@@ -61,7 +62,7 @@
     - name: Update PostgreSQL password
       become_user: postgres
       shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
-    
+
     - name: Move GitLab private key
       become_user: ubuntu
       copy:
@@ -81,7 +82,7 @@
     - name: Add GitHub to known hosts
       become_user: ubuntu
       shell: "ssh-keyscan -H github.com > $HOME/.ssh/known_hosts"
-    
+
     - name: Add GitLab to known hosts
       become_user: ubuntu
       shell: "ssh-keyscan -H gitlab.com >> $HOME/.ssh/known_hosts"
@@ -145,3 +146,11 @@
     - name: Update materialized views
       become_user: ubuntu
       shell: $HOME/venv/shir_connect/bin/shir_connect initialize --drop_views
+
+    - name: Set up Let's Encrypt certs
+      shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
+
+    - name: Setup NGINX config in conf.d
+      template:
+        src: templates/server.conf
+        dest: "/etc/nginx/conf.d/server.conf"

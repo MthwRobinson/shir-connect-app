@@ -5,8 +5,8 @@
 BEGIN;
 
 ALTER TABLE shir_connect.users
-ADD COLUMN role text DEFAULT 'standard',
-ADD COLUMN modules text[] DEFAULT array[]::text[];
+ADD COLUMN IF NOT EXISTS role text DEFAULT 'standard',
+ADD COLUMN IF NOT EXISTS modules text[] DEFAULT array[]::text[];
 
 COMMIT;
 

@@ -5,7 +5,7 @@
 BEGIN;
 
 ALTER TABLE shir_connect.members
-ADD COLUMN gender text DEFAULT NULL;
+ADD COLUMN IF NOT EXISTS gender text DEFAULT NULL;
 
 COMMIT;
 

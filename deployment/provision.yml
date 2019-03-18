@@ -167,7 +167,7 @@
 
     - name: Set shir connect environmental variables
       become_user: ubuntu
-      shell: echo "export eventbrite_oauth={{ eventbrite }}" >> $HOME/.bashrc && echo "export jwt_secret_key={{ jwt }}" >> $HOME/.bashrc
+      shell: echo "export EVENTBRITE_OAUTH={{ eventbrite }}" >> $HOME/.bashrc && echo "export JWT_SECRET_KEY={{ jwt }}" >> $HOME/.bashrc
 
     - name: Transfer ui build
       become_user: ubuntu

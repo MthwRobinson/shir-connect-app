@@ -75,7 +75,7 @@ deploy_test:
     - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
     - chmod 0600 $HOME/.ssh/id_rsa.pub
     - ssh-agent bash -s
-    - ssh-keyscan -H 13.58.50.14 >> $HOME/.ssh/known_hosts
+    - ssh-keyscan -H 3.18.177.11 >> $HOME/.ssh/known_hosts
 
     # Install NVM and NPM
     - sudo apt-get update && sudo apt-get -y install curl
@@ -117,6 +117,7 @@ deploy_prod:
     - chmod 0600 $HOME/.ssh/id_rsa.pub
     - ssh-agent bash -s
     - ssh-keyscan -H 52.14.35.159 >> $HOME/.ssh/known_hosts
+    - ssh-keyscan -H 3.18.71.140 >> $HOME/.ssh/known_hosts
 
     # Install NVM and NPM
     - sudo apt-get update && sudo apt-get -y install curl

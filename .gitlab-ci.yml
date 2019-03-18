@@ -94,6 +94,7 @@ deploy_prod:
     - sudo apt-get -y install ansible
     - echo "[prod]" >> $HOME/hosts
     - echo "ubuntu@52.14.35.159" >> $HOME/hosts
+    - echo "ubuntu@3.18.71.140" >> $HOME/hosts
   script:
     - cd ui
     - npm install

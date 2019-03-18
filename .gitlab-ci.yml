@@ -65,9 +65,8 @@ deploy_test:
   stage: deploy_test
   image: ubuntu:latest
   when: manual
-  only:
-    branches:
-      - master
+  branches:
+    - master
   before_script:
     # Install open ssh and add remote server to known hosts
     - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*

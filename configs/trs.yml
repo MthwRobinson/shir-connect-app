@@ -1,0 +1,43 @@
+name: Temple Rodef Shalom
+
+ip_addresses:
+  - 52.14.35.159 # TRS Prod
+  - 3.18.177.11 # Test
+  - 13.58.50.14 # Dev
+  - 3.18.71.140 # Demo
+  - 98.169.130.15 # Matt local dev
+
+identifiers:
+  eventbrite: 1358538665
+
+location:
+  address_1: "2100 Westmoreland Street"
+  address_2: null
+  city: Falls Church
+  region: VA
+  country: US
+  latitude: 38.906111
+  longitude: -77.173588
+  postal_code: 22043
+
+age_groups:
+  College:
+    min: 18
+    max: 23
+  Young Professional:
+    min: 23
+    max: 35
+  35-50:
+    min: 35
+    max: 50
+  50-60:
+    min: 50
+    max: 60
+  60-70:
+    min: 60
+    max: 70
+  70-80:
+    min: 70
+    max: 80
+  Over 80:
+    min: 80

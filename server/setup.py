@@ -12,6 +12,7 @@ reqs = [
     'networkx',
     'pandas',
     'psycopg2-binary',
+    'pyyaml',
     'requests',
     'uuid',
     'xkcdpass',

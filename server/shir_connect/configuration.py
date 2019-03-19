@@ -2,7 +2,19 @@
 import datetime
 import os
 
+import requests
+import yaml
+
+
+# Application paths
+PATH = os.path.dirname(os.path.realpath(__file__))
 HOMEPATH = os.path.expanduser('~')
+PROJPATH = os.path.join(PATH, '..', '..')
+
+# Application environmental variables 
+mode = os.getenv('SHIR_CONNECT_MODE')
+DEMO_MODE = mode == 'DEMO' or False
+EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')
 
 # Secrets for API connections
@@ -13,11 +25,6 @@ JWT_TOKEN_LOCATION = ['cookies']
 # Disable HTTPS only for local development because localhost uses HTTP
 JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'LOCAL'
 JWT_COOKIE_CSRF_PROTECT = True
-
-# Application environmental variables 
-mode = os.getenv('SHIR_CONNECT_MODE')
-DEMO_MODE = mode == 'DEMO' or False
-EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Database configurations and secrets
 PG_USER = 'postgres'
@@ -48,12 +55,17 @@ TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
 ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, MAP_GROUP]
 
-# Age Group Definitions
-AGE_GROUPS = {
-    'College': {'min': 18, 'max': 23},
-    'Young Professional': {'min': 23, 'max': 35},
-    '35-50': {'min': 35, 'max': 50},
-    '50-60': {'min': 50, 'max': 60},
-    '60-70': {'min': 60, 'max': 70},
-    'Over 80': {'min': 80}
-}
+# Custom Configurations
+custom_config = {}
+ip_addr = requests.get('https://api.ipify.org').text
+config_path = os.path.join(PROJPATH, 'configs')
+config_files = os.listdir(config_path)
+for file_ in config_files:
+    filename = config_path + '/' + file_
+    with open(filename, 'r') as f:
+        config = yaml.safe_load(f)
+    if ip_addr in config['ip_addresses']:
+        custom_config = config
+        break
+
+AGE_GROUPS = custom_config['age_groups']

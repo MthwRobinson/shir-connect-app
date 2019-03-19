@@ -67,5 +67,9 @@ for file_ in config_files:
     if ip_addr in config['ip_addresses']:
         custom_config = config
         break
+    if config['default']:
+        default_config = config
+if not custom_config:
+    custom_config = default_config
 
 AGE_GROUPS = custom_config['age_groups']

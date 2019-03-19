@@ -1,11 +1,11 @@
 name: Temple Rodef Shalom
+default: yes
 
 ip_addresses:
   - 52.14.35.159 # TRS Prod
   - 3.18.177.11 # Test
   - 13.58.50.14 # Dev
   - 3.18.71.140 # Demo
-  - 98.169.130.15 # Matt local dev
 
 identifiers:
   eventbrite: 1358538665

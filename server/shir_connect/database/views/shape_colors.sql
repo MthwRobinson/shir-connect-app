@@ -80,7 +80,7 @@ FROM(
             CAST(COUNT(*) AS DECIMAL) as events 
           FROM {schema}.event_aggregates
           WHERE postal_code IS NOT NULL
-          AND postal_code <> '22043'
+          AND postal_code <> '{zip_code}'
           GROUP BY postal_code
         ) x
       ) as max_events,

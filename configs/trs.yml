@@ -8,7 +8,7 @@ ip_addresses:
   - 3.18.71.140 # Demo
 
 identifiers:
-  eventbrite: 1358538665
+  eventbrite_org: 1358538665
 
 location:
   address_1: "2100 Westmoreland Street"

@@ -24,7 +24,7 @@ class Eventbrite(object):
         response = requests.get(url)
         return response
 
-    def get_events(self, org_id=1358538665, start=None, page=1):
+    def get_events(self, org_id, start=None, page=1):
         """ Pulls a list of events basd on id """
         url = self.url + '/organizers/%s/events/'%(org_id)
 

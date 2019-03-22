@@ -18,19 +18,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = getMapBoxToken();
 
-const TRS_LOCATION = {
-  "type": "Feature",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [-77.173449, 38.906103]
-  },
-  "properties": {
-    "title": "Temple Rodef Shalom",
-    "icon": "religious-jewish",
-    "description" : "<strong>Temple Rodef Shalom</strong>"
-  }
-}
-
 class EventMap extends Component {
 
   constructor(props: Props) {
@@ -39,6 +26,7 @@ class EventMap extends Component {
         lng: null,
         lat: null,
         zoom: 10.3,
+        defaultLocationName: null,
         features: [],
         zipLayer: {},
         mapLoading: true,
@@ -56,7 +44,8 @@ class EventMap extends Component {
     this.checkAccess();
     getDefaultLocation()
       .then(res => {
-        this.setState({lng: res.data.longitude, lat: res.data.latitude})
+        this.setState({lng: res.data.longitude, lat: res.data.latitude,
+                       defaultLocationName: res.data.name})
         const locationPromise = this.getEventLocations();
         const zipPromise = this.getZipCodeGeometries();
         const mapPromise = locationPromise
@@ -124,7 +113,21 @@ class EventMap extends Component {
     let response = axios.get(url)
       .then(res => {
         let features = res.data.results;
-        features.push(TRS_LOCATION);
+
+        const name = this.state.defaultLocationName;
+        const DEFAULT_LOCATION = {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [this.state.lng, this.state.lat]
+          },
+          "properties": {
+            "title": name,
+            "icon": "religious-jewish",
+            "description" : "<strong>" + name + "</strong>"
+          }
+        }
+        features.push(DEFAULT_LOCATION);
         this.setState({features: features, mapLoading: false});
       })
       .catch(err => {

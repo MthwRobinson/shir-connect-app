@@ -10,7 +10,8 @@ mapboxgl.accessToken = getMapBoxToken();
 class EventInfo extends Component {
   state = {
     zoom: 13,
-    map: null
+    map: null,
+    eventLocation: null
   }
 
   componentDidMount(){
@@ -25,7 +26,7 @@ class EventInfo extends Component {
             lat = res.data.latitude;
             name = res.data.name;
           }
-          this.setState({map: this.buildMap(long, lat, name)})
+          this.setState({map: this.buildMap(long, lat, name), eventLocation: name})
         }
       })
   }
@@ -60,8 +61,7 @@ class EventInfo extends Component {
         },
         "properties": {
           "title": name,
-          "icon": "religious-jewish",
-          "description" : "<strong>Temple Rodef Shalom</strong>"
+          "icon": "religious-jewish"
         }
       };
 
@@ -142,7 +142,7 @@ class EventInfo extends Component {
               </li>
               <li><b>Food: </b> { event.is_food==='True' ? 'Yes' : 'No' }</li>
               <li><b>Venue:</b> {event.venue_name != null
-                  ? event.venue_name : 'Temple Rodef Shalom'}
+                  ? event.venue_name : this.state.eventLocation}
               </li>
               <li><b>Location:</b> {address.length>0
                   ? address : 'Not Available'}

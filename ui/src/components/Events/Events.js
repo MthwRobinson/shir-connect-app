@@ -15,6 +15,7 @@ import moment from 'moment';
 import FileDownload from 'js-file-download';
 
 import { refreshAccessToken } from './../../utilities/authentication';
+import { getDefaultLocation } from './../../utilities/map';
 
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
@@ -35,7 +36,8 @@ class Events extends Component {
         query: '',
         searchTerms: [],
         sortColumn: 'start_datetime',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
+        defaultEventLocation: null
       }
 
       // Bindings for search bar
@@ -43,7 +45,10 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      this.getEvents();
+      getDefaultLocation().then(res => {
+        this.setState({defaultEventLocation: res.data.name});
+        this.getEvents();
+      })
       refreshAccessToken();
     }
 
@@ -272,7 +277,7 @@ class Events extends Component {
                       <th>{event.name}</th>
                       <th>{event.start}</th>
                       <th>{event.venue_name !== null 
-                          ? event.venue_name : 'Temple Rodef Shalom'}</th>
+                          ? event.venue_name : this.state.defaultEventLocation}</th>
                       <th>{event.attendee_count != null 
                           ? event.attendee_count : 0}</th>
                     </tr>

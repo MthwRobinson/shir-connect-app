@@ -72,6 +72,18 @@ def zip_codes():
     zip_codes = map_geometries.get_zip_codes()
     return jsonify(zip_codes)
 
+@map_geometries.route('/service/map/default', methods=['GET'])
+@jwt_required
+def map_default():
+    """ Returns the default location for the map. This location is
+    user for the following purposes:
+
+    1. It is used to center the event map
+    2. For events with a null location, the default location is
+        plotted on the map.
+    """
+    return jsonify(conf.DEFAULT_LOCATION)
+
 class MapGeometries(object):
     """ Class that handles geometries for the map """
     def __init__(self):

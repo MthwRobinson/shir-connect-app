@@ -7,7 +7,7 @@ def test_token():
 
 def test_events():
     eventbrite = Eventbrite()
-    events = eventbrite.get_events(start='2018-07-01')
+    events = eventbrite.get_events(1358538665, start='2018-07-01')
     assert type(events['events']) == list
     event = events['events'][0]
     assert event['start']['local'] >= '2018-07-01'

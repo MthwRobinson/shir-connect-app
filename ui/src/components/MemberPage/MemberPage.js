@@ -8,6 +8,7 @@ import { withRouter } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
 import { refreshAccessToken } from './../../utilities/authentication';
+import { getDefaultLocation } from './../../utilities/map';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -17,8 +18,8 @@ import 'react-calendar-heatmap/dist/styles.css';
 
 class MemberPage extends Component {
   state = {
-    lng: -77.173449,
-    lat: 38.906103,
+    lng: null,
+    lat: null,
     loading: true,
     zoom: 10,
     map: null,
@@ -27,7 +28,11 @@ class MemberPage extends Component {
   }
 
   componentDidMount(){
-    this.getMember();
+    getDefaultLocation()
+      .then(res => {
+        this.setState({lng: res.data.longitude, lat: res.data.latitude});
+        this.getMember();
+      })
   }
 
   switchTab = (tab) => {
@@ -230,7 +235,6 @@ class MemberPage extends Component {
               "properties": {
                 "title": event.name,
                 "icon": "religious-jewish",
-                "description" : "<strong>Temple Rodef Shalom</strong>"
               }
             };
             features.push(feature);

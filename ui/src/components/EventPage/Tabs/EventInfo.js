@@ -3,28 +3,32 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { getMapBoxToken } from './../../../utilities/authentication';
+import { getMapBoxToken, getDefaultLocation } from './../../../utilities/map';
 
 mapboxgl.accessToken = getMapBoxToken();
 
 class EventInfo extends Component {
   state = {
     zoom: 13,
-    map: null
+    map: null,
+    eventLocation: null
   }
 
   componentDidMount(){
-    if(this.props.event){
-      let lat = this.props.event.latitude;
-      let long = this.props.event.longitude;
-      let name = this.props.event.venue_name;
-      if(!(lat&&long&&name)){
-        long = -77.173449;
-        lat = 38.906103;
-        name = 'Temple Rodef Shalom';
-      }
-      this.setState({map: this.buildMap(long, lat, name)})
-    }
+    getDefaultLocation()
+      .then(res => {
+        if(this.props.event){
+          let lat = this.props.event.latitude;
+          let long = this.props.event.longitude;
+          let name = this.props.event.venue_name;
+          if(!(lat&&long&&name)){
+            long = res.data.longitude;
+            lat = res.data.latitude;
+            name = res.data.name;
+          }
+          this.setState({map: this.buildMap(long, lat, name), eventLocation: name})
+        }
+      })
   }
 
   buildMap = (lng, lat, name) => {
@@ -57,8 +61,7 @@ class EventInfo extends Component {
         },
         "properties": {
           "title": name,
-          "icon": "religious-jewish",
-          "description" : "<strong>Temple Rodef Shalom</strong>"
+          "icon": "religious-jewish"
         }
       };
 
@@ -139,7 +142,7 @@ class EventInfo extends Component {
               </li>
               <li><b>Food: </b> { event.is_food==='True' ? 'Yes' : 'No' }</li>
               <li><b>Venue:</b> {event.venue_name != null
-                  ? event.venue_name : 'Temple Rodef Shalom'}
+                  ? event.venue_name : this.state.eventLocation}
               </li>
               <li><b>Location:</b> {address.length>0
                   ? address : 'Not Available'}

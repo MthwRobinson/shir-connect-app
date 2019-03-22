@@ -2,7 +2,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-
 function getCSRFToken(){
   // Pulls the CSRF token from cookies
   return Cookies.get('csrf_access_token');
@@ -22,8 +21,3 @@ function logout() {
   axios.post(url)
 }
 export { logout };
-
-function getMapBoxToken() {
-  return 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
-}
-export { getMapBoxToken }

@@ -1,8 +1,18 @@
 """ Configurations file for the REST platfrom and ETL pipeline """
-import datetime
 import os
 
+from shir_connect.utils import get_config
+
+
+# Application paths
+PATH = os.path.dirname(os.path.realpath(__file__))
 HOMEPATH = os.path.expanduser('~')
+PROJPATH = os.path.join(PATH, '..', '..')
+
+# Application environmental variables 
+mode = os.getenv('SHIR_CONNECT_MODE')
+DEMO_MODE = mode == 'DEMO' or False
+EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')
 
 # Secrets for API connections
@@ -13,11 +23,6 @@ JWT_TOKEN_LOCATION = ['cookies']
 # Disable HTTPS only for local development because localhost uses HTTP
 JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'LOCAL'
 JWT_COOKIE_CSRF_PROTECT = True
-
-# Application environmental variables 
-mode = os.getenv('SHIR_CONNECT_MODE')
-DEMO_MODE = mode == 'DEMO' or False
-EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 
 # Database configurations and secrets
 PG_USER = 'postgres'
@@ -30,6 +35,10 @@ MATERIALIZED_VIEWS = [
     'participants.sql',
     'shape_colors.sql'
 ]
+
+# Test configs
+TEST_USER = 'unittestuser'
+TEST_PASSWORD = 'YBjQOlzzzI!4jX'
 
 # Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
@@ -48,12 +57,9 @@ TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
 ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, MAP_GROUP]
 
-# Age Group Definitions
-AGE_GROUPS = {
-    'College': {'min': 18, 'max': 23},
-    'Young Professional': {'min': 23, 'max': 35},
-    '35-50': {'min': 35, 'max': 50},
-    '50-60': {'min': 50, 'max': 60},
-    '60-70': {'min': 60, 'max': 70},
-    'Over 80': {'min': 80}
-}
+# Custom Configurations
+config = get_config(PROJPATH, HOMEPATH)
+AGE_GROUPS = config['age_groups']
+DEFAULT_LOCATION = config['location']
+IDENTIFIERS = config['identifiers']
+AVAILABLE_MODULES = config['modules']

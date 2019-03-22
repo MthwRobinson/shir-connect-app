@@ -7,6 +7,7 @@ import time
 import arrow
 import daiquiri
 
+import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.etl.eventbrite import Eventbrite
 
@@ -18,6 +19,7 @@ class DataLoader(object):
 
         self.database = Database()
         self.eventbrite = Eventbrite()
+        self.eventbrite_org = conf.IDENTIFIERS['eventbrite_org']
 
     def run(self, test=False):
         """ Runs the data load process """
@@ -107,7 +109,9 @@ class DataLoader(object):
         Pulls events from eventbrite and sleeps if the rate limit
         has been exceeded
         """
-        events = self.eventbrite.get_events(start=start, page=page)
+        org_id = self.eventbrite_org
+        events = self.eventbrite.get_events(org_id=org_id, start=start, 
+                                            page=page)
         if not events:
             # Sleep until eventbrite resets
             self.logger.info('Rate limit exceed. Sleeping 30 mins')

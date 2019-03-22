@@ -4,10 +4,12 @@ import mapboxgl from 'mapbox-gl';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import {
-  getMapBoxToken,
-  refreshAccessToken
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
+import { 
+  getMapBoxToken, 
+  getDefaultLocation
+} from './../../utilities/map';
+
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -16,27 +18,15 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = getMapBoxToken();
 
-const TRS_LOCATION = {
-  "type": "Feature",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [-77.173449, 38.906103]
-  },
-  "properties": {
-    "title": "Temple Rodef Shalom",
-    "icon": "religious-jewish",
-    "description" : "<strong>Temple Rodef Shalom</strong>"
-  }
-}
-
 class EventMap extends Component {
 
   constructor(props: Props) {
       super(props);
       this.state = {
-        lng: -77.174,
-        lat: 38.906,
+        lng: null,
+        lat: null,
         zoom: 10.3,
+        defaultLocationName: null,
         features: [],
         zipLayer: {},
         mapLoading: true,
@@ -52,21 +42,31 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
-    const locationPromise = this.getEventLocations();
-    const zipPromise = this.getZipCodeGeometries();
-    const mapPromise = locationPromise
-      // Only build the map after the locations have been loaded
-      .then(() =>{
-        this.setState({map: this.buildMap()});
+    getDefaultLocation()
+      .then(res => {
+        this.setState({lng: res.data.longitude, lat: res.data.latitude,
+                       defaultLocationName: res.data.name})
+        const locationPromise = this.getEventLocations();
+        const zipPromise = this.getZipCodeGeometries();
+        const mapPromise = locationPromise
+          // Only build the map after the locations have been loaded
+          .then(() =>{
+            this.setState({map: this.buildMap()});
+          })
+        Promise.all([mapPromise, zipPromise])
+          .then(() => {
+            // First add the zip codes and then add the event
+            // locaitons so the event locations will be on top
+            this.addAllZipGeometries()
+            .then(() => {
+              this.addEventLocations();
+            })
+          })
       })
-    Promise.all([mapPromise, zipPromise])
-      .then(() => {
-        // First add the zip codes and then add the event
-        // locaitons so the event locations will be on top
-        this.addAllZipGeometries()
-        .then(() => {
-          this.addEventLocations();
-        })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
       })
   }
 
@@ -103,11 +103,6 @@ class EventMap extends Component {
         let features = res.data;
         this.setState({zipLayers: features});
       })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        }
-      })
     return response
   }
   
@@ -118,7 +113,21 @@ class EventMap extends Component {
     let response = axios.get(url)
       .then(res => {
         let features = res.data.results;
-        features.push(TRS_LOCATION);
+
+        const name = this.state.defaultLocationName;
+        const DEFAULT_LOCATION = {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [this.state.lng, this.state.lat]
+          },
+          "properties": {
+            "title": name,
+            "icon": "religious-jewish",
+            "description" : "<strong>" + name + "</strong>"
+          }
+        }
+        features.push(DEFAULT_LOCATION);
         this.setState({features: features, mapLoading: false});
       })
       .catch(err => {

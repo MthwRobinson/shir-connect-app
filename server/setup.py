@@ -12,6 +12,7 @@ reqs = [
     'networkx',
     'pandas',
     'psycopg2-binary',
+    'pyyaml',
     'requests',
     'uuid',
     'xkcdpass',
@@ -22,9 +23,9 @@ test_reqs = ['ipython', 'pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
 
 setup(
     name='shir_connect',
-    description='etl pipeline and dashboard for temple rodef shalom',
-    author='Temple Rodef Shalom',
-    author_email='nsmuckler@templerodefshalom.org',
+    description='Analytics in support of community engagement',
+    author='Fiddler Analytics',
+    author_email='info@fiddleranalytics.com',
     packages=find_packages(),
     version='0.1.1',
     install_requires=reqs,

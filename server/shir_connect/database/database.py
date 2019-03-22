@@ -27,6 +27,7 @@ class Database(object):
 
         # Database connection and configurations
         self.materialized_views = conf.MATERIALIZED_VIEWS
+        self.zip_code = conf.DEFAULT_LOCATION['postal_code']
         self.columns = {}
         self.schema = conf.PG_SCHEMA
         self.database = conf.PG_DATABASE
@@ -86,11 +87,15 @@ class Database(object):
                 self.logger.info(msg)
                 filename = path + file_
                 with open(filename, 'r') as f:
-                    sql = f.read().format(schema=self.schema)
+                    if table == 'shape_colors':
+                        sql = f.read().format(schema=self.schema,
+                                              zip_code=self.zip_code)
+                    else:
+                        sql = f.read().format(schema=self.schema)
                 self.run_query(sql)
     
     def refresh_view(self, view):
-        """ Refrshes a materialized view """
+        """ Refreshes a materialized view """
         sql = "REFRESH MATERIALIZED VIEW %s.%s"%(self.schema, view)
         self.run_query(sql)
 

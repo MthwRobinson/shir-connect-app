@@ -10,6 +10,12 @@ ip_addresses:
 identifiers:
   eventbrite_org: 1358538665
 
+modules:
+  - events
+  - members
+  - trends
+  - map
+
 location:
   name: Temple Rodef Shalom
   address_1: "2100 Westmoreland Street"

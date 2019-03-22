@@ -62,3 +62,4 @@ config = get_config(PROJPATH, HOMEPATH)
 AGE_GROUPS = config['age_groups']
 DEFAULT_LOCATION = config['location']
 IDENTIFIERS = config['identifiers']
+AVAILABLE_MODULES = config['modules']

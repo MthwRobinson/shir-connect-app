@@ -36,6 +36,10 @@ MATERIALIZED_VIEWS = [
     'shape_colors.sql'
 ]
 
+# Test configs
+TEST_USER = 'unittestuser'
+TEST_PASSWORD = 'YBjQOlzzzI!4jX'
+
 # Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']
 

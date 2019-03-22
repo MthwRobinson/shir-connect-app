@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { getMapBoxToken } from './../../../utilities/authentication';
+import { getMapBoxToken } from './../../../utilities/map';
 
 mapboxgl.accessToken = getMapBoxToken();
 

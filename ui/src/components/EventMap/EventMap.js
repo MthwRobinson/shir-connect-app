@@ -4,10 +4,12 @@ import mapboxgl from 'mapbox-gl';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import {
-  getMapBoxToken,
-  refreshAccessToken
-} from './../../utilities/authentication';
+import { refreshAccessToken } from './../../utilities/authentication';
+import { 
+  getMapBoxToken, 
+  getDefaultLocation
+} from './../../utilities/map';
+
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -34,8 +36,8 @@ class EventMap extends Component {
   constructor(props: Props) {
       super(props);
       this.state = {
-        lng: -77.174,
-        lat: 38.906,
+        lng: null,
+        lat: null,
         zoom: 10.3,
         features: [],
         zipLayer: {},
@@ -52,21 +54,30 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
-    const locationPromise = this.getEventLocations();
-    const zipPromise = this.getZipCodeGeometries();
-    const mapPromise = locationPromise
-      // Only build the map after the locations have been loaded
-      .then(() =>{
-        this.setState({map: this.buildMap()});
+    getDefaultLocation()
+      .then(res => {
+        this.setState({lng: res.data.longitude, lat: res.data.latitude})
+        const locationPromise = this.getEventLocations();
+        const zipPromise = this.getZipCodeGeometries();
+        const mapPromise = locationPromise
+          // Only build the map after the locations have been loaded
+          .then(() =>{
+            this.setState({map: this.buildMap()});
+          })
+        Promise.all([mapPromise, zipPromise])
+          .then(() => {
+            // First add the zip codes and then add the event
+            // locaitons so the event locations will be on top
+            this.addAllZipGeometries()
+            .then(() => {
+              this.addEventLocations();
+            })
+          })
       })
-    Promise.all([mapPromise, zipPromise])
-      .then(() => {
-        // First add the zip codes and then add the event
-        // locaitons so the event locations will be on top
-        this.addAllZipGeometries()
-        .then(() => {
-          this.addEventLocations();
-        })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        }
       })
   }
 
@@ -102,11 +113,6 @@ class EventMap extends Component {
       .then(res => {
         let features = res.data;
         this.setState({zipLayers: features});
-      })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        }
       })
     return response
   }

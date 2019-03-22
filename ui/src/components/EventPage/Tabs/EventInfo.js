@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { getMapBoxToken } from './../../../utilities/map';
+import { getMapBoxToken, getDefaultLocation } from './../../../utilities/map';
 
 mapboxgl.accessToken = getMapBoxToken();
 
@@ -14,17 +14,20 @@ class EventInfo extends Component {
   }
 
   componentDidMount(){
-    if(this.props.event){
-      let lat = this.props.event.latitude;
-      let long = this.props.event.longitude;
-      let name = this.props.event.venue_name;
-      if(!(lat&&long&&name)){
-        long = -77.173449;
-        lat = 38.906103;
-        name = 'Temple Rodef Shalom';
-      }
-      this.setState({map: this.buildMap(long, lat, name)})
-    }
+    getDefaultLocation()
+      .then(res => {
+        if(this.props.event){
+          let lat = this.props.event.latitude;
+          let long = this.props.event.longitude;
+          let name = this.props.event.venue_name;
+          if(!(lat&&long&&name)){
+            long = res.data.longitude;
+            lat = res.data.latitude;
+            name = res.data.name;
+          }
+          this.setState({map: this.buildMap(long, lat, name)})
+        }
+      })
   }
 
   buildMap = (lng, lat, name) => {

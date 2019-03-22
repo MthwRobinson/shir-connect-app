@@ -26,6 +26,11 @@
         version: "{{ branch }}"
         dest: "{{ shir_connect }}"
         update: yes
+    
+    - name: Install new Python dependencies
+      shell: "{{ path }}/venv/shir_connect/bin/pip install -e ."
+      args:
+        chdir: "{{ shir_connect }}/server"
 
     - name: Run database mirgrations
       shell: "shmig -t postgresql -d postgres up"
@@ -35,10 +40,6 @@
     - name: Update materialized views
       shell: "{{ path }}/venv/shir_connect/bin/shir_connect initialize --drop_views"
 
-    - name: Install new Python dependencies
-      shell: "{{ path }}/venv/shir_connect/bin/pip install -e ."
-      args:
-        chdir: "{{ shir_connect }}/server"
 
     - name: Restarting all PM2 processes
       shell: 'bash -ic "pm2 start all"'

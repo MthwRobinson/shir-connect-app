@@ -11,7 +11,7 @@
     "mapbox-gl": "^0.50.0-beta.1",
     "moment": "^2.22.2",
     "plotly": "^1.0.6",
-    "plotly.js": "^1.41.3",
+    "plotly.js": "^1.45.3",
     "react": "^16.4.2",
     "react-bootstrap": "^0.32.4",
     "react-calendar-heatmap": "^1.8.0",

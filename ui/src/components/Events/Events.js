@@ -240,7 +240,7 @@ class Events extends Component {
         <div className='paging pull-left'>
             {leftCaret}
             {this.state.page}/{this.state.pages}
-            {rightCaret}
+            {rightCaret}{' '}({this.state.count}{' '} total)
         </div>
       )
     }

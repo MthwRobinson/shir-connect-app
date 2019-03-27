@@ -339,10 +339,9 @@ class Database(object):
             df = pd.read_sql(sql, self.connection)
             return df
     
-    def count_rows(self, table, query=[], where=[]):
+    def count_rows(self, table, **kwargs):
         """ Returns the number of rows, given a query. """
-        count = self.read_table(table=table, query=query,
-                                where=where, count=True)
+        count = self.read_table(table=table, count=True, **kwargs)
         return count
 
     def to_json(self, df):

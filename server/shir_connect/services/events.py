@@ -73,6 +73,18 @@ def get_events():
     sort = request.args.get('sort')
     if not sort:
         sort = 'start_datetime'
+
+    where = []
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    if start_date or end_date:
+        conditions = {}
+        if start_date:
+            conditions['>='] = "'{}'".format(start_date)
+        if end_date:
+            conditions['<'] = "'{}'".format(end_date)
+        where.append(('start_datetime', conditions))
+
     q = request.args.get('q')
 
     response = event_manager.get_events(
@@ -80,7 +92,8 @@ def get_events():
         page=page,
         order=order,
         sort=sort,
-        q=q
+        q=q,
+        where=where
     )
     return jsonify(response)
 
@@ -151,7 +164,8 @@ class Events(object):
         self.database = Database()
    
     @demo_mode([{'results': ['name', 'venue_name']}])
-    def get_events(self, limit=None, page=None, order=None, sort=None, q=None):
+    def get_events(self, limit=None, page=None, order=None, 
+                   sort=None, q=None, where=[]):
         """ Fetches the most recent events from the database """
         if q:
             query = ('name', q)
@@ -163,9 +177,11 @@ class Events(object):
             page=page,
             order=order,
             sort=sort,
-            query=query
+            query=query,
+            where=where
         )
-        count = self.database.count_rows('event_aggregates', query=query)
+        count = self.database.count_rows('event_aggregates', query=query,
+                                         where=where)
 
         pages = int((count/limit)) + 1
         events = self.database.to_json(df)

@@ -100,6 +100,14 @@ class Events extends Component {
       url += '&q='+searchTerms.join(' ');
       url += '&order='+sortOrder;
       url += '&sort='+sortCol;
+      if(this.state.startDate){
+        const filterStart = moment(this.state.startDate).format('YYYY-MM-DD')
+        url += '&start_date='+filterStart;
+      }
+      if(this.state.endDate){
+        const filterEnd = moment(this.state.endDate).format('YYYY-MM-DD')
+        url += '&end_date='+filterEnd;
+      }
       
       axios.get(url)
         .then(res => {
@@ -167,7 +175,8 @@ class Events extends Component {
     handleFilter = (event) => {
       // Handles filtering
       event.preventDefault();
-
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
     }
 
     handleRemoveTerm = (removeTerm) => {
@@ -204,6 +213,7 @@ class Events extends Component {
 
     handleStartDate(event){
       // Updates the start date in the state
+      console.log(moment(event).format('YYYY-MM-DD'));
       this.setState({startDate: event});
     }
   

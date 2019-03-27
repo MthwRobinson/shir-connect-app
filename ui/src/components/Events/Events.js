@@ -41,12 +41,14 @@ class Events extends Component {
         sortColumn: 'start_datetime',
         sortOrder: 'desc',
         defaultEventLocation: null,
-        startDate: null
+        startDate: null,
+        endDate: new Date() 
       }
 
       // Bindings for search bar
       this.handleQuery = this.handleQuery.bind(this)
       this.handleStartDate = this.handleStartDate.bind(this)
+      this.handleEndDate = this.handleEndDate.bind(this)
     }
   
     componentDidMount(){
@@ -198,6 +200,11 @@ class Events extends Component {
       // Updates the start date in the state
       this.setState({startDate: event});
     }
+  
+    handleEndDate(event){
+      // Updates the start date in the state
+      this.setState({endDate: event});
+    }
 
     renderPageCount = () => {
       // Renders the page count at the top of the table
@@ -335,7 +342,7 @@ class Events extends Component {
           <div className="Events">
             <div className='events-header'>
               <h2>
-                Events ({this.state.count})
+                Events
                 <i 
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
@@ -349,16 +356,31 @@ class Events extends Component {
             </div>
             <div className='event-header'>
               {pageCount}
-              <div className='pull-left filter-form'>
-                <Form>
+              <div className='pull-right filter-form'>
+                <Form inline>
                   <FormGroup>
-                    <Label>Start Date:</Label>
+                    <Label className="filter-form-label">Start Date:</Label>
                     <DatePicker
                       selected={this.state.startDate}
                       onChange={this.handleStartDate}
-                      className="form-control filter-form-input"
+                      maxDate={this.state.endDate}
+                      className="form-control filter-form-date-input"
                     />
                   </FormGroup>
+                  <FormGroup>
+                    <Label className="filter-form-label">End Date:</Label>
+                    <DatePicker
+                      selected={this.state.endDate}
+                      onChange={this.handleEndDate}
+                      minDate={this.state.startDate}
+                      className="form-control filter-form-date-input"
+                    />
+                  </FormGroup>
+                  <Button 
+                    className='search-button'
+                    type="submit"
+                    data-tip="Filters the table results."
+                  >Filter</Button>
                 </Form>
               </div>
               <div className='pull-right'>

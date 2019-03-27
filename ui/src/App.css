@@ -47,10 +47,13 @@
 
 .filter-form {
   margin-left: 10px;
-
 }
 
-.filter-form-input {
-  margin-left: 5px;
+.filter-form-date-input {
   max-width: 110px;
+}
+
+.filter-form-label {
+  margin-left: 5px;
+  margin-right: 5px;
 }

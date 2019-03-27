@@ -1,6 +1,8 @@
 """ Utilities for user for use with the Shir Connect REST services.
 Most are deocrators that modify the functions that define the
 REST calls. """
+import re
+
 from flask import jsonify, request
 
 from shir_connect.configuration import DEMO_MODE
@@ -105,6 +107,8 @@ def validate_inputs(fields={}):
                         valid = len(value) < max_value
                     else:
                         valid = True
+                elif restrictions['type'] == 'date':
+                    valid = validate_date(value)
                 results.append(valid)
 
             valid_call = min(results)
@@ -137,6 +141,17 @@ def validate_int(value, max_value=None):
         if value > max_value:
             valid = False
     return valid
+
+def validate_date(value):
+    """ Validates that an input is a YYYY-MM-DD formatted date. """
+    match = re.match(r'\d{4}-\d{2}-\d{2}', value)
+    if match:
+        # Checks to see if the value is the same as the match to
+        # avoid accepting values like:
+        # "2017-02-02;DO BAD STUFF"
+        return value == value[match.start():match.end()]
+    else:
+        return False
 
 def _get_cookie_from_response(response, cookie_name):
     cookie_headers = response.headers.getlist('Set-Cookie')

@@ -46,7 +46,8 @@ def get_event(event_id):
 
 @events.route('/service/events', methods=['GET'])
 @jwt_required
-@validate_inputs()
+@validate_inputs(fields={'start_date': {'type': 'date'},
+                         'end_date': {'type': 'date'}})
 def get_events():
     """ Pulls events from the database """
     event_manager = Events()

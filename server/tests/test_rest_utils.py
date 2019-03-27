@@ -96,3 +96,16 @@ def test_validate_int():
     value = 'koala'
     valid = utils.validate_int(value)
     assert not valid
+
+def test_validate_date():
+    value = '2018-01-01'
+    assert utils.validate_date(value)
+
+    value = 'big bad bird!'
+    assert not utils.validate_date(value)
+
+    value ='2018-01-01-conure'
+    assert not utils.validate_date(value)
+    
+    value ='2018-01-0177'
+    assert not utils.validate_date(value)

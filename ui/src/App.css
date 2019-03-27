@@ -44,3 +44,13 @@
 .search-term-times {
   margin-top: 2px;
 }
+
+.filter-form {
+  margin-left: 10px;
+
+}
+
+.filter-form-input {
+  margin-left: 5px;
+  max-width: 110px;
+}

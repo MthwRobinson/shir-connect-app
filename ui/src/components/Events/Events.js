@@ -5,9 +5,11 @@ import {
   Form,
   FormControl,
   FormGroup,
+  Label,
   Row,
   Table
 } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
@@ -21,6 +23,7 @@ import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './Events.css';
+import "react-datepicker/dist/react-datepicker.css";
 
 const LIMIT = 25
 
@@ -37,11 +40,13 @@ class Events extends Component {
         searchTerms: [],
         sortColumn: 'start_datetime',
         sortOrder: 'desc',
-        defaultEventLocation: null
+        defaultEventLocation: null,
+        startDate: null
       }
 
       // Bindings for search bar
       this.handleQuery = this.handleQuery.bind(this)
+      this.handleStartDate = this.handleStartDate.bind(this)
     }
   
     componentDidMount(){
@@ -186,9 +191,12 @@ class Events extends Component {
 
     handleQuery(event){
       // Updates the query value in the state
-      this.setState({
-        query: event.target.value
-      });
+      this.setState({query: event.target.value});
+    }
+
+    handleStartDate(event){
+      // Updates the start date in the state
+      this.setState({startDate: event});
     }
 
     renderPageCount = () => {
@@ -341,6 +349,18 @@ class Events extends Component {
             </div>
             <div className='event-header'>
               {pageCount}
+              <div className='pull-left filter-form'>
+                <Form>
+                  <FormGroup>
+                    <Label>Start Date:</Label>
+                    <DatePicker
+                      selected={this.state.startDate}
+                      onChange={this.handleStartDate}
+                      className="form-control filter-form-input"
+                    />
+                  </FormGroup>
+                </Form>
+              </div>
               <div className='pull-right'>
                 <Form onSubmit={this.handleSearch} inline>
                   <FormGroup>

@@ -433,8 +433,8 @@ class Events extends Component {
             </div>
             <div className='event-header'>
               {pageCount}
-              {filter}
               {search}
+              {filter}
             </div>
               {table}
           </div>

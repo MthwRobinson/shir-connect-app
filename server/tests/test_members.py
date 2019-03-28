@@ -64,7 +64,7 @@ def test_members():
     
     url = '/service/members?limit=25&page=2'
     url += '&sort=last_event_date&order=desc'
-    url += '&q=smuckler'
+    url += '&q=smuckler&min_age=4&max_age=100'
     
     # The user must have access to members
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})

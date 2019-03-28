@@ -20,7 +20,8 @@ SELECT DISTINCT
     CASE
       WHEN e.events_attended IS NOT NULL THEN e.events_attended
       ELSE 0
-    END AS events_attended
+    END AS events_attended,
+    DATE_PART('year', AGE(now(), birth_date)) as age
   FROM {schema}.attendees a
   FULL JOIN {schema}.members b
   ON (LOWER(a.first_name) = LOWER(b.first_name)

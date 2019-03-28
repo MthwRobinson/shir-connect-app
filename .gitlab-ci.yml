@@ -13,6 +13,7 @@ test:
     - apt-get -qq install -y python-virtualenv python3-pip
     - python3 -m venv test_environment
     - . test_environment/bin/activate
+    - shir_connect initialize --drop_views
   script:
     - echo $SHIR_CONNECT_ENV
     - echo "13.58.50.14:5432:*:postgres:${POSTGRES_PASSWORD}" >> ~/.pgpass

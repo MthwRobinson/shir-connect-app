@@ -111,13 +111,8 @@ def get_members():
             conditions['>='] = min_age
         where.append(('age', conditions))
 
-    response = member_manager.get_members(
-        limit=limit,
-        page=page,
-        order=order,
-        sort=sort,
-        q=q
-    )
+    response = member_manager.get_members(limit=limit, page=page, order=order,
+                                          sort=sort, q=q, where=where)
     return jsonify(response)
 
 @members.route('/service/members/upload', methods=['POST'])

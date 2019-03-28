@@ -31,7 +31,7 @@ EVENT_TABLE = """
             '-', date_part('month', start_datetime)
         ) as event_month,
         date_part('year', start_datetime) as event_year,
-        date_part('year', start_datetime) - date_part('year', birth_date) as age
+        DATE_PART('year', AGE(start_datetime, birth_date)) as age
     FROM {schema}.attendees a
     INNER JOIN {schema}.members_view b
     ON (LOWER(a.first_name)=LOWER(b.first_name) 

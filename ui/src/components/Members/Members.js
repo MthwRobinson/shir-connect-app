@@ -98,6 +98,12 @@ class Members extends Component {
       url += '&q='+searchTerms.join(' ');
       url += '&sort='+sortCol;
       url += '&order='+sortOrder;
+      if(this.state.minAge){
+        url += '&min_age='+this.state.minAge;
+      }
+      if(this.state.maxAge){
+        url += '&max_age='+this.state.maxAge;
+      }
 
       axios.get(url)
         .then(res => {
@@ -163,7 +169,7 @@ class Members extends Component {
     handleFilter = (event) => {
       // Handles filtering
       event.preventDefault();
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
                      this.state.searchTerms);
     }
 
@@ -267,6 +273,20 @@ class Members extends Component {
                     : null}
                   </th>
                   <th className='table-heading'
+                      onClick={()=>this.handleSort('is_member')}>
+                    Member 
+                    {this.state.sortColumn === 'is_member'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
+                  <th className='table-heading'
+                      onClick={()=>this.handleSort('age')}>
+                    Age 
+                    {this.state.sortColumn === 'age'
+                    ? <i className={arrowClass}></i>
+                    : null}
+                  </th>
+                  <th className='table-heading'
                       onClick={()=>this.handleSort('events_attended')}>
                     Events
                     {this.state.sortColumn === 'events_attended'
@@ -304,6 +324,10 @@ class Members extends Component {
                           ? member.first_name : '--'}</th>
                       <th>{member.last_name != null
                           ? member.last_name : '--'}</th>
+                      <th>{member.is_member === true
+                          ? 'Y' : 'N'}</th>
+                      <th>{member.age != null
+                          ? member.age : null}</th>
                       <th>{member.events_attended != null
                           ? member.events_attended : 0}</th>
                       <th>{member.last_event_date != null

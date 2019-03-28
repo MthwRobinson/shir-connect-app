@@ -361,7 +361,8 @@ class Events extends Component {
           <div className='pull-right'>
             <Form onSubmit={this.handleSearch} inline>
               <FormGroup>
-                <FormControl 
+                <FormControl
+                  className='search-box'
                   value={this.state.query}
                   onChange={this.handleQuery}
                   type="text" 
@@ -392,7 +393,6 @@ class Events extends Component {
         </div>)
       }
       return searchTermPills
-
     }
 
     render() {

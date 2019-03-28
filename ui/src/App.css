@@ -1,6 +1,3 @@
-.App {
-}
-
 .menu-content {
   font-family: 'Source Sans Pro', sans-serif;
   color: black;
@@ -23,6 +20,10 @@
 .menu-content > a:hover {
   color: #666666;
   text-decoration: none;
+}
+
+.search-box {
+  max-width: 140px;
 }
 
 .search-term-row {
@@ -64,6 +65,10 @@
 
 .filter-form-date-input {
   max-width: 110px;
+}
+
+.filter-form-age-input {
+  max-width: 50px;
 }
 
 .filter-form-label {

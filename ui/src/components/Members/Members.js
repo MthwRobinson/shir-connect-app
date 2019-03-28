@@ -7,6 +7,7 @@ import {
   Form,
   FormControl,
   FormGroup,
+  Label,
   Row,
   Table
 } from 'react-bootstrap';
@@ -38,12 +39,16 @@ class Members extends Component {
         showUpload: false,
         uploadLoading: false,
         uploadFailed: false,
-        userRole: 'standard'
+        userRole: 'standard',
+        minAge: null,
+        maxAge: null
       }
 
       // Binding for the file upload in the popup
       this.uploadFile = this.uploadFile.bind(this)
       this.handleQuery = this.handleQuery.bind(this)
+      this.handleMinAge = this.handleMinAge.bind(this)
+      this.handleMaxAge= this.handleMaxAge.bind(this)
     }
 
   componentDidMount(){
@@ -155,6 +160,13 @@ class Members extends Component {
                       this.state.sortOrder, searchTerms);
     }
 
+    handleFilter = (event) => {
+      // Handles filtering
+      event.preventDefault();
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
+    }
+
     handleRemoveTerm = (removeTerm) => {
       // Removes search term from the search terms list
       let searchTerms = [...this.state.searchTerms];
@@ -184,9 +196,17 @@ class Members extends Component {
 
     handleQuery(event){
       // Updates the query value in the state
-      this.setState({
-        query: event.target.value
-      });
+      this.setState({query: event.target.value});
+    }
+  
+    handleMinAge(event){
+      // Updates the min age value in the state
+      this.setState({minAge: event.target.value});
+    }
+  
+    handleMaxAge(event){
+      // Updates the max age value in the state
+      this.setState({maxAge: event.target.value});
     }
 
     renderPageCount = () => {
@@ -410,6 +430,62 @@ class Members extends Component {
       )
     }
 
+    renderSearch = () => {
+      // Renders the serach bar
+      return(
+        <div className='pull-right'>
+          <Form onSubmit={this.handleSearch} inline>
+            <FormGroup>
+              <FormControl
+                className="search-box"
+                value={this.state.query}
+                onChange={this.handleQuery}
+                type="text" 
+              />
+            </FormGroup>
+            <Button 
+              className='search-button'
+              type="submit"
+              data-tip="Returns search results for last name."
+            >Search</Button>
+            <ReactToolTip />
+          </Form>
+        </div>
+      )
+    }
+
+    renderFilter = () => {
+      // Renders the filter option
+      return(
+        <div className='pull-right filter-form'>
+          <Form onSubmit={this.handleFilter} inline>
+            <FormGroup>
+              <Label className='filter-form-label'>Min Age:</Label>
+              <FormControl
+                className='filter-form-age-input'
+                value={this.state.minAge}
+                onChange={this.handleMinAge}
+                type="text" 
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label className='filter-form-label'>Max Age:</Label>
+              <FormControl
+                className='filter-form-age-input'
+                value={this.state.maxAge}
+                onChange={this.handleMaxAge}
+                type="text" 
+              />
+            </FormGroup>
+            <Button
+              className='search-button'
+              type='submit'
+              data-tip='Filters the table results.'>Filter</Button>
+          </Form>
+        </div>
+      )
+    }
+
     renderSearchTermPills = () => {
       // Renders the pill buttons for the active search terms
       let searchTermPills = [];
@@ -442,6 +518,8 @@ class Members extends Component {
 
       let pageCount = this.renderPageCount();
       let searchTermPills = this.renderSearchTermPills();
+      let search = this.renderSearch();
+      let filter = this.renderFilter();
 
       let uploadButton = null
       if(this.state.userRole==='admin'){
@@ -460,7 +538,7 @@ class Members extends Component {
           <div className="Members">
             <div className='events-header'>
               <h2>
-                Participants ({this.state.count})
+                Participants ({this.state.count} total)
                 <i className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 ></i>
@@ -470,23 +548,8 @@ class Members extends Component {
             {popup}
             <div className='event-header'>
               {pageCount}
-              <div className='pull-right'>
-                <Form onSubmit={this.handleSearch} inline>
-                  <FormGroup>
-                    <FormControl 
-                      value={this.state.query}
-                      onChange={this.handleQuery}
-                      type="text" 
-                    />
-                  </FormGroup>
-                  <Button 
-                    className='search-button'
-                    type="submit"
-                    data-tip="Returns search results for last name."
-                  >Search</Button>
-                  <ReactToolTip />
-                </Form>
-              </div>
+              {search}
+              {filter}
             </div>
             <div className='search-term-row pull-right'>
               {searchTermPills.length >0 

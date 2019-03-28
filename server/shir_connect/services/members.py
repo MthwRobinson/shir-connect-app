@@ -106,7 +106,7 @@ def get_members():
     if max_age or min_age:
         conditions = {}
         if max_age:
-            conditions['<'] = max_age
+            conditions['<='] = max_age
         if min_age:
             conditions['>='] = min_age
         where.append(('age', conditions))

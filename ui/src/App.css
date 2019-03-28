@@ -25,8 +25,21 @@
   text-decoration: none;
 }
 
+.search-term-row {
+  padding-right: 6%;
+  padding-left: 2%;
+  padding-bottom: 5px;
+  font-size: 16px;
+}
+
+#search-term-list {
+  display: inline-block;
+  padding-top: 5px;
+}
+
 .search-term-pill {
-  margin-right: 10px;
+  margin-right: 5px;
+  margin-left: 5px;
   margin-top: 3px;
   font-size: 11px;
   background-color: #3a9fbf;

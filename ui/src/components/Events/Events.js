@@ -250,7 +250,7 @@ class Events extends Component {
         <div className='paging pull-left'>
             {leftCaret}
             {this.state.page}/{this.state.pages}
-            {rightCaret}{' '}({this.state.count}{' '} total)
+            {rightCaret}{' '}
         </div>
       )
     }
@@ -356,7 +356,6 @@ class Events extends Component {
 
     renderSearch = () => {
       // Renders the search bar
-      let searchTermPills = this.renderSearchTermPills();
       return (
         <div>
           <div className='pull-right'>
@@ -376,7 +375,6 @@ class Events extends Component {
             </Form>
             <ReactToolTip />
           </div>
-          {searchTermPills}
         </div>
       )
     }
@@ -412,6 +410,7 @@ class Events extends Component {
       let pageCount = this.renderPageCount();
       let search = this.renderSearch();
       let filter = this.renderFilter();
+      let searchTermPills = this.renderSearchTermPills();
 
       return (
         <div>
@@ -419,7 +418,7 @@ class Events extends Component {
           <div className="Events">
             <div className='events-header'>
               <h2>
-                Events
+                Events ({this.state.count} total)
                 <i 
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
@@ -436,7 +435,13 @@ class Events extends Component {
               {search}
               {filter}
             </div>
-              {table}
+            <div className='search-term-row pull-right'>
+              {searchTermPills.length > 0 ? 
+                  <span id='search-term-list'><b>Search Terms:</b></span> : 
+               null}
+              {searchTermPills}
+            </div>
+            {table}
           </div>
         </div>
       );

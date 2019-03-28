@@ -436,9 +436,9 @@ class Events extends Component {
               {filter}
             </div>
             <div className='search-term-row pull-right'>
-              {searchTermPills.length > 0 ? 
-                  <span id='search-term-list'><b>Search Terms:</b></span> : 
-               null}
+              {searchTermPills.length > 0 
+                ? <span id='search-term-list'><b>Search Terms:</b></span> 
+                : null}
               {searchTermPills}
             </div>
             {table}

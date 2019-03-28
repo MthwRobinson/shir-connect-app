@@ -327,7 +327,7 @@ class Events extends Component {
         <div className='pull-right filter-form'>
           <Form onSubmit={this.handleFilter} inline>
             <FormGroup>
-              <Label className="filter-form-label">Start Date:</Label>
+              <Label className="filter-form-label">Date:</Label>
               <DatePicker
                 selected={this.state.startDate}
                 onChange={this.handleStartDate}
@@ -336,7 +336,7 @@ class Events extends Component {
               />
             </FormGroup>
             <FormGroup>
-              <Label className="filter-form-label">End Date:</Label>
+              <Label className="filter-form-label">-</Label>
               <DatePicker
                 selected={this.state.endDate}
                 onChange={this.handleEndDate}

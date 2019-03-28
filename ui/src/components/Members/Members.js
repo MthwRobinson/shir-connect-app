@@ -460,21 +460,23 @@ class Members extends Component {
         <div className='pull-right filter-form'>
           <Form onSubmit={this.handleFilter} inline>
             <FormGroup>
-              <Label className='filter-form-label'>Min Age:</Label>
+              <Label className='filter-form-label'>Age:</Label>
               <FormControl
                 className='filter-form-age-input'
                 value={this.state.minAge}
                 onChange={this.handleMinAge}
-                type="text" 
+                max={this.state.maxAge}
+                type="number" 
               />
             </FormGroup>
             <FormGroup>
-              <Label className='filter-form-label'>Max Age:</Label>
+              <Label className='filter-form-label'>-</Label>
               <FormControl
                 className='filter-form-age-input'
                 value={this.state.maxAge}
                 onChange={this.handleMaxAge}
-                type="text" 
+                min={this.state.minAge}
+                type="number" 
               />
             </FormGroup>
             <Button

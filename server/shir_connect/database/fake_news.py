@@ -1,4 +1,5 @@
 """ Generates fake data to support testing and demos to new clients. 
+
 Fake data is generated for the following tables and columns:
     - Table: attendees
         Columns:
@@ -37,11 +38,7 @@ class FakeNews:
         self.faker = Faker()
 
     def fake_names(self):
-        """ Generates fake names for the attendees, members, and orders table. """
-        participants = self.database.read_table('participants')
-        attendees = self.database.read_table('attendees')
-        members = self.database.read_table('members')
-        order = self.database.read_table('orders')
+        """Generates fake names for the attendees, members, and orders table. """
 
         for i in participants.index:
             participant = dict(participants.loc[i])
@@ -50,6 +47,18 @@ class FakeNews:
             fake_first_name = self.faker.first_name()
             fake_last_name = self.faker.last_name()
             fake_email = self.faker.email()
+
+    def _get_person_tables(self):
+        """Pulls person information from the database.""" 
+        self.participants = self.database.read_table('participants')
+        self.attendees = self.database.read_table('attendees')
+        self.members = self.database.read_table('members')
+        self.order = self.database.read_table('orders')
+
+    def _swap_attendees(self, first_name, last_name, fake_first_name,
+                        fake_last_name, fake_email):
+        """Swaps out real date for fake data in the attendees table."""
+        pass
 
     def _find_name(self, first_name, last_name, table):
         """Finds the rows in the table that match the name."""

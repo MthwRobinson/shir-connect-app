@@ -52,33 +52,41 @@ class FakeNews:
         self.participants = self.database.read_table('participants')
         self.attendees = self.database.read_table('attendees')
         self.members = self.database.read_table('members')
-        self.order = self.database.read_table('orders')
+        self.orders = self.database.read_table('orders')
 
-    def _swap_attendees(self, first_name, last_name, fake_first_name,
-                        fake_last_name, fake_email):
-        """Swaps out real date for fake data in the attendees table."""
-        subset = self._find_name(first_name, last_name, self.attendees)
+    def _swap_people(self, first_name, last_name, fake_first_name,
+                        fake_last_name, fake_email, table):
+        """Swaps out real date for fake data in the people tables."""
+        df = getattr(self, table)
+        subset = self._find_name(first_name, last_name, df)
         for i in subset.index:
-            attendee = dict(subset.loc[i])
+            person = dict(subset.loc[i])
             full_name = ' '.join([first_name, last_name])
-            self.database.update_column(table='attendees',
-                                        item_id=attendee['id'],
+            self.database.update_column(table=table,
+                                        item_id=person['id'],
                                         column='first_name',
                                         value=fake_first_name)
-            self.database.update_column(table='attendees',
-                                        item_id=attendee['id'],
+            self.database.update_column(table=table,
+                                        item_id=person['id'],
                                         column='last_name',
                                         value=fake_last_name)
-            self.database.update_column(table='attendees',
-                                        item_id=attendee['id'],
-                                        column='name',
-                                        value=full_name)
-            self.database.update_column(table='attendees',
-                                        item_id=attendee['id'],
+            self.database.update_column(table=table,
+                                        item_id=person['id'],
                                         column='email',
                                         value=fake_email)
+            if table in ['attendees', 'orders']:
+                self.database.update_column(table=table,
+                                            item_id=person['id'],
+                                            column='name',
+                                            value=full_name)
+            elif table == 'members':
+                self.database.update_column(table='members',
+                                            item_id=person['id'],
+                                            column='nickname',
+                                            value=first_name)
+        
         return list(subset.index)
-
+    
     def _find_name(self, first_name, last_name, table):
         """Finds the rows in the table that match the name."""
         return table[(table['first_name']==first_name)&

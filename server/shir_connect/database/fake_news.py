@@ -49,11 +49,14 @@ class FakeNews:
         updated = []
         for i in events.index:
             event = dict(events.loc[i])
+            if not event['name']:
+                continue
             if ':' in event['name']:
                 prefix = event['name'].split(':')[0] + ':'
                 fake_name = ' '.join([prefix, self._random_name(max_size=5)])
             else:
                 fake_name = self._random_name(max_size=5)
+            fake_name = fake_name.replace("'",'')
             fake_descr = self._random_paragraph(max_size=15)
             msg = 'Changing event name {} to {}'.format(event['name'],
                                                         fake_name)
@@ -78,6 +81,8 @@ class FakeNews:
         updated = []
         for i in venues.index:
             venue = dict(venues.loc[i])
+            if not venue['name']:
+                continue
             fake_name = self._random_name(max_size=2)
             msg = 'Changing venue name {} to {}'.format(venue['name'],
                                                         fake_name)

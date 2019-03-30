@@ -28,6 +28,7 @@ Fake data is generated for the following tables and columns:
             - name
 """
 import logging
+import random
 
 import daiquiri
 from faker import Faker
@@ -41,6 +42,23 @@ class FakeNews:
         self.logger = daiquiri.getLogger(__name__)
         self.database = Database()
         self.faker = Faker()
+
+    def fake_venues(self):
+        """ Generates fake venues for the venues table."""
+        venues = self.database.read_table('venues')
+        updated = []
+        for i in venues.index:
+            venue = dict(venues.loc[i])
+            fake_name = self._random_name()
+            subset = venues[venues['name']==venue['name']]
+            for i in subset.index:
+                venue_ = dict(subset.loc[i])
+                self.database.update_column(table='venues',
+                                            item_id=venue_['id'],
+                                            column='name',
+                                            value="'{}'".format(fake_name))
+                updated.append(i)
+        return updated
 
     def fake_names(self):
         """Generates fake names for the attendees, members, and orders table. """
@@ -121,3 +139,10 @@ class FakeNews:
         """Finds the rows in the table that match the name."""
         return table[(table['first_name']==first_name)&
                      (table['last_name']==last_name)]
+
+    def _random_name(self):
+        """Generates a random name for events and venues. """
+        letters = list(self.faker.catch_phrase())
+        random.shuffle(letters)
+        name = ''.join(letters).replace("'","")
+        return name

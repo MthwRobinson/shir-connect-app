@@ -43,6 +43,13 @@ class FakeNews:
         self.database = Database()
         self.faker = Faker()
 
+    def build_fake_data(self):
+        """ Generates fake data for the database. """
+        self.fake_names()
+        self.fake_events()
+        self.fake_venues()
+        self.database.refresh_views()
+
     def fake_events(self):
         """Generates fake events for the events table."""
         events = self.database.read_table('events')

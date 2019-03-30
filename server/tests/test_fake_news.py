@@ -29,6 +29,7 @@ def fake_news():
     fake_news = FakeNews()
     fake_news.database.read_table = lambda x: read_table(x)
     fake_news.database.update_column = lambda *args, **kwargs: 'Squawk!'
+    fake_news.database.refresh_views = lambda *args, **kwargs: 'Bark!'
     fake_news._get_person_tables()
     return fake_news
 
@@ -86,3 +87,6 @@ def test_fake_venues(fake_news):
 def test_fake_events(fake_news):
     updated = fake_news.fake_events()
     assert set(updated) == {0,1,2,3}
+
+def test_fake_data(fake_news):
+    fake_news.build_fake_data()

@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS {schema}.members (
   postal_code text,
   member_family text,
   member_type text,
-  email text
+  email text,
+  gender text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS members_index ON {schema}.members (id);

@@ -24,6 +24,7 @@ class Database(object):
         
         # Find the path to the file
         self.path = os.path.dirname(os.path.realpath(__file__))
+        self.database_path = os.path.join(self.path,'..','..','..','database')
 
         # Database connection and configurations
         self.materialized_views = conf.MATERIALIZED_VIEWS
@@ -42,7 +43,7 @@ class Database(object):
         self.logger.info('Initializing schema')
         self.initialize_schema()
         self.logger.info('Initializing tables')
-        self.initialize_tables('sql')
+        self.initialize_tables('tables')
         self.logger.info('Initializing views')
         self.initialize_tables('views', drop_views=drop_views)
         
@@ -65,7 +66,7 @@ class Database(object):
 
     def initialize_tables(self, folder='sql', drop_views=False):
         """ Creates the tables for the dashboard data """
-        path = self.path + '/%s/'%(folder)
+        path = self.database_path + '/%s/'%(folder)
         if folder == 'views':
             files = self.materialized_views
         else:
@@ -101,7 +102,7 @@ class Database(object):
 
     def refresh_views(self, test=False):
         """ Refreshes all materialized views """
-        path = self.path + '/views/'
+        path = self.database_path + '/views/'
         files = os.listdir(path)
         for file_ in files:
             if file_.endswith('.sql'):

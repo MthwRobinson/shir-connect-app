@@ -30,16 +30,35 @@ def test_find_name(fake_news):
     assert len(subset) == 2
 
 def test_get_person_tables(fake_news):
-    tables = ['participants', 'attendees', 'members', 'order']
+    tables = ['participants', 'attendees', 'members', 'orders']
     for table in tables:
         df = getattr(fake_news, table)
         assert isinstance(df, pd.core.frame.DataFrame)
         assert len(df) == 6
 
 def test_swap_attendees(fake_news):
-    updated = fake_news._swap_attendees(first_name='Jabber', 
+    updated = fake_news._swap_people(first_name='Jabber', 
                                         last_name='Robinson',
                                         fake_first_name='Big',
                                         fake_last_name='Beak',
-                                        fake_email='bird@flapping.net')
+                                        fake_email='bird@flapping.net',
+                                        table='attendees')
+    assert updated == [0,4]
+
+def test_swap_orders(fake_news):
+    updated = fake_news._swap_people(first_name='Jabber', 
+                                        last_name='Robinson',
+                                        fake_first_name='Big',
+                                        fake_last_name='Beak',
+                                        fake_email='bird@flapping.net',
+                                        table='orders')
+    assert updated == [0,4]
+
+def test_swap_members(fake_news):
+    updated = fake_news._swap_people(first_name='Jabber', 
+                                        last_name='Robinson',
+                                        fake_first_name='Big',
+                                        fake_last_name='Beak',
+                                        fake_email='bird@flapping.net',
+                                        table='members')
     assert updated == [0,4]

@@ -39,7 +39,6 @@ class FakeNews:
 
     def fake_names(self):
         """Generates fake names for the attendees, members, and orders table. """
-
         for i in participants.index:
             participant = dict(participants.loc[i])
             first_name = participant['first_name']
@@ -58,7 +57,27 @@ class FakeNews:
     def _swap_attendees(self, first_name, last_name, fake_first_name,
                         fake_last_name, fake_email):
         """Swaps out real date for fake data in the attendees table."""
-        pass
+        subset = self._find_name(first_name, last_name, self.attendees)
+        for i in subset.index:
+            attendee = dict(subset.loc[i])
+            full_name = ' '.join([first_name, last_name])
+            self.database.update_column(table='attendees',
+                                        item_id=attendee['id'],
+                                        column='first_name',
+                                        value=fake_first_name)
+            self.database.update_column(table='attendees',
+                                        item_id=attendee['id'],
+                                        column='last_name',
+                                        value=fake_last_name)
+            self.database.update_column(table='attendees',
+                                        item_id=attendee['id'],
+                                        column='name',
+                                        value=full_name)
+            self.database.update_column(table='attendees',
+                                        item_id=attendee['id'],
+                                        column='email',
+                                        value=fake_email)
+        return list(subset.index)
 
     def _find_name(self, first_name, last_name, table):
         """Finds the rows in the table that match the name."""

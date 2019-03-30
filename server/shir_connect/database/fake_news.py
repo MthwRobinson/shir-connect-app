@@ -27,6 +27,9 @@ Fake data is generated for the following tables and columns:
         Columns:
             - name
 """
+import logging
+
+import daiquiri
 from faker import Faker
 
 from shir_connect.database.database import Database
@@ -34,6 +37,8 @@ from shir_connect.database.database import Database
 class FakeNews:
     """A class for generating and uploading fake Shir Connect data."""
     def __init__(self):
+        daiquiri.setup(level=logging.INFO)
+        self.logger = daiquiri.getLogger(__name__)
         self.database = Database()
         self.faker = Faker()
 
@@ -49,6 +54,10 @@ class FakeNews:
             fake_first_name = self.faker.first_name()
             fake_last_name = self.faker.last_name()
             fake_email = self.faker.email()
+            msg = 'Changing name {} {} to {} {}'.format(first_name, last_name,
+                                                        fake_first_name,
+                                                        fake_last_name)
+            self.logger.info(msg)    
             for table in people_tables:
                 new_updates = self._swap_people(first_name=first_name, 
                                                 last_name=last_name,
@@ -70,6 +79,14 @@ class FakeNews:
     def _swap_people(self, first_name, last_name, fake_first_name,
                         fake_last_name, fake_email, table):
         """Swaps out real date for fake data in the people tables."""
+        # Need to clean the inputs because apostrophes trips up the
+        # update statement in postgres
+        first_name = first_name.replace("'",'')
+        last_name = last_name.replace("'",'')
+        fake_first_name = fake_first_name.replace("'",'')
+        fake_last_name = fake_last_name.replace("'",'')
+        fake_email = fake_email.replace("'",'')
+
         df = getattr(self, table)
         subset = self._find_name(first_name, last_name, df)
         for i in subset.index:
@@ -78,25 +95,25 @@ class FakeNews:
             self.database.update_column(table=table,
                                         item_id=person['id'],
                                         column='first_name',
-                                        value=fake_first_name)
+                                        value="'{}'".format(fake_first_name))
             self.database.update_column(table=table,
                                         item_id=person['id'],
                                         column='last_name',
-                                        value=fake_last_name)
+                                        value="'{}'".format(fake_last_name))
             self.database.update_column(table=table,
                                         item_id=person['id'],
                                         column='email',
-                                        value=fake_email)
+                                        value="'{}'".format(fake_email))
             if table in ['attendees', 'orders']:
                 self.database.update_column(table=table,
                                             item_id=person['id'],
                                             column='name',
-                                            value=full_name)
+                                            value="'{}'".format(full_name))
             elif table == 'members':
                 self.database.update_column(table='members',
                                             item_id=person['id'],
                                             column='nickname',
-                                            value=first_name)
+                                            value="'{}'".format(first_name))
         
         return list(subset.index)
     

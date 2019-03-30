@@ -90,7 +90,7 @@ def test_events():
     
     url = '/service/events?limit=25&page=2'
     url += '&sort=start_datetime&order=desc'
-    url += '&q=trsty&start_datetime=1900-01-01'
+    url += '&q=a&start_datetime=1900-01-01'
     url += '&end_datetime=2100-01-01'
     user_management.update_access('unittestuser', ['events'])
 

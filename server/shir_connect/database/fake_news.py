@@ -49,7 +49,10 @@ class FakeNews:
         updated = []
         for i in venues.index:
             venue = dict(venues.loc[i])
-            fake_name = self._random_name()
+            fake_name = self._random_name(max_size=2)
+            msg = 'Changing venue name {} to {}'.format(venue['name'],
+                                                        fake_name)
+            self.logger.info(msg)
             subset = venues[venues['name']==venue['name']]
             for i in subset.index:
                 venue_ = dict(subset.loc[i])
@@ -140,9 +143,11 @@ class FakeNews:
         return table[(table['first_name']==first_name)&
                      (table['last_name']==last_name)]
 
-    def _random_name(self):
+    def _random_name(self, max_size):
         """Generates a random name for events and venues. """
-        letters = list(self.faker.catch_phrase())
+        phrase = self.faker.catch_phrase().split()
+        short_phrase = ' '.join(phrase[:max_size])
+        letters = list(short_phrase)
         random.shuffle(letters)
-        name = ''.join(letters).replace("'","")
-        return name
+        name = ''.join(letters)
+        return name.title()

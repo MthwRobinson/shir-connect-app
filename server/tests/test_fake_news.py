@@ -7,7 +7,8 @@ from shir_connect.database.fake_news import FakeNews
 def fake_news():
     def read_table(name):
         if name in ['participants', 'attendees', 'members', 'orders']:
-            return pd.DataFrame({'first_name': ['Jabber', 'Chester',
+            return pd.DataFrame({'id': [0,1,2,3,4,5],
+                                 'first_name': ['Jabber', 'Chester',
                                                 'Missy', 'Cody', 
                                                 'Jabber', 'Shenzy'],
                                  'last_name': ['Robinson', 'Shindhelm',
@@ -17,6 +18,7 @@ def fake_news():
     fake_news = FakeNews()
     fake_news.database.read_table = lambda x: read_table(x)
     fake_news.database.update_column = lambda *args, **kwargs: 'Squawk!'
+    fake_news._get_person_tables()
     return fake_news
 
 def test_find_name(fake_news):
@@ -28,9 +30,16 @@ def test_find_name(fake_news):
     assert len(subset) == 2
 
 def test_get_person_tables(fake_news):
-    fake_news._get_person_tables()
     tables = ['participants', 'attendees', 'members', 'order']
     for table in tables:
         df = getattr(fake_news, table)
         assert isinstance(df, pd.core.frame.DataFrame)
         assert len(df) == 6
+
+def test_swap_attendees(fake_news):
+    updated = fake_news._swap_attendees(first_name='Jabber', 
+                                        last_name='Robinson',
+                                        fake_first_name='Big',
+                                        fake_last_name='Beak',
+                                        fake_email='bird@flapping.net')
+    assert updated == [0,4]

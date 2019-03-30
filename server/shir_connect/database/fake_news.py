@@ -39,13 +39,26 @@ class FakeNews:
 
     def fake_names(self):
         """Generates fake names for the attendees, members, and orders table. """
-        for i in participants.index:
-            participant = dict(participants.loc[i])
+        self._get_person_tables()
+        people_tables = ['attendees', 'members', 'orders']
+        updated = {k: [] for k in people_tables}
+        for i in self.participants.index:
+            participant = dict(self.participants.loc[i])
             first_name = participant['first_name']
             last_name = participant['last_name']
             fake_first_name = self.faker.first_name()
             fake_last_name = self.faker.last_name()
             fake_email = self.faker.email()
+            for table in people_tables:
+                new_updates = self._swap_people(first_name=first_name, 
+                                                last_name=last_name,
+                                                fake_first_name=fake_first_name,
+                                                fake_last_name=fake_last_name,
+                                                fake_email=fake_email,
+                                                table=table)
+                for update in new_updates:
+                    updated[table].append(update)
+        return updated
 
     def _get_person_tables(self):
         """Pulls person information from the database.""" 

@@ -62,3 +62,8 @@ def test_swap_members(fake_news):
                                         fake_email='bird@flapping.net',
                                         table='members')
     assert updated == [0,4]
+
+def test_fake_names(fake_news):
+    updated = fake_news.fake_names()
+    for key in updated:
+        assert set(updated[key]) == {0,1,2,3,4,5}

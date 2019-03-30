@@ -255,13 +255,8 @@ class Database(object):
             UPDATE {schema}.{table}
             SET {column} = {value}
             WHERE id = '{item_id}'
-        """.format(
-            schema=self.schema, 
-            table=table, 
-            column=column, 
-            value=value,
-            item_id=item_id
-        )
+        """.format(schema=self.schema, table=table, column=column, 
+                   value=value, item_id=item_id)
         self.run_query(sql)
 
     def last_event_date(self):

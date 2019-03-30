@@ -43,8 +43,37 @@ class FakeNews:
         self.database = Database()
         self.faker = Faker()
 
+    def fake_events(self):
+        """Generates fake events for the events table."""
+        events = self.database.read_table('events')
+        updated = []
+        for i in events.index:
+            event = dict(events.loc[i])
+            if ':' in event['name']:
+                prefix = event['name'].split(':')[0] + ':'
+                fake_name = ' '.join([prefix, self._random_name(max_size=5)])
+            else:
+                fake_name = self._random_name(max_size=5)
+            fake_descr = self._random_paragraph(max_size=15)
+            msg = 'Changing event name {} to {}'.format(event['name'],
+                                                        fake_name)
+            self.logger.info(msg)
+            subset = events[events['name']==event['name']]
+            for j in subset.index:
+                event_ = dict(subset.loc[j])
+                self.database.update_column(table='events',
+                                            item_id=event_['id'],
+                                            column='name',
+                                            value="'{}'".format(fake_name))
+                self.database.update_column(table='events',
+                                            item_id=event_['id'],
+                                            column='description',
+                                            value="'{}'".format(fake_descr))
+                updated.append(j)
+        return updated
+
     def fake_venues(self):
-        """ Generates fake venues for the venues table."""
+        """Generates fake venues for the venues table."""
         venues = self.database.read_table('venues')
         updated = []
         for i in venues.index:
@@ -54,13 +83,13 @@ class FakeNews:
                                                         fake_name)
             self.logger.info(msg)
             subset = venues[venues['name']==venue['name']]
-            for i in subset.index:
-                venue_ = dict(subset.loc[i])
+            for j in subset.index:
+                venue_ = dict(subset.loc[j])
                 self.database.update_column(table='venues',
                                             item_id=venue_['id'],
                                             column='name',
                                             value="'{}'".format(fake_name))
-                updated.append(i)
+                updated.append(j)
         return updated
 
     def fake_names(self):
@@ -143,11 +172,23 @@ class FakeNews:
         return table[(table['first_name']==first_name)&
                      (table['last_name']==last_name)]
 
-    def _random_name(self, max_size):
-        """Generates a random name for events and venues. """
+    def _random_name(self, max_size=2):
+        """Generates a random name for events and venues."""
         phrase = self.faker.catch_phrase().split()
         short_phrase = ' '.join(phrase[:max_size])
         letters = list(short_phrase)
         random.shuffle(letters)
         name = ''.join(letters)
         return name.title()
+
+    def _random_paragraph(self, max_size=15):
+        """Generates a random sentence for event descriptions."""
+        sentences = self.faker.sentences(max_size)
+        scrambled_sentences = []
+        for sentence in sentences:
+            sentence_list = list(sentence)
+            random.shuffle(sentence_list)
+            scrambled_sentence = ''.join(sentence_list).replace('.','')
+            scrambled_sentences.append(scrambled_sentence.capitalize())
+        paragraph = '. '.join(scrambled_sentences)
+        return paragraph

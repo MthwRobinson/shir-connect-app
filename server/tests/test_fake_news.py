@@ -17,6 +17,14 @@ def fake_news():
         elif name == 'venues':
             return pd.DataFrame({'id': [0,1,2,3],
                                  'name': ['Squawk', 'Bark', 'Moo', 'Quack']})
+        elif name == 'events':
+            return pd.DataFrame({'id': [0,1,2,3],
+                                 'name': ['Rodef 2100: Squawk', 'Bark', 
+                                          'WOTRS: hooray', 'Quack'],
+                                 'description': ['Lots of flappy birds!',
+                                                 'Lots of barky dogs!',
+                                                 'Lots friendly camels!',
+                                                 'Lots of hungry ducks!']})
 
     fake_news = FakeNews()
     fake_news.database.read_table = lambda x: read_table(x)
@@ -73,4 +81,8 @@ def test_fake_names(fake_news):
 
 def test_fake_venues(fake_news):
     updated = fake_news.fake_venues()
+    assert set(updated) == {0,1,2,3}
+
+def test_fake_events(fake_news):
+    updated = fake_news.fake_events()
     assert set(updated) == {0,1,2,3}

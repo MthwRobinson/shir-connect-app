@@ -24,8 +24,8 @@ test_reqs = [
     'ipython',
     'pytest',
     'pytest-cov',
-    'pylint'
-    'pytest-sugar',
+    'pylint',
+    'pytest-sugar'
 ]
 
 setup(

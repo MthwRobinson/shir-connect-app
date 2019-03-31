@@ -15,7 +15,7 @@ import pandas as pd
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.utils import demo_mode, validate_inputs
+from shir_connect.services.utils import validate_inputs
 
 trends = Blueprint('trends', __name__)
 
@@ -209,7 +209,6 @@ class Trends(object):
             response[age_group]['count'].append(row['distinct_attendees'])
         return response
 
-    @demo_mode([{'results': ['name']}]) 
     def get_participation(self, age_group, top='member', limit=25):
         """ Pulls the top events or attendees by age group """
         event_table = EVENT_TABLE.format(schema=self.database.schema)

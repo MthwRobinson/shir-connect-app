@@ -164,7 +164,6 @@ class Events(object):
 
         self.database = Database()
    
-    @demo_mode([{'results': ['name', 'venue_name']}])
     def get_events(self, limit=None, page=None, order=None, 
                    sort=None, q=None, where=[]):
         """ Fetches the most recent events from the database """
@@ -189,18 +188,8 @@ class Events(object):
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
-    @demo_mode([
-        'address_1',
-        'address_2',
-        'city',
-        'country',
-        'description',
-        'name',
-        'region',
-        'venue_name',
-        'postal_code',
-        {'attendees': ['email', 'first_name', 'last_name', 'name']}
-    ])
+    @demo_mode(['address_1', 'address_2', 'city',
+                'country', 'region', 'postal_code'])
     def get_event(self, event_id):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
@@ -436,7 +425,6 @@ class Events(object):
         """ Converts a dataframe row into a geojson feature """
         # Mask the event name and address if the app is in dev mode
         if conf.DEMO_MODE:
-            row['event_name'] = 'EVENT_NAME'
             row['address_1'] = 'ADDRESS'
             row['city'] = 'CITY'
 

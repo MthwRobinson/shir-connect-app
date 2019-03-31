@@ -19,6 +19,7 @@ test:
     - chmod 0600 ~/.pgpass
     - cd server
     - pip install -e .[test]
+    - shir_connect initialize --drop_views
     - py.test --cov=shir_connect
   coverage: '/TOTAL.*\s+(\d+%)$/'
 

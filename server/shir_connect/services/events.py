@@ -46,7 +46,8 @@ def get_event(event_id):
 
 @events.route('/service/events', methods=['GET'])
 @jwt_required
-@validate_inputs()
+@validate_inputs(fields={'start_date': {'type': 'date'},
+                         'end_date': {'type': 'date'}})
 def get_events():
     """ Pulls events from the database """
     event_manager = Events()
@@ -73,6 +74,18 @@ def get_events():
     sort = request.args.get('sort')
     if not sort:
         sort = 'start_datetime'
+
+    where = []
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    if start_date or end_date:
+        conditions = {}
+        if start_date:
+            conditions['>='] = "'{}'".format(start_date)
+        if end_date:
+            conditions['<'] = "'{}'".format(end_date)
+        where.append(('start_datetime', conditions))
+
     q = request.args.get('q')
 
     response = event_manager.get_events(
@@ -80,7 +93,8 @@ def get_events():
         page=page,
         order=order,
         sort=sort,
-        q=q
+        q=q,
+        where=where
     )
     return jsonify(response)
 
@@ -150,8 +164,8 @@ class Events(object):
 
         self.database = Database()
    
-    @demo_mode([{'results': ['name', 'venue_name']}])
-    def get_events(self, limit=None, page=None, order=None, sort=None, q=None):
+    def get_events(self, limit=None, page=None, order=None, 
+                   sort=None, q=None, where=[]):
         """ Fetches the most recent events from the database """
         if q:
             query = ('name', q)
@@ -163,27 +177,19 @@ class Events(object):
             page=page,
             order=order,
             sort=sort,
-            query=query
+            query=query,
+            where=where
         )
-        count = self.database.count_rows('event_aggregates', query=query)
+        count = self.database.count_rows('event_aggregates', query=query,
+                                         where=where)
 
         pages = int((count/limit)) + 1
         events = self.database.to_json(df)
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
-    @demo_mode([
-        'address_1',
-        'address_2',
-        'city',
-        'country',
-        'description',
-        'name',
-        'region',
-        'venue_name',
-        'postal_code',
-        {'attendees': ['email', 'first_name', 'last_name', 'name']}
-    ])
+    @demo_mode(['address_1', 'address_2', 'city',
+                'country', 'region', 'postal_code'])
     def get_event(self, event_id):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
@@ -419,7 +425,6 @@ class Events(object):
         """ Converts a dataframe row into a geojson feature """
         # Mask the event name and address if the app is in dev mode
         if conf.DEMO_MODE:
-            row['event_name'] = 'EVENT_NAME'
             row['address_1'] = 'ADDRESS'
             row['city'] = 'CITY'
 

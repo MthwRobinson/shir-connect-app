@@ -15,7 +15,7 @@ import pandas as pd
 
 from shir_connect.database.database import Database
 import shir_connect.configuration as conf
-from shir_connect.services.utils import demo_mode, validate_inputs
+from shir_connect.services.utils import validate_inputs
 
 trends = Blueprint('trends', __name__)
 
@@ -31,7 +31,7 @@ EVENT_TABLE = """
             '-', date_part('month', start_datetime)
         ) as event_month,
         date_part('year', start_datetime) as event_year,
-        date_part('year', start_datetime) - date_part('year', birth_date) as age
+        DATE_PART('year', AGE(start_datetime, birth_date)) as age
     FROM {schema}.attendees a
     INNER JOIN {schema}.members_view b
     ON (LOWER(a.first_name)=LOWER(b.first_name) 
@@ -209,7 +209,6 @@ class Trends(object):
             response[age_group]['count'].append(row['distinct_attendees'])
         return response
 
-    @demo_mode([{'results': ['name']}]) 
     def get_participation(self, age_group, top='member', limit=25):
         """ Pulls the top events or attendees by age group """
         event_table = EVENT_TABLE.format(schema=self.database.schema)

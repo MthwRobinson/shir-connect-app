@@ -24,6 +24,7 @@ class Database(object):
         
         # Find the path to the file
         self.path = os.path.dirname(os.path.realpath(__file__))
+        self.database_path = os.path.join(self.path,'..','..','..','database')
 
         # Database connection and configurations
         self.materialized_views = conf.MATERIALIZED_VIEWS
@@ -42,7 +43,7 @@ class Database(object):
         self.logger.info('Initializing schema')
         self.initialize_schema()
         self.logger.info('Initializing tables')
-        self.initialize_tables('sql')
+        self.initialize_tables('tables')
         self.logger.info('Initializing views')
         self.initialize_tables('views', drop_views=drop_views)
         
@@ -65,7 +66,7 @@ class Database(object):
 
     def initialize_tables(self, folder='sql', drop_views=False):
         """ Creates the tables for the dashboard data """
-        path = self.path + '/%s/'%(folder)
+        path = self.database_path + '/%s/'%(folder)
         if folder == 'views':
             files = self.materialized_views
         else:
@@ -101,7 +102,7 @@ class Database(object):
 
     def refresh_views(self, test=False):
         """ Refreshes all materialized views """
-        path = self.path + '/views/'
+        path = self.database_path + '/views/'
         files = os.listdir(path)
         for file_ in files:
             if file_.endswith('.sql'):
@@ -254,13 +255,8 @@ class Database(object):
             UPDATE {schema}.{table}
             SET {column} = {value}
             WHERE id = '{item_id}'
-        """.format(
-            schema=self.schema, 
-            table=table, 
-            column=column, 
-            value=value,
-            item_id=item_id
-        )
+        """.format(schema=self.schema, table=table, column=column, 
+                   value=value, item_id=item_id)
         self.run_query(sql)
 
     def last_event_date(self):
@@ -339,10 +335,9 @@ class Database(object):
             df = pd.read_sql(sql, self.connection)
             return df
     
-    def count_rows(self, table, query=[], where=[]):
+    def count_rows(self, table, **kwargs):
         """ Returns the number of rows, given a query. """
-        count = self.read_table(table=table, query=query,
-                                where=where, count=True)
+        count = self.read_table(table=table, count=True, **kwargs)
         return count
 
     def to_json(self, df):

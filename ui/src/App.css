@@ -1,6 +1,3 @@
-.App {
-}
-
 .menu-content {
   font-family: 'Source Sans Pro', sans-serif;
   color: black;
@@ -25,8 +22,25 @@
   text-decoration: none;
 }
 
+.search-box {
+  max-width: 140px;
+}
+
+.search-term-row {
+  padding-right: 6%;
+  padding-left: 2%;
+  padding-bottom: 5px;
+  font-size: 16px;
+}
+
+#search-term-list {
+  display: inline-block;
+  padding-top: 5px;
+}
+
 .search-term-pill {
-  margin-right: 10px;
+  margin-right: 5px;
+  margin-left: 5px;
   margin-top: 3px;
   font-size: 11px;
   background-color: #3a9fbf;
@@ -43,4 +57,21 @@
 
 .search-term-times {
   margin-top: 2px;
+}
+
+.filter-form {
+  margin-right: 5px;
+}
+
+.filter-form-date-input {
+  max-width: 110px;
+}
+
+.filter-form-age-input {
+  max-width: 70px;
+}
+
+.filter-form-label {
+  margin-left: 5px;
+  margin-right: 5px;
 }

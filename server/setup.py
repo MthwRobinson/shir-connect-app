@@ -19,7 +19,14 @@ reqs = [
     'xlrd'
 ]
 
-test_reqs = ['ipython', 'pytest', 'pytest-sugar', 'pytest-cov', 'pylint']
+test_reqs = [
+    'Faker',
+    'ipython',
+    'pytest',
+    'pytest-cov',
+    'pylint',
+    'pytest-sugar'
+]
 
 setup(
     name='shir_connect',

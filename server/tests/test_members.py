@@ -2,6 +2,7 @@ from io import StringIO
 import json
 
 import pandas as pd
+import pytest
 
 from shir_connect.services.app import app
 from shir_connect.services.members import Members
@@ -9,6 +10,21 @@ from shir_connect.services.user_management import UserManagement
 import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
+
+@pytest.fixture
+def test_participant():
+    members = Members()
+    sql = """
+        SELECT first_name, last_name
+        FROM {schema}.participants
+        WHERE first_name IS NOT NULL
+        AND last_name IS NOT NULL
+        ORDER BY first_name DESC, last_name DESC
+        LIMIT 1
+    """.format(schema=members.database.schema)
+    df = pd.read_sql(sql, members.database.connection)
+    test_participant = dict(df.loc[0])
+    return test_participant
 
 def test_member_authorize():
     user_management = UserManagement()
@@ -64,7 +80,7 @@ def test_members():
     
     url = '/service/members?limit=25&page=2'
     url += '&sort=last_event_date&order=desc'
-    url += '&q=smuckler'
+    url += '&q=smuckler&min_age=4&max_age=100'
     
     # The user must have access to members
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
@@ -86,7 +102,7 @@ def test_members():
     user = user_management.get_user('unittestuser')
     assert user == None
 
-def test_member():
+def test_member(test_participant):
     user_management = UserManagement()
     user_management.delete_user('unittestuser')
     user_management.add_user('unittestuser', 'testPassword!')
@@ -113,12 +129,12 @@ def test_member():
     assert response.status_code == 404
     
     # The parametes must include first name and last name
-    url += '?firstName=danielle'
+    url += '?firstName=' + test_participant['first_name']
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 404
     
     # Success!
-    url += '&lastName=agress'
+    url += '&lastName=' + test_participant['last_name']
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
     assert 'first_name' in response.json

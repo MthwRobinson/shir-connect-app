@@ -5,9 +5,11 @@ import {
   Form,
   FormControl,
   FormGroup,
+  Label,
   Row,
   Table
 } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
@@ -21,6 +23,7 @@ import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './Events.css';
+import "react-datepicker/dist/react-datepicker.css";
 
 const LIMIT = 25
 
@@ -37,11 +40,15 @@ class Events extends Component {
         searchTerms: [],
         sortColumn: 'start_datetime',
         sortOrder: 'desc',
-        defaultEventLocation: null
+        defaultEventLocation: null,
+        startDate: null,
+        endDate: new Date() 
       }
 
       // Bindings for search bar
       this.handleQuery = this.handleQuery.bind(this)
+      this.handleStartDate = this.handleStartDate.bind(this)
+      this.handleEndDate = this.handleEndDate.bind(this)
     }
   
     componentDidMount(){
@@ -93,6 +100,14 @@ class Events extends Component {
       url += '&q='+searchTerms.join(' ');
       url += '&order='+sortOrder;
       url += '&sort='+sortCol;
+      if(this.state.startDate){
+        const filterStart = moment(this.state.startDate).format('YYYY-MM-DD')
+        url += '&start_date='+filterStart;
+      }
+      if(this.state.endDate){
+        const filterEnd = moment(this.state.endDate).format('YYYY-MM-DD')
+        url += '&end_date='+filterEnd;
+      }
       
       axios.get(url)
         .then(res => {
@@ -157,6 +172,13 @@ class Events extends Component {
                      searchTerms);
     }
 
+    handleFilter = (event) => {
+      // Handles filtering
+      event.preventDefault();
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
+    }
+
     handleRemoveTerm = (removeTerm) => {
       // Removes search term from the search terms list
       let searchTerms = [...this.state.searchTerms];
@@ -186,9 +208,18 @@ class Events extends Component {
 
     handleQuery(event){
       // Updates the query value in the state
-      this.setState({
-        query: event.target.value
-      });
+      this.setState({query: event.target.value});
+    }
+
+    handleStartDate(event){
+      // Updates the start date in the state
+      console.log(moment(event).format('YYYY-MM-DD'));
+      this.setState({startDate: event});
+    }
+  
+    handleEndDate(event){
+      // Updates the start date in the state
+      this.setState({endDate: event});
     }
 
     renderPageCount = () => {
@@ -219,7 +250,7 @@ class Events extends Component {
         <div className='paging pull-left'>
             {leftCaret}
             {this.state.page}/{this.state.pages}
-            {rightCaret}
+            {rightCaret}{' '}
         </div>
       )
     }
@@ -290,6 +321,65 @@ class Events extends Component {
       )
     }
 
+    renderFilter = () => {
+      // Renders the filter options
+      return(
+        <div className='pull-right filter-form'>
+          <Form onSubmit={this.handleFilter} inline>
+            <FormGroup>
+              <Label className="filter-form-label">Date:</Label>
+              <DatePicker
+                selected={this.state.startDate}
+                onChange={this.handleStartDate}
+                maxDate={this.state.endDate}
+                className="form-control filter-form-date-input"
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label className="filter-form-label">-</Label>
+              <DatePicker
+                selected={this.state.endDate}
+                onChange={this.handleEndDate}
+                minDate={this.state.startDate}
+                className="form-control filter-form-date-input"
+              />
+            </FormGroup>
+            <Button 
+              className='search-button'
+              type="submit"
+              data-tip="Filters the table results."
+            >Filter</Button>
+          </Form>
+        </div>
+      )
+    }
+
+    renderSearch = () => {
+      // Renders the search bar
+      return (
+        <div>
+          <div className='pull-right'>
+            <Form onSubmit={this.handleSearch} inline>
+              <FormGroup>
+                <FormControl
+                  className='search-box'
+                  value={this.state.query}
+                  onChange={this.handleQuery}
+                  type="text" 
+                />
+              </FormGroup>
+              <Button 
+                className='search-button'
+                type="submit"
+                data-tip="Returns searchs fesults for the event name."
+              >Search</Button>
+            </Form>
+            <ReactToolTip />
+          </div>
+        </div>
+      )
+    }
+
     renderSearchTermPills = () => {
       // Renders the pill buttons for the active search terms
       let searchTermPills = [];
@@ -303,7 +393,6 @@ class Events extends Component {
         </div>)
       }
       return searchTermPills
-
     }
 
     render() {
@@ -319,6 +408,8 @@ class Events extends Component {
       }
 
       let pageCount = this.renderPageCount();
+      let search = this.renderSearch();
+      let filter = this.renderFilter();
       let searchTermPills = this.renderSearchTermPills();
 
       return (
@@ -327,7 +418,7 @@ class Events extends Component {
           <div className="Events">
             <div className='events-header'>
               <h2>
-                Events ({this.state.count})
+                Events ({this.state.count} total)
                 <i 
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
@@ -341,26 +432,16 @@ class Events extends Component {
             </div>
             <div className='event-header'>
               {pageCount}
-              <div className='pull-right'>
-                <Form onSubmit={this.handleSearch} inline>
-                  <FormGroup>
-                    <FormControl 
-                      value={this.state.query}
-                      onChange={this.handleQuery}
-                      type="text" 
-                    />
-                  </FormGroup>
-                  <Button 
-                    className='search-button'
-                    type="submit"
-                    data-tip="Returns searchs fesults for the event name."
-                  >Search</Button>
-                </Form>
-                <ReactToolTip />
-              </div>
+              {search}
+              {filter}
+            </div>
+            <div className='search-term-row pull-right'>
+              {searchTermPills.length > 0 
+                ? <span id='search-term-list'><b>Search Terms:</b></span> 
+                : null}
               {searchTermPills}
             </div>
-              {table}
+            {table}
           </div>
         </div>
       );

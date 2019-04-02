@@ -15,6 +15,7 @@ modules:
   - members
   - trends
   - map
+  - report
 
 location:
   name: Temple Rodef Shalom

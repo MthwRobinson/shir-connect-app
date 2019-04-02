@@ -39,6 +39,7 @@ class ManageUsers extends Component {
         members: false,
         trends: false,
         map: false,
+        report: false,
         deleteModalOpen: false,
         deleteUsername: '',
         modRole: 'standard',
@@ -46,6 +47,7 @@ class ManageUsers extends Component {
         modMembers: false,
         modTrends: false,
         modMap: false,
+        modReport: false,
         modUsername: '',
         resetUsername: '',
         resetPassword: '',
@@ -68,6 +70,7 @@ class ManageUsers extends Component {
       this.handleMembers = this.handleMembers.bind(this);
       this.handleTrends = this.handleTrends.bind(this);
       this.handleMap = this.handleMap.bind(this);
+      this.handleReport = this.handleReport.bind(this);
 
       // Bindings for the modify user form
       this.handleModSubmit = this.handleModSubmit.bind(this);
@@ -76,6 +79,7 @@ class ManageUsers extends Component {
       this.handleModMembers = this.handleModMembers.bind(this);
       this.handleModTrends = this.handleModTrends.bind(this);
       this.handleModMap = this.handleModMap.bind(this);
+      this.handleModReport = this.handleModReport.bind(this);
 
       // Bindings for reset password form
 
@@ -124,6 +128,9 @@ class ManageUsers extends Component {
       }
       if(this.state.map){
         modules.push('map');
+      }
+      if(this.state.report){
+        modules.push('report');
       }
       const data = {
         username: this.state.username,
@@ -182,6 +189,9 @@ class ManageUsers extends Component {
       }
       if(this.state.modMap){
         modules.push('map');
+      }
+      if(this.state.modReport){
+        modules.push('report');
       }
       const data = {
         username: this.state.modUsername,
@@ -269,6 +279,11 @@ class ManageUsers extends Component {
     handleMap(event){
       // Updates the map checkbox
       this.setState({ map: event.target.checked });
+    }
+  
+    handleReport(event){
+      // Updates the report checkbox
+      this.setState({ report: event.target.checked });
     }
 
     handleAddSubmit(event){
@@ -384,6 +399,13 @@ class ManageUsers extends Component {
                     className='form-check-box' 
                   inline>
                     {' '}Map
+                  </Checkbox><br/>
+                  <Checkbox 
+                    checked={this.state.report}
+                    onChange={this.handleReport}
+                    className='form-check-box' 
+                  inline>
+                    {' '}Report
                   </Checkbox>
                 </FormGroup>
                 {msg}
@@ -486,6 +508,11 @@ class ManageUsers extends Component {
       // Updates the map checkbox
       this.setState({ modMap: event.target.checked });
     }
+  
+    handleModReport(event){
+      // Updates the report checkbox
+      this.setState({ modReport: event.target.checked });
+    }
 
     handleModSubmit(event){
       // Posts user updates to the database
@@ -575,6 +602,13 @@ class ManageUsers extends Component {
                     className='form-check-box' 
                   inline>
                     {' '}Map
+                  </Checkbox><br/>
+                  <Checkbox 
+                    checked={this.state.modReport}
+                    onChange={this.handleModReport}
+                    className='form-check-box' 
+                  inline>
+                    {' '}Report
                   </Checkbox>
                 </FormGroup>
                 <Button

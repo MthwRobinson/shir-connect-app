@@ -22,7 +22,7 @@
     "title": "Age Group Trends",
     "icon" : "fa fa-line-chart",
     "bullets": [
-      "View trends in age group participation.",
+      "Evaluate engagement trends over time.",
       "Export plots to include in presentations."
     ],
     "link": "/trends"
@@ -31,10 +31,20 @@
     "title": "Event Map",
     "icon" : "fa fa-globe",
     "bullets": [
-      "View a map that shows where events take place.",
+      "See where your events take place on a heat map.",
       "Export maps to include in presentations."
     ],
     "link": "/map",
     "accessGroup": "map"
+  },
+  "report": {
+    "title": "Report",
+    "icon" : "fa fa-book",
+    "bullets": [
+      "Evaluate engagement performance.",
+      "See who's new across different age groups."
+    ],
+    "link": "/report",
+    "accessGroup": "report"
   }
 }

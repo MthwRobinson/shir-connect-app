@@ -1,1 +1,6 @@
-.Reporting {}
+.Report {
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-bottom: 30px;
+  text-align: left;
+}

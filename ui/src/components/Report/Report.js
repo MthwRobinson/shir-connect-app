@@ -44,7 +44,6 @@ class Report extends Component {
               />
             </h2><hr/>
           </div>
-          <AgeGroupAttendance />
         </div>
       </div>
     );

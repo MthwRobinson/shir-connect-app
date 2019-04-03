@@ -1,37 +1,61 @@
 // Renders the component for the Report screen
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Nav } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import Header from './../Header/Header';
+import Loading from './../Loading/Loading';
 
 import './Report.css';
 
 class Report extends Component {
   state = {
-    loading: true
+    loading: false,
+    activeTab: 'attendees'
   }
   
   componentDidMount(){
     // Checks to make sure the user has access to the 
-    // trends access group
-    const url = '/service/trends/authorize';
-    axios.get(url)
-      .then(res => {
-        // Refresh the token to keep the session active
-        refreshAccessToken();
-      })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        } else if(err.response.status===403){
-          this.props.history.push('/forbidden');
-        }
-      })
+    refreshAccessToken();
+  }
+
+  switchTab = (tab) => {
+    // Toggles between different report tabs
+    this.setState({activeTab: tab});
   }
 
   render() {
+    let body = null
+    if(this.state.loading){
+      body = (<div className="event-loading"><Loading /></div>)
+    } else {
+      let tabStyle = {
+        'report': 'record-tab',
+        'attendees': 'record-tab',
+        'events': 'record-tab'
+      }
+      const activeTab = this.state.activeTab;
+      tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
+
+      body = (
+          <Nav bsStyle="tabs" className="record-tabs">
+            <li eventKey="report" 
+                className={tabStyle['report']}
+                onClick={()=>this.switchTab('report')}>Report</li>
+            <li eventKey="attendees" 
+                className={tabStyle['attendees']}
+                onClick={()=>this.switchTab('attendees')}
+            >Attendees</li>
+            <li eventKey="events"
+                className={tabStyle['events']}
+                onClick={()=>this.switchTab('events')}
+            >Events</li>
+          </Nav>
+      )
+    }
+
     return (
       <div>
         <Header />
@@ -44,6 +68,7 @@ class Report extends Component {
               />
             </h2><hr/>
           </div>
+          {body}
         </div>
       </div>
     );

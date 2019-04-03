@@ -265,6 +265,54 @@ class Events:
         response = {'results': features, 'count': len(features)}
         return response
 
+    def event_group_counts(self, start, end):
+        """Returns the counts for each event group in the given date range
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+
+        Response
+        --------
+        counts: dict
+        """
+        counts = {}
+        for event_group in conf.EVENT_GROUPS:
+            count = self.count_events(start, end, query=event_group)
+            counts[event_group] = count
+        counts['All'] = self.count_events(start, end)
+        return counts
+
+    def count_events(self, start, end, query=None):
+        """Counts the number of attendees meeting the search criteria
+        in the given range.
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+        query: str
+            a search term
+
+        Returns
+        -------
+        count: int
+        """
+        start = "'{}'".format(start)
+        end = "'{}'".format(end)
+        if query:
+            query = ('name', query)
+        count = self.database.count_rows('event_aggregates', query=query,
+                                         where=[('start_datetime', {'>=': start, 
+                                                                    '<': end})])
+        return count
+
+
 def build_feature(row):
     """ Converts a dataframe row into a geojson feature """
     # Mask the event name and address if the app is in dev mode

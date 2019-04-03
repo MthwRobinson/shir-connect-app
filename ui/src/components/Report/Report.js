@@ -13,7 +13,7 @@ import './Report.css';
 class Report extends Component {
   state = {
     loading: false,
-    activeTab: 'attendees'
+    activeTab: 'report'
   }
   
   componentDidMount(){

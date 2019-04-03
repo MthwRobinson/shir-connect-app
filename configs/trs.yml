@@ -28,6 +28,19 @@ location:
   longitude: -77.173588
   postal_code: 22043
 
+event_groups:
+  - Food 4 Thought
+  - TRSNS
+  - Rodef 2100
+  - WoTRS
+  - Parent Workshop
+  - Renaissance
+  - "Feed 'Em Fridays"
+  - Shabbat Guests
+  - Lox and Lecture
+  - Tot Shabbat
+  - TRS Tents
+
 age_groups:
   College:
     min: 18

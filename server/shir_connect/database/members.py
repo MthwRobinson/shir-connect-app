@@ -1,0 +1,177 @@
+""" Class for pulling member information from the database. """
+import logging
+
+import daiquiri
+import pandas as pd
+import numpy as np
+
+import shir_connect.configuration as conf
+from shir_connect.database.database import Database
+from shir_connect.database.member_loader import MemberLoader
+
+class Members:
+    """ Class that handle database operations for members """
+    def __init__(self, database=None):
+        daiquiri.setup(level=logging.INFO)
+        self.logger = daiquiri.getLogger(__name__)
+
+        self.database = database if database else Database()
+        self.member_loader = MemberLoader(database=database)
+
+        self.allowed_extensions = conf.ALLOWED_EXTENSIONS
+
+    def get_member(self, first_name, last_name):
+        """ Pulls the information for a member """
+        sql = """
+            SELECT DISTINCT
+                CASE
+                    WHEN a.first_name IS NOT NULL then INITCAP(a.first_name)
+                    ELSE INITCAP(c.first_name)
+                END as first_name,
+                CASE
+                    WHEN a.last_name IS NOT NULL then INITCAP(a.last_name)
+                    ELSE INITCAP(c.last_name)
+                END as last_name,
+                DATE_PART('year', AGE(now(), birth_date)) as age,
+                CASE
+                    WHEN c.email IS NOT NULL THEN c.email
+                    ELSE a.email
+                END as email,
+                CASE
+                    WHEN c.first_name IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END as is_member,
+                membership_date
+            FROM {schema}.members_view c
+            FULL JOIN {schema}.attendees a
+            ON (lower(a.first_name) = lower(c.first_name)
+            AND lower(a.last_name) = lower(c.last_name))
+            LEFT JOIN {schema}.events b
+            ON a.event_id = b.id
+            WHERE (
+                (
+                    lower(a.first_name) = lower('{first_name}')
+                    AND lower(a.last_name) = lower('{last_name}')
+                ) OR
+                (
+                    lower(c.first_name) = lower('{first_name}')
+                    AND lower(c.last_name) = lower('{last_name}')
+
+                )
+            )
+        """.format(
+            schema=self.database.schema,
+            first_name=first_name,
+            last_name=last_name
+        )
+
+        df = pd.read_sql(sql, self.database.connection)
+        df = df.where((pd.notnull(df)), None)
+        if len(df) > 0:
+            col_to_string = ['membership_date']
+            member = dict(df.loc[0])
+            for column in member.keys():
+                if type(member[column]) == int:
+                    col_to_string.append(column)
+                elif isinstance(member[column], np.int64):
+                    col_to_string.append(column)
+                elif member[column] in [True, False]:
+                    col_to_string.append(column)
+                if column in col_to_string:
+                    member[column] = str(member[column])
+            member['events'] = self.get_member_events(first_name, last_name)
+            return member
+        else:
+            return None
+
+    def get_member_events(self, first_name, last_name):
+        """ Pulls information for events a member has attended """
+        sql = """
+            SELECT DISTINCT
+                b.id as event_id,
+                b.start_datetime,
+                b.name,
+                d.latitude,
+                d.longitude
+            FROM {schema}.attendees a
+            LEFT JOIN {schema}.events b
+            ON a.event_id = b.id
+            LEFT JOIN {schema}.venues d
+            ON b.venue_id = d.id
+            WHERE (
+                lower(a.first_name) = lower('{first_name}')
+                AND lower(a.last_name) = lower('{last_name}')
+            )
+            ORDER BY start_datetime DESC
+        """.format(
+            schema=self.database.schema,
+            first_name=first_name,
+            last_name=last_name
+        )
+        df = pd.read_sql(sql, self.database.connection)
+        df = df.where((pd.notnull(df)), None)
+        if len(df) > 0:
+            events = []
+            for i in df.index:
+                event = dict(df.loc[i])
+                event['start_datetime'] = str(event['start_datetime'])
+                events.append(event)
+            return events
+        else:
+            return []
+
+    def get_members(self, limit=None, page=None, order=None, sort=None,
+                    q=None, where=[]):
+        """ Pulls a list of members from the database """
+        if q:
+            query = ('last_name', q)
+        else:
+            query = None
+
+        df = self.database.read_table(
+            'participants',
+            limit=limit,
+            page=page,
+            order=order,
+            sort=sort,
+            query=query,
+            where=where
+        )
+        count = self.database.count_rows('participants', query=query,
+                                         where=where)
+
+        pages = int((count/limit)) + 1
+        members = self.database.to_json(df)
+        response = {'results': members, 'count': str(count), 'pages': pages}
+        return response
+
+    def upload_file(self, request):
+        """ Reads the file and uploads it to the database """
+        # Check the filetype
+        file_ = request.files['file']
+        filename = file_.filename
+        if not self.valid_extension(filename):
+            return False
+
+        # Convert the file to a dataframe
+        if filename.endswith('.csv'):
+            df = pd.read_csv(file_, encoding='latin-1')
+        else:
+            df = pd.read_excel(file_)
+        return self.member_loader.load(df)
+
+    def valid_extension(self, filename):
+        """ Checks to make sure the filename has a valid extension """
+        for extension in self.allowed_extensions:
+            if filename.endswith(extension):
+                return True
+        return False
+
+    def check_columns(self):
+        """ Checks to make sure the columns are the same in the new table """
+        new_columns = self.database.get_columns('members')
+        old_columns = self.database.get_columns('members_backup')
+        for column in new_columns:
+            if column not in old_columns:
+                return False
+        return True

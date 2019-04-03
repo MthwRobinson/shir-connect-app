@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from shir_connect.services.app import app
-from shir_connect.services.members import Members
+from shir_connect.database.members import Members
 from shir_connect.services.user_management import UserManagement
 import shir_connect.services.utils as utils
 

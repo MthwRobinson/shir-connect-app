@@ -15,7 +15,7 @@ class MemberLoader(object):
     Current supports the following formats:
         1. MM2000
     """
-    def __init__(self):
+    def __init__(self, database=None):
         # Set up logging
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
@@ -25,7 +25,7 @@ class MemberLoader(object):
         filename = self.path + '/member_columns.json'
         with open(filename, 'r') as f:
             self.column_mapping = json.load(f)
-        self.database = Database()
+        self.database = database if database else Database()
 
     def load(self, df, source='MM2000', test=False):
         """ Loads the data in to the member database """

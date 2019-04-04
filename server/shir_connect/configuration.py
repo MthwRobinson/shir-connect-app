@@ -55,9 +55,9 @@ EVENT_GROUP = 'events'
 MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
-REPORTING_GROUP = 'report'
+REPORT_GROUP = 'report'
 ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, 
-                 MAP_GROUP, REPORTING_GROUP]
+                 MAP_GROUP, REPORT_GROUP]
 
 # Custom Configurations
 config = get_config(PROJPATH, HOMEPATH)

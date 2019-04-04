@@ -4,6 +4,7 @@ A user must be authenticated to use these
 Includes:
     1. Flask routes with /report paths
 """
+from copy import deepcopy
 import datetime
 
 from flask import Blueprint, jsonify, request 
@@ -35,7 +36,7 @@ def get_quarters():
     quarters.reverse()
     return quarters
 
-def get_quarter_event_counts(quarters, event_manager):
+def get_quarterly_event_counts(quarters, event_manager):
     """Pulls the quarterly event counts for the specified quarters."""
     response = {}
     for pair in quarters:
@@ -50,6 +51,14 @@ def get_quarter_event_counts(quarters, event_manager):
         response[quarter_desc] = event_manager.event_group_counts(start, end)
     return response
 
+def convert_counts_to_string(response):
+    """Converts ints to string so they are JSON serializable."""
+    response = deepcopy(response)
+    for key in response:
+        for entry in response[key]:
+            response[key][entry] = str(response[key][entry])
+    return response
+
 @reports.route('/service/report/events/count', methods=['GET'])
 @jwt_required
 def get_report_event_count():
@@ -62,4 +71,7 @@ def get_report_event_count():
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
-
+    quarters = get_quarters()
+    response = get_quarterly_event_counts(quarters, event_manager)
+    response = convert_counts_to_string(response)
+    return jsonify(response)

@@ -16,6 +16,9 @@ import shir_connect.services.utils as utils
 
 reports = Blueprint('reports', __name__)
 
+REPORT_QUARTERS = [("01-01", "04-01"), ("04-01", "07-01"),
+                   ("07-01", "10-01"), ("10-01", "01-01")]
+
 def get_quarters():
     """Computes the current quarter of the year."""
     now = datetime.datetime.now()
@@ -32,6 +35,21 @@ def get_quarters():
     quarters.reverse()
     return quarters
 
+def get_quarter_event_counts(quarters, event_manager):
+    """Pulls the quarterly event counts for the specified quarters."""
+    response = {}
+    for pair in quarters:
+        year = pair[0]
+        quarter = pair[1]
+        quarter_desc = '{}-Q{}'.format(year, quarter)
+        date_range = REPORT_QUARTERS[quarter-1]
+        start = '{}-{}'.format(year, date_range[0])
+        if quarter == 4:
+            year += 1
+        end = '{}-{}'.format(year, date_range[1])
+        response[quarter_desc] = event_manager.event_group_counts(start, end)
+    return response
+
 @reports.route('/service/report/events/count', methods=['GET'])
 @jwt_required
 def get_report_event_count():
@@ -43,6 +61,5 @@ def get_report_event_count():
     if not has_access:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
-    
-    
+
 

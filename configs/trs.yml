@@ -28,20 +28,6 @@ location:
   longitude: -77.173588
   postal_code: 22043
 
-planning_dates:
-  Q1:
-    start: "01-01"
-    end: "04-01"
-  Q2:
-    start: "04-01"
-    end: "07-01"
-  Q3:
-    start: "07-01"
-    end: "10-01"
-  Q4:
-    start: "10-01"
-    end: "12-01"
-
 event_groups:
   - Food 4 Thought
   - TRSNS

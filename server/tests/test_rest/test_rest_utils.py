@@ -18,6 +18,17 @@ def kangaroo():
     }
     return response
 
+class FakeDatabase:
+    def __init__(self):
+        pass
+
+    def get_item(self, table, item):
+        if item == 'Jabber':
+            modules =  ['events', 'members']
+        else:
+            modules = ['events']
+        return {'modules': modules}
+
 def test_demo_mode():
     response = kangaroo()
     assert response['first_name'] != 'Matt'
@@ -109,3 +120,8 @@ def test_validate_date():
     
     value ='2018-01-0177'
     assert not utils.validate_date(value)
+
+def test_check_access():
+    fake_database = FakeDatabase()
+    assert utils.check_access('Jabber', 'members', fake_database) == True
+    assert utils.check_access('Chester', 'members', fake_database) == False

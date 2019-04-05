@@ -164,7 +164,9 @@ class Members:
         """.format(age_groups=age_groups, schema=self.database.schema)
         df = pd.read_sql(sql, self.database.connection)
         list_response = self.database.to_json(df)
+        total = sum([x['total'] for x in list_response])
         response = {x['age_group']: x['total'] for x in list_response}
+        response['All'] = total
         return response
 
     ########################

@@ -9,4 +9,4 @@ def test_get_demographics(monkeypatch):
     monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
     members = Members()
     demographics = members.get_demographics()
-    assert demographics == {'Parrots': 100, 'Penguins': 262}
+    assert demographics == {'Parrots': 100, 'Penguins': 262, 'All': 362}

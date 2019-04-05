@@ -20,6 +20,10 @@ class Members:
 
         self.allowed_extensions = conf.ALLOWED_EXTENSIONS
 
+    ########################
+    # Data fetching methods
+    ########################
+
     def get_member(self, first_name, last_name):
         """ Pulls the information for a member """
         sql = """
@@ -122,21 +126,25 @@ class Members:
 
     def get_members(self, limit=None, page=None, order=None, sort=None,
                     q=None, where=[]):
-        """ Pulls a list of members from the database """
-        if q:
-            query = ('last_name', q)
-        else:
-            query = None
+        """Pulls a list of members from the database
 
-        df = self.database.read_table(
-            'participants',
-            limit=limit,
-            page=page,
-            order=order,
-            sort=sort,
-            query=query,
-            where=where
-        )
+        Parameters
+        ----------
+            limit: int
+            page: int
+            order: str, the column to sort on
+            sort: str, 'asc' or 'desc'
+            q: tuple, a query on the last name
+            where: list, the where conditions for the query
+
+        Returns
+        -------
+            dict
+        """
+        query = ('last_name', q) if q else None
+        df = self.database.read_table('participants', limit=limit, page=page,
+                                      order=order, sort=sort, query=query, 
+                                      where=where)
         count = self.database.count_rows('participants', query=query,
                                          where=where)
 
@@ -144,6 +152,10 @@ class Members:
         members = self.database.to_json(df)
         response = {'results': members, 'count': str(count), 'pages': pages}
         return response
+
+    ########################
+    # File upload methods
+    ########################
 
     def upload_file(self, request):
         """ Reads the file and uploads it to the database """

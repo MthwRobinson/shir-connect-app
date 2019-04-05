@@ -1,5 +1,7 @@
 """ Class for pulling member information from the database. """
+import collections
 import logging
+import operator
 
 import daiquiri
 import pandas as pd
@@ -167,7 +169,9 @@ class Members:
         total = sum([x['total'] for x in list_response])
         response = {x['age_group']: x['total'] for x in list_response}
         response['All'] = total
-        return response
+        ordered_list = sorted(response.items(), key=operator.itemgetter(1),
+                              reverse=True)
+        return collections.OrderedDict(ordered_list)
 
     ########################
     # File upload methods

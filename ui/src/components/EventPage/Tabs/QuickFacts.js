@@ -6,16 +6,7 @@ import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
 
 import Loading from './../../Loading/Loading';
-
-const PLOT_COLORS = [
-  "#0038b8",
-  "#ff00ff",
-  "#8c69cb",
-  "#ff7bff",
-  "#cea6e1",
-  "#ffb7ff",
-  "#ffebff"
-]
+import { DONUT_PLOT_COLORS } from './../../../utilities/plots';
 
 class QuickFacts extends Component {
   state = {
@@ -72,7 +63,7 @@ class QuickFacts extends Component {
       textinfo: 'label',
       textfont: {color: 'white'},
       hoverinfo: 'label+percent',
-      marker: {colors: PLOT_COLORS, color: 'white'}
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
     const ageGroupList = this.renderAgeGroupList();
@@ -138,7 +129,7 @@ class QuickFacts extends Component {
       textinfo: 'label',
       textfont: {color: 'white'},
       hoverinfo: 'label+percent',
-      marker: {colors: PLOT_COLORS, color: 'white'}
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
     if(!this.state.mounted){
@@ -211,7 +202,7 @@ class QuickFacts extends Component {
       textinfo: 'label',
       textfont: {color: 'white'},
       hoverinfo: 'label+percent',
-      marker: {colors: PLOT_COLORS, color: 'white'}
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
     if(!this.state.mounted){
@@ -282,7 +273,7 @@ class QuickFacts extends Component {
       textinfo: 'label',
       textfont: {color: 'white'},
       hoverinfo: 'label+percent',
-      marker: {colors: PLOT_COLORS, color: 'white'}
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
     if(!this.state.mounted){

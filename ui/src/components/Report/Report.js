@@ -5,6 +5,7 @@ import { Nav } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
 import { refreshAccessToken } from './../../utilities/authentication';
+import MemberReport from './Tabs/MemberReport';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -12,13 +13,32 @@ import './Report.css';
 
 class Report extends Component {
   state = {
-    loading: false,
-    activeTab: 'report'
+    loading: true,
+    activeTab: 'members',
+    demographics: null
   }
   
   componentDidMount(){
     // Checks to make sure the user has access to the 
     refreshAccessToken();
+    this.getDemographics();
+  }
+
+  getDemographics = () => {
+    // Pulls the current community demographics
+    this.setState({loading: true})
+    const url = '/service/report/members/demographics';
+    axios.get(url)
+      .then(res => {
+        this.setState({demographics: res.data, loading: false});
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        }
+      })
   }
 
   switchTab = (tab) => {
@@ -26,35 +46,43 @@ class Report extends Component {
     this.setState({activeTab: tab});
   }
 
-  render() {
-    let body = null
+  renderTab = () => {
+    // Renders the current displayed tab in the component
     if(this.state.loading){
-      body = (<div className="event-loading"><Loading /></div>)
+      return <div className='event-loading'><Loading /></div>
     } else {
-      let tabStyle = {
-        'report': 'record-tab',
-        'attendees': 'record-tab',
-        'events': 'record-tab'
+      if(this.state.activeTab==='members'){
+        return <MemberReport demographics={this.state.demographics}/>;
       }
-      const activeTab = this.state.activeTab;
-      tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
-
-      body = (
-          <Nav bsStyle="tabs" className="record-tabs">
-            <li eventKey="report" 
-                className={tabStyle['report']}
-                onClick={()=>this.switchTab('report')}>Report</li>
-            <li eventKey="attendees" 
-                className={tabStyle['attendees']}
-                onClick={()=>this.switchTab('attendees')}
-            >Attendees</li>
-            <li eventKey="events"
-                className={tabStyle['events']}
-                onClick={()=>this.switchTab('events')}
-            >Events</li>
-          </Nav>
-      )
     }
+  }
+
+  render() {
+    let displayTab = this.renderTab();
+    let tabs = null
+    let tabStyle = {
+      'members': 'record-tab',
+      'attendees': 'record-tab',
+      'events': 'record-tab'
+    }
+    const activeTab = this.state.activeTab;
+    tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
+
+    tabs = (
+        <Nav bsStyle="tabs" className="record-tabs">
+          <li eventKey="members" 
+              className={tabStyle['members']}
+              onClick={()=>this.switchTab('members')}>Members</li>
+          <li eventKey="attendees" 
+              className={tabStyle['attendees']}
+              onClick={()=>this.switchTab('attendees')}
+          >Attendees</li>
+          <li eventKey="events"
+              className={tabStyle['events']}
+              onClick={()=>this.switchTab('events')}
+          >Events</li>
+        </Nav>
+    )
 
     return (
       <div>
@@ -68,7 +96,8 @@ class Report extends Component {
               />
             </h2><hr/>
           </div>
-          {body}
+          {tabs}
+          {displayTab}
         </div>
       </div>
     );

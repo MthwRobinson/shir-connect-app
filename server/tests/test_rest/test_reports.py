@@ -10,11 +10,10 @@ import shir_connect.services.utils as utils
 
 CLIENT = app.test_client()
 
-def test_report_event_count():
+def run_url_tests(url):
     user_management = UserManagement()
     user_management.delete_user(conf.TEST_USER)
     user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
-    url = '/service/report/events/count'
 
     # User must be authenticated
     response = CLIENT.get(url)
@@ -42,6 +41,12 @@ def test_report_event_count():
     user_management.delete_user(conf.TEST_USER)
     user = user_management.get_user(conf.TEST_USER)
     assert not user
+
+def test_report_event_count():
+    run_url_tests('/service/report/events/count')
+
+def test_member_demographics():
+    run_url_tests('/service/report/members/demographics')
 
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)

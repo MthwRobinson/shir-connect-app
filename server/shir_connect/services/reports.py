@@ -12,6 +12,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
 from shir_connect.database.events import Events
+from shir_connect.database.members import Members
 import shir_connect.configuration as conf
 import shir_connect.services.utils as utils
 
@@ -74,4 +75,20 @@ def get_report_event_count():
     quarters = get_quarters()
     response = get_quarterly_event_counts(quarters, event_manager)
     response = convert_counts_to_string(response)
+    return jsonify(response)
+
+@reports.route('/service/report/members/demographics', methods=['GET'])
+@jwt_required
+def get_member_demographics():
+    """Pulls the current membership demographics."""
+    members = Members()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+                                    members.database)
+
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    response = members.get_demographics()
     return jsonify(response)

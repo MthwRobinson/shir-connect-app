@@ -5,6 +5,7 @@ import daiquiri
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
+from shir_connect.database.utils import build_age_groups
 
 class Trends:
     """ Class that handles database calls for trends """
@@ -67,7 +68,7 @@ class Trends:
         elif group == 'month':
             group_by = 'event_month'
         event_table = EVENT_TABLE.format(schema=self.database.schema)
-        age_groups = self.build_age_groups()
+        age_groups = build_age_groups()
         sql = """
             SELECT
                 {age_groups},
@@ -95,7 +96,7 @@ class Trends:
     def get_participation(self, age_group, top='member', limit=25):
         """ Pulls the top events or attendees by age group """
         event_table = EVENT_TABLE.format(schema=self.database.schema)
-        age_groups = self.build_age_groups()
+        age_groups = build_age_groups()
         sql = """
             SELECT
                 count(*) as total,

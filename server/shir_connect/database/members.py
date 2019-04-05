@@ -8,6 +8,7 @@ import numpy as np
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.member_loader import MemberLoader
+from shir_connect.database.utils import build_age_groups
 
 class Members:
     """ Class that handle database operations for members """
@@ -63,11 +64,8 @@ class Members:
 
                 )
             )
-        """.format(
-            schema=self.database.schema,
-            first_name=first_name,
-            last_name=last_name
-        )
+        """.format(schema=self.database.schema, first_name=first_name,
+                   last_name=last_name)
 
         df = pd.read_sql(sql, self.database.connection)
         df = df.where((pd.notnull(df)), None)
@@ -107,11 +105,8 @@ class Members:
                 AND lower(a.last_name) = lower('{last_name}')
             )
             ORDER BY start_datetime DESC
-        """.format(
-            schema=self.database.schema,
-            first_name=first_name,
-            last_name=last_name
-        )
+        """.format(schema=self.database.schema, first_name=first_name, 
+                   last_name=last_name)
         df = pd.read_sql(sql, self.database.connection)
         df = df.where((pd.notnull(df)), None)
         if len(df) > 0:
@@ -151,6 +146,24 @@ class Members:
         pages = int((count/limit)) + 1
         members = self.database.to_json(df)
         response = {'results': members, 'count': str(count), 'pages': pages}
+        return response
+
+    def get_demographics(self):
+        """Pulls the current demographics for the community based on the 
+        age groups in the configuration file. """
+        age_groups = build_age_groups()
+        sql = """
+            SELECT COUNT(*) AS total, {age_groups}
+            FROM (
+                SELECT first_name, 
+                       last_name,
+                       DATE_PART('year', AGE(now(), birth_date)) as age
+                FROM {schema}.members
+            ) x
+            GROUP BY age_group
+        """.format(age_groups=age_groups, schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        response = self.database.to_json(df)
         return response
 
     ########################

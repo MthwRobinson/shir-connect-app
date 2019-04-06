@@ -161,7 +161,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Locations</h4>
+          <h4>Counties</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -182,7 +182,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Locations</h4>
+          <h4>Counties</h4>
           <div className='quick-facts-list'>
             {locationList}
           </div>

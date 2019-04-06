@@ -4,8 +4,9 @@
 
 BEGIN;
 
-ALTER TABLE shir_connect.users
-ADD COLUMN IF NOT EXISTS city_name text DEFAULT NULL;
+ALTER TABLE shir_connect.geometries
+ADD COLUMN IF NOT EXISTS city text DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS county text DEFAULT NULL;
 
 COMMIT;
 
@@ -13,7 +14,8 @@ COMMIT;
 
 BEGIN;
 
-ALTER TABLE shir_connect.users
-DROP COLUMN city_name;
+ALTER TABLE shir_connect.geometries
+DROP COLUMN city,
+DROP COLUMN county;
 
 COMMIT;

@@ -18,8 +18,8 @@ test:
     - echo "13.58.50.14:5432:*:postgres:${POSTGRES_PASSWORD}" >> ~/.pgpass
     - chmod 0600 ~/.pgpass
     - cd server
-    - shir_connect initialize --drop_views
     - pip install -e .[test]
+    - shir_connect initialize --drop_views
     - py.test --cov=shir_connect
   coverage: '/TOTAL.*\s+(\d+%)$/'
 

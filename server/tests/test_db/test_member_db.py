@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from shir_connect.database.members import Members
+from shir_connect.database.members import Members, _clean_location_name
 
 def test_get_demographics(monkeypatch):
     fake_response = pd.DataFrame({'age_group': ['Parrots', 'Penguins'],
@@ -23,11 +23,16 @@ def test_get_member_locations(monkeypatch):
     locations = members.get_member_locations('city', limit=2)
     assert locations == [{'location': 'All', 'total': 800},
                          {'location': 'Bird Town', 'total': 500},
-                         {'location': 'Dog City', 'total': 200},
+                         {'location': 'Dog', 'total': 200},
                          {'location': 'Other', 'total': 100}]
 
     locations = members.get_member_locations('city', limit=3)
     assert locations == [{'location': 'All', 'total': 800},
                          {'location': 'Bird Town', 'total': 500},
-                         {'location': 'Dog City', 'total': 200},
+                         {'location': 'Dog', 'total': 200},
                          {'location': 'Fishville', 'total': 100}]
+
+def test_clean_location_name():
+    assert _clean_location_name('Moo City') == 'Moo'
+    assert _clean_location_name('Growl County') == 'Growl'
+    assert _clean_location_name('District of Columbia') == 'DC'

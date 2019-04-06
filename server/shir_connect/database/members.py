@@ -189,6 +189,7 @@ class Members:
         accounted_for = 0
         for i, item in enumerate(locations):
             if i < limit and item['location']:
+                item['location'] = _clean_location_name(item['location'])
                 response.append(item)
                 accounted_for += item['total']
 
@@ -233,3 +234,12 @@ class Members:
             if column not in old_columns:
                 return False
         return True
+
+def _clean_location_name(name):
+    """Cleans a location name for display."""
+    subs = ['City', 'County']
+    for sub in subs:
+        name = name.replace(sub, '')
+    if name.strip().lower() == 'district of columbia':
+        name = 'DC'
+    return name.strip()

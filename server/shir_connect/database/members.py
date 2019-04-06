@@ -196,6 +196,28 @@ class Members:
             response.append({'location': 'Other', 'total': other})
         response.append({'location': 'All', 'total': total})
         return sorted(response, key=lambda k: k['total'], reverse=True)
+    
+    def count_new_members(self, start, end):
+        """Counts the number of new members meeting in the given range.
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+
+        Returns
+        -------
+        count: int
+        """
+        start = "'{}'".format(start)
+        end = "'{}'".format(end)
+        count = self.database.count_rows('members_view',
+                                         where=[('membership_date', 
+                                                 {'>=': start, 
+                                                  '<': end})])
+        return count
 
     ########################
     # File upload methods

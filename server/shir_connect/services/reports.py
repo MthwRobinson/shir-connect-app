@@ -53,6 +53,21 @@ def get_quarterly_event_counts(quarters, event_manager):
         response[quarter_desc] = event_manager.event_group_counts(start, end)
     return response
 
+def get_quarterly_new_members(quarters, members):
+    """Pulls the quarterly event counts for the specified quarters."""
+    response = {}
+    for pair in quarters:
+        year = pair[0]
+        quarter = pair[1]
+        quarter_desc = '{}-Q{}'.format(year, quarter)
+        date_range = REPORT_QUARTERS[quarter-1]
+        start = '{}-{}'.format(year, date_range[0])
+        if quarter == 4:
+            year += 1
+        end = '{}-{}'.format(year, date_range[1])
+        response[quarter_desc] = members.count_new_members(start, end)
+    return response
+
 def convert_counts_to_string(response):
     """Converts ints to string so they are JSON serializable."""
     response = deepcopy(response)
@@ -76,6 +91,23 @@ def get_report_event_count():
     quarters = get_quarters()
     response = get_quarterly_event_counts(quarters, event_manager)
     response = convert_counts_to_string(response)
+    return jsonify(response)
+
+@reports.route('/service/report/members/new/count', methods=['GET'])
+@jwt_required
+def get_new_member_count():
+    """Pulls the new event counts by quarter."""
+    members = Members()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+                                    members.database)
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    quarters = get_quarters()
+    response = get_quarterly_new_members(quarters, members)
+    response = {k: str(response[k]) for k in response}
     return jsonify(response)
 
 @reports.route('/service/report/members/demographics', methods=['GET'])

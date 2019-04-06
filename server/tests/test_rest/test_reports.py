@@ -51,6 +51,9 @@ def test_member_demographics():
 def test_member_locations():
     run_url_tests('/service/report/members/locations')
 
+def test_new_members_cont():
+    run_url_tests('/service/report/members/new/count')
+
 def test_member_locations():
     run_url_tests('/service/report/members/new?limit=30')
 
@@ -71,4 +74,16 @@ def test_get_quarterly_events():
     event_manager = FakeEvents()
     quarters = [(2018, 3), (2018, 4), (2019, 1)]
     response = rep.get_quarterly_event_counts(quarters, event_manager)
+    assert set(response.keys()) == {'2018-Q3', '2018-Q4', '2019-Q1'}
+
+def test_get_quarterly_new_members():
+    class FakeMembers:
+        def __init__(self):
+            pass
+        def count_new_members(self, start, end):
+            return 100
+
+    members = FakeMembers()
+    quarters = [(2018, 3), (2018, 4), (2019, 1)]
+    response = rep.get_quarterly_new_members(quarters, members)
     assert set(response.keys()) == {'2018-Q3', '2018-Q4', '2019-Q1'}

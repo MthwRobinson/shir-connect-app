@@ -92,3 +92,21 @@ def get_member_demographics():
 
     response = members.get_demographics()
     return jsonify(response)
+
+@reports.route('/service/report/members/locations', methods=['GET'])
+@jwt_required
+def get_member_locations():
+    """Pulls in the current breakdown of member location."""
+    members = Members()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+                                    members.database)
+
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    # Hard coding these settings for now, but we can move these
+    # to the config files if a client wants something different
+    response = members.get_member_locations('county', limit=10)
+    return jsonify(response)

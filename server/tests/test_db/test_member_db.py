@@ -19,8 +19,15 @@ def test_get_member_locations(monkeypatch):
                                   'total': [500, 200, 100]})
     monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
     members = Members()
+
     locations = members.get_member_locations('city', limit=2)
     assert locations == [{'location': 'All', 'total': 800},
                          {'location': 'Bird Town', 'total': 500},
                          {'location': 'Dog City', 'total': 200},
                          {'location': 'Other', 'total': 100}]
+
+    locations = members.get_member_locations('city', limit=3)
+    assert locations == [{'location': 'All', 'total': 800},
+                         {'location': 'Bird Town', 'total': 500},
+                         {'location': 'Dog City', 'total': 200},
+                         {'location': 'Fishville', 'total': 100}]

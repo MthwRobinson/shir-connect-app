@@ -48,6 +48,9 @@ def test_report_event_count():
 def test_member_demographics():
     run_url_tests('/service/report/members/demographics')
 
+def test_member_locations():
+    run_url_tests('/service/report/members/locations')
+
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)
     class patched_datetime(datetime.datetime): pass

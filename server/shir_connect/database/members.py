@@ -1,7 +1,5 @@
 """ Class for pulling member information from the database. """
-import collections
 import logging
-import operator
 
 import daiquiri
 import pandas as pd
@@ -165,13 +163,41 @@ class Members:
             GROUP BY age_group
         """.format(age_groups=age_groups, schema=self.database.schema)
         df = pd.read_sql(sql, self.database.connection)
-        list_response = self.database.to_json(df)
-        total = sum([x['total'] for x in list_response])
-        response = {x['age_group']: x['total'] for x in list_response}
-        response['All'] = total
-        ordered_list = sorted(response.items(), key=operator.itemgetter(1),
-                              reverse=True)
-        return collections.OrderedDict(ordered_list)
+        response = self.database.to_json(df)
+        total = sum([x['total'] for x in response])
+        response.append({'age_group': 'All', 'total': total})
+        return sorted(response, key=lambda k: k['total'], reverse=True)
+
+    def get_member_locations(self, level, limit=10):
+        """Pulls the current location demographics for the community.
+        Available levels are city, county, and region (state)."""
+        sql = """
+            SELECT INITCAP({level}) as location, COUNT(*) AS total
+            FROM {schema}.members a
+            LEFT JOIN (SELECT DISTINCT id, {level}
+                       FROM {schema}.geometries) b
+            ON a.postal_code = b.id
+            GROUP BY {level} 
+            ORDER BY total DESC
+        """.format(schema=self.database.schema, level=level)
+        df = pd.read_sql(sql, self.database.connection)
+        locations = self.database.to_json(df)
+        total = sum([x['total'] for x in locations])
+
+        # Limit the number of responses
+        response = []
+        accounted_for = 0
+        for i, item in enumerate(locations):
+            if i < limit and item['location']:
+                response.append(item)
+                accounted_for += item['total']
+
+        # Figure out how many are in the "Other" category
+        other = total - accounted_for
+        if other > 0:
+            response.append({'location': 'Other', 'total': other})
+        response.append({'location': 'All', 'total': total})
+        return sorted(response, key=lambda k: k['total'], reverse=True)
 
     ########################
     # File upload methods

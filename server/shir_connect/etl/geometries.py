@@ -8,6 +8,7 @@ import os
 import kml2geojson
 import pandas as pd
 import requests
+from uszipcode import SearchEngine
 
 from shir_connect.database.database import Database
 
@@ -17,6 +18,7 @@ class Geometries(object):
         self.database = Database()
         self.path = os.path.dirname(os.path.realpath(__file__))
         self.url = 'https://www.zip-codes.com/cache/kml-zip/'
+        self.search = SearchEngine(simple_zipcode=True)
 
     def get_kml(self, zip_code):
         """ Pulls the KML file for a zip code """
@@ -71,3 +73,42 @@ class Geometries(object):
         # Delete the temporary files
         os.remove(filename)
         os.remove(geo_filename)
+
+    def load_locations(self):
+        """Loads any missing location names into the database."""
+        missing = self.missing_locations()
+        for zip_code in missing:
+            data = self.get_zipcode_data(zip_code)
+            if data:
+                city = "'{}'".format(data['major_city'].replace("'", ""))
+                self.database.update_column('geometries', item_id=zip_code,
+                                             column='city', value=city)
+
+                county = "'{}'".format(data['county'].replace("'", ""))
+                self.database.update_column('geometries', item_id=zip_code,
+                                            column='county', value=county)
+                
+                state = "'{}'".format(data['state'])
+                self.database.update_column('geometries', item_id=zip_code,
+                                            column='region', value=state)
+
+    def missing_locations(self):
+        """Pulls a list of zip codes for which we don't have 
+        a city and county name."""
+        sql = """
+            SELECT DISTINCT id
+            FROM {schema}.geometries
+        """.format(schema=self.database.schema)
+            #WHERE city IS NULL or county IS NULL
+        df = pd.read_sql(sql, self.database.connection)
+        zip_codes = self.database.to_json(df)
+        return [x['id'] for x in zip_codes]
+
+    def get_zipcode_data(self, zipcode):
+        """Pulls the city and county name for the specified zipcode."""
+        results = self.search.by_zipcode(zipcode)
+        if results.zipcode:
+            zipcode_data = results.to_dict()
+        else:
+            zipcode_data = None
+        return zipcode_data

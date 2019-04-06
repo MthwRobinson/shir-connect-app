@@ -15,7 +15,8 @@ class Report extends Component {
   state = {
     activeTab: 'members',
     demographics: [],
-    memberLocations: [] 
+    memberLocations: [],
+    newMembers: []
   }
   
   componentDidMount(){
@@ -23,6 +24,7 @@ class Report extends Component {
     refreshAccessToken();
     this.getDemographics();
     this.getMemberLocations();
+    this.getNewMembers();
   }
 
   getDemographics = () => {
@@ -47,6 +49,22 @@ class Report extends Component {
     axios.get(url)
       .then(res => {
         this.setState({memberLocations: res.data});
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        }
+      })
+  }
+  
+  getNewMembers = () => {
+    // Pulls the current community demographics
+    const url = '/service/report/members/new';
+    axios.get(url)
+      .then(res => {
+        this.setState({newMembers: res.data});
       })
       .catch(err => {
         if(err.response.status===401){

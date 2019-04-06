@@ -173,10 +173,7 @@ class Members:
         Available levels are city, county, and region (state)."""
         sql = """
             SELECT INITCAP({level}) as location, COUNT(*) AS total
-            FROM {schema}.members a
-            LEFT JOIN (SELECT DISTINCT id, {level}
-                       FROM {schema}.geometries) b
-            ON a.postal_code = b.id
+            FROM {schema}.members_view
             GROUP BY {level} 
             ORDER BY total DESC
         """.format(schema=self.database.schema, level=level)

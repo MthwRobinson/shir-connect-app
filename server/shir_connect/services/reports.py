@@ -126,7 +126,7 @@ def get_new_members():
 
     limit_param = request.args.get('limit')
     limit = limit_param if limit_param else 25
-    new_members = database.read_table('members', limit=limit, order='desc',
-                                      sort='membership_date')
+    new_members = database.read_table('members_view', limit=limit,
+                                      order='desc', sort='membership_date')
     response = database.to_json(new_members)
     return jsonify(response)

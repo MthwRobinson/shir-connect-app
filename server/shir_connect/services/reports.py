@@ -11,6 +11,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
+from shir_connect.database.database import Database
 from shir_connect.database.events import Events
 from shir_connect.database.members import Members
 import shir_connect.configuration as conf
@@ -109,4 +110,23 @@ def get_member_locations():
     # Hard coding these settings for now, but we can move these
     # to the config files if a client wants something different
     response = members.get_member_locations('county', limit=10)
+    return jsonify(response)
+
+@reports.route('/service/report/members/new', methods=['GET'])
+@jwt_required
+def get_new_members():
+    """Pulls in a list of the most recent members of the Congregation."""
+    database = Database()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, database)
+
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    limit_param = request.args.get('limit')
+    limit = limit_param if limit_param else 25
+    new_members = database.read_table('members', limit=limit, order='desc',
+                                      sort='membership_date')
+    response = database.to_json(new_members)
     return jsonify(response)

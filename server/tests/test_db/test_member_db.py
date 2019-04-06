@@ -35,4 +35,4 @@ def test_get_member_locations(monkeypatch):
 def test_clean_location_name():
     assert _clean_location_name('Moo City') == 'Moo'
     assert _clean_location_name('Growl County') == 'Growl'
-    assert _clean_location_name('District of Columbia') == 'DC'
+    assert _clean_location_name('District Of Columbia') == 'DC'

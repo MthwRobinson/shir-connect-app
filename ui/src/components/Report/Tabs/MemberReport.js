@@ -21,12 +21,11 @@ class MemberReport extends Component {
     // Shows the count for each demographic
     const demographics = this.props.demographics;
     let ageGroups = [];
-    for(let group in demographics){
-      const count = demographics[group];
-      if(group==='Young Professional'){
-        ageGroups.push(<li><b>YP:</b> {count}</li>);
+    for(let group of demographics){
+      if(group.age_group==='Young Professional'){
+        ageGroups.push(<li><b>YP:</b> {group.total}</li>);
       } else {
-        ageGroups.push(<li><b>{group}:</b> {count}</li>);
+        ageGroups.push(<li><b>{group.age_group}:</b> {group.total}</li>);
       }
     }
     return(
@@ -47,14 +46,14 @@ class MemberReport extends Component {
     const demographics = this.props.demographics;
     let values = [];
     let labels = [];
-    for(let group in demographics){
-      if(group !== 'All'){
-        if(group==='Young Professional'){
+    for(let group of demographics){
+      if(group.age_group !== 'All'){
+        if(group.age_group==='Young Professional'){
           labels.push('YP');
         } else {
-          labels.push(group);
+          labels.push(group.age_group);
         }
-        values.push(demographics[group]);
+        values.push(group.total);
       }
     }
     const data = [{
@@ -69,12 +68,12 @@ class MemberReport extends Component {
     }]
 
     const ageGroupList = this.renderAgeGroupList();
-    if(!this.state.mounted){
+    if(this.props.demographics.length === 0){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Demographics</h4>
-          <div className='quick-facts-plot-area'>
+          <h4>Age Groups</h4>
+          <div className='event-loading'>
             <Loading />
           </div>
         </div>

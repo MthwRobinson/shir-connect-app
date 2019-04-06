@@ -13,24 +13,40 @@ import './Report.css';
 
 class Report extends Component {
   state = {
-    loading: true,
     activeTab: 'members',
-    demographics: null
+    demographics: [],
+    memberLocations: [] 
   }
   
   componentDidMount(){
     // Checks to make sure the user has access to the 
     refreshAccessToken();
     this.getDemographics();
+    this.getMemberLocations();
   }
 
   getDemographics = () => {
     // Pulls the current community demographics
-    this.setState({loading: true})
     const url = '/service/report/members/demographics';
     axios.get(url)
       .then(res => {
-        this.setState({demographics: res.data, loading: false});
+        this.setState({demographics: res.data});
+      })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        }
+      })
+  }
+  
+  getMemberLocations = () => {
+    // Pulls the current community demographics
+    const url = '/service/report/members/locations';
+    axios.get(url)
+      .then(res => {
+        this.setState({memberLocations: res.data});
       })
       .catch(err => {
         if(err.response.status===401){
@@ -48,12 +64,9 @@ class Report extends Component {
 
   renderTab = () => {
     // Renders the current displayed tab in the component
-    if(this.state.loading){
-      return <div className='event-loading'><Loading /></div>
-    } else {
-      if(this.state.activeTab==='members'){
-        return <MemberReport demographics={this.state.demographics}/>;
-      }
+    if(this.state.activeTab==='members'){
+      return (<MemberReport demographics={this.state.demographics}
+                            memberLocations={this.state.memberLocations}/>);
     }
   }
 

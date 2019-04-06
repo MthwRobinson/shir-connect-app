@@ -84,7 +84,8 @@ class Report extends Component {
     // Renders the current displayed tab in the component
     if(this.state.activeTab==='members'){
       return (<MemberReport demographics={this.state.demographics}
-                            memberLocations={this.state.memberLocations}/>);
+                            memberLocations={this.state.memberLocations}
+                            newMembers={this.state.newMembers}/>);
     }
   }
 

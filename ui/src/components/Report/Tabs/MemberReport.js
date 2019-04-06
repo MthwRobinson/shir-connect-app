@@ -1,7 +1,8 @@
 // Renders the information in the Members
 // section of the report view
+import moment from 'moment';
 import React, { Component } from 'react';
-import { Col, Row } from 'react-bootstrap';
+import { Col, Row, Table } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
 
@@ -199,10 +200,81 @@ class MemberReport extends Component {
       )
     }
   }
+
+  renderNewMembers = () => {
+    // Creates a table that displays the most recent members
+    if(this.props.newMembers.length === 0){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <div className='event-loading'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      const rows = this.renderTableRows();
+      return(
+        <Table responsive header hover>
+          <thead>
+            <tr>
+              <th className='table-heading'>First Name</th>
+              <th className='table-heading'>Last Name</th>
+              <th className='table-heading'>Age</th>
+              <th className='table-heading'>City</th>
+              <th className='table-heading'>State</th>
+              <th className='table-heading'>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </Table>
+      )
+    }
+  }
+
+  selectMember = (firstName, lastName) => {
+    // Navigates to the page for the member
+    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    this.props.history.push(url);
+  }
+
+  renderTableRows = () => {
+    // Renders the rows for the new members table
+    let rows = [];
+    let i = 0;
+    for(let member of this.props.newMembers){
+      i++;
+      const row = (
+        <tr className='table-row' key={i}
+            onClick={()=>this.selectMember(member.first_name, 
+                                           member.last_name)} >
+          <th>{member.first_name != null
+              ? member.first_name : '--'}</th>
+          <th>{member.last_name != null
+              ? member.last_name : '--'}</th>
+          <th>{member.age != null
+              ? member.age : null}</th>
+          <th>{member.city != null
+              ? member.city : null}</th>
+          <th>{member.region != null
+              ? member.region : null}</th>
+          <th>{member.membership_date != null
+              ? moment(member.membership_date).format('MM/DD/YY')
+              : null}</th>
+        </tr>
+      )
+      rows.push(row);
+    }
+    return rows
+  }
   
   render(){
     const ageGroups = this.renderAgeGroups();
     const memberLocations = this.renderMemberLocations();
+    const newMembers = this.renderNewMembers();
    return(
       <div className='QuickFacts'>
         <h2>Membership Report</h2><hr/>
@@ -211,7 +283,8 @@ class MemberReport extends Component {
           {ageGroups}
           {memberLocations}
         </Row><hr/>
-        <h3>Newest Members</h3>
+        <h3>Newest Members</h3><br/>
+        {newMembers}
       </div> 
     )
   }

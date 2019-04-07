@@ -124,7 +124,7 @@ def get_member_demographics():
         return jsonify(response), 403
     
     only = request.args.get('only')
-    new_members = only is 'new_members'
+    new_members = only == 'new_members'
 
     response = members.get_demographics(new_members=new_members)
     return jsonify(response)

@@ -16,7 +16,8 @@ class Report extends Component {
     demographics: [],
     memberLocations: [],
     newMembers: [],
-    newMembersCount: {}
+    newMembersCount: {},
+    newMemberDemographics: []
   }
   
   componentDidMount(){
@@ -26,6 +27,7 @@ class Report extends Component {
     this.getMemberLocations();
     this.getNewMembers();
     this.getNewMemberCount();
+    this.getNewMemberDemographics();
   }
 
   getDemographics = () => {
@@ -41,6 +43,15 @@ class Report extends Component {
         } else if(err.response.status===403){
           this.props.history.push('/forbidden');
         }
+      })
+  }
+  
+  getNewMemberDemographics = () => {
+    // Pulls the current community demographics
+    const url = '/service/report/members/demographics?only=new_members';
+    axios.get(url)
+      .then(res => {
+        this.setState({newMemberDemographics: res.data});
       })
   }
   
@@ -82,7 +93,8 @@ class Report extends Component {
       return (<MemberReport demographics={this.state.demographics}
                             memberLocations={this.state.memberLocations}
                             newMembers={this.state.newMembers}
-                            newMemberCount={this.state.newMemberCount}/>);
+                            newMemberCount={this.state.newMemberCount}
+                            newMemberDemographics={this.state.newMemberDemographics}/>);
     }
   }
 

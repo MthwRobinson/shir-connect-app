@@ -8,7 +8,7 @@ def test_get_demographics(monkeypatch):
                                  'total': [100, 262]})
     monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
     members = Members()
-    demographics = members.get_demographics()
+    demographics = members.get_demographics(new_members=True)
     assert demographics == [{'age_group': 'All', 'total': 362},
                             {'age_group': 'Penguins', 'total': 262},
                             {'age_group': 'Parrots', 'total': 100}]

@@ -293,7 +293,6 @@ class MemberReport extends Component {
       marker: {colors: DONUT_PLOT_COLORS}
     }]
 
-    const locationList = this.renderLocationList();
     if(this.props.memberLocations.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
@@ -311,7 +310,7 @@ class MemberReport extends Component {
       const width = elem.clientWidth;
       const height = elem.clientHeight;
       const layout = {
-        height: .6*height,
+        height: 200,
         width: .9*width,
         yaxis: {
           title: 'New Members',

@@ -1,4 +1,5 @@
 """ Class for pulling member information from the database. """
+import datetime
 import logging
 
 import daiquiri
@@ -148,9 +149,15 @@ class Members:
         response = {'results': members, 'count': str(count), 'pages': pages}
         return response
 
-    def get_demographics(self):
+    def get_demographics(self, new_members=False):
         """Pulls the current demographics for the community based on the 
         age groups in the configuration file. """
+        where = None
+        if new_members:
+            year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+            year_ago_str = str(year_ago)[:10]
+            where = " WHERE membership_date >= '{}' ".format(year_ago_str)
+
         age_groups = build_age_groups()
         sql = """
             SELECT COUNT(*) AS total, {age_groups}
@@ -159,9 +166,11 @@ class Members:
                        last_name,
                        DATE_PART('year', AGE(now(), birth_date)) as age
                 FROM {schema}.members
+                {where}
             ) x
             GROUP BY age_group
-        """.format(age_groups=age_groups, schema=self.database.schema)
+        """.format(age_groups=age_groups, schema=self.database.schema,
+                   where=where)
         df = pd.read_sql(sql, self.database.connection)
         response = self.database.to_json(df)
         total = sum([x['total'] for x in response])
@@ -215,8 +224,7 @@ class Members:
         end = "'{}'".format(end)
         count = self.database.count_rows('members_view',
                                          where=[('membership_date', 
-                                                 {'>=': start, 
-                                                  '<': end})])
+                                                 {'>=': start, '<': end})])
         return count
 
     ########################

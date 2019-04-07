@@ -122,8 +122,11 @@ def get_member_demographics():
     if not has_access:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
+    
+    only = request.args.get('only')
+    new_members = only is 'new_members'
 
-    response = members.get_demographics()
+    response = members.get_demographics(new_members=new_members)
     return jsonify(response)
 
 @reports.route('/service/report/members/locations', methods=['GET'])

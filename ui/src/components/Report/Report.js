@@ -134,4 +134,3 @@ class Report extends Component {
 }
 
 export default withRouter(Report);
-

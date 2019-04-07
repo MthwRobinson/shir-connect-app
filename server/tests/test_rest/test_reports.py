@@ -48,6 +48,9 @@ def test_report_event_count():
 def test_member_demographics():
     run_url_tests('/service/report/members/demographics')
 
+def test_new_member_demographics():
+    run_url_tests('/service/report/members/demographics?only=new_members')
+
 def test_member_locations():
     run_url_tests('/service/report/members/locations')
 

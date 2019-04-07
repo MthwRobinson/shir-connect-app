@@ -69,7 +69,7 @@ class MemberReport extends Component {
     }]
 
     const ageGroupList = this.renderAgeGroupList();
-    if(this.props.demographics.length === 0){
+    if(this.props.demographics.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -158,7 +158,7 @@ class MemberReport extends Component {
     }]
 
     const locationList = this.renderLocationList();
-    if(this.props.memberLocations.length === 0){
+    if(this.props.memberLocations.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -203,7 +203,7 @@ class MemberReport extends Component {
 
   renderNewMembers = () => {
     // Creates a table that displays the most recent members
-    if(this.props.newMembers.length === 0){
+    if(this.props.newMembers.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>

@@ -7,7 +7,6 @@ import { withRouter } from 'react-router-dom';
 import { refreshAccessToken } from './../../utilities/authentication';
 import MemberReport from './Tabs/MemberReport';
 import Header from './../Header/Header';
-import Loading from './../Loading/Loading';
 
 import './Report.css';
 

@@ -271,10 +271,78 @@ class MemberReport extends Component {
     return rows
   }
   
+  renderNewMemberCount= () => {
+    // Creates a bar chart with the number o new members by quarter 
+    // Generate the data for the plot
+    const newMemberCount= this.props.newMemberCount;
+    let values = [];
+    let labels = [];
+    for(let group in newMemberCount){
+      labels.push(group);
+      values.push(newMemberCount[group]);
+    }
+    const data = [{
+      y: values,
+      x: labels,
+      type: 'bar',
+      textinfo: 'label',
+      // xaxis: {family: 'Source Sans Pro'},
+
+      // textfont: {color: 'white'},
+      // hoverinfo: 'label+percent',
+      marker: {colors: DONUT_PLOT_COLORS}
+    }]
+
+    const locationList = this.renderLocationList();
+    if(this.props.memberLocations.length === 0 || !this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Locations</h4>
+          <div className='event-loading'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('age-group-plot');
+      const width = elem.clientWidth;
+      const height = elem.clientHeight;
+      const layout = {
+        height: .6*height,
+        width: .9*width,
+        yaxis: {
+          title: 'New Members',
+          titlefont: {family: 'Source Sans Pro'}
+        },
+        showlegend: false,
+        margin: {l: 50, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>New Member Count</h4>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
+    }
+  }
+  
   render(){
     const ageGroups = this.renderAgeGroups();
     const memberLocations = this.renderMemberLocations();
     const newMembers = this.renderNewMembers();
+    const newMemberCount = this.renderNewMemberCount();
    return(
       <div className='QuickFacts'>
         <h2>Membership Report</h2><hr/>
@@ -283,7 +351,11 @@ class MemberReport extends Component {
           {ageGroups}
           {memberLocations}
         </Row><hr/>
-        <h3>Newest Members</h3><br/>
+        <h3>NewMembers</h3>
+        <Row>
+          {newMemberCount}
+        </Row>
+        <h4>Newest Members</h4><br/>
         {newMembers}
       </div> 
     )

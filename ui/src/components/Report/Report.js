@@ -15,7 +15,8 @@ class Report extends Component {
     activeTab: 'members',
     demographics: [],
     memberLocations: [],
-    newMembers: []
+    newMembers: [],
+    newMembersCount: {}
   }
   
   componentDidMount(){
@@ -24,6 +25,7 @@ class Report extends Component {
     this.getDemographics();
     this.getMemberLocations();
     this.getNewMembers();
+    this.getNewMemberCount();
   }
 
   getDemographics = () => {
@@ -49,13 +51,6 @@ class Report extends Component {
       .then(res => {
         this.setState({memberLocations: res.data});
       })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        } else if(err.response.status===403){
-          this.props.history.push('/forbidden');
-        }
-      })
   }
   
   getNewMembers = () => {
@@ -65,12 +60,14 @@ class Report extends Component {
       .then(res => {
         this.setState({newMembers: res.data});
       })
-      .catch(err => {
-        if(err.response.status===401){
-          this.props.history.push('/login');
-        } else if(err.response.status===403){
-          this.props.history.push('/forbidden');
-        }
+  }
+  
+  getNewMemberCount = () => {
+    // Pulls the current community demographics
+    const url = '/service/report/members/new/count';
+    axios.get(url)
+      .then(res => {
+        this.setState({newMemberCount: res.data});
       })
   }
 
@@ -84,7 +81,8 @@ class Report extends Component {
     if(this.state.activeTab==='members'){
       return (<MemberReport demographics={this.state.demographics}
                             memberLocations={this.state.memberLocations}
-                            newMembers={this.state.newMembers}/>);
+                            newMembers={this.state.newMembers}
+                            newMemberCount={this.state.newMemberCount}/>);
     }
   }
 

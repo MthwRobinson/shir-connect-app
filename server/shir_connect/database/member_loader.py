@@ -61,43 +61,26 @@ class MemberLoader:
         items = []
         for group in column_mapping:
             column_map = column_mapping[group]['columns']
-            source_cols = [x for x in column_map.keys()]
-            dest_cols = [column_map[x] for x in column_map]
-
+            df_group = _group_mm2000(df, column_map)
+            
             if 'id_extension' in column_mapping[group]:
                 id_extension = column_mapping[group]['id_extension']
             else:
                 id_extension = None
 
-            df_group = df[source_cols].copy()
-            df_group = df_group.where((pd.notnull(df_group)), None)
-            df_group.columns = dest_cols
-            df_group = df_group.dropna(how='all').copy()
-            df_group = df_group.reset_index().copy()
-
             for i in df_group.index:
                 item = dict(df_group.loc[i])
-                
-                # Convert postal codes to five number format
-                postal = str(item['postal_code'])
-                if '-' in postal:
-                    postal = postal.split('-')[0]
-                if len(postal) != 5:
-                    postal = None
-                item['postal_code'] = postal
+                item = _add_postal_code(item)
 
                 # ID extension for children and spouses
                 # since a family shares the same id
+                item['household_id'] = item['id']
                 if id_extension:
                     item['id'] += id_extension
 
                 # Remove invalid birthdates
-                if item['birth_date']:
-                    if item['birth_date'].startswith('0'):
-                        item['birth_date'] = None
-                if item['membership_date']:
-                    if item['membership_date'].startswith('0'):
-                        item['membership_date'] = None
+                item = _parse_mm2000_date(item, 'birth_date')
+                item = _parse_mm2000_date(item, 'membership_date')
 
                 # Children only have a full name, not separate
                 # first names and last name
@@ -107,7 +90,6 @@ class MemberLoader:
                     item['last_name'] = item['full_name'].split()[0]
                 if 'first_name' in item and 'last_name' in item:
                     items.append(item)
-
         return items
 
     def check_columns(self):
@@ -118,3 +100,34 @@ class MemberLoader:
             if column not in old_columns:
                 return False
         return True
+
+def _group_mm2000(df, column_map):
+    """Creates a dataframe for the specified MM2000 group
+    with the appropriate column mappings."""
+    source_cols = [x for x in column_map.keys()]
+    dest_cols = [column_map[x] for x in column_map]
+
+    df_group = df[source_cols].copy()
+    df_group = df_group.where((pd.notnull(df_group)), None)
+    df_group.columns = dest_cols
+    df_group = df_group.dropna(how='all').copy()
+    df_group = df_group.reset_index().copy()
+
+    return df_group
+
+def _parse_mm2000_date(item, column):
+    """Removes invalid birthdays and membership dates."""
+    if item[column]:
+        if item[column].startswith('0'):
+            item[column] = None
+    return item
+
+def _add_postal_code(item):
+    """Converts the postal code in an item to 5 digits."""
+    postal = str(item['postal_code'])
+    if '-' in postal:
+        postal = postal.split('-')[0]
+    if len(postal) != 5:
+        postal = None
+    item['postal_code'] = postal
+    return item

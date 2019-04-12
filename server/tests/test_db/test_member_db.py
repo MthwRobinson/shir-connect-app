@@ -32,6 +32,15 @@ def test_get_member_locations(monkeypatch):
                          {'location': 'Dog', 'total': 200},
                          {'location': 'Fishville', 'total': 100}]
 
+def test_get_households_by_year(monkeypatch):
+    fake_response = pd.DataFrame({'total': [5000]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
+    members = Members()
+    demographics = members.get_households_by_year(2014, 2017)
+    assert demographics == [{'year': '2014', 'count': 5000},
+                            {'year': '2015', 'count': 5000},
+                            {'year': '2016', 'count': 5000}]
+
 def test_clean_location_name():
     assert _clean_location_name('Moo City') == 'Moo'
     assert _clean_location_name('Growl County') == 'Growl'

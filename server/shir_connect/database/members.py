@@ -228,6 +228,22 @@ class Members:
                                                  {'>=': start, '<': end})])
         return count
 
+    def get_households_by_year(self, start, end):
+        results = []
+        for i in range(start, end):
+            year = i+1
+            date = "'{}-01-01'".format(year)
+            sql = """
+                SELECT COUNT(DISTINCT household_id) as total
+                FROM {schema}.members_view
+                WHERE active_member = true
+                AND membership_date <= '{year}-01-01'
+            """.format(schema=self.database.schema, year=year)
+            df = pd.read_sql(sql, self.database.connection)
+            count = df.loc[0]['total']
+            results.append({'year': str(i), 'count': count})
+        return results
+
     ########################
     # File upload methods
     ########################

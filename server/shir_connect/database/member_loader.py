@@ -71,6 +71,7 @@ class MemberLoader:
             for i in df_group.index:
                 item = dict(df_group.loc[i])
                 item = _parse_postal_code(item)
+                item = _check_mm2000_active(item)
 
                 # ID extension for children and spouses
                 # since a family shares the same id

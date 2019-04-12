@@ -1,15 +1,15 @@
 """ Utility for uploading member data into the database """
-import json
 import logging
 import os
 
 import daiquiri
 import numpy as np
-import pandas as pd 
+import pandas as pd
+import yaml
 
 from shir_connect.database.database import Database
 
-class MemberLoader(object):
+class MemberLoader:
     """
     Uploads members into the member database
     Current supports the following formats:
@@ -22,9 +22,9 @@ class MemberLoader(object):
 
         # Load the column mapping configs
         self.path = os.path.dirname(os.path.realpath(__file__))
-        filename = self.path + '/member_columns.json'
+        filename = self.path + '/member_columns.yml'
         with open(filename, 'r') as f:
-            self.column_mapping = json.load(f)
+            self.column_mapping = yaml.safe_load(f)
         self.database = database if database else Database()
 
     def load(self, df, source='MM2000', test=False):

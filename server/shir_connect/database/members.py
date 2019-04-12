@@ -229,6 +229,19 @@ class Members:
         return count
 
     def get_households_by_year(self, start, end):
+        """Counts the number of households by year.
+
+        Parameters
+        ----------
+        start: int
+            the starting year
+        end: int
+            the ending year
+
+        Returns
+        -------
+        results: dict
+        """
         results = []
         for i in range(start, end):
             year = i+1
@@ -241,7 +254,7 @@ class Members:
             """.format(schema=self.database.schema, year=year)
             df = pd.read_sql(sql, self.database.connection)
             count = df.loc[0]['total']
-            results.append({'year': str(i), 'count': count})
+            results.append({'year': str(i), 'count': str(count)})
         return results
 
     ########################

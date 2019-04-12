@@ -168,3 +168,25 @@ def get_new_members():
                                       order='desc', sort='membership_date')
     response = database.to_json(new_members)
     return jsonify(response)
+
+@reports.route('/service/report/members/households/count', methods=['GET'])
+@jwt_required
+def get_households_by_year():
+    """Pulls in a list of the most recent members of the Congregation."""
+    members = Members()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
+
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    years = request.args.get('years')
+    years = int(years) if years else 10
+
+    now = datetime.datetime.now()
+    end = now.year
+    start = end - years
+
+    response = members.get_households_by_year(start, end)
+    return jsonify(response)

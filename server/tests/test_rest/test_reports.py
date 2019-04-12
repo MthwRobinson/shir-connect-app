@@ -60,6 +60,9 @@ def test_new_members_cont():
 def test_member_locations():
     run_url_tests('/service/report/members/new?limit=30')
 
+def test_households_by_year():
+    run_url_tests('/service/report/members/households/count?years=5')
+
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)
     class patched_datetime(datetime.datetime): pass

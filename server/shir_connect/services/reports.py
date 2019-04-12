@@ -88,7 +88,7 @@ def get_report_event_count():
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
-    quarters = get_quarters(19)
+    quarters = get_quarters(3)
     response = get_quarterly_event_counts(quarters, event_manager)
     response = convert_counts_to_string(response)
     return jsonify(response)
@@ -105,7 +105,7 @@ def get_new_member_count():
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
-    quarters = get_quarters()
+    quarters = get_quarters(19)
     response = get_quarterly_new_members(quarters, members)
     response = {k: str(response[k]) for k in response}
     return jsonify(response)
@@ -137,6 +137,9 @@ def get_member_locations():
     jwt_user = get_jwt_identity()
     has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
                                     members.database)
+    
+    level = request.args.get('level')
+    level = level if level else 'city'
 
     if not has_access:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
@@ -144,7 +147,7 @@ def get_member_locations():
 
     # Hard coding these settings for now, but we can move these
     # to the config files if a client wants something different
-    response = members.get_member_locations('county', limit=10)
+    response = members.get_member_locations('city', limit=8)
     return jsonify(response)
 
 @reports.route('/service/report/members/new', methods=['GET'])

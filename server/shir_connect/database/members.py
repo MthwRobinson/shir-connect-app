@@ -152,11 +152,11 @@ class Members:
     def get_demographics(self, new_members=False):
         """Pulls the current demographics for the community based on the 
         age groups in the configuration file. """
-        where = None
+        where = " WHERE active_member = true "
         if new_members:
             year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
             year_ago_str = str(year_ago)[:10]
-            where = " WHERE membership_date >= '{}' ".format(year_ago_str)
+            where += " AND membership_date >= '{}' ".format(year_ago_str)
 
         age_groups = build_age_groups()
         sql = """
@@ -183,6 +183,7 @@ class Members:
         sql = """
             SELECT INITCAP({level}) as location, COUNT(*) AS total
             FROM {schema}.members_view
+            WHERE active_member = true
             GROUP BY {level} 
             ORDER BY total DESC
         """.format(schema=self.database.schema, level=level)

@@ -440,7 +440,7 @@ class MemberReport extends Component {
    return(
       <div className='QuickFacts'>
         <h2>Membership Report</h2><hr/>
-        <h3>Demographics</h3>
+        <h3>Member Demographics</h3>
         <Row>
           {ageGroups}
           {memberLocations}

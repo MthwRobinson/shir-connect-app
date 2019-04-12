@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import pytest
 
 from shir_connect.database.member_loader import MemberLoader
 
@@ -13,6 +14,28 @@ class FakeDatabase:
     def get_columns(self, table):
         return ['parrots', 'dogs']
 
+    def backup_table(self, table):
+        pass
+
+    def truncate_table(self, table):
+        pass
+
+    def load_item(self, *args):
+        pass
+
+    def refresh_view(self, view):
+        pass
+
+    def revert_table(self, table):
+        pass
+
+class OtherFakeDB(FakeDatabase):
+    def get_columns(self, table):
+        if table == 'members':
+            return ['koalas']
+        else:
+            return ['parrots', 'dogs']
+
 def test_mm2000():
     filename = os.path.join(PATH, '..', 'data/mm2000_upload_test.csv')
     df = pd.read_csv(filename, encoding='latin-1')
@@ -24,16 +47,23 @@ def test_mm2000():
         assert 'last_name' in item
 
 def test_check_columns():
-    class OtherFakeDB(FakeDatabase):
-        def get_columns(self, table):
-            if table == 'members':
-                return ['koalas']
-            else:
-                return ['parrots', 'dogs']
-
     member_loader = MemberLoader()
     member_loader.database = FakeDatabase()
     assert member_loader.check_columns() is True
 
     member_loader.database = OtherFakeDB()
     assert member_loader.check_columns() is False
+
+def test_load():
+    filename = os.path.join(PATH, '..', 'data/mm2000_upload_test.csv')
+    df = pd.read_csv(filename, encoding='latin-1')
+
+    member_loader = MemberLoader()
+    member_loader.database = FakeDatabase()
+    loaded = member_loader.load(df, source='MM2000')
+    assert loaded is True
+
+    member_loader.database = OtherFakeDB()
+    with pytest.warns(None):
+        loaded = member_loader.load(df, source='MM2000')
+    assert loaded is False

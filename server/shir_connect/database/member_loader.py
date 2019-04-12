@@ -27,7 +27,7 @@ class MemberLoader:
             self.column_mapping = yaml.safe_load(f)
         self.database = database if database else Database()
 
-    def load(self, df, source='MM2000', test=False):
+    def load(self, df, source='MM2000'):
         """ Loads the data in to the member database """
         if source=='MM2000':
             self.logger.info('Parsing MM2000 data.')

@@ -445,13 +445,13 @@ class MemberReport extends Component {
           {ageGroups}
           {memberLocations}
         </Row><hr/>
-        <h3>NewMembers</h3>
+        <h3>New Members</h3>
         <Row>
           {newMemberCount}
           {newMemberDemographics}
         </Row>
-        <h4>Newest Members</h4><br/>
-        {newMembers}
+        {/* <h4>Newest Members</h4><br/> */}
+        {/* {newMembers} */}
       </div> 
     )
   }

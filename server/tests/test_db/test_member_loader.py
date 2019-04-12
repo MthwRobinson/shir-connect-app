@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from shir_connect.database.member_loader import MemberLoader
+import shir_connect.database.member_loader as ml
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -67,3 +68,16 @@ def test_load():
     with pytest.warns(None):
         loaded = member_loader.load(df, source='MM2000')
     assert loaded is False
+
+def test_add_postal_code():
+    item = {'postal_code': '55000-131'}
+    assert ml._parse_postal_code(item) == {'postal_code': '55000'}
+    item = {'postal_code': '222-13'}
+    assert ml._parse_postal_code(item) == {'postal_code': None}
+
+def test_parse_mm2000_date():
+    item = {'birth_date': '0000-01-01'}
+    assert ml._parse_mm2000_date(item, 'birth_date') == {'birth_date': None}
+    
+    item = {'birth_date': '1999-01-01'}
+    assert ml._parse_mm2000_date(item, 'birth_date') == {'birth_date': '1999-01-01'}

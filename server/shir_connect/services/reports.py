@@ -22,13 +22,13 @@ reports = Blueprint('reports', __name__)
 REPORT_QUARTERS = [("01-01", "04-01"), ("04-01", "07-01"),
                    ("07-01", "10-01"), ("10-01", "01-01")]
 
-def get_quarters():
+def get_quarters(n=3):
     """Computes the current quarter of the year."""
     now = datetime.datetime.now()
     year = now.year
     quarter = pd.Timestamp(now).quarter
     quarters = [(year, quarter)]
-    for i in range(20):
+    for i in range(n):
         if quarter == 1:
             quarter = 4
             year -= 1
@@ -88,7 +88,7 @@ def get_report_event_count():
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
-    quarters = get_quarters()
+    quarters = get_quarters(19)
     response = get_quarterly_event_counts(quarters, event_manager)
     response = convert_counts_to_string(response)
     return jsonify(response)

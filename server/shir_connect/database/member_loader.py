@@ -70,7 +70,7 @@ class MemberLoader:
 
             for i in df_group.index:
                 item = dict(df_group.loc[i])
-                item = _add_postal_code(item)
+                item = _parse_postal_code(item)
 
                 # ID extension for children and spouses
                 # since a family shares the same id
@@ -86,9 +86,11 @@ class MemberLoader:
                 # first names and last name
                 if 'first_name' not in item and item['full_name']:
                     item['first_name'] = item['full_name'].split()[0]
-                if 'last_name' not in item  and item['full_name']:
+                if 'last_name' not in item and item['full_name']:
                     item['last_name'] = item['full_name'].split()[0]
-                if 'first_name' in item and 'last_name' in item:
+                if not item['first_name'] or not item['last_name']:
+                    continue
+                else:
                     items.append(item)
         return items
 
@@ -122,7 +124,7 @@ def _parse_mm2000_date(item, column):
             item[column] = None
     return item
 
-def _add_postal_code(item):
+def _parse_postal_code(item):
     """Converts the postal code in an item to 5 digits."""
     postal = str(item['postal_code'])
     if '-' in postal:
@@ -130,4 +132,15 @@ def _add_postal_code(item):
     if len(postal) != 5:
         postal = None
     item['postal_code'] = postal
+    return item
+
+def _check_mm2000_active(item):
+    """Checks to see if an MM2000 member is active."""
+    if not item['member_type']:
+        active = False
+    elif 'MEM' in item['member_type']:
+        active = True
+    else:
+        active = False
+    item['active_member'] = active
     return item

@@ -81,3 +81,16 @@ def test_parse_mm2000_date():
     
     item = {'birth_date': '1999-01-01'}
     assert ml._parse_mm2000_date(item, 'birth_date') == {'birth_date': '1999-01-01'}
+
+def test_parse_mm2000_active():
+    item = {'member_type': None}
+    assert ml._check_mm2000_active(item) == {'member_type': None,
+                                           'active_member': False}
+ 
+    item = {'member_type': 'MEMFAM'}
+    assert ml._check_mm2000_active(item) == {'member_type': 'MEMFAM',
+                                           'active_member': True}
+ 
+    item = {'member_type': 'Bird'}
+    assert ml._check_mm2000_active(item) == {'member_type': 'Bird', 
+                                           'active_member': False}

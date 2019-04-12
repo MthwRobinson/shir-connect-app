@@ -141,6 +141,8 @@ def _check_mm2000_active(item):
         active = False
     elif 'MEM' in item['member_type']:
         active = True
+    elif item['member_type'] == 'STAFF':
+        active = True
     else:
         active = False
     item['active_member'] = active

@@ -92,5 +92,9 @@ def test_parse_mm2000_active():
                                            'active_member': True}
  
     item = {'member_type': 'Bird'}
-    assert ml._check_mm2000_active(item) == {'member_type': 'Bird', 
+    assert ml._check_mm2000_active(item) == {'member_type': 'Bird',
                                            'active_member': False}
+    
+    item = {'member_type': 'STAFF'}
+    assert ml._check_mm2000_active(item) == {'member_type': 'STAFF',
+                                           'active_member': True}

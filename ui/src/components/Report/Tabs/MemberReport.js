@@ -403,14 +403,15 @@ class MemberReport extends Component {
       const elem = document.getElementById('age-group-plot');
       const width = elem.clientWidth;
       const layout = {
-        height: .4*width,
+        height: .55*width,
         width: .9*width,
         yaxis: {
           title: 'New Members',
           titlefont: {family: 'Source Sans Pro'}
         },
+        xaxis: { tickangle: 45 },
         showlegend: false,
-        margin: {l: 50, r: 0, b: 13, t: 0, pad: 0}
+        margin: {l: 50, r: 35, b: 70, t: 0, pad: 0}
       }
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>

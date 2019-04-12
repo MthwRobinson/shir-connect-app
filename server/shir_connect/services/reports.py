@@ -28,7 +28,7 @@ def get_quarters():
     year = now.year
     quarter = pd.Timestamp(now).quarter
     quarters = [(year, quarter)]
-    for i in range(3):
+    for i in range(20):
         if quarter == 1:
             quarter = 4
             year -= 1

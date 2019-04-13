@@ -53,7 +53,7 @@ class Report extends Component {
   
   getHouseholdCount = () => {
     // Pulls the current community demographics
-    const url = '/service/report/members/households/count?years=10';
+    const url = '/service/report/members/households/count?years=25';
     axios.get(url)
       .then(res => {
         this.setState({householdCount: res.data});

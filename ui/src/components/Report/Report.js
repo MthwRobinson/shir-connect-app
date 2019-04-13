@@ -13,12 +13,14 @@ import './Report.css';
 class Report extends Component {
   state = {
     activeTab: 'members',
+    // Data for the report tab
     demographics: [],
     memberLocations: [],
     newMembers: [],
     newMembersCount: {},
     newMemberDemographics: [],
-    householdCount: []
+    householdCount: [],
+    householdType: []
   }
   
   componentDidMount(){
@@ -30,6 +32,7 @@ class Report extends Component {
     this.getNewMemberCount();
     this.getNewMemberDemographics();
     this.getHouseholdCount();
+    this.getHouseholdType();
   }
 
   getDemographics = () => {
@@ -54,6 +57,15 @@ class Report extends Component {
     axios.get(url)
       .then(res => {
         this.setState({householdCount: res.data});
+      })
+  }
+  
+  getHouseholdType = () => {
+    // Pulls the current community demographics
+    const url = '/service/report/members/households/type';
+    axios.get(url)
+      .then(res => {
+        this.setState({householdType: res.data});
       })
   }
   
@@ -106,7 +118,8 @@ class Report extends Component {
                             newMembers={this.state.newMembers}
                             newMemberCount={this.state.newMemberCount}
                             newMemberDemographics={this.state.newMemberDemographics}
-                            householdCount={this.state.householdCount}/>);
+                            householdCount={this.state.householdCount}
+                            householdType={this.state.householdType}/>);
     }
   }
 

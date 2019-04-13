@@ -17,6 +17,91 @@ class MemberReport extends Component {
   componentDidMount(){
     this.setState({mounted: true});
   }
+  
+  renderHouseholdTypeList = () => {
+    // Shows the count for each location
+    const householdType = this.props.householdType;
+    let householdTypes = [];
+    for(let group of householdType){
+      householdTypes.push(<li><b>{group.member_type}:</b> {group.total}</li>);
+    }
+    return(
+      <div>
+        <ul className='quick-facts-bullets'>
+          {householdTypes}
+        </ul>
+      </div>
+    )
+  }
+
+  renderHouseholdTypes = () => {
+    // Creates a donut chart showing the 
+    // breakdown of household types
+    
+    // Generate the data for the plot
+    const householdType = this.props.householdType;
+    let values = [];
+    let labels = [];
+    for(let group of householdType){
+      if(group.member_type !== 'All'){
+        labels.push(group.member_type);
+        values.push(group.total);
+      }
+    }
+    const data = [{
+      values: values,
+      labels: labels,
+      type: 'pie',
+      hole: .4,
+      textinfo: 'label',
+      textfont: {color: 'white'},
+      hoverinfo: 'label+percent',
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
+    }]
+
+    const householdTypeList = this.renderHouseholdTypeList();
+    if(this.props.householdType.length === 0 || !this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Household Types</h4>
+          <div className='event-loading'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('age-group-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Household Types</h4>
+          <div className='quick-facts-list'>
+            {householdTypeList}
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
+    }
+  }
 
   renderAgeGroupList = () => {
     // Shows the count for each demographic
@@ -495,13 +580,14 @@ class MemberReport extends Component {
     const newMemberCount = this.renderNewMemberCount();
     const newMemberDemographics = this.renderNewMemberDemographics();
     const householdCount = this.renderHouseholdCount();
+    const householdType = this.renderHouseholdTypes();
    return(
       <div className='QuickFacts'>
         <h2>Membership Report</h2><hr/>
         <h3>Household Demographics</h3>
         <Row>
           {householdCount}
-
+          {householdType}
         </Row>
         <h3>Member Demographics</h3>
         <Row>

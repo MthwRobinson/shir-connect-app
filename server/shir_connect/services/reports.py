@@ -76,6 +76,51 @@ def convert_counts_to_string(response):
             response[key][entry] = str(response[key][entry])
     return response
 
+def build_locations_pct(response):
+    """Builds the locations data as percentages to use in the
+    'Where do members live?' table and bar chart."""
+    common_locations = _find_common_locations(response)
+    percentages = {}
+    for key in response:
+        percentages[key] = {}
+        locations = response[key]
+        total = _get_list_key(locations, 'location', 'All')
+        for location in locations:
+            location_name = location['location']
+            if location_name in common_locations:
+                pct = location['total'] / total['total']
+                percentages[key][location_name] = pct
+        total_pct = sum([percentages[key][k] for k in percentages[key]])
+        percentages[key]['Other'] = 1 - total_pct
+    return percentages
+
+def _find_common_locations(response):
+    """Finds locations that are in every category."""
+    sets = []
+    for key in response:
+        key_locations = set()
+        locations = response[key]
+        for location in locations:
+            location_name = location['location']
+            if location_name not in ['All', 'Other']:
+                key_locations.add(location_name)
+        sets.append(key_locations)
+
+    for i, set_ in enumerate(sets):
+        if i == 0:
+            common_locations = set_
+        else:
+            common_locations = common_locations.intersection(set_)
+    return common_locations
+
+def _get_list_key(list_, key, value):
+    """Pulls the corresponding item from a list of dicts."""
+    for item in list_:
+        if key in item:
+            if item[key] == value:
+                return item
+    return None
+
 @reports.route('/service/report/events/count', methods=['GET'])
 @jwt_required
 def get_report_event_count():
@@ -146,15 +191,20 @@ def get_member_locations():
     level = level if level else 'city'
 
     now = datetime.datetime.now()
-    year_ago = now - datetime.timedelta(days=365)
-    new_start = str(year_ago)[:10]
+    year_ago = str(now - datetime.timedelta(days=365))[:10]
+    five_years_ago = str(now - datetime.timedelta(days=365*5))[:10]
 
     # Hard coding these settings for now, but we can move these
     # to the config files if a client wants something different
     response = {}
     response['all_members'] = members.get_member_locations('city', limit=8)
     response['new_members'] = members.get_member_locations('city', limit=8,
-                                                           start=new_start)
+                                                           start=year_ago)
+    response['year_ago'] = members.get_member_locations('city', limit=8,
+                                                           end=year_ago)
+    response['five_years_ago'] = members.get_member_locations('city', limit=8,
+                                                           end=year_ago)
+    response['percentages'] = build_locations_pct(response)
     return jsonify(response)
 
 @reports.route('/service/report/members/new', methods=['GET'])

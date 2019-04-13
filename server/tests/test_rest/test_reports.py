@@ -100,3 +100,59 @@ def test_get_quarterly_new_members():
     quarters = [(2018, 3), (2018, 4), (2019, 1)]
     response = rep.get_quarterly_new_members(quarters, members)
     assert set(response.keys()) == {'2018-Q3', '2018-Q4', '2019-Q1'}
+
+def test_common_locations():
+    response = {'all_members': [{'location': 'All', 'total': 175},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkville', 'total': 25},
+                                {'location': 'Portland', 'total': 50},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Other', 'total': 25}],
+                'new_members': [{'location': 'All', 'total': 150},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkland', 'total': 25},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Chicago', 'total': 25},
+                                {'location': 'Other', 'total': 25}],
+                'other_members': [{'location': 'All', 'total': 150},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkland', 'total': 25},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Portland', 'total': 25},
+                                {'location': 'Other', 'total': 25}]}
+    common_locations = rep._find_common_locations(response)
+    assert common_locations == {'Bird Town', 'Fishville'}
+
+def test_build_locations_pct():
+    response = {'all_members': [{'location': 'All', 'total': 175},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkville', 'total': 25},
+                                {'location': 'Portland', 'total': 50},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Other', 'total': 25}],
+                'new_members': [{'location': 'All', 'total': 150},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkland', 'total': 25},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Chicago', 'total': 25},
+                                {'location': 'Other', 'total': 25}],
+                'other_members': [{'location': 'All', 'total': 150},
+                                {'location': 'Bird Town', 'total': 50},
+                                {'location': 'Barkland', 'total': 25},
+                                {'location': 'Fishville', 'total': 25},
+                                {'location': 'Portland', 'total': 25},
+                                {'location': 'Other', 'total': 25}]}
+    
+    percentages = rep.build_locations_pct(response)
+    for key in percentages:
+        assert set(percentages[key].keys()) == {'Bird Town', 'Fishville',
+                                                'Other'}
+
+        total = rep._get_list_key(response[key], 'location', 'All')['total']
+        for k in percentages[key]:
+            if k != 'Other':
+                count = rep._get_list_key(response[key], 'location', k)['total']
+                assert percentages[key][k] == count/total
+        total_pct = sum([percentages[key][k] for k in percentages[key]])
+        assert total_pct < 1.0000000001
+        assert total_pct > 0.9999999999

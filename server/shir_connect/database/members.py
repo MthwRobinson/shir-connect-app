@@ -181,17 +181,7 @@ class Members:
                              start=None, end=None):
         """Pulls the current location demographics for the community.
         Available levels are city, county, and region (state)."""
-        where = []
-        if start:
-            where.append(" membership_date >= '{}' ".format(start))
-        if end:
-            where.append(" membership_date <= '{}' ".format(end))
-
-        conditions = ""
-        if where:
-            date_range = " AND ".join(where)
-            conditions = " AND ({}) ".format(date_range)
-
+        conditions = _build_member_date_range(start, end)
         sql = """
             SELECT INITCAP({level}) as location, COUNT(*) AS total
             FROM {schema}.members_view
@@ -295,16 +285,18 @@ class Members:
             results.append({'year': str(i), 'count': str(count)})
         return results
 
-    def get_household_types(self):
+    def get_household_types(self, start=None, end=None):
         """Return a count of how many house holds have each
         membership type."""
+        conditions = _build_member_date_range(start, end)
         sql = """
             SELECT member_type, 
                    COUNT(DISTINCT household_id) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            {conditions}
             GROUP BY member_type
-        """.format(schema=self.database.schema)
+        """.format(schema=self.database.schema, conditions=conditions)
         df = pd.read_sql(sql, self.database.connection)
         type_counts = self.database.to_json(df)
         total = sum([x['total'] for x in type_counts])
@@ -356,3 +348,28 @@ def _clean_location_name(name):
     if name.strip().lower() == 'district of columbia':
         name = 'DC'
     return name.strip()
+
+def _build_member_date_range(start, end):
+    """Builds a where condition that can be added to a querty
+    to restrict the membership date range (ie for new members)
+
+    Parameters
+    ----------
+    start: str, 'YYYY-MM-DD'
+    end: str, 'YYYY-MM-DD'
+
+    Returns
+    -------
+    conditions: str
+    """
+    where = []
+    if start:
+        where.append(" membership_date >= '{}' ".format(start))
+    if end:
+        where.append(" membership_date <= '{}' ".format(end))
+
+    conditions = ""
+    if where:
+        date_range = " AND ".join(where)
+        conditions = " AND ({}) ".format(date_range)
+    return conditions

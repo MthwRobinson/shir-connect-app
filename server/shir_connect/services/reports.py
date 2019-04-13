@@ -210,7 +210,19 @@ def get_household_types():
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
-    response = members.get_household_types()
-    for item in response:
+    response = {}
+    all_households = members.get_household_types()
+    for item in all_households:
         item['total'] = str(item['total'])
+    response['all_households'] = all_households
+    
+    now = datetime.datetime.now()
+    year_ago = now - datetime.timedelta(days=365)
+    new_start = str(year_ago)[:10]
+
+    new_households = members.get_household_types(start=new_start)
+    for item in new_households:
+        item['total'] = str(item['total'])
+    response['new_households'] = new_households
+
     return jsonify(response)

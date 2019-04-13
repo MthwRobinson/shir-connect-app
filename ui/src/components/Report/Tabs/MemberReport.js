@@ -18,9 +18,9 @@ class MemberReport extends Component {
     this.setState({mounted: true});
   }
   
-  renderHouseholdTypeList = () => {
+  renderHouseholdTypeList = (key) => {
     // Shows the count for each location
-    const households = this.props.householdType;
+    const households = this.props.householdType[key];
     let householdTypes = [];
     for(let group of households){
       householdTypes.push(<li><b>{group.member_type}:</b> {group.total}</li>);
@@ -34,12 +34,12 @@ class MemberReport extends Component {
     )
   }
 
-  renderHouseholdTypes = () => {
+  renderHouseholdTypes = (key) => {
     // Creates a donut chart showing the 
     // breakdown of household types
     
     // Generate the data for the plot
-    const householdType = this.props.householdType;
+    const householdType = this.props.householdType[key];
     let values = [];
     let labels = [];
     for(let group of householdType){
@@ -59,7 +59,7 @@ class MemberReport extends Component {
       marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
-    const householdTypeList = this.renderHouseholdTypeList();
+    const householdTypeList = this.renderHouseholdTypeList(key);
     if(this.props.householdType.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
@@ -252,7 +252,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>New Members (Past Year)</h4>
+          <h4>New Members</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -273,7 +273,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>New Members (Past Year)</h4>
+          <h4>New Members</h4>
           <div className='quick-facts-list'>
             {ageGroupList}
           </div>
@@ -581,7 +581,8 @@ class MemberReport extends Component {
     const newMemberCount = this.renderNewMemberCount();
     const newMemberDemographics = this.renderNewMemberDemographics();
     const householdCount = this.renderHouseholdCount();
-    const householdType = this.renderHouseholdTypes();
+    const householdType = this.renderHouseholdTypes('all_households');
+    const newHouseholdType = this.renderHouseholdTypes('new_households');
    return(
       <div className='QuickFacts'>
         <h2>Membership Report</h2><hr/>
@@ -595,13 +596,14 @@ class MemberReport extends Component {
           {ageGroups}
           {memberLocations}
         </Row><hr/>
-        <h3>New Members</h3>
+        <h3>New Members (Past Year)</h3>
         <Row>
           {newMemberDemographics}
           {newMemberLocations}
         </Row>
         <Row>
           {newMemberCount}
+          {newHouseholdType}
         </Row>
         {/* <h4>Newest Members</h4><br/> */}
         {/* {newMembers} */}

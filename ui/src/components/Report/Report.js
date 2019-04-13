@@ -20,7 +20,7 @@ class Report extends Component {
     newMembersCount: {},
     newMemberDemographics: [],
     householdCount: [],
-    householdType: []
+    householdType: {all_households: [], new_households: []}
   }
   
   componentDidMount(){

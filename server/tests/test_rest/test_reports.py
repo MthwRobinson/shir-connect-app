@@ -89,7 +89,11 @@ def test_get_quarterly_new_members():
     class FakeMembers:
         def __init__(self):
             pass
+
         def count_new_members(self, start, end):
+            return 100
+        
+        def count_new_households(self, start, end):
             return 100
 
     members = FakeMembers()

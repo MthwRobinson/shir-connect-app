@@ -257,6 +257,24 @@ class Members:
             results.append({'year': str(i), 'count': str(count)})
         return results
 
+    def get_household_types(self):
+        """Return a count of how many house holds have each
+        membership type."""
+        sql = """
+            SELECT member_type, 
+                   COUNT(DISTINCT household_id) AS total
+            FROM {schema}.members_view
+            WHERE active_member = true
+            GROUP BY member_type
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        type_counts = self.database.to_json(df)
+        total = sum([x['total'] for x in type_counts])
+        type_counts.append({'member_type': 'All', 'total': total})
+        type_counts = sorted(type_counts, key=lambda k: k['total'],
+                             reverse=True)
+        return type_counts
+
     ########################
     # File upload methods
     ########################

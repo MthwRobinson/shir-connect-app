@@ -76,10 +76,11 @@ def convert_counts_to_string(response):
             response[key][entry] = str(response[key][entry])
     return response
 
-def build_locations_pct(response):
+def build_locations_pct(response, common_locations=None):
     """Builds the locations data as percentages to use in the
     'Where do members live?' table and bar chart."""
-    common_locations = _find_common_locations(response)
+    if not common_locations:
+        common_locations = _find_common_locations(response)
     percentages = {}
     for key in response:
         percentages[key] = {}
@@ -204,7 +205,9 @@ def get_member_locations():
                                                            end=year_ago)
     response['five_years_ago'] = members.get_member_locations('city', limit=8,
                                                            end=year_ago)
-    response['percentages'] = build_locations_pct(response)
+    common_locations = _find_common_locations(response)
+    response['percentages'] = build_locations_pct(response, common_locations)
+    response['common_locations'] = list(common_locations)
     return jsonify(response)
 
 @reports.route('/service/report/members/new', methods=['GET'])

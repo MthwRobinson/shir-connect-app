@@ -412,12 +412,6 @@ class MemberReport extends Component {
     }
   }
 
-  selectMember = (firstName, lastName) => {
-    // Navigates to the page for the member
-    const url = '/member?firstName='+firstName+'&lastName='+lastName;
-    this.props.history.push(url);
-  }
-
   renderTableHeaders = () => {
     // Renders the header of the locations table
     let header = [];

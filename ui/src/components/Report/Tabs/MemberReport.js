@@ -1,6 +1,5 @@
 // Renders the information in the Members
 // section of the report view
-import moment from 'moment';
 import React, { Component } from 'react';
 import { Col, Row, Table } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
@@ -60,7 +59,7 @@ class MemberReport extends Component {
     }]
 
     const householdTypeList = this.renderHouseholdTypeList(key);
-    if(this.props.householdType.length === 0 || !this.state.mounted){
+    if(this.props.householdType[key].length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -337,7 +336,7 @@ class MemberReport extends Component {
     }]
 
     const locationList = this.renderLocationList(key);
-    if(this.props.memberLocations.length === 0 || !this.state.mounted){
+    if(this.props.memberLocations[key].length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -380,9 +379,10 @@ class MemberReport extends Component {
     }
   }
 
-  renderNewMembers = () => {
+  renderLocationsTable = () => {
     // Creates a table that displays the most recent members
-    if(this.props.newMembers.length === 0 || !this.state.mounted){
+    const notReady = this.props.memberLocations.all_members.length === 0;
+    if(notReady || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -394,16 +394,14 @@ class MemberReport extends Component {
       )
     } else {
       const rows = this.renderTableRows();
+      const headers = this.renderTableHeaders();
       return(
         <Table responsive header hover>
           <thead>
             <tr>
-              <th className='table-heading'>First Name</th>
-              <th className='table-heading'>Last Name</th>
-              <th className='table-heading'>Age</th>
-              <th className='table-heading'>City</th>
-              <th className='table-heading'>State</th>
-              <th className='table-heading'>Joined</th>
+              <th className='table-heading'>Group</th>
+              {headers}
+              <th className='table-heading'>Other</th>
             </tr>
           </thead>
           <tbody>
@@ -420,29 +418,36 @@ class MemberReport extends Component {
     this.props.history.push(url);
   }
 
+  renderTableHeaders = () => {
+    // Renders the header of the locations table
+    let header = [];
+    let i = 0;
+    for(let location of this.props.memberLocations['common_locations']){
+      header.push(<th className='table-heading' key={i}>{location}</th>)
+    }
+    return header;
+  }
+
   renderTableRows = () => {
-    // Renders the rows for the new members table
+    // Renders the rows for the locations table
+    const percentages = this.props.memberLocations.percentages;
     let rows = [];
     let i = 0;
-    for(let member of this.props.newMembers){
+    const groupNames = {'all_members': 'Current Members', 'year_ago': 'Last Year',
+                        'five_years_ago': 'Five Years Ago', 'new_members': 'New Members'}
+    for(let group in groupNames){
       i++;
+      let entries = [];
+      for(let location of this.props.memberLocations['common_locations']){
+        const pct = (percentages[group][location]*100).toFixed(2);
+        entries.push(<td>{pct}%</td>);
+      }
+      const otherPCT = (percentages[group]['Other']*100).toFixed(2);
       const row = (
-        <tr className='table-row' key={i}
-            onClick={()=>this.selectMember(member.first_name, 
-                                           member.last_name)} >
-          <th>{member.first_name != null
-              ? member.first_name : '--'}</th>
-          <th>{member.last_name != null
-              ? member.last_name : '--'}</th>
-          <th>{member.age != null
-              ? member.age : null}</th>
-          <th>{member.city != null
-              ? member.city : null}</th>
-          <th>{member.region != null
-              ? member.region : null}</th>
-          <th>{member.membership_date != null
-              ? moment(member.membership_date).format('MM/DD/YY')
-              : null}</th>
+        <tr className='table-row' key={i}>
+          <td>{groupNames[group]}</td>
+          {entries}
+          <td>{otherPCT}%</td>
         </tr>
       )
       rows.push(row);
@@ -468,7 +473,7 @@ class MemberReport extends Component {
       marker: {colors: DONUT_PLOT_COLORS}
     }]
 
-    if(this.props.memberLocations.length === 0 || !this.state.mounted){
+    if(this.props.newMembers.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -529,7 +534,7 @@ class MemberReport extends Component {
       marker: {colors: DONUT_PLOT_COLORS}
     }]
 
-    if(this.props.memberLocations.length === 0 || !this.state.mounted){
+    if(this.props.householdCount.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
@@ -577,7 +582,7 @@ class MemberReport extends Component {
     const ageGroups = this.renderAgeGroups();
     const memberLocations = this.renderMemberLocations('all_members');
     const newMemberLocations = this.renderMemberLocations('new_members');
-    // const newMembers = this.renderNewMembers();
+    const locationsTable = this.renderLocationsTable();
     const newMemberCount = this.renderNewMemberCount();
     const newMemberDemographics = this.renderNewMemberDemographics();
     const householdCount = this.renderHouseholdCount();
@@ -605,8 +610,8 @@ class MemberReport extends Component {
           {newMemberCount}
           {newHouseholdType}
         </Row>
-        {/* <h4>Newest Members</h4><br/> */}
-        {/* {newMembers} */}
+        <h4>Where Members Live</h4><br/>
+        {locationsTable}
       </div> 
     )
   }

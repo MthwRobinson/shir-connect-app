@@ -204,7 +204,7 @@ def get_member_locations():
     response['year_ago'] = members.get_member_locations('city', limit=8,
                                                            end=year_ago)
     response['five_years_ago'] = members.get_member_locations('city', limit=8,
-                                                           end=year_ago)
+                                                           end=five_years_ago)
     common_locations = _find_common_locations(response)
     response['percentages'] = build_locations_pct(response, common_locations)
     response['common_locations'] = list(common_locations)

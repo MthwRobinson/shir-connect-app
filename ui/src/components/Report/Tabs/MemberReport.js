@@ -472,7 +472,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>New Member Count</h4>
+          <h4>New Household Count</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -487,7 +487,7 @@ class MemberReport extends Component {
         height: .55*width,
         width: .9*width,
         yaxis: {
-          title: 'New Members',
+          title: 'New Households',
           titlefont: {family: 'Source Sans Pro'}
         },
         xaxis: { tickangle: 45 },
@@ -497,7 +497,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>New Member Count</h4>
+          <h4>New Household Count</h4>
           <div className='quick-facts-plot-area'> 
             <Plot
             data={data}
@@ -597,11 +597,11 @@ class MemberReport extends Component {
         </Row><hr/>
         <h3>New Members</h3>
         <Row>
-          {newMemberCount}
+          {newMemberDemographics}
           {newMemberLocations}
         </Row>
         <Row>
-          {newMemberDemographics}
+          {newMemberCount}
         </Row>
         {/* <h4>Newest Members</h4><br/> */}
         {/* {newMembers} */}

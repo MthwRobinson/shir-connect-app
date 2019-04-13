@@ -576,7 +576,7 @@ class MemberReport extends Component {
   render(){
     const ageGroups = this.renderAgeGroups();
     const memberLocations = this.renderMemberLocations();
-    const newMembers = this.renderNewMembers();
+    // const newMembers = this.renderNewMembers();
     const newMemberCount = this.renderNewMemberCount();
     const newMemberDemographics = this.renderNewMemberDemographics();
     const householdCount = this.renderHouseholdCount();
@@ -600,7 +600,7 @@ class MemberReport extends Component {
           {newMemberDemographics}
         </Row>
         <h4>Newest Members</h4><br/>
-        {newMembers}
+        {/* {newMembers} */}
       </div> 
     )
   }

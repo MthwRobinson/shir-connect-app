@@ -65,7 +65,7 @@ def get_quarterly_new_members(quarters, members):
         if quarter == 4:
             year += 1
         end = '{}-{}'.format(year, date_range[1])
-        response[quarter_desc] = members.count_new_members(start, end)
+        response[quarter_desc] = members.count_new_households(start, end)
     return response
 
 def convert_counts_to_string(response):
@@ -138,16 +138,23 @@ def get_member_locations():
     has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
                                     members.database)
     
-    level = request.args.get('level')
-    level = level if level else 'city'
-
     if not has_access:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
+    
+    level = request.args.get('level')
+    level = level if level else 'city'
+
+    now = datetime.datetime.now()
+    year_ago = now - datetime.timedelta(days=365)
+    new_start = str(year_ago)[:10]
 
     # Hard coding these settings for now, but we can move these
     # to the config files if a client wants something different
-    response = members.get_member_locations('city', limit=8)
+    response = {}
+    response['all_members'] = members.get_member_locations('city', limit=8)
+    response['new_members'] = members.get_member_locations('city', limit=8,
+                                                           start=new_start)
     return jsonify(response)
 
 @reports.route('/service/report/members/new', methods=['GET'])

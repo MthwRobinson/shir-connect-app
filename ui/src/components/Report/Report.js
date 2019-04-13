@@ -15,7 +15,7 @@ class Report extends Component {
     activeTab: 'members',
     // Data for the report tab
     demographics: [],
-    memberLocations: [],
+    memberLocations: {all_members: [], new_members: []},
     newMembers: [],
     newMembersCount: {},
     newMemberDemographics: [],

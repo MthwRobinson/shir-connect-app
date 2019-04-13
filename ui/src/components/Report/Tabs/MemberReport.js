@@ -20,9 +20,9 @@ class MemberReport extends Component {
   
   renderHouseholdTypeList = () => {
     // Shows the count for each location
-    const householdType = this.props.householdType;
+    const households = this.props.householdType;
     let householdTypes = [];
-    for(let group of householdType){
+    for(let group of households){
       householdTypes.push(<li><b>{group.member_type}:</b> {group.total}</li>);
     }
     return(
@@ -291,9 +291,9 @@ class MemberReport extends Component {
     }
   }
   
-  renderLocationList = () => {
+  renderLocationList = (key) => {
     // Shows the count for each location
-    const memberLocations = this.props.memberLocations;
+    const memberLocations = this.props.memberLocations[key];
     let ageGroups = [];
     for(let group of memberLocations){
       if(group.location==='Young Professional'){
@@ -311,12 +311,12 @@ class MemberReport extends Component {
     )
   }
 
-  renderMemberLocations = () => {
+  renderMemberLocations = (key) => {
     // Creates a donut chart showing the 
     // proportions of each age group
     
     // Generate the data for the plot
-    const memberLocations = this.props.memberLocations;
+    const memberLocations = this.props.memberLocations[key];
     let values = [];
     let labels = [];
     for(let group of memberLocations){
@@ -336,7 +336,7 @@ class MemberReport extends Component {
       marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
     }]
 
-    const locationList = this.renderLocationList();
+    const locationList = this.renderLocationList(key);
     if(this.props.memberLocations.length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
@@ -575,7 +575,8 @@ class MemberReport extends Component {
   
   render(){
     const ageGroups = this.renderAgeGroups();
-    const memberLocations = this.renderMemberLocations();
+    const memberLocations = this.renderMemberLocations('all_members');
+    const newMemberLocations = this.renderMemberLocations('new_members');
     // const newMembers = this.renderNewMembers();
     const newMemberCount = this.renderNewMemberCount();
     const newMemberDemographics = this.renderNewMemberDemographics();
@@ -597,9 +598,12 @@ class MemberReport extends Component {
         <h3>New Members</h3>
         <Row>
           {newMemberCount}
+          {newMemberLocations}
+        </Row>
+        <Row>
           {newMemberDemographics}
         </Row>
-        <h4>Newest Members</h4><br/>
+        {/* <h4>Newest Members</h4><br/> */}
         {/* {newMembers} */}
       </div> 
     )

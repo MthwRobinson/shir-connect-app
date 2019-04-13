@@ -26,7 +26,9 @@ def test_get_member_locations(monkeypatch):
                          {'location': 'Dog', 'total': 200},
                          {'location': 'Other', 'total': 100}]
 
-    locations = members.get_member_locations('city', limit=3)
+    locations = members.get_member_locations('city', limit=3,
+                                             start='2018-01-01',
+                                             end='2019-01-01')
     assert locations == [{'location': 'All', 'total': 800},
                          {'location': 'Bird Town', 'total': 500},
                          {'location': 'Dog', 'total': 200},
@@ -50,6 +52,13 @@ def test_get_households_types(monkeypatch):
     assert demographics == [{'member_type': 'All', 'total': 500},
                             {'member_type': 'Individual', 'total': 300},
                             {'member_type': 'Family', 'total': 200}]
+
+def test_count_new_households(monkeypatch):
+    fake_response = pd.DataFrame({'count': [200]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
+    members = Members()
+    count = members.count_new_households('2018-01-01', '2019-01-01')
+    assert count == 200
 
 def test_clean_location_name():
     assert _clean_location_name('Moo City') == 'Moo'

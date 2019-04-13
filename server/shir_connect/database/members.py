@@ -126,16 +126,16 @@ class Members:
 
         Parameters
         ----------
-            limit: int
-            page: int
-            order: str, the column to sort on
-            sort: str, 'asc' or 'desc'
-            q: tuple, a query on the last name
-            where: list, the where conditions for the query
+        limit: int
+        page: int
+        order: str, the column to sort on
+        sort: str, 'asc' or 'desc'
+        q: tuple, a query on the last name
+        where: list, the where conditions for the query
 
         Returns
         -------
-            dict
+        dict
         """
         query = ('last_name', q) if q else None
         df = self.database.read_table('participants', limit=limit, page=page,
@@ -177,16 +177,30 @@ class Members:
         response.append({'age_group': 'All', 'total': total})
         return sorted(response, key=lambda k: k['total'], reverse=True)
 
-    def get_member_locations(self, level, limit=10):
+    def get_member_locations(self, level, limit=10,
+                             start=None, end=None):
         """Pulls the current location demographics for the community.
         Available levels are city, county, and region (state)."""
+        where = []
+        if start:
+            where.append(" membership_date >= '{}' ".format(start))
+        if end:
+            where.append(" membership_date <= '{}' ".format(end))
+
+        conditions = ""
+        if where:
+            date_range = " AND ".join(where)
+            conditions = " AND ({}) ".format(date_range)
+
         sql = """
             SELECT INITCAP({level}) as location, COUNT(*) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            {conditions}
             GROUP BY {level} 
             ORDER BY total DESC
-        """.format(schema=self.database.schema, level=level)
+        """.format(schema=self.database.schema, level=level,
+                   conditions=conditions)
         df = pd.read_sql(sql, self.database.connection)
         locations = self.database.to_json(df)
         total = sum([x['total'] for x in locations])
@@ -208,7 +222,7 @@ class Members:
         return sorted(response, key=lambda k: k['total'], reverse=True)
     
     def count_new_members(self, start, end):
-        """Counts the number of new members meeting in the given range.
+        """Counts the number of new members joining in the given range.
 
         Parameters
         ----------
@@ -226,6 +240,30 @@ class Members:
         count = self.database.count_rows('members_view',
                                          where=[('membership_date', 
                                                  {'>=': start, '<': end})])
+        return count
+
+    def count_new_households(self, start, end):
+        """Counts the number of new members joining in the given range.
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+
+        Returns
+        -------
+        count: int
+        """
+        sql = """
+            SELECT COUNT(DISTINCT household_id) as count
+            FROM {schema}.members_view
+            WHERE membership_date >= '{start}'
+            AND membership_date < '{end}'
+        """.format(schema=self.database.schema, start=start, end=end)
+        df = pd.read_sql(sql, self.database.connection)
+        count = df.loc[0]['count']
         return count
 
     def get_households_by_year(self, start, end):

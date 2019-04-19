@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Col, Row, Table } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 
 import Loading from './../../Loading/Loading';
 import { DONUT_PLOT_COLORS } from './../../../utilities/plots';
@@ -582,9 +583,17 @@ class MemberReport extends Component {
     const householdCount = this.renderHouseholdCount();
     const householdType = this.renderHouseholdTypes('all_households');
     const newHouseholdType = this.renderHouseholdTypes('new_households');
+    let reportInfo = 'The membership report contains information about active ';
+    reportInfo += 'members.<br/> It does not include information about attendees who ';
+    reportInfo += 'are not members.'
    return(
       <div className='QuickFacts'>
-        <h2>Membership Report</h2><hr/>
+        <h2>Membership Report{' '}
+          <sup><i className='fa fa-info-circle'
+                  data-tip={reportInfo}></i>
+          </sup>
+        </h2><hr/>
+        <ReactToolTip html={true} />
         <h3>Household Demographics</h3>
         <Row>
           {householdCount}
@@ -606,7 +615,7 @@ class MemberReport extends Component {
         </Row>
         <h4>Where Members Live</h4><br/>
         {locationsTable}
-      </div> 
+      </div>
     )
   }
 };

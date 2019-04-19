@@ -400,9 +400,9 @@ class MemberReport extends Component {
         <Table responsive header hover>
           <thead>
             <tr>
-              <th className='table-heading'>Group</th>
+              <th>Group</th>
               {headers}
-              <th className='table-heading'>Other</th>
+              <th>Other</th>
             </tr>
           </thead>
           <tbody>
@@ -418,7 +418,7 @@ class MemberReport extends Component {
     let header = [];
     let i = 0;
     for(let location of this.props.memberLocations['common_locations']){
-      header.push(<th className='table-heading' key={i}>{location}</th>)
+      header.push(<th key={i}>{location}</th>)
     }
     return header;
   }

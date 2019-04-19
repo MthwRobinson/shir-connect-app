@@ -51,7 +51,8 @@ class ManageUsers extends Component {
         modUsername: '',
         resetUsername: '',
         resetPassword: '',
-        resetModalOpen: false
+        resetModalOpen: false,
+        availableModules: ['events', 'members', 'map']
       }
     }
   
@@ -336,6 +337,7 @@ class ManageUsers extends Component {
             </p>
         )
       }
+      let checkBoxes = this.renderCheckBoxes();
       // The modal that pops up to add a new user
       return(
         <div>
@@ -374,39 +376,7 @@ class ManageUsers extends Component {
                 </FormGroup>
                 <FormGroup className='bottom-user-form'>
                   <ControlLabel>Modules</ControlLabel><br/>
-                  <Checkbox
-                    checked={this.state.events}
-                    onChange={this.handleEvents}
-                    className='form-check-box' inline>
-                    {' '}Events
-                  </Checkbox>
-                  <Checkbox 
-                    checked={this.state.members}
-                    onChange={this.handleMembers}
-                  className='form-check-box' inline>
-                    {' '}Members
-                  </Checkbox><br/>
-                  <Checkbox 
-                    checked={this.state.trends}
-                    onChange={this.handleTrends}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Trends
-                  </Checkbox>
-                  <Checkbox 
-                    checked={this.state.map}
-                    onChange={this.handleMap}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Map
-                  </Checkbox><br/>
-                  <Checkbox 
-                    checked={this.state.report}
-                    onChange={this.handleReport}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Report
-                  </Checkbox>
+                  {checkBoxes}
                 </FormGroup>
                 {msg}
                 <Button
@@ -529,6 +499,7 @@ class ManageUsers extends Component {
         modMembers: modules.includes('members'),
         modTrends: modules.includes('trends'),
         modMap: modules.includes('map'),
+        modReport: modules.includes('report'),
         modModalOpen: true 
       });
     }
@@ -548,6 +519,7 @@ class ManageUsers extends Component {
 
     renderModModal = () => {
       // The modal that pops up to add a new user
+      let checkBoxes = this.renderCheckBoxes(true);
       return(
         <div>
           <Modal 
@@ -577,39 +549,7 @@ class ManageUsers extends Component {
                 </FormGroup>
                 <FormGroup>
                   <ControlLabel>Modules</ControlLabel><br/>
-                  <Checkbox
-                    checked={this.state.modEvents}
-                    onChange={this.handleModEvents}
-                    className='form-check-box' inline>
-                    {' '}Events
-                  </Checkbox>
-                  <Checkbox 
-                    checked={this.state.modMembers}
-                    onChange={this.handleModMembers}
-                  className='form-check-box' inline>
-                    {' '}Members
-                  </Checkbox><br/>
-                  <Checkbox 
-                    checked={this.state.modTrends}
-                    onChange={this.handleModTrends}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Trends
-                  </Checkbox>
-                  <Checkbox 
-                    checked={this.state.modMap}
-                    onChange={this.handleModMap}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Map
-                  </Checkbox><br/>
-                  <Checkbox 
-                    checked={this.state.modReport}
-                    onChange={this.handleModReport}
-                    className='form-check-box' 
-                  inline>
-                    {' '}Report
-                  </Checkbox>
+                  {checkBoxes}
                 </FormGroup>
                 <Button
                   className='login-button'
@@ -756,6 +696,104 @@ class ManageUsers extends Component {
         </div>
       )
     }
+
+  //-------------------
+  // UTILITY METHODS
+  //-------------------
+
+  renderCheckBoxes = (mod=false) => {
+    // Renders the check boxes and only displays
+    // modules that the client has access to.
+    //
+    // Parameters
+    // ----------
+    // mod: boolean
+    //     renders the boxs for the mod pop up if true
+    //
+    // Returns
+    // -------
+    // checkBoxes: array
+    //     an array of check boxes for the pop up
+    //
+    let checkBoxes = [];
+    let i = 1;
+    if(this.state.availableModules.indexOf('events') >= 0){
+      checkBoxes.push(
+        <Checkbox
+          checked={mod ? this.state.modEvents : this.state.events}
+          onChange={mod ? this.handleModEvents : this.handleEvents}
+          className='form-check-box' inline>
+          {' '}Events
+        </Checkbox>
+      )
+      if(i % 2 == 0){
+        checkBoxes.push(<br/>)
+      }
+      i += 1;
+    }
+    if(this.state.availableModules.indexOf('members') >= 0){
+      checkBoxes.push(
+        <Checkbox 
+          checked={mod ? this.state.modMembers : this.state.members}
+          onChange={mod ? this.handleModMembers : this.handleMembers}
+          className='form-check-box'
+        inline>
+          {' '}Members
+        </Checkbox>
+      )
+      if(i % 2 == 0){
+        checkBoxes.push(<br/>)
+      }
+      i += 1;
+    }
+    if(this.state.availableModules.indexOf('trends') >= 0){
+      checkBoxes.push(
+        <Checkbox 
+          checked={mod ? this.state.modTrends : this.state.trends}
+          onChange={mod ? this.handleModTrends : this.handleTrends}
+          className='form-check-box' 
+        inline>
+          {' '}Trends
+        </Checkbox>
+      )
+      if(i % 2 == 0){
+        checkBoxes.push(<br/>)
+      }
+      i += 1;
+    }
+    if(this.state.availableModules.indexOf('map') >= 0){
+      const br = i % 2 == 0 ? <br/> : null;
+      checkBoxes.push(
+        <Checkbox 
+          checked={mod ? this.state.modMap : this.state.map}
+          onChange={mod ? this.handleModMap : this.handleMap}
+          className='form-check-box' 
+        inline>
+          {' '}Map
+        </Checkbox>
+      )
+      if(i % 2 == 0){
+        checkBoxes.push(<br/>)
+      }
+      i += 1;
+    }
+    if(this.state.availableModules.indexOf('report') >= 0){
+      checkBoxes.push(
+        <Checkbox 
+          checked={mod ? this.state.modReport : this.state.report}
+          onChange={mod ? this.handleModReport : this.handleReport}
+          className='form-check-box' 
+        inline>
+          {' '}Report
+        </Checkbox>
+      )
+      if(i % 2 == 0){
+        checkBoxes.push(<br/>)
+      }
+      i += 1;
+    }
+    return checkBoxes
+  }
 
   render() {
       const addWindow = this.renderAddModal();

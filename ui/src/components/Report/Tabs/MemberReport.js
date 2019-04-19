@@ -439,7 +439,7 @@ class MemberReport extends Component {
       }
       const otherPCT = (percentages[group]['Other']*100).toFixed(2);
       const row = (
-        <tr className='table-row' key={i}>
+        <tr key={i}>
           <td>{groupNames[group]}</td>
           {entries}
           <td>{otherPCT}%</td>

@@ -48,10 +48,10 @@ member_types:
   JCCMEM: JCC
 
 age_groups:
-  College:
+  18-22:
     min: 18
     max: 23
-  Young Professional:
+  22-35:
     min: 23
     max: 35
   35-50:

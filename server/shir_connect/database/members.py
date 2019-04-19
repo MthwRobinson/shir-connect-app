@@ -9,7 +9,7 @@ import numpy as np
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.member_loader import MemberLoader
-from shir_connect.database.utils import build_age_groups
+from shir_connect.database.utils import build_age_groups, sort_results
 
 class Members:
     """ Class that handle database operations for members """
@@ -175,7 +175,7 @@ class Members:
         response = self.database.to_json(df)
         total = sum([x['total'] for x in response])
         response.append({'age_group': 'All', 'total': total})
-        return sorted(response, key=lambda k: k['total'], reverse=True)
+        return sort_results(response, 'age_group')
 
     def get_member_locations(self, level, limit=10,
                              start=None, end=None):
@@ -209,7 +209,7 @@ class Members:
         if other > 0:
             response.append({'location': 'Other', 'total': other})
         response.append({'location': 'All', 'total': total})
-        return sorted(response, key=lambda k: k['total'], reverse=True)
+        return sort_results(response, 'location')
     
     def count_new_members(self, start, end):
         """Counts the number of new members joining in the given range.
@@ -307,8 +307,7 @@ class Members:
 
         total = sum([x['total'] for x in type_counts])
         type_counts.append({'member_type': 'All', 'total': total})
-        type_counts = sorted(type_counts, key=lambda k: k['total'],
-                             reverse=True)
+        type_counts = sort_results(type_counts, 'member_type')
         return type_counts
 
     ########################

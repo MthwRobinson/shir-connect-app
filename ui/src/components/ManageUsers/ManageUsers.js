@@ -52,13 +52,14 @@ class ManageUsers extends Component {
         resetUsername: '',
         resetPassword: '',
         resetModalOpen: false,
-        availableModules: ['events', 'members', 'map']
+        availableModules: []
       }
     }
   
     componentDidMount(){
-      // Pulls the users name
+      // Pulls the users and the available modules
       this.getUsers();
+      this.getAvailableModules();
 
       // Refreshes the token to keep the session active
       refreshAccessToken();
@@ -89,7 +90,15 @@ class ManageUsers extends Component {
     //------------------
     // SERVICE CALLS
     //-------------------
-  
+
+    getAvailableModules = () => {
+      // Pulls a list of modules that are available
+      axios.get('/service/user/authorize')
+        .then(res => {
+        this.setState({availableModules: res.data.available_modules});
+      })
+    }
+
     getUsers = () => {
       // Pulls a list of users from the database
       this.setState({loading: true});
@@ -315,7 +324,13 @@ class ManageUsers extends Component {
 
     renderAddModal = () => {
       let msg = null;
-      let done = null;
+      let button = (
+        <Button
+          className='login-button add-user-button'
+          bsStyle='primary'
+          type='submit'
+        >Submit</Button>
+      );
       if(this.state.password&&!this.state.addUserError){
         msg = (
             <p className='success-msg'>
@@ -323,7 +338,7 @@ class ManageUsers extends Component {
               {'\n'}<b>{this.state.password}</b>
             </p>
         )
-        done = (
+        button = (
           <Button
             className='login-button'
             bsStyle='primary'
@@ -379,12 +394,7 @@ class ManageUsers extends Component {
                   {checkBoxes}
                 </FormGroup>
                 {msg}
-                <Button
-                  className='login-button add-user-button'
-                  bsStyle='primary'
-                  type='submit'
-                >Submit</Button>
-                {done}
+                {button}
               </Form>
             </div>
           </Modal>
@@ -726,7 +736,7 @@ class ManageUsers extends Component {
           {' '}Events
         </Checkbox>
       )
-      if(i % 2 == 0){
+      if(i % 2 === 0){
         checkBoxes.push(<br/>)
       }
       i += 1;
@@ -741,7 +751,7 @@ class ManageUsers extends Component {
           {' '}Members
         </Checkbox>
       )
-      if(i % 2 == 0){
+      if(i % 2 === 0){
         checkBoxes.push(<br/>)
       }
       i += 1;
@@ -756,13 +766,13 @@ class ManageUsers extends Component {
           {' '}Trends
         </Checkbox>
       )
-      if(i % 2 == 0){
+      if(i % 2 === 0){
         checkBoxes.push(<br/>)
       }
       i += 1;
     }
     if(this.state.availableModules.indexOf('map') >= 0){
-      const br = i % 2 == 0 ? <br/> : null;
+      const br = i % 2 === 0 ? <br/> : null;
       checkBoxes.push(
         <Checkbox 
           checked={mod ? this.state.modMap : this.state.map}
@@ -772,7 +782,7 @@ class ManageUsers extends Component {
           {' '}Map
         </Checkbox>
       )
-      if(i % 2 == 0){
+      if(i % 2 === 0){
         checkBoxes.push(<br/>)
       }
       i += 1;
@@ -787,7 +797,7 @@ class ManageUsers extends Component {
           {' '}Report
         </Checkbox>
       )
-      if(i % 2 == 0){
+      if(i % 2 === 0){
         checkBoxes.push(<br/>)
       }
       i += 1;

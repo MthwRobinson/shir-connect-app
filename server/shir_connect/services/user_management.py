@@ -152,6 +152,8 @@ def user_authorize():
         response = {'message': 'user not found'}
         return jsonify(response), 400
     else:
+        if user['role'] == 'admin':
+            user['available_modules'] = conf.AVAILABLE_MODULES
         modules = [x for x in user['modules'] if x in conf.AVAILABLE_MODULES]
         user['modules'] = modules
         del user['password']

@@ -40,6 +40,13 @@ event_groups:
   - Tot Shabbat
   - TRS Tents
 
+member_types:
+  MEMFAM: Family
+  MEMIND: Individual
+  STAFF: Staff
+  MEMYNG: Young Prof.
+  JCCMEM: JCC
+
 age_groups:
   College:
     min: 18

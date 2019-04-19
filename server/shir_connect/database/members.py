@@ -299,6 +299,12 @@ class Members:
         """.format(schema=self.database.schema, conditions=conditions)
         df = pd.read_sql(sql, self.database.connection)
         type_counts = self.database.to_json(df)
+
+        for count in type_counts:
+            if count['member_type'] in conf.MEMBER_TYPES:
+                member_type = conf.MEMBER_TYPES[count['member_type']]
+                count['member_type'] = member_type
+
         total = sum([x['total'] for x in type_counts])
         type_counts.append({'member_type': 'All', 'total': total})
         type_counts = sorted(type_counts, key=lambda k: k['total'],

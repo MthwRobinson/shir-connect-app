@@ -8,7 +8,18 @@ def test_build_age_groups(monkeypatch):
     monkeypatch.setattr('shir_connect.configuration.AGE_GROUPS', 
                         FAKE_AGE_GROUPS)
     sql = utils.build_age_groups()
-    expected = " CASE WHEN age >= 18 AND age < 23 THEN '18-23'"
-    expected += " WHEN age >= 35 AND age < 50 THEN '35-50'"
-    expected += " ELSE 'Unknown' END as age_group "
-    assert sql.lower().split() == expected.lower().split()
+    assert "'18-23'" in sql
+    assert "'35-50'" in sql
+    assert "'Unknown'" in sql
+
+def test_sort_results():
+    results = [{'parrot': 'Conure'}, {'parrot': 'All'},
+               {'parrot': 'Other'}, {'parrot': 'Macaw'}]
+
+    ordered_results = utils.sort_results(results, 'parrot')
+    assert ordered_results == [{'parrot': 'All'}, {'parrot': 'Conure'},
+                               {'parrot': 'Macaw'}, {'parrot': 'Other'}]
+    
+    ordered_results = utils.sort_results(results, 'parrot', reverse=True)
+    assert ordered_results == [{'parrot': 'All'}, {'parrot': 'Macaw'},
+                               {'parrot': 'Conure'}, {'parrot': 'Other'}]

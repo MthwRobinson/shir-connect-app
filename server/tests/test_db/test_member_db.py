@@ -10,8 +10,8 @@ def test_get_demographics(monkeypatch):
     members = Members()
     demographics = members.get_demographics(new_members=True)
     assert demographics == [{'age_group': 'All', 'total': 362},
-                            {'age_group': 'Penguins', 'total': 262},
-                            {'age_group': 'Parrots', 'total': 100}]
+                            {'age_group': 'Parrots', 'total': 100},
+                            {'age_group': 'Penguins', 'total': 262}]
 
 def test_get_member_locations(monkeypatch):
     fake_response = pd.DataFrame({'location': ['Bird Town', 'Dog City',
@@ -50,8 +50,8 @@ def test_get_households_types(monkeypatch):
     members = Members()
     demographics = members.get_household_types()
     assert demographics == [{'member_type': 'All', 'total': 500},
-                            {'member_type': 'Individual', 'total': 300},
-                            {'member_type': 'Family', 'total': 200}]
+                            {'member_type': 'Family', 'total': 200},
+                            {'member_type': 'Individual', 'total': 300}]
 
 def test_count_new_households(monkeypatch):
     fake_response = pd.DataFrame({'count': [200]})

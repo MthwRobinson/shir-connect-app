@@ -139,14 +139,14 @@ class Report extends Component {
           <li eventKey="members" 
               className={tabStyle['members']}
               onClick={()=>this.switchTab('members')}>Members</li>
-          <li eventKey="attendees" 
-              className={tabStyle['attendees']}
-              onClick={()=>this.switchTab('attendees')}
-          >Attendees</li>
-          <li eventKey="events"
-              className={tabStyle['events']}
-              onClick={()=>this.switchTab('events')}
-          >Events</li>
+          {/* <li eventKey="attendees"  */}
+          {/*     className={tabStyle['attendees']} */}
+          {/*     onClick={()=>this.switchTab('attendees')} */}
+          {/* >Attendees</li> */}
+          {/* <li eventKey="events" */}
+          {/*     className={tabStyle['events']} */}
+          {/*     onClick={()=>this.switchTab('events')} */}
+          {/* >Events</li> */}
         </Nav>
     )
 

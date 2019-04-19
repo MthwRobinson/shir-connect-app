@@ -15,6 +15,7 @@ modules:
   - members
   - trends
   - map
+  - report
 
 location:
   name: Temple Rodef Shalom
@@ -27,11 +28,30 @@ location:
   longitude: -77.173588
   postal_code: 22043
 
+event_groups:
+  - Food 4 Thought
+  - TRSNS
+  - Rodef 2100
+  - WoTRS
+  - Parent Workshop
+  - Renaissance
+  - Feed Em Friday
+  - Lox and Lecture
+  - Tot Shabbat
+  - TRS Tents
+
+member_types:
+  MEMFAM: Family
+  MEMIND: Individual
+  STAFF: Staff
+  MEMYNG: Young Prof.
+  JCCMEM: JCC
+
 age_groups:
-  College:
+  18-22:
     min: 18
     max: 23
-  Young Professional:
+  22-35:
     min: 23
     max: 35
   35-50:

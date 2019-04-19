@@ -5,11 +5,11 @@ Includes:
     1. Flask route with /map path
     2. MapGeometries class for database calls
 """
-from flask import Blueprint, abort, jsonify
+from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import pandas as pd
 
 from shir_connect.database.database import Database
+from shir_connect.database.map_geometries import MapGeometries
 import shir_connect.configuration as conf
 from shir_connect.services.utils import validate_inputs
 
@@ -60,7 +60,7 @@ def geometries():
 
 @map_geometries.route('/service/map/zipcodes', methods=['GET'])
 @jwt_required
-def zip_codes():
+def map_zip_codes():
     """ Retrieves a list of zip codes """
     map_geometries = MapGeometries()
     # Make sure the user has access to the module
@@ -83,112 +83,3 @@ def map_default():
         plotted on the map.
     """
     return jsonify(conf.DEFAULT_LOCATION)
-
-class MapGeometries(object):
-    """ Class that handles geometries for the map """
-    def __init__(self):
-        self.database = Database()
-
-    def get_geometry(self, zip_code):
-        """ Constructs the geometry for the specified zip code """
-        geometry = self.database.get_item('geometries', zip_code)
-        colors = self.database.get_item('shape_colors', zip_code)
-        if colors:
-            red = int(colors['red'])
-            blue = int(colors['blue'])
-            events = int(colors['events'])
-            members = int(colors['residents'])
-        else:
-            red = 0; blue = 0; events = 0; members = 0;
-        layer = self.build_layer(geometry, red, blue, members, events)
-        return layer
-
-    def get_geometries(self):
-        """ Returns all of the geometries with their colors """
-        sql = """
-            SELECT
-                a.id as postal_code, 
-                geometry, 
-                residents, 
-                red, 
-                events, 
-                blue
-            FROM {schema}.geometries a 
-            INNER JOIN {schema}.shape_colors b
-            ON a.id = b.id
-            WHERE a.id IS NOT NULL
-        """.format(schema=self.database.schema)
-        df = pd.read_sql(sql, self.database.connection)
-        
-        layers = {}
-        for i in df.index:
-            geometry = dict(df.loc[i])
-            postal_code = geometry['postal_code']
-            geo = {
-                'geometry': geometry['geometry'], 
-                'id': geometry['postal_code']
-            }
-            if len(geo['geometry']['features']) == 0:
-                continue
-            red = int(geometry['red'])
-            blue = int(geometry['blue'])
-            members = int(geometry['residents'])
-            events = int(geometry['events'])
-            layer = self.build_layer(geo, red, blue, members, events)
-            layers[postal_code] = layer
-        return layers
-
-    def build_layer(self, geometry, red, blue, members, events):
-        """ Builds the map layer with the correct colors """
-        geojson = geometry['geometry']
-        geojson['features'][0]['properties'] = {
-            'description': """
-                <strong>Zip Code: {zip_code}</strong>
-                <ul>
-                    <li>Members: {members}</li>
-                    <li>Events: {events}</li>
-                </ul>
-            """.format(
-                zip_code=geometry['id'],
-                members=members,
-                events=events
-            )
-        }
-        layer = {
-            'id': geometry['id'],
-            'type': 'fill',
-            'source' : {
-                'type': 'geojson',
-                'data': geojson
-            },
-            'paint': {
-                'fill-color': 'rgb(%s, 256, %s)'%(red,blue),
-                'fill-opacity': 0.6,
-                'fill-outline-color': 'rgb(0, 0, 0)'
-            }
-        }
-        return layer
-
-    def get_zip_codes(self):
-        """ 
-        Pulls a list of zip codes that have at least
-        one event and at least one member 
-        """
-        sql = """
-            SELECT DISTINCT postal_code
-            FROM (
-                SELECT DISTINCT postal_code
-                FROM {schema}.members_view
-                UNION ALL
-                SELECT DISTINCT postal_code
-                FROM {schema}.venues
-            ) a
-            INNER JOIN {schema}.geometries b
-            ON a.postal_code = b.id
-        """.format(schema=self.database.schema)
-        df = pd.read_sql(sql, self.database.connection)
-        if len(df) > 0:
-            response = [str(x) for x in df['postal_code']]
-        else:
-            response = []
-        return response

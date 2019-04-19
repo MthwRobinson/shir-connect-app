@@ -14,6 +14,7 @@ reqs = [
     'psycopg2-binary',
     'pyyaml',
     'requests',
+    'uszipcode',
     'uuid',
     'xkcdpass',
     'xlrd'

@@ -55,11 +55,15 @@ EVENT_GROUP = 'events'
 MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
-ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, MAP_GROUP]
+REPORT_GROUP = 'report'
+ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, 
+                 MAP_GROUP, REPORT_GROUP]
 
 # Custom Configurations
 config = get_config(PROJPATH, HOMEPATH)
+EVENT_GROUPS = config['event_groups']
 AGE_GROUPS = config['age_groups']
 DEFAULT_LOCATION = config['location']
 IDENTIFIERS = config['identifiers']
 AVAILABLE_MODULES = config['modules']
+MEMBER_TYPES = config['member_types']

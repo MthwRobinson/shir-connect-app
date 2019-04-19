@@ -1,33 +1,33 @@
 """ Utility for uploading member data into the database """
-import json
 import logging
 import os
 
 import daiquiri
 import numpy as np
-import pandas as pd 
+import pandas as pd
+import yaml
 
 from shir_connect.database.database import Database
 
-class MemberLoader(object):
+class MemberLoader:
     """
     Uploads members into the member database
     Current supports the following formats:
         1. MM2000
     """
-    def __init__(self):
+    def __init__(self, database=None):
         # Set up logging
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
 
         # Load the column mapping configs
         self.path = os.path.dirname(os.path.realpath(__file__))
-        filename = self.path + '/member_columns.json'
+        filename = self.path + '/member_columns.yml'
         with open(filename, 'r') as f:
-            self.column_mapping = json.load(f)
-        self.database = Database()
+            self.column_mapping = yaml.safe_load(f)
+        self.database = database if database else Database()
 
-    def load(self, df, source='MM2000', test=False):
+    def load(self, df, source='MM2000'):
         """ Loads the data in to the member database """
         if source=='MM2000':
             self.logger.info('Parsing MM2000 data.')
@@ -61,53 +61,38 @@ class MemberLoader(object):
         items = []
         for group in column_mapping:
             column_map = column_mapping[group]['columns']
-            source_cols = [x for x in column_map.keys()]
-            dest_cols = [column_map[x] for x in column_map]
-
+            df_group = _group_mm2000(df, column_map)
+            
             if 'id_extension' in column_mapping[group]:
                 id_extension = column_mapping[group]['id_extension']
             else:
                 id_extension = None
 
-            df_group = df[source_cols].copy()
-            df_group = df_group.where((pd.notnull(df_group)), None)
-            df_group.columns = dest_cols
-            df_group = df_group.dropna(how='all').copy()
-            df_group = df_group.reset_index().copy()
-
             for i in df_group.index:
                 item = dict(df_group.loc[i])
-                
-                # Convert postal codes to five number format
-                postal = str(item['postal_code'])
-                if '-' in postal:
-                    postal = postal.split('-')[0]
-                if len(postal) != 5:
-                    postal = None
-                item['postal_code'] = postal
+                item = _parse_postal_code(item)
+                item = _check_mm2000_active(item)
 
                 # ID extension for children and spouses
                 # since a family shares the same id
+                item['household_id'] = item['id']
                 if id_extension:
                     item['id'] += id_extension
 
                 # Remove invalid birthdates
-                if item['birth_date']:
-                    if item['birth_date'].startswith('0'):
-                        item['birth_date'] = None
-                if item['membership_date']:
-                    if item['membership_date'].startswith('0'):
-                        item['membership_date'] = None
+                item = _parse_mm2000_date(item, 'birth_date')
+                item = _parse_mm2000_date(item, 'membership_date')
 
                 # Children only have a full name, not separate
                 # first names and last name
                 if 'first_name' not in item and item['full_name']:
                     item['first_name'] = item['full_name'].split()[0]
-                if 'last_name' not in item  and item['full_name']:
+                if 'last_name' not in item and item['full_name']:
                     item['last_name'] = item['full_name'].split()[0]
-                if 'first_name' in item and 'last_name' in item:
+                if not item['first_name'] or not item['last_name']:
+                    continue
+                else:
                     items.append(item)
-
         return items
 
     def check_columns(self):
@@ -118,3 +103,47 @@ class MemberLoader(object):
             if column not in old_columns:
                 return False
         return True
+
+def _group_mm2000(df, column_map):
+    """Creates a dataframe for the specified MM2000 group
+    with the appropriate column mappings."""
+    source_cols = [x for x in column_map.keys()]
+    dest_cols = [column_map[x] for x in column_map]
+
+    df_group = df[source_cols].copy()
+    df_group = df_group.where((pd.notnull(df_group)), None)
+    df_group.columns = dest_cols
+    df_group = df_group.dropna(how='all').copy()
+    df_group = df_group.reset_index().copy()
+
+    return df_group
+
+def _parse_mm2000_date(item, column):
+    """Removes invalid birthdays and membership dates."""
+    if item[column]:
+        if item[column].startswith('0'):
+            item[column] = None
+    return item
+
+def _parse_postal_code(item):
+    """Converts the postal code in an item to 5 digits."""
+    postal = str(item['postal_code'])
+    if '-' in postal:
+        postal = postal.split('-')[0]
+    if len(postal) != 5:
+        postal = None
+    item['postal_code'] = postal
+    return item
+
+def _check_mm2000_active(item):
+    """Checks to see if an MM2000 member is active."""
+    if not item['member_type']:
+        active = False
+    elif 'MEM' in item['member_type']:
+        active = True
+    elif item['member_type'] == 'STAFF':
+        active = True
+    else:
+        active = False
+    item['active_member'] = active
+    return item

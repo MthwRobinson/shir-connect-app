@@ -148,7 +148,7 @@ class Header extends Component {
                   className='pull-left'>
                     <img
                       className="header-star"
-                      src="./shirconnect_logo_white.svg"
+                      src="./shirconnect_logo_white.png"
                       height="40px"
                       alt=""
                       onClick={this.toggleMenu}

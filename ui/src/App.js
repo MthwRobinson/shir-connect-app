@@ -12,6 +12,7 @@ import Login from './components/Login/Login';
 import ManageUsers from './components/ManageUsers/ManageUsers';
 import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
+import Report from './components/Report/Report';
 import Trends from './components/Trends/Trends';
 
 import './App.css';
@@ -33,6 +34,7 @@ class App extends Component {
             <Route path="/manage-users" component={ManageUsers} />
             <Route path="/member" component={MemberPage} />
             <Route path="/members" component={Members} />
+            <Route path="/report" component={Report} />
             <Route path="/trends" component={Trends} />
             <Route path="/map" component={EventMap} />
             <Route path="/login" component={Login} />

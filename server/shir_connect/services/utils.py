@@ -5,7 +5,7 @@ import re
 
 from flask import jsonify, request
 
-from shir_connect.configuration import DEMO_MODE
+import shir_connect.configuration as conf
 
 def demo_mode(fields, demo=False):
     """ If the SHIR_CONNECT_MODE environmental variable is set
@@ -14,7 +14,7 @@ def demo_mode(fields, demo=False):
     def _scrambler(function):
         def _service(*args, **kwargs):
             response = function(*args, **kwargs)
-            if DEMO_MODE or demo:
+            if conf.DEMO_MODE or demo:
                 for field in fields:
                     # Fields that are passed as a string are assumed
                     # to be a string in the dictionary
@@ -164,3 +164,8 @@ def _get_cookie_from_response(response, cookie_name):
                 cookie[split[0].strip().lower()] = split[1] if len(split) > 1 else True
                 return cookie
     return None
+
+def check_access(user, module, database):
+    """Checks to see if the user has access to the specified module. """
+    user = database.get_item('users', user)
+    return module in user['modules']

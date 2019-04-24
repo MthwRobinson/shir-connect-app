@@ -38,25 +38,26 @@ class NameResolver():
         """.format(schema=self.database.schema)
         self.database.run_query(sql)
 
-    def get_fuzzy_matches(self, first_name, last_name, email, tolerance=2):
+    def get_fuzzy_matches(self, first_name, last_name, email, tolerance=1):
         """Returns all names from the participants table that are within edit
         distance tolerance of the first name and last name."""
+        select, conditions = self._first_name_sql(first_name, tolerance)
+
         sql = """
             SELECT id, member_id, first_name, last_name, nickname,
                    email, birth_date, is_birth_date_estimated
             FROM(
-                SELECT *,
-                    lower('{first_name}') as match_first_name,
-                    lower('{last_name}') as match_last_name
+                SELECT *, {select}
                 FROM {schema}.participant_match
             ) x
             WHERE
-              ((levenshtein(lower(first_name), match_first_name) <= {tol}
-              OR levenshtein(lower(nickname), match_first_name) <= {tol})
-              AND levenshtein(lower(last_name), match_last_name) <= {tol})
-              OR email = '{email}'
-        """.format(schema=self.database.schema, first_name=first_name,
-                   last_name=last_name, tol=tolerance, email=email)
+              ( ({conditions})
+              AND last_name = '{last_name}')
+              OR email='{email}'
+        """.format(select=select, conditions=conditions,
+                   schema=self.database.schema,
+                   first_name=first_name, last_name=last_name,
+                   tol=tolerance, email=email)
         df = pd.read_sql(sql, self.database.connection)
         results = self.database.to_json(df)
         return results
@@ -75,10 +76,29 @@ class NameResolver():
         return lookup
 
     def _lookup_name(self, name):
+        """Generates a sets of equivalent nicknames."""
         name = name.lower()
         if name not in self.lookup:
-            raise KeyError(name)
+            return { name }
         names = functools.reduce(operator.or_, self.lookup[name])
-        if name in names:
-            names.remove(name)
+        names.add(name)
         return names
+
+    def _first_name_sql(self, first_name, tolerance=1):
+        """Generates the select and where statments for the name
+        fuzzy match."""
+        nicknames = self._lookup_name(first_name)
+        first_name_selects = []
+        first_name_conditions = []
+        for i, name in enumerate(nicknames):
+            col_name = "match_first_name_{}".format(i)
+            select = " lower('{}') as {} ".format(name, col_name)
+            first_name_selects.append(select)
+            edit_distance = """
+                (levenshtein(lower(first_name), {col}) <= {tolerance}
+                 OR levenshtein(lower(nickname), {col}) <= {tolerance})
+            """.format(col=col_name, tolerance=tolerance)
+            first_name_conditions.append(edit_distance)
+        name_select = ", ".join(first_name_selects)
+        name_conditions = " OR ".join(first_name_conditions)
+        return name_select, name_conditions

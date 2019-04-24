@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 CREATE TABLE IF NOT EXISTS {schema}.participant_match (
   id text,
   member_id text,

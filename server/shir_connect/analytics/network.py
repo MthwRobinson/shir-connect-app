@@ -9,7 +9,7 @@ import networkx as nx
 import networkx.algorithms.approximation as approx
 
 from shir_connect.database.database import Database
-from shir_connect.services.events import Events
+from shir_connect.database.events import Events
 
 class Network():
     """ Pulls in data from the events database and

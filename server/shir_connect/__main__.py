@@ -8,6 +8,7 @@ import daiquiri
 from flask.cli import FlaskGroup
 from gunicorn.app.wsgiapp import WSGIApplication
 
+from shir_connect.analytics.entity_resolution import NameResolver
 from shir_connect.database.database import Database
 from shir_connect.etl.data_loader import DataLoader
 from shir_connect.etl.geometries import Geometries
@@ -32,6 +33,9 @@ def initialize(drop_views=False):
     database = Database()
     LOGGER.info('Initializing the database ...')
     database.initialize(drop_views=drop_views)
+    LOGGER.info('Loading member ids into participant match table ..')
+    name_resolver = NameResolver(database=database)
+    name_resolver.load_member_ids()
 main.add_command(initialize)
 
 @click.command('refresh_views', help='Refreshes materialized views')

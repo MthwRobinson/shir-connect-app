@@ -14,5 +14,12 @@ def test_load_members_id():
 
 def test_get_fuzzy_matches():
     name_resolver = NameResolver()
-    results = name_resolver.get_fuzzy_matches('fake', 'name')
+    results = name_resolver.get_fuzzy_matches('fake', 'name', 'fake@email.com')
     assert isinstance(results, list)
+
+def test_lookup_name():
+    name_resolver = NameResolver()
+    nicknames = name_resolver._lookup_name('matt')
+    assert 'matthew' in nicknames
+    nicknames = name_resolver._lookup_name('matthew')
+    assert 'matt' in nicknames

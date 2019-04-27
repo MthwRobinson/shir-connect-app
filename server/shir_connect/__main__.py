@@ -61,8 +61,8 @@ def load_eventbrite():
             LOGGER.warning('Geojson load failed for %s'%(code))
     LOGGER.info('Updating city, county, and state name')
     geo.load_locations()
-    LOGGER.info('Refreshing shape colors')
-    geo.database.refresh_view('shape_colors')
+    LOGGER.info('Refreshing views')
+    geo.database.refresh_views()
     LOGGER.info('Finished Eventbrite dataload at %s'%(end))
 main.add_command(load_eventbrite)
 

@@ -26,8 +26,8 @@ class DataLoader(object):
         last_event_date = self.database.last_event_date()
         if last_event_date:
             self.logger.info('Loading events starting at %s'%(last_event_date))
-            today = datetime.datetime.now() - datetime.timedelta(days=1)
-            first_event = min(today, last_event_date)
+            look_back = datetime.datetime.now() - datetime.timedelta(days=60)
+            first_event = min(look_back, last_event_date)
             start = str(first_event)[:10]
         else:
             self.logger.info('Loading events from the first available event')

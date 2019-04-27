@@ -25,10 +25,10 @@ class DataLoader(object):
         """ Runs the data load process """
         last_event_date = self.database.last_event_date()
         if last_event_date:
-            self.logger.info('Loading events starting at %s'%(last_event_date))
             look_back = datetime.datetime.now() - datetime.timedelta(days=60)
             first_event = min(look_back, last_event_date)
             start = str(first_event)[:10]
+            self.logger.info('Loading events starting at %s'%(start))
         else:
             self.logger.info('Loading events from the first available event')
             start = None

@@ -14,6 +14,6 @@ COMMIT;
 BEGIN;
 
 ALTER TABLE shir_connect.members
-DROP COLUMN gender;
+DROP COLUMN IF EXISTS gender;
 
 COMMIT;

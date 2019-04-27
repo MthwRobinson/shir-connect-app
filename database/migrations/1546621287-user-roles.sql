@@ -15,7 +15,7 @@ COMMIT;
 BEGIN;
 
 ALTER TABLE shir_connect.users
-DROP COLUMN role,
-DROP COLUMN modules;
+DROP COLUMN IF EXISTS role,
+DROP COLUMN IF EXISTS modules;
 
 COMMIT;

@@ -2,6 +2,7 @@
 resolve event attendees against a table of participants."""
 import collections
 import csv
+from difflib import SequenceMatcher
 import functools
 import logging
 import operator
@@ -38,7 +39,7 @@ class NameResolver():
         """.format(schema=self.database.schema)
         self.database.run_query(sql)
 
-    def get_fuzzy_matches(self, first_name, last_name, email, tolerance=1):
+    def get_fuzzy_matches(self, first_name, last_name, email=None, tolerance=1):
         """Returns all names from the participants table that are within edit
         distance tolerance of the first name and last name."""
         select, conditions = self._first_name_sql(first_name, tolerance)
@@ -53,14 +54,16 @@ class NameResolver():
             WHERE
               ( ({conditions})
               AND last_name = '{last_name}')
-              OR email='{email}'
         """.format(select=select, conditions=conditions,
                    schema=self.database.schema,
                    first_name=first_name, last_name=last_name,
-                   tol=tolerance, email=email)
+                   tol=tolerance)
+        if email:
+            sql += " OR email='{}' ".format(email)
         df = pd.read_sql(sql, self.database.connection)
         results = self.database.to_json(df)
         return results
+
 
     def _read_names_file(self):
         """Reads the names.csv, which contains mappings of names
@@ -102,3 +105,9 @@ class NameResolver():
         name_select = ", ".join(first_name_selects)
         name_conditions = " OR ".join(first_name_conditions)
         return name_select, name_conditions
+
+def string_similarity(item_1, item_2):
+    """Computes string similarity by looking for the largest
+    contiguous matching substrings.
+    """
+    return SequenceMatcher(None, item_1.lower(), item_2.lower()).ratio()

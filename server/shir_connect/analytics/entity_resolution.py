@@ -111,3 +111,17 @@ def string_similarity(item_1, item_2):
     contiguous matching substrings.
     """
     return SequenceMatcher(None, item_1.lower(), item_2.lower()).ratio()
+
+def age_similarity(age_1, age_2):
+    """Converts age difference to a similarity score in [0,1]"""
+    difference = abs(age_1 - age_2)
+    similarity =  1 - (difference/60)
+    return max(0, similarity)
+
+def name_similarity(name_1, name_2, nickname_2=None):
+    """Computes the similarity of two names."""
+    name_similarity = string_similarity(name_1, name_2)
+    nickname_similarity = 0
+    if nickname_2:
+        nickname_similarity = string_similarity(name_1, nickname_2)
+    return max(name_similarity, nickname_similarity)

@@ -31,3 +31,17 @@ def test_string_similarity():
     assert similarity_1 > similarity_2
     assert similarity_2 > similarity_3
 
+def test_age_similarity():
+    similarity_1 = er.age_similarity(50, 50)
+    assert similarity_1 == 1
+    similarity_2 = er.age_similarity(50, 35)
+    similarity_3 = er.age_similarity(40, 50)
+    assert similarity_3 > similarity_2
+    similarity_4 = er.age_similarity(100, 20)
+    assert similarity_4 == 0
+
+def test_name_similarity():
+    similarity_1 = er.name_similarity('Matt', 'Matthew', 'Matt')
+    assert similarity_1 == 1
+    similarity_2 = er.name_similarity('Matt', 'Matthew')
+    assert similarity_1 > similarity_2

@@ -45,3 +45,26 @@ def test_name_similarity():
     assert similarity_1 == 1
     similarity_2 = er.name_similarity('Matt', 'Matthew')
     assert similarity_1 > similarity_2
+
+def test_compute_age():
+    epoch = 822700800000
+    age = er.compute_age(epoch)
+    assert age > 23 and age < 100
+
+def test_compute_match_score():
+    match = {
+        'first_name': 'Carl',
+        'last_name': 'Camel',
+        'nickname': 'DoubleHump',
+        'birth_date': 822700800000,
+        'email': 'carl@camels.co.uk'
+    }
+
+    score = er.compute_match_score(match=match,
+                                   first_name='Carla',
+                                   nickname='TwoHump',
+                                   age=33,
+                                   email='supercamel@gmail.com')
+    assert score >= 0 and score <= 1
+
+

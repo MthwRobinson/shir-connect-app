@@ -2,6 +2,7 @@
 resolve event attendees against a table of participants."""
 import collections
 import csv
+import datetime
 from difflib import SequenceMatcher
 import functools
 import logging
@@ -64,6 +65,38 @@ class NameResolver():
         results = self.database.to_json(df)
         return results
 
+    def find_best_match(first_name, last_name, nickname=None, 
+                        email=None, age=None):
+        """Finds the best, given the criteria that is provide.
+        If there are not matches, None will be returned."""
+        matches = self.get_fuzzy_matches(first_name, last_name, email)
+        average_age = self._get_average_age()
+        if not matches:
+            return None
+        else:
+            for match in matches:
+                if not match['birth_date'] or match['birth_date'] < 0:
+                    match['birth_date'] = average_age
+                match_score = compute_match_score(match, *args, **kwargs)
+                match['match_score'] = match_score
+
+    
+    def _get_average_age(self):
+        """Pulls the average participant age. Is used if there is an
+        observation that does not have an age recorded."""
+        sql = """
+            SELECT AVG(age) as avg_age
+            FROM(
+                SELECT DATE_PART('year', AGE(now(), birth_date)) as age
+                FROM {schema}.participant_match
+                WHERE birth_date is not null
+            ) x
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        avg_age = None
+        if len(df) > 0:
+            avg_age = df.loc[0]['avg_age']
+        return avg_age
 
     def _read_names_file(self):
         """Reads the names.csv, which contains mappings of names
@@ -125,3 +158,29 @@ def name_similarity(name_1, name_2, nickname_2=None):
     if nickname_2:
         nickname_similarity = string_similarity(name_1, nickname_2)
     return max(name_similarity, nickname_similarity)
+
+def compute_age(epoch):
+    """Converts the epoch time from Postgres to an age."""
+    birth_date = datetime.datetime.fromtimestamp(epoch/1000)
+    now = datetime.datetime.now()
+    age = (now - birth_date).days / 365
+    return age
+    
+def compute_match_score(match, first_name, nickname=None, email=None, age=None):
+        """Computes the match score for the specified match."""
+        # Compute the age similarity. If a match does not have
+        # an age, then the average age of all members is used
+        age_score = 1
+        if age:
+            match_age = compute_age(match['birth_date'])
+            age_score = age_similarity(age, match_age)
+
+        name_score = name_similarity(first_name, match['first_name'],
+                                     match['nickname'])
+
+        email_score = 1
+        if email:
+            email_score = string_similarity(email, match['email'])
+
+        total_score = age_score * email_score * name_score
+        return total_score

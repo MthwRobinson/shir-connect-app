@@ -65,7 +65,7 @@ class NameResolver():
         results = self.database.to_json(df)
         return results
 
-    def find_best_match(first_name, last_name, nickname=None, 
+    def find_best_match(self, first_name, last_name, nickname=None, 
                         email=None, age=None):
         """Finds the best, given the criteria that is provide.
         If there are not matches, None will be returned."""
@@ -77,9 +77,17 @@ class NameResolver():
             for match in matches:
                 if not match['birth_date'] or match['birth_date'] < 0:
                     match['birth_date'] = average_age
-                match_score = compute_match_score(match, *args, **kwargs)
+                match_score = compute_match_score(match,
+                                                  first_name=first_name,
+                                                  nickname=nickname,
+                                                  email=email,
+                                                  age=age)
                 match['match_score'] = match_score
 
+            sorted_matches = sorted(matches, 
+                                    key=lambda k: k['match_score'],
+                                    reverse=True)
+            return sorted_matches[0]
     
     def _get_average_age(self):
         """Pulls the average participant age. Is used if there is an

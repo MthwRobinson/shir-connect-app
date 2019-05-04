@@ -1,8 +1,12 @@
+import pandas as pd
+import pytest
+
 import shir_connect.analytics.entity_resolution as er
 
 class FakeDatabase():
     def __init__(self):
         self.schema = 'fake_schema'
+        self.connection = None
 
     def run_query(self, query):
         pass
@@ -67,4 +71,34 @@ def test_compute_match_score():
                                    email='supercamel@gmail.com')
     assert score >= 0 and score <= 1
 
+def test_find_best_match(monkeypatch):
+    fake_response = pd.DataFrame({'avg_age': [58]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
 
+    name_resolver = er.NameResolver()
+    name_resolver.database = FakeDatabase()
+
+    matches = [
+        {'birth_date': -423100800000,
+         'email': 'moo@cow.com',
+         'first_name': 'Clarence',
+         'last_name': 'Cow',
+         'nickname': 'LittleMoo',
+         'id': 1
+        },
+        {'birth_date': 822700800000,
+         'email': 'icecream@cow.com',
+         'first_name': 'Claramel',
+         'last_name': 'Cow',
+         'nickname': 'BigMoo',
+         'id': 2
+        }
+    ]
+    name_resolver.get_fuzzy_matches = lambda *args, **kwargs: matches
+
+    best_match = name_resolver.find_best_match(first_name='Caramel',
+                                               last_name='Cow',
+                                               nickname='BigMoo',
+                                               email='moo@cow.com',
+                                               age=38)
+    assert best_match['id'] == 2

@@ -18,7 +18,7 @@ def test_load_members_id():
 
 def test_get_fuzzy_matches():
     name_resolver = er.NameResolver()
-    results = name_resolver.get_fuzzy_matches('fake', 'name', 'fake@email.com')
+    results = name_resolver.get_fuzzy_matches('fake', 'name')
     assert isinstance(results, list)
 
 def test_lookup_name():
@@ -61,12 +61,12 @@ def test_compute_match_score():
         'last_name': 'Camel',
         'nickname': 'DoubleHump',
         'birth_date': 822700800000,
+        'age': 28,
         'email': 'carl@camels.co.uk'
     }
 
     score = er.compute_match_score(match=match,
                                    first_name='Carla',
-                                   nickname='TwoHump',
                                    age=33,
                                    email='supercamel@gmail.com')
     assert score >= 0 and score <= 1
@@ -98,7 +98,6 @@ def test_find_best_match(monkeypatch):
 
     best_match = name_resolver.find_best_match(first_name='Caramel',
                                                last_name='Cow',
-                                               nickname='BigMoo',
                                                email='moo@cow.com',
                                                age=38)
     assert best_match['id'] == 2

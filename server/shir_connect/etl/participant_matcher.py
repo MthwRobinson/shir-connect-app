@@ -15,11 +15,53 @@ class ParticipantMatcher:
         self.name_resolver = NameResolver(database=self.database)
         self.avg_event_age = {}
 
+    def run(self, limit=1000, iters=None):
+        """Adds attendees that have not been matched up to a participant
+        to the look up table. If there are no matches for an attendee, a
+        new participant id is created."""
+        n = 0
+        while True:
+            missing_attendees = self._get_missing_attendees(limit=limit)
+            count = len(missing_attendees)
+            msg = 'Iteration {} | Processing {} missing attendees'
+            self.logger.info(msg.format(n+1, count))
+            if (iters and n >= iters) or counts == 0:
+                break
+
+            for i in range(count):
+                attendee = dict(missing_attendees.loc[i])
+                self._process_attendee(attendee)
+
+    def _process_attendee(self, attendee):
+        """Adds a link to attendee_to_participant if the attendee has a match.
+        Otherwise a new participant id is created for the attendee."""
+        # Cache the average age for the event so it
+        # doesn't have to pull it from the database each time
+        event_id = attendee['event_id']
+        if event_id not in self.avg_event_age:
+            age = self._get_avg_event_age(event_id)
+            self.avg_event_age[event_id] = age
+        else:
+            age = self.avg_event_age[event_id]
+
+        match = self.name_resolver.find_best_match(
+            first_name=attendee['first_name'],
+            last_name=attendee['last_name'],
+            email=attendee['email'],
+            age=age
+        )
+        if match:
+            item = {'id': attendee['id'],
+                    'participant_id': match['id']}
+            self.database.load_item(item, 'attendee_to_participant')
+        else:
+            pass
+
     def _get_missing_attendees(self, limit=1000):
         """Pulls a list of attendees that have not yet been matched
         to a participant."""
         sql = """
-            SELECT id, event_id
+            SELECT id, event_id, first_name, last_name, email
             FROM {schema}.attendees
             WHERE id NOT IN (SELECT id FROM {schema}.attendee_to_participant)
             ORDER BY event_id ASC

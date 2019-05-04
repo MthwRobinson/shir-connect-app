@@ -24,6 +24,7 @@ class NameResolver():
         self.database = Database() if not database else database
 
         self.lookup = self._read_names_file()
+        self.average_age = None
 
     def load_member_ids(self):
         """Loads member information into the participant match table.
@@ -40,7 +41,7 @@ class NameResolver():
         """.format(schema=self.database.schema)
         self.database.run_query(sql)
 
-    def get_fuzzy_matches(self, first_name, last_name, email=None, tolerance=1):
+    def get_fuzzy_matches(self, first_name, last_name, tolerance=1):
         """Returns all names from the participants table that are within edit
         distance tolerance of the first name and last name."""
         select, conditions = self._first_name_sql(first_name, tolerance)
@@ -59,27 +60,26 @@ class NameResolver():
                    schema=self.database.schema,
                    first_name=first_name, last_name=last_name,
                    tol=tolerance)
-        if email:
-            sql += " OR email='{}' ".format(email)
         df = pd.read_sql(sql, self.database.connection)
         results = self.database.to_json(df)
         return results
 
-    def find_best_match(self, first_name, last_name, nickname=None, 
-                        email=None, age=None):
+    def find_best_match(self, first_name, last_name, email=None, age=None):
         """Finds the best, given the criteria that is provide.
         If there are not matches, None will be returned."""
-        matches = self.get_fuzzy_matches(first_name, last_name, email)
-        average_age = self._get_average_age()
+        matches = self.get_fuzzy_matches(first_name, last_name)
+        if not self.average_age:
+            self.average_age = self._get_average_age()
         if not matches:
             return None
         else:
             for match in matches:
                 if not match['birth_date'] or match['birth_date'] < 0:
-                    match['birth_date'] = average_age
+                    match['age'] = self.average_age
+                else:
+                    match['age'] = compute_age(match['birth_date'])
                 match_score = compute_match_score(match,
                                                   first_name=first_name,
-                                                  nickname=nickname,
                                                   email=email,
                                                   age=age)
                 match['match_score'] = match_score
@@ -174,14 +174,13 @@ def compute_age(epoch):
     age = (now - birth_date).days / 365
     return age
     
-def compute_match_score(match, first_name, nickname=None, email=None, age=None):
+def compute_match_score(match, first_name, email=None, age=None):
         """Computes the match score for the specified match."""
         # Compute the age similarity. If a match does not have
         # an age, then the average age of all members is used
         age_score = 1
         if age:
-            match_age = compute_age(match['birth_date'])
-            age_score = age_similarity(age, match_age)
+            age_score = age_similarity(age, match['age'])
 
         name_score = name_similarity(first_name, match['first_name'],
                                      match['nickname'])

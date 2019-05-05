@@ -44,6 +44,9 @@ class NameResolver():
     def get_fuzzy_matches(self, first_name, last_name, tolerance=1):
         """Returns all names from the participants table that are within edit
         distance tolerance of the first name and last name."""
+        # Add PostgreSQL escape characters
+        first_name = first_name.replace("'", "''")
+        last_name = last_name.replace("'", "''")
         select, conditions = self._first_name_sql(first_name, tolerance)
 
         sql = """

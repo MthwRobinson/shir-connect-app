@@ -2,6 +2,7 @@ import logging
 
 import daiquiri
 import pandas as pd
+import uuid
 
 from shir_connect.database.database import Database
 from shir_connect.analytics.entity_resolution import NameResolver
@@ -23,14 +24,17 @@ class ParticipantMatcher:
         while True:
             missing_attendees = self._get_missing_attendees(limit=limit)
             count = len(missing_attendees)
+            if (iters and n >= iters) or count == 0:
+                msg = 'Participant matcher has finished processing.'
+                self.logger.info(msg)
+                break
             msg = 'Iteration {} | Processing {} missing attendees'
             self.logger.info(msg.format(n+1, count))
-            if (iters and n >= iters) or counts == 0:
-                break
 
             for i in range(count):
                 attendee = dict(missing_attendees.loc[i])
                 self._process_attendee(attendee)
+            n += 1
 
     def _process_attendee(self, attendee):
         """Adds a link to attendee_to_participant if the attendee has a match.
@@ -51,11 +55,21 @@ class ParticipantMatcher:
             age=age
         )
         if match:
-            item = {'id': attendee['id'],
-                    'participant_id': match['id']}
-            self.database.load_item(item, 'attendee_to_participant')
+            participant_id = match['id']
         else:
-            pass
+            # If there is no participant match, a new participant
+            # is created and added to the database
+            participant_id = uuid.uuid4().hex
+            participant = {'id': participant_id,
+                           'first_name': attendee['first_name'],
+                           'last_name': attendee['last_name'],
+                           'email': attendee['email']}
+            self.database.load_item(participant, 'participant_match')
+
+        # Insert the attendee to participant match to the database
+        item = {'id': attendee['id'],
+                'participant_id': participant_id}
+        self.database.load_item(item, 'attendee_to_participant')
 
     def _get_missing_attendees(self, limit=1000):
         """Pulls a list of attendees that have not yet been matched

@@ -159,7 +159,7 @@ def string_similarity(item_1, item_2):
 def age_similarity(age_1, age_2):
     """Converts age difference to a similarity score in [0,1]"""
     difference = abs(age_1 - age_2)
-    similarity =  1 - (difference/60)
+    similarity =  1 - (difference/30)
     return max(0, similarity)
 
 def name_similarity(name_1, name_2, nickname_2=None):
@@ -188,9 +188,12 @@ def compute_match_score(match, first_name, email=None, age=None):
         name_score = name_similarity(first_name, match['first_name'],
                                      match['nickname'])
 
-        email_score = 1
-        if email:
+        email_score = (name_score + age_score) / 2
+        if email and match['email']:
             email_score = string_similarity(email, match['email'])
 
-        total_score = age_score * email_score * name_score
+        if name_score == 1 and email_score == 1:
+            total_score = 1
+        else:
+            total_score = age_score * email_score * name_score
         return total_score

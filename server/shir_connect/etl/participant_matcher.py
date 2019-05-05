@@ -33,7 +33,8 @@ class ParticipantMatcher:
 
             for i in range(count):
                 attendee = dict(missing_attendees.loc[i])
-                self._process_attendee(attendee)
+                if attendee['first_name'] and attendee['last_name']:
+                    self._process_attendee(attendee)
             n += 1
 
     def _process_attendee(self, attendee):
@@ -78,6 +79,8 @@ class ParticipantMatcher:
             SELECT id, event_id, first_name, last_name, email
             FROM {schema}.attendees
             WHERE id NOT IN (SELECT id FROM {schema}.attendee_to_participant)
+            AND first_name IS NOT NULL
+            AND last_name IS NOT NULL
             ORDER BY event_id ASC
             LIMIT {limit}
         """.format(schema=self.database.schema, limit=limit)

@@ -54,6 +54,21 @@ class Database(object):
         if commit:
             self.connection.commit()
 
+    def fetch_df(self, sql, params):
+        """Uses a prepared statement to fetch query results as a dataframe
+        Parameters
+        ----------
+        sql: str, the query to run against the database. parameters
+            should be in the form %(param_name)s
+        params: dict, the params to substitute in to the prepared statement
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+        df = pd.read_sql(sql, self.connection, params=params)
+        return df
+
     def initialize_schema(self):
         """ Creates the schema for the dashboard data """
         msg = 'Creating schema {schema} in database {database}'.format(

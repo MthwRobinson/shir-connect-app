@@ -2,7 +2,6 @@ import pandas as pd
 
 from shir_connect.database.participants import Participants
 
-
 participants = Participants()
 sql = """
     SELECT id

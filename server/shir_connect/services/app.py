@@ -7,6 +7,7 @@ from shir_connect.services.events import events
 from shir_connect.services.trends import trends
 from shir_connect.services.map_geometries import map_geometries
 from shir_connect.services.members import members
+from shir_connect.services.participants import participants
 from shir_connect.services.reports import reports
 from shir_connect.services.utils import validate_inputs
 from shir_connect.services.user_management import user_management
@@ -25,6 +26,7 @@ app.register_blueprint(trends)
 app.register_blueprint(map_geometries)
 app.register_blueprint(members)
 app.register_blueprint(reports)
+app.register_blueprint(participants)
 app.register_blueprint(user_management)
 
 jwt = JWTManager(app)

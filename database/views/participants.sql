@@ -1,18 +1,13 @@
 CREATE MATERIALIZED VIEW 
 IF NOT EXISTS {schema}.participants
 AS
-SELECT DISTINCT 
+SELECT DISTINCT
+    a.id as participant_id,
+    INITCAP(a.first_name) as first_name,
+    INITCAP(a.last_name) as last_name,
     CASE 
-      WHEN a.first_name IS NOT NULL THEN INITCAP(a.first_name)
-      ELSE INITCAP(b.first_name)
-    END AS first_name,
-    CASE 
-      WHEN a.last_name IS NOT NULL THEN INITCAP(a.last_name)
-      ELSE INITCAP(b.last_name)
-    END AS last_name,
-    CASE 
-      WHEN b.first_name IS NOT NULL THEN TRUE
-      ELSE FALSE
+      WHEN b.active_member IS NULL THEN FALSE
+      ELSE b.active_member
     END AS is_member,
     e.first_event_date,
     e.last_event_date,
@@ -21,44 +16,47 @@ SELECT DISTINCT
       WHEN e.events_attended IS NOT NULL THEN e.events_attended
       ELSE 0
     END AS events_attended,
-    DATE_PART('year', AGE(now(), birth_date)) as age
-  FROM {schema}.attendees a
-  FULL JOIN {schema}.members b
-  ON (LOWER(a.first_name) = LOWER(b.first_name)
-  AND LOWER(a.last_name) = LOWER(b.last_name))
+    DATE_PART('year', AGE(now(), a.birth_date)) as age
+  FROM {schema}.participant_match a
+  LEFT JOIN {schema}.members_view b
+  ON a.member_id = b.id
+  LEFT JOIN {schema}.attendee_to_participant c
+  ON c.participant_id = a.id
+  LEFT JOIN {schema}.attendees d
+  ON d.id = c.id
   LEFT JOIN (
-    SELECT DISTINCT
-      x.first_name,
-      x.last_name,
+    SELECT
+      x.participant_id,
       event_name,
       x.last_event_date,
       x.first_event_date,
       x.events_attended
     FROM(
       SELECT
-        MAX(c.start_datetime) AS last_event_date,
-        MIN(c.start_datetime) AS first_event_date,
-        COUNT(DISTINCT c.name) AS events_attended,
-        LOWER(d.first_name) AS first_name,
-        LOWER(d.last_name) AS last_name
-      FROM {schema}.events c
-      INNER JOIN {schema}.attendees d
-      ON c.id = d.event_id
-      GROUP BY LOWER(d.first_name), LOWER(d.last_name)
+        MAX(events.start_datetime) AS last_event_date,
+        MIN(events.start_datetime) AS first_event_date,
+        COUNT(DISTINCT events.id) AS events_attended,
+        MAX(events.name) as event_name,
+        participant_id
+      FROM {schema}.events events
+      INNER JOIN {schema}.attendees attendees
+      ON attendees.event_id = events.id
+      INNER JOIN {schema}.attendee_to_participant participants
+      ON participants.id = attendees.id
+      GROUP BY participant_id
     ) x
     INNER JOIN (
       SELECT
-        c.start_datetime last_event_date,
-        c.name AS event_name,
-        LOWER(d.first_name) AS first_name,
-        LOWER(d.last_name) AS last_name
-      FROM {schema}.events c
-      INNER JOIN {schema}.attendees d
-      ON c.id = d.event_id
+        events.start_datetime last_event_date,
+        participant_id
+      FROM {schema}.events events
+      INNER JOIN {schema}.attendees attendees
+      ON attendees.event_id = events.id
+      INNER JOIN {schema}.attendee_to_participant participants
+      ON participants.id = attendees.id
     ) y
-    ON (x.first_name=y.first_name AND x.last_name=y.last_name
-    AND x.last_event_date=y.last_event_date)
+    ON x.participant_id = y.participant_id
+    AND y.last_event_date = x.last_event_date
   ) e
-  ON (LOWER(a.first_name) = LOWER(e.first_name)
-  AND LOWER(a.last_name) = LOWER(e.last_name))                 
+ON e.participant_id = c.participant_id
 WITH DATA

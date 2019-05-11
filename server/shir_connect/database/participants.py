@@ -51,6 +51,35 @@ class Participants:
             return result
         else:
             return None
+    
+    def get_participants(self, limit=None, page=None, order=None, sort=None,
+                         q=None, where=[]):
+        """Pulls a list of members from the database
+
+        Parameters
+        ----------
+        limit: int
+        page: int
+        order: str, the column to sort on
+        sort: str, 'asc' or 'desc'
+        q: tuple, a query on the last name
+        where: list, the where conditions for the query
+
+        Returns
+        -------
+        dict
+        """
+        query = ('last_name', q) if q else None
+        df = self.database.read_table('participants', limit=limit, page=page,
+                                      order=order, sort=sort, query=query, 
+                                      where=where)
+        count = self.database.count_rows('participants', query=query,
+                                         where=where)
+
+        pages = int((count/limit)) + 1
+        members = self.database.to_json(df)
+        response = {'results': members, 'count': str(count), 'pages': pages}
+        return response
 
     def get_participant_events(self, participant_id):
         """Returns a list of events that a participant has attended."""

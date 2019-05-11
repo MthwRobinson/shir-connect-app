@@ -27,3 +27,9 @@ def test_get_participant_events():
     events = participants.get_participant_events(PARTICIPANT_ID)
     assert isinstance(events, list)
     assert len(events) > 0
+
+def test_get_participants():
+    participant_db = Participants()
+    participants = participant_db.get_participants(limit=25)
+    assert isinstance(participants, dict)
+    assert len(participants['results']) == 25

@@ -51,3 +51,36 @@ class Participants:
             return result
         else:
             return None
+
+    def get_participant_events(self, participant_id):
+        """Returns a list of events that a participant has attended."""
+        sql = """
+            SELECT
+                a.id as participant_id,
+                d.id as event_id,
+                d.name,
+                d.start_datetime,
+                e.latitude,
+                e.longitude
+            FROM {schema}.participant_match a
+            INNER JOIN {schema}.attendee_to_participant b
+            ON a.id = b.participant_id
+            INNER JOIN {schema}.attendees c
+            ON c.id = b.id
+            INNER JOIN {schema}.events d
+            ON d.id = c.event_id
+            INNER JOIN {schema}.venues e
+            ON e.id = d.venue_id
+            WHERE a.id = %(participant_id)s
+            ORDER BY d.start_datetime DESC
+        """.format(schema=self.database.schema)
+        params = {'participant_id': participant_id}
+        df = self.database.fetch_df(sql, params)
+        
+        events = []
+        if len(df) > 0:
+            for i in df.index:
+                event = dict(df.loc[i])
+                event['start_datetime'] = str(event['start_datetime'])
+                events.append(event)
+        return events

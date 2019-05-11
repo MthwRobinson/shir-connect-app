@@ -133,43 +133,35 @@ class Events:
 
     def get_attendees(self, event_id):
         """ Pulls the list of the attendees for the event """
+        if isinstance(event_id, int):
+            event_id = str(event_id)
+
         sql = """
-            SELECT
-                first_name,
-                last_name,
-                max(age) as age,
+            SELECT DISTINCT
+                a.participant_id,
+                a.first_name,
+                a.last_name,
+                DATE_PART('year', AGE(now(), d.birth_date)) as age,
                 CASE
-                    WHEN max(is_member) = 1 THEN TRUE
-                    ELSE FALSE
+                    WHEN e.active_member IS NULL THEN FALSE
+                    ELSE e.active_member
                 end as is_member,
-                max(first_event_date) as first_event_date,
-                max(events_attended) as events_attended
-            FROM(
-                SELECT DISTINCT
-                    INITCAP(a.first_name) as first_name,
-                    INITCAP(a.last_name) as last_name,
-                    DATE_PART('year', AGE(now(), birth_date)) as age,
-                    CASE
-                        WHEN c.first_name IS NOT NULL THEN 1
-                        ELSE 0
-                    END as is_member,
-                    d.first_event_date,
-                    d.events_attended
-                FROM {schema}.attendees a
-                INNER JOIN {schema}.events b
-                on a.event_id = b.id
-                LEFT JOIN {schema}.members_view c
-                ON (lower(a.first_name)=lower(c.first_name)
-                AND lower(a.last_name)=lower(c.last_name))
-                LEFT JOIN {schema}.participants d
-                ON (lower(a.first_name)=lower(d.first_name)
-                AND lower(a.last_name)=lower(d.last_name))
-                where b.id = '{event_id}'
-            ) x
-            GROUP BY first_name, last_name
+                a.first_event_date,
+                a.events_attended
+            FROM {schema}.participants a
+            INNER JOIN {schema}.attendee_to_participant b
+            ON a.participant_id = b.participant_id
+            INNER JOIN {schema}.attendees c
+            ON b.id = c.id
+            INNER JOIN {schema}.participant_match d
+            ON d.id = a.participant_id
+            LEFT JOIN {schema}.members_view e
+            ON e.id = d.member_id
+            WHERE c.event_id = %(event_id)s
             ORDER BY last_name ASC
-        """.format(schema=self.database.schema, event_id=event_id)
-        df = pd.read_sql(sql, self.database.connection)
+        """.format(schema=self.database.schema)
+        params = {'event_id': event_id}
+        df = self.database.fetch_df(sql, params)
         attendees = self.database.to_json(df)
 
         # Conver the first_event_date epoch time to a timestamp

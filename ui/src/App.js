@@ -32,8 +32,8 @@ class App extends Component {
             <Route path="/event" component={EventPage} />
             <Route path="/forbidden" component={Forbidden} />
             <Route path="/manage-users" component={ManageUsers} />
-            <Route path="/member" component={MemberPage} />
-            <Route path="/members" component={Members} />
+            <Route path="/participant" component={MemberPage} />
+            <Route path="/participants" component={Members} />
             <Route path="/report" component={Report} />
             <Route path="/trends" component={Trends} />
             <Route path="/map" component={EventMap} />

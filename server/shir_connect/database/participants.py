@@ -44,6 +44,7 @@ class Participants:
         df = self.database.fetch_df(sql, params=params)
         if len(df) > 0:
             result = dict(df.loc[0])
+            result['events'] = self.get_participant_events(result['participant_id'])
             estimated = str(result['is_birth_date_estimated'])
             result['is_birth_date_estimated'] = estimated
             result['is_member'] = str(result['is_member'])

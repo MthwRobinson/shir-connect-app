@@ -74,9 +74,9 @@ class Members extends Component {
         })
     }
 
-    selectMember = (firstName, lastName) => {
+    selectMember = (participantID) => {
       // Switches to the member page
-      const url = '/member?firstName='+firstName+'&lastName='+lastName;
+      const url = '/participant?id=' + participantID;
       this.props.history.push(url);
     }
 
@@ -93,7 +93,7 @@ class Members extends Component {
       //   terms are applied as an AND condition
       this.setState({loading: true});
       // Construct the URL parameters
-      let url = '/service/members?limit='+LIMIT;
+      let url = '/service/participants?limit='+LIMIT;
       url += '&page='+page;
       url += '&q='+searchTerms.join(' ');
       url += '&sort='+sortCol;
@@ -315,10 +315,7 @@ class Members extends Component {
                     <tr 
                       className='table-row' 
                       key={index}
-                      onClick={()=>this.selectMember(
-                        member.first_name,
-                        member.last_name
-                      )}
+                      onClick={()=>this.selectMember(member.participant_id)}
                     >
                       <th>{member.first_name != null
                           ? member.first_name : '--'}</th>

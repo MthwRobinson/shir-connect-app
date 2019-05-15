@@ -62,11 +62,9 @@ class AgeGroupAttendance extends Component {
     this.getTopParticipants(ageGroup, topCategory);
   }
 
-  selectMember = (name) => {
+  selectMember = (participantID) => {
     // Switches to the member page
-    const firstName = name.split(' ')[0];
-    const lastName = name.split(' ')[1];
-    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+    const url = '/participant?id=' + participantID;
     this.props.history.push(url);
   }
 
@@ -179,7 +177,7 @@ class AgeGroupAttendance extends Component {
       if(this.state.topCategory==='Events'){
         selectItem = (item) => this.selectEvent(item.id);
       } else {
-        selectItem = (item) => this.selectMember(item.name);
+        selectItem = (item) => this.selectMember(item.id);
       }
 
       return(

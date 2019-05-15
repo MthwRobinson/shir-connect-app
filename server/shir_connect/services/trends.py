@@ -91,7 +91,7 @@ def participation(age_group):
 
     top = request.args.get('top')
     if not top:
-        top = 'member'
+        top = 'participant'
     limit = request.args.get('limit')
     if not limit:
         limit = 25

@@ -74,7 +74,7 @@ class Members extends Component {
         })
     }
 
-    selectMember = (participantID) => {
+    selectParticipant = (participantID) => {
       // Switches to the member page
       const url = '/participant?id=' + participantID;
       this.props.history.push(url);
@@ -315,7 +315,7 @@ class Members extends Component {
                     <tr 
                       className='table-row' 
                       key={index}
-                      onClick={()=>this.selectMember(member.participant_id)}
+                      onClick={()=>this.selectParticipant(member.participant_id)}
                     >
                       <th>{member.first_name != null
                           ? member.first_name : '--'}</th>

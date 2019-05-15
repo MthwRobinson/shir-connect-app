@@ -5,9 +5,9 @@ import { withRouter } from 'react-router-dom';
 import moment from 'moment';
 
 class Attendees extends Component {
-  selectMember = (firstName, lastName) => {
-    // Switches to the member page
-    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+  selectParticipant = (participantID) => {
+    // Switches to the participant page
+    const url = '/participant?id='+ participantID; 
     this.props.history.push(url);
   }
 
@@ -36,10 +36,7 @@ class Attendees extends Component {
                   <tr 
                     className='table-row' 
                     key={index}
-                    onClick={()=>this.selectMember(
-                      attendee.first_name,
-                      attendee.last_name
-                    )}
+                    onClick={()=>this.selectParticipant(attendee.participant_id)}
                   >
                     <th>{index+1}</th>
                     <th>{attendee.first_name != null

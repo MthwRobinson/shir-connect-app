@@ -89,25 +89,28 @@ class ParticipantMatcher:
 
     def _get_avg_event_age(self, event_id):
         """Computes the average age of the attendees of an event."""
+        if not isinstance(event_id, list):
+            event_id = [str(event_id)]
+        else:
+            event_id = [str(x) for x in event_id]
+
         sql = """
             SELECT AVG(age) as avg_age
             FROM(
-                SELECT DATE_PART('year', AGE(now(), birth_date)) as age,
-                       LOWER(first_name) AS first_name,
-                       LOWER(last_name) AS last_name
-                FROM {schema}.members
-                WHERE birth_date IS NOT NULL
-            ) x
+                SELECT age, participant_id
+                FROM {schema}.participants
+                WHERE age IS NOT NULL
+            ) a
+            INNER JOIN {schema}.attendee_to_participant b
+            ON a.participant_id = b.participant_id
             INNER JOIN (
-                SELECT LOWER(first_name) as first_name,
-                       LOWER(last_name) as last_name
+                SELECT id
                 FROM {schema}.attendees
-                WHERE event_id = '{event_id}'
-            ) y
-            ON (x.first_name = y.first_name 
-            AND x.last_name = y.last_name)
+                WHERE event_id = ANY(%(event_id)s)
+            ) c
+            ON c.id = b.id
         """.format(schema=self.database.schema, event_id=event_id)
-        df = pd.read_sql(sql, self.database.connection)
+        df = self.database.fetch_df(sql, params={'event_id': event_id})
         avg_age = None
         if len(df) > 0:
             avg_age = df.loc[0]['avg_age']

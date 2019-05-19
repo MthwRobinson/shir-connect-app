@@ -12,6 +12,11 @@ class FakeDatabase():
     def load_item(self, *args, **kwargs):
         pass
 
+    def fetch_df(self, *args, **kwargs):
+        df = pd.read_sql(*args, **kwargs)
+        return df
+
+
 class FakeNameResolver():
     def __init__(self):
         pass
@@ -37,6 +42,7 @@ def test_get_avg_event_age(monkeypatch):
     participant_matcher = ParticipantMatcher()
     avg_age = participant_matcher._get_avg_event_age(123)
     assert avg_age == 53
+    avg_age = participant_matcher._get_avg_event_age([123, 456])
 
 def test_process_attendee(monkeypatch):
     # Mainly testing to make sure this code runs without error

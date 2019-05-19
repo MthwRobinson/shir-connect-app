@@ -16,6 +16,12 @@ class FakeDatabase():
         df = pd.read_sql(*args, **kwargs)
         return df
 
+    def update_column(self, *args, **kwargs):
+        pass
+
+    def to_json(self, df):
+        return [{'id': 867}, {'id': 5309}]
+
 
 class FakeNameResolver():
     def __init__(self):
@@ -91,5 +97,17 @@ def test_participant_match_run():
     participant_matcher.name_resolver = FakeNameResolver()
     participant_matcher._get_missing_attendees = lambda *args, **kwargs: fake_response
     participant_matcher._process_attendee = lambda attendee: attendee
+    participant_matcher._estimate_unknown_ages = lambda *args, **kwargs: 'Squawk!!'
 
     participant_matcher.run(iters=1)
+
+def test_estimate_unknown_ages(monkeypatch):
+    fake_response = pd.DataFrame({'id': [867, 5309]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
+
+    participant_matcher = ParticipantMatcher()
+    participant_matcher.database = FakeDatabase()
+    participant_matcher.name_resolver = FakeNameResolver()
+    participant_matcher._estimate_participant_age = lambda *args, **kwargs: 34
+
+    participant_matcher.estimate_unknown_ages()

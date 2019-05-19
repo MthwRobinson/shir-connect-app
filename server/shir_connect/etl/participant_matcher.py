@@ -1,6 +1,7 @@
 import logging
 
 import daiquiri
+import datetime
 import pandas as pd
 import uuid
 
@@ -38,6 +39,30 @@ class ParticipantMatcher:
                 if attendee['first_name'] and attendee['last_name']:
                     self._process_attendee(attendee)
             n += 1
+    
+    def estimate_unknown_ages(self):
+        """Finds estimated ages for any participant whose age is
+        unknown or who has an estimated age."""
+        unknowns = self._get_unknown_ages()
+        for i, unknown in enumerate(unknowns):
+            if i%100 == 0:
+                msg = 'Estimated age for {} participants.'.format(i)
+                self.logger.info(msg)
+
+            estimated_age = self._estimate_participant_age(unknown['id'])
+            if not estimated_age:
+                continue
+            now = datetime.datetime.now()
+            estimated_birth_date = now - datetime.timedelta(estimated_age*365)
+            estimated_birth_date = "'{}'".format(str(estimated_birth_date)[:10])
+            self.database.update_column(table='participant_match',
+                                        item_id=unknown['id'],
+                                        column='birth_date',
+                                        value=estimated_birth_date)
+            self.database.update_column(table='participant_match',
+                                        item_id=unknown['id'],
+                                        column='is_birth_date_estimated',
+                                        value=True)
 
     def _process_attendee(self, attendee):
         """Adds a link to attendee_to_participant if the attendee has a match.
@@ -131,3 +156,17 @@ class ParticipantMatcher:
             event_id = [x['event_id'] for x in events]
         age = self._get_avg_event_age(event_id)
         return age
+
+    def _get_unknown_ages(self):
+        """Pulls all participant ids that have a null date or
+        and estimated date."""
+        sql = """
+            SELECT id
+            FROM {schema}.participant_match
+            WHERE is_birth_date_estimated = TRUE
+            OR birth_date IS NULL
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        results = self.database.to_json(df)
+        return results
+

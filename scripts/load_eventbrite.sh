@@ -7,4 +7,7 @@ fi
 touch $LOCK
 echo Eventbrite load is starting
 /home/ubuntu/venv/shir_connect/bin/shir_connect load_eventbrite
+/home/ubuntu/venv/shir_connect/bin/shir_connect update_geometries
+/home/ubuntu/venv/shir_connect/bin/shir_connect match_participants
+/home/ubuntu/venv/shir_connect/bin/shir_connect refresh_views
 rm $LOCK

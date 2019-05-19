@@ -45,7 +45,7 @@ class ParticipantMatcher:
         unknown or who has an estimated age."""
         unknowns = self._get_unknown_ages()
         for i, unknown in enumerate(unknowns):
-            if i%100 == 0:
+            if i%1000 == 0:
                 msg = 'Estimated age for {} participants.'.format(i)
                 self.logger.info(msg)
 
@@ -163,10 +163,9 @@ class ParticipantMatcher:
         sql = """
             SELECT id
             FROM {schema}.participant_match
-            WHERE is_birth_date_estimated = TRUE
+            WHERE birth_date_estimated = TRUE
             OR birth_date IS NULL
         """.format(schema=self.database.schema)
         df = pd.read_sql(sql, self.database.connection)
         results = self.database.to_json(df)
         return results
-

@@ -12,6 +12,7 @@ from shir_connect.analytics.entity_resolution import NameResolver
 from shir_connect.database.database import Database
 from shir_connect.etl.data_loader import DataLoader
 from shir_connect.etl.geometries import Geometries
+from shir_connect.etl.participant_matcher import ParticipantMatcher
 from shir_connect.services.app import app
 
 # Configure logging
@@ -54,7 +55,14 @@ def load_eventbrite():
     data_loader = DataLoader()
     data_loader.run()
     end = datetime.datetime.now()
-    LOGGER.info('Updating zip code geometries ...')
+    LOGGER.info('Finished Eventbrite dataload at %s'%(end))
+main.add_command(load_eventbrite)
+
+@click.command('update_geometries', help='Updates the zip code geometries')
+def update_geometries():
+    """Adds geometries for any missing postal codes."""
+    start = datetime.datetime.now()
+    LOGGER.info('Started loading geometries at %s'%(start))
     geo = Geometries()
     zip_codes = geo.missing_zip_codes()
     for code in zip_codes:
@@ -67,8 +75,21 @@ def load_eventbrite():
     geo.load_locations()
     LOGGER.info('Refreshing views')
     geo.database.refresh_views()
-    LOGGER.info('Finished Eventbrite dataload at %s'%(end))
-main.add_command(load_eventbrite)
+    end = datetime.datetime.now()
+    LOGGER.info('Finished loading geometries at %s'%(end))
+main.add_command(update_geometries)
+
+@click.command('match_participants', help='Fuzzy matches attendees to participant ids')
+def match_participants():
+    """ Loads Eventbrite data into postgres """
+    start = datetime.datetime.now()
+    LOGGER.info('Starting fuzzy matching at %s'%(start))
+    participant_matcher = ParticipantMatcher()
+    participant_matcher.run()
+    participant_matcher.estimate_unknown_ages()
+    end = datetime.datetime.now()
+    LOGGER.info('Finished fuzzy matching at %s'%(end))
+main.add_command(match_participants)
 
 @click.command('launch_api', help='Runs the Flask development server')
 @click.option('--prod', is_flag=True, help='Runs the WSGI prod server')

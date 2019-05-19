@@ -163,7 +163,7 @@ class ParticipantMatcher:
         sql = """
             SELECT id
             FROM {schema}.participant_match
-            WHERE birth_date_estimated = TRUE
+            WHERE is_birth_date_estimated = TRUE
             OR birth_date IS NULL
         """.format(schema=self.database.schema)
         df = pd.read_sql(sql, self.database.connection)

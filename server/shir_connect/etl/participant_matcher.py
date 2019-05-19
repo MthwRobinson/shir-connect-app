@@ -5,6 +5,7 @@ import pandas as pd
 import uuid
 
 from shir_connect.database.database import Database
+from shir_connect.database.participants import Participants
 from shir_connect.analytics.entity_resolution import NameResolver
 
 class ParticipantMatcher:
@@ -14,6 +15,7 @@ class ParticipantMatcher:
 
         self.database = Database() if not database else database
         self.name_resolver = NameResolver(database=self.database)
+        self.participants = Participants(database=self.database)
         self.avg_event_age = {}
 
     def run(self, limit=1000, iters=None):
@@ -95,23 +97,37 @@ class ParticipantMatcher:
             event_id = [str(x) for x in event_id]
 
         sql = """
-            SELECT AVG(age) as avg_age
+            SELECT PERCENTILE_CONT(0.5)
+                   WITHIN GROUP 
+                   (ORDER BY avg_age) as avg_age
             FROM(
-                SELECT age, participant_id
-                FROM {schema}.participants
-                WHERE age IS NOT NULL
-            ) a
-            INNER JOIN {schema}.attendee_to_participant b
-            ON a.participant_id = b.participant_id
-            INNER JOIN (
-                SELECT id
-                FROM {schema}.attendees
+                SELECT event_id,
+                       PERCENTILE_CONT(0.5)
+                       WITHIN GROUP
+                       (ORDER BY z.age) as avg_age
+                FROM {schema}.attendees x
+                INNER JOIN {schema}.attendee_to_participant y
+                ON x.id = y.id
+                INNER JOIN {schema}.participants z
+                ON y.participant_id = z.participant_id
                 WHERE event_id = ANY(%(event_id)s)
-            ) c
-            ON c.id = b.id
+                AND z.age IS NOT NULL
+                GROUP BY event_id
+            ) a
         """.format(schema=self.database.schema, event_id=event_id)
         df = self.database.fetch_df(sql, params={'event_id': event_id})
         avg_age = None
         if len(df) > 0:
             avg_age = df.loc[0]['avg_age']
         return avg_age
+
+    def _estimate_participant_age(self, participant_id):
+        """Estimates a participants age based on who they've
+        attended events with."""
+        events = self.participants.get_participant_events(participant_id)
+        if len(events) == 0:
+            return None
+        else:
+            event_id = [x['event_id'] for x in events]
+        age = self._get_avg_event_age(event_id)
+        return age

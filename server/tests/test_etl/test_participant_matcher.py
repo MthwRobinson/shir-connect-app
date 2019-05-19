@@ -28,6 +28,14 @@ class FakeNameResolver():
         else:
             return None
 
+
+class FakeParticipants():
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def get_participant_events(self, participant_id):
+        return [{'event_id': 867}, {'event_id': 5309}]
+
 def test_get_missing_attendees(monkeypatch):
     fake_response = pd.DataFrame({'id': [1, 2, 3], 'event_id': [4, 5, 6]})
     monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
@@ -43,6 +51,15 @@ def test_get_avg_event_age(monkeypatch):
     avg_age = participant_matcher._get_avg_event_age(123)
     assert avg_age == 53
     avg_age = participant_matcher._get_avg_event_age([123, 456])
+    assert avg_age == 53
+
+def test_estimate_participant_age(monkeypatch):
+    fake_response = pd.DataFrame({'avg_age': [53]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
+    participant_matcher = ParticipantMatcher()
+    participant_matcher.participants = FakeParticipants()
+    est_age = participant_matcher._estimate_participant_age('fake_participant')
+    assert est_age == 53
 
 def test_process_attendee(monkeypatch):
     # Mainly testing to make sure this code runs without error

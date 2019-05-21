@@ -20,7 +20,9 @@ import random
 import daiquiri
 from faker import Faker
 import pandas as pd
+import numpy as np
 
+import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 
 class FakeNews:
@@ -40,57 +42,45 @@ class FakeNews:
 
     def fake_events(self):
         """Generates fake events for the events table."""
-        events = self.database.read_table('events')
-        updated = []
-        for i in events.index:
-            event = dict(events.loc[i])
-            if not event['name']:
-                continue
-            if ':' in event['name']:
-                prefix = event['name'].split(':')[0] + ':'
-                fake_name = ' '.join([prefix, self._random_name(max_size=5)])
-            else:
-                fake_name = self._random_name(max_size=5)
+        event_ids = self._get_events()
+        prefixes = [x for x in conf.EVENT_GROUPS]
+        prefixes.append(None)
+
+        for i, event_id in enumerate(event_ids):
+            if i%1000 == 0:
+                msg = 'Generated fake names for {} events.'.format(i)
+                self.logger.info(msg)
+
+            fake_name = self._random_name(max_size=5)
             fake_name = fake_name.replace("'",'')
+            np.random.shuffle(prefixes)
+            prefix = prefixes[0]
+            if prefix:
+                fake_name = prefix + ': ' + fake_name
             fake_descr = self._random_paragraph(max_size=15)
-            msg = 'Changing event name {} to {}'.format(event['name'],
-                                                        fake_name)
-            self.logger.info(msg)
-            subset = events[events['name']==event['name']]
-            for j in subset.index:
-                event_ = dict(subset.loc[j])
-                self.database.update_column(table='events',
-                                            item_id=event_['id'],
-                                            column='name',
-                                            value="'{}'".format(fake_name))
-                self.database.update_column(table='events',
-                                            item_id=event_['id'],
-                                            column='description',
-                                            value="'{}'".format(fake_descr))
-                updated.append(j)
-        return updated
+                
+            self.database.update_column(table='events',
+                                        item_id=event_id,
+                                        column='fake_name',
+                                        value="'{}'".format(fake_name))
+            self.database.update_column(table='events',
+                                        item_id=event_id,
+                                        column='fake_description',
+                                        value="'{}'".format(fake_descr))
 
     def fake_venues(self):
         """Generates fake venues for the venues table."""
-        venues = self.database.read_table('venues')
-        updated = []
-        for i in venues.index:
-            venue = dict(venues.loc[i])
-            if not venue['name']:
-                continue
+        venue_ids = self._get_venues()
+        for i, venue_id in enumerate(venue_ids):
+            if i%1000 == 0:
+                msg = 'Generated fake names for {} venues.'.format(i)
+                self.logger.info(msg)
+
             fake_name = self._random_name(max_size=2)
-            msg = 'Changing venue name {} to {}'.format(venue['name'],
-                                                        fake_name)
-            self.logger.info(msg)
-            subset = venues[venues['name']==venue['name']]
-            for j in subset.index:
-                venue_ = dict(subset.loc[j])
-                self.database.update_column(table='venues',
-                                            item_id=venue_['id'],
-                                            column='name',
-                                            value="'{}'".format(fake_name))
-                updated.append(j)
-        return updated
+            self.database.update_column(table='venues',
+                                        item_id=venue_id,
+                                        column='fake_name',
+                                        value="'{}'".format(fake_name))
 
     def fake_names(self):
         """Generates fake names for the attendees, members, and orders table. """
@@ -122,7 +112,7 @@ class FakeNews:
                                         value=fake_email)
 
     def _get_participants(self):
-        """Pulls person information from the database."""
+        """Pulls a list of participants who need fake names."""
         sql = """
             SELECT id
             FROM {schema}.participant_match
@@ -133,6 +123,28 @@ class FakeNews:
         df = pd.read_sql(sql, self.database.connection)
         participant_ids = list(df['id'].unique())
         return participant_ids
+
+    def _get_events(self):
+        """Pulls a list of events that need fake names."""
+        sql = """
+            SELECT id
+            FROM {schema}.events
+            WHERE fake_name IS NULL
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        event_ids = list(df['id'].unique())
+        return event_ids 
+    
+    def _get_venues(self):
+        """Pulls a list of events that need fake names."""
+        sql = """
+            SELECT id
+            FROM {schema}.venues
+            WHERE fake_name IS NULL
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        venue_ids = list(df['id'].unique())
+        return venue_ids 
 
     def _random_name(self, max_size=2):
         """Generates a random name for events and venues."""

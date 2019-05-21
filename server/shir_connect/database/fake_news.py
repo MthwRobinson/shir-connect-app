@@ -1,28 +1,15 @@
 """ Generates fake data to support testing and demos to new clients. 
 
 Fake data is generated for the following tables and columns:
-    - Table: attendees
+    - Table: participant_match
         Columns:
-            - email
-            - first_name
-            - last_name
-            - name
+            - fake_first_name
+            - fake_last_name
+            - fake_nickname
     - Table: events
         Columns:
             - name
             - description
-    - Table: members
-        Columns:
-            - first_name
-            - last_name
-            - nickname
-            - email
-    - Table: orders
-        Columns:
-            - email
-            - first_name
-            - last_name
-            - name
     - Table: venues
         Columns:
             - name
@@ -32,6 +19,7 @@ import random
 
 import daiquiri
 from faker import Faker
+import pandas as pd
 
 from shir_connect.database.database import Database
 
@@ -106,83 +94,45 @@ class FakeNews:
 
     def fake_names(self):
         """Generates fake names for the attendees, members, and orders table. """
-        self._get_person_tables()
-        people_tables = ['attendees', 'members', 'orders']
-        updated = {k: [] for k in people_tables}
-        for i in self.participants.index:
-            participant = dict(self.participants.loc[i])
-            first_name = participant['first_name']
-            last_name = participant['last_name']
-            fake_first_name = self.faker.first_name()
-            fake_last_name = self.faker.last_name()
-            fake_email = self.faker.email()
-            msg = 'Changing name {} {} to {} {}'.format(first_name, last_name,
-                                                        fake_first_name,
-                                                        fake_last_name)
-            self.logger.info(msg)    
-            for table in people_tables:
-                new_updates = self._swap_people(first_name=first_name, 
-                                                last_name=last_name,
-                                                fake_first_name=fake_first_name,
-                                                fake_last_name=fake_last_name,
-                                                fake_email=fake_email,
-                                                table=table)
-                for update in new_updates:
-                    updated[table].append(update)
-        return updated
+        participant_ids = self._get_participants()
+        for i, participant_id in enumerate(participant_ids):
+            if i%1000 == 0:
+                msg = 'Generated fake names for {} participants.'.format(i)
+                self.logger.info(msg)
 
-    def _get_person_tables(self):
-        """Pulls person information from the database.""" 
-        self.participants = self.database.read_table('participants')
-        self.attendees = self.database.read_table('attendees')
-        self.members = self.database.read_table('members')
-        self.orders = self.database.read_table('orders')
+            fake_first_name = "'{}'".format(self.faker.first_name())
+            fake_last_name = "'{}'".format(self.faker.last_name())
+            fake_email = "'{}'".format(self.faker.email())
 
-    def _swap_people(self, first_name, last_name, fake_first_name,
-                        fake_last_name, fake_email, table):
-        """Swaps out real date for fake data in the people tables."""
-        # Need to clean the inputs because apostrophes trips up the
-        # update statement in postgres
-        first_name = first_name.replace("'",'')
-        last_name = last_name.replace("'",'')
-        fake_first_name = fake_first_name.replace("'",'')
-        fake_last_name = fake_last_name.replace("'",'')
-        fake_email = fake_email.replace("'",'')
+            self.database.update_column(table='participant_match',
+                                        item_id=participant_id,
+                                        column='fake_first_name',
+                                        value=fake_first_name)
+            self.database.update_column(table='participant_match',
+                                        item_id=participant_id,
+                                        column='fake_nickname',
+                                        value=fake_first_name)
+            self.database.update_column(table='participant_match',
+                                        item_id=participant_id,
+                                        column='fake_last_name',
+                                        value=fake_last_name)
+            self.database.update_column(table='participant_match',
+                                        item_id=participant_id,
+                                        column='fake_email',
+                                        value=fake_email)
 
-        df = getattr(self, table)
-        subset = self._find_name(first_name, last_name, df)
-        for i in subset.index:
-            person = dict(subset.loc[i])
-            full_name = ' '.join([first_name, last_name])
-            self.database.update_column(table=table,
-                                        item_id=person['id'],
-                                        column='first_name',
-                                        value="'{}'".format(fake_first_name))
-            self.database.update_column(table=table,
-                                        item_id=person['id'],
-                                        column='last_name',
-                                        value="'{}'".format(fake_last_name))
-            self.database.update_column(table=table,
-                                        item_id=person['id'],
-                                        column='email',
-                                        value="'{}'".format(fake_email))
-            if table in ['attendees', 'orders']:
-                self.database.update_column(table=table,
-                                            item_id=person['id'],
-                                            column='name',
-                                            value="'{}'".format(full_name))
-            elif table == 'members':
-                self.database.update_column(table='members',
-                                            item_id=person['id'],
-                                            column='nickname',
-                                            value="'{}'".format(first_name))
-        
-        return list(subset.index)
-    
-    def _find_name(self, first_name, last_name, table):
-        """Finds the rows in the table that match the name."""
-        return table[(table['first_name']==first_name)&
-                     (table['last_name']==last_name)]
+    def _get_participants(self):
+        """Pulls person information from the database."""
+        sql = """
+            SELECT id
+            FROM {schema}.participant_match
+            WHERE fake_first_name IS NULL
+            OR fake_last_name IS NULL
+            OR fake_nickname IS NULL
+        """.format(schema=self.database.schema)
+        df = pd.read_sql(sql, self.database.connection)
+        participant_ids = list(df['id'].unique())
+        return participant_ids
 
     def _random_name(self, max_size=2):
         """Generates a random name for events and venues."""

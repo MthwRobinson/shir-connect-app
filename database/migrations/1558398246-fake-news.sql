@@ -7,7 +7,8 @@ BEGIN;
 ALTER TABLE shir_connect.participant_match
 ADD COLUMN IF NOT EXISTS fake_first_name text DEFAULT NULL,
 ADD COLUMN IF NOT EXISTS fake_last_name text DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS fake_nickname text DEFAULT NULL;
+ADD COLUMN IF NOT EXISTS fake_nickname text DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS fake_email text DEFAULT NULL;
 
 COMMIT;
 
@@ -18,6 +19,7 @@ BEGIN;
 ALTER TABLE shir_connect.participant_match
 DROP COLUMN IF EXISTS fake_first_name,
 DROP COLUMN IF EXISTS fake_last_name,
-DROP COLUMN IF EXISTS fake_nickname;
+DROP COLUMN IF EXISTS fake_nickname,
+DROP COLUMN IF EXISTS fake_email;
 
 COMMIT;

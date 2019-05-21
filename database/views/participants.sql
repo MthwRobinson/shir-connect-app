@@ -5,6 +5,8 @@ SELECT DISTINCT
     a.id as participant_id,
     INITCAP(a.first_name) as first_name,
     INITCAP(a.last_name) as last_name,
+    INITCAP(a.fake_first_name) as fake_first_name,
+    INITCAP(a.fake_last_name) as fake_last_name,
     CASE 
       WHEN b.active_member IS NULL THEN FALSE
       ELSE b.active_member

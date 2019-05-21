@@ -19,12 +19,11 @@ class Events:
         self.database = database if database else Database()
 
     def get_events(self, limit=None, page=None, order=None,
-                   sort=None, q=None, where=[]):
+                   sort=None, q=None, where=[], fake=False):
         """ Fetches the most recent events from the database """
-        if q:
-            query = ('name', q)
-        else:
-            query = None
+        limit = 25 if not limit else limit
+        name_col = 'fake_name' if fake else 'name'
+        query = (name_col, q) if q else None
         df = self.database.read_table('event_aggregates', limit=limit,
                                       page=page, order=order, sort=sort,
                                       query=query, where=where)
@@ -33,15 +32,24 @@ class Events:
 
         pages = int((count/limit)) + 1
         events = self.database.to_json(df)
+        if fake:
+            for event in events:
+                event['name'] = event['fake_name']
+                event['description'] = event['fake_description']
+                event['venue_name'] = event['fake_venue_name']
+
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
     @demo_mode(['address_1', 'address_2', 'city',
                 'country', 'region', 'postal_code'])
-    def get_event(self, event_id):
+    def get_event(self, event_id, fake=False):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
         if event:
+            if fake:
+                event['name'] = event['fake_name']
+                event['venue_name'] = event['fake_venue_name']
             # Peform type conversions on the columns
             col_to_string = ['duration', 'start_datetime', 'end_datetime']
             for column in event.keys():
@@ -55,7 +63,7 @@ class Events:
                     event[column] = str(event[column])
 
             # Add attendees and event aggregate information
-            event['attendees'] = self.get_attendees(event_id)
+            event['attendees'] = self.get_attendees(event_id, fake=fake)
             event = self.compute_aggregates(event)
 
         return event
@@ -131,16 +139,17 @@ class Events:
 
         return event
 
-    def get_attendees(self, event_id):
+    def get_attendees(self, event_id, fake=False):
         """ Pulls the list of the attendees for the event """
         if isinstance(event_id, int):
             event_id = str(event_id)
 
+        prefix = 'fake_' if fake else ''
         sql = """
             SELECT DISTINCT
                 a.participant_id,
-                a.first_name,
-                a.last_name,
+                d.{prefix}first_name as first_name,
+                d.{prefix}last_name as last_name,
                 DATE_PART('year', AGE(now(), d.birth_date)) as age,
                 CASE
                     WHEN e.active_member IS NULL THEN FALSE
@@ -159,7 +168,7 @@ class Events:
             ON e.id = d.member_id
             WHERE c.event_id = %(event_id)s
             ORDER BY last_name ASC
-        """.format(schema=self.database.schema)
+        """.format(prefix=prefix, schema=self.database.schema)
         params = {'event_id': event_id}
         df = self.database.fetch_df(sql, params)
         attendees = self.database.to_json(df)
@@ -210,8 +219,9 @@ class Events:
         }
         return response
 
-    def get_event_locations(self):
+    def get_event_locations(self, fake=False):
         """ Pulls the latest event at each latitude/longitude """
+        prefix = 'fake_' if fake else ''
         sql = """
             SELECT
                 events.event_id as event_id,
@@ -236,7 +246,7 @@ class Events:
                 SELECT
                     a.id as event_id,
                     start_datetime,
-                    a.name as event_name,
+                    a.{prefix}name as event_name,
                     address_1,
                     city,
                     latitude,
@@ -246,7 +256,7 @@ class Events:
                 ON a.venue_id = b.id
             ) events
             ON max_location.event_id = events.event_id
-        """.format(schema=self.database.schema)
+        """.format(schema=self.database.schema, prefix=prefix)
         df = pd.read_sql(sql, self.database.connection)
 
         features = []

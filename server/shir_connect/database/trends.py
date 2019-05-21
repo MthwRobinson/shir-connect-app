@@ -67,7 +67,7 @@ class Trends:
             group_by = 'event_year'
         elif group == 'month':
             group_by = 'event_month'
-        event_table = EVENT_TABLE.format(schema=self.database.schema)
+        event_table = EVENT_TABLE.format(prefix='', schema=self.database.schema)
         age_groups = build_age_groups()
         sql = """
             SELECT
@@ -93,9 +93,10 @@ class Trends:
             response[age_group]['count'].append(row['distinct_attendees'])
         return response
 
-    def get_participation(self, age_group, top='participant', limit=25):
+    def get_participation(self, age_group, top='participant', limit=25, fake=False):
         """ Pulls the top events or attendees by age group """
-        event_table = EVENT_TABLE.format(schema=self.database.schema)
+        prefix = 'fake_' if fake else ''
+        event_table = EVENT_TABLE.format(prefix=prefix, schema=self.database.schema)
         age_groups = build_age_groups()
         sql = """
             SELECT
@@ -129,9 +130,9 @@ EVENT_TABLE = """
     SELECT DISTINCT
         event_id,
         d.participant_id,
-        c.name as event_name,
-        CONCAT(INITCAP(a.first_name), ' ',
-               INITCAP(a.last_name)) as participant_name,
+        c.{prefix}name as event_name,
+        CONCAT(INITCAP(d.{prefix}first_name), ' ',
+               INITCAP(d.{prefix}last_name)) as participant_name,
         a.id as attendee_id,
         concat(
             date_part('year', start_datetime),

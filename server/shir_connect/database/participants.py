@@ -17,16 +17,17 @@ class Participants:
 
         self.database = database if database else Database()
 
-    def get_participant(self, participant_id):
+    def get_participant(self, participant_id, fake=False):
         """Pulls information on a participant based on the participant id."""
+        prefix = 'fake_' if fake else ''
         sql = """
             SELECT
                 a.id as participant_id,
-                a.first_name,
-                a.last_name,
+                a.{prefix}first_name as first_name,
+                a.{prefix}last_name as last_name,
                 DATE_PART('year', AGE(now(), a.birth_date)) as age,
                 is_birth_date_estimated,
-                a.email,
+                a.{prefix}email as email,
                 CASE
                     WHEN b.active_member IS NOT NULL THEN b.active_member
                     ELSE FALSE
@@ -39,12 +40,13 @@ class Participants:
             ) a
             LEFT JOIN {schema}.members_view b
             ON a.member_id = b.id
-        """.format(schema=self.database.schema)
+        """.format(prefix=prefix, schema=self.database.schema)
         params = {'participant_id': participant_id}
         df = self.database.fetch_df(sql, params=params)
         if len(df) > 0:
             result = dict(df.loc[0])
-            result['events'] = self.get_participant_events(result['participant_id'])
+            result['events'] = self.get_participant_events(result['participant_id'],
+                                                           fake=fake)
             estimated = str(result['is_birth_date_estimated'])
             result['is_birth_date_estimated'] = estimated
             result['is_member'] = str(result['is_member'])
@@ -54,7 +56,7 @@ class Participants:
             return None
     
     def get_participants(self, limit=None, page=None, order=None, sort=None,
-                         q=None, where=[]):
+                         q=None, where=[], fake=False):
         """Pulls a list of members from the database
 
         Parameters
@@ -79,16 +81,22 @@ class Participants:
 
         pages = int((count/limit)) + 1
         members = self.database.to_json(df)
+        if fake:
+            for member in members:
+                member['first_name'] = member['fake_first_name']
+                member['last_name'] = member['fake_last_name']
+
         response = {'results': members, 'count': str(count), 'pages': pages}
         return response
 
-    def get_participant_events(self, participant_id):
+    def get_participant_events(self, participant_id, fake=False):
         """Returns a list of events that a participant has attended."""
+        prefix = 'fake_' if fake else ''
         sql = """
             SELECT
                 a.id as participant_id,
                 d.id as event_id,
-                d.name,
+                d.{prefix}name as name,
                 d.start_datetime,
                 e.latitude,
                 e.longitude
@@ -103,7 +111,7 @@ class Participants:
             ON e.id = d.venue_id
             WHERE a.id = %(participant_id)s
             ORDER BY d.start_datetime DESC
-        """.format(schema=self.database.schema)
+        """.format(prefix=prefix, schema=self.database.schema)
         params = {'participant_id': participant_id}
         df = self.database.fetch_df(sql, params)
         

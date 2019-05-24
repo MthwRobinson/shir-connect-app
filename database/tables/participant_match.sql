@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS {schema}.participant_match (
   last_name text,
   nickname text,
   email text,
+  fake_first_name text,
+  fake_last_name text,
+  fake_nickname text,
+  fake_email text,
   birth_date timestamp,
   is_birth_date_estimated boolean
 );

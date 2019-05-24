@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS {schema}.venues (
   latitude numeric,
   longitude numeric,
   postal_code text,
-  name text
+  name text,
+  fake_name text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS venue_index ON {schema}.venues (id);

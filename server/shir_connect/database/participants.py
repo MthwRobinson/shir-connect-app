@@ -67,6 +67,7 @@ class Participants:
         sort: str, 'asc' or 'desc'
         q: tuple, a query on the last name
         where: list, the where conditions for the query
+        fake: bool, uses fake participant names for demo purposes if true
 
         Returns
         -------
@@ -81,10 +82,12 @@ class Participants:
 
         pages = int((count/limit)) + 1
         members = self.database.to_json(df)
+
         if fake:
             for member in members:
                 member['first_name'] = member['fake_first_name']
                 member['last_name'] = member['fake_last_name']
+                member['event_name'] = member['fake_event_name']
 
         response = {'results': members, 'count': str(count), 'pages': pages}
         return response

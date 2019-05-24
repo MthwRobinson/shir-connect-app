@@ -14,6 +14,7 @@ SELECT DISTINCT
     e.first_event_date,
     e.last_event_date,
     e.event_name,
+    e.fake_event_name,
     CASE
       WHEN e.events_attended IS NOT NULL THEN e.events_attended
       ELSE 0
@@ -30,6 +31,7 @@ SELECT DISTINCT
     SELECT
       x.participant_id,
       event_name,
+      fake_event_name,
       x.last_event_date,
       x.first_event_date,
       x.events_attended
@@ -39,6 +41,7 @@ SELECT DISTINCT
         MIN(events.start_datetime) AS first_event_date,
         COUNT(DISTINCT events.id) AS events_attended,
         MAX(events.name) as event_name,
+        MAX(events.fake_name) as fake_event_name,
         participant_id
       FROM {schema}.events events
       INNER JOIN {schema}.attendees attendees

@@ -73,7 +73,8 @@ class Participants:
         -------
         dict
         """
-        query = ('last_name', q) if q else None
+        query_term = 'last_name' if not fake else 'fake_last_name'
+        query = (query_term, q) if q else None
         df = self.database.read_table('participants', limit=limit, page=page,
                                       order=order, sort=sort, query=query, 
                                       where=where)

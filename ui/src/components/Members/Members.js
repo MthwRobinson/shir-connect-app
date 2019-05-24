@@ -51,10 +51,10 @@ class Members extends Component {
       this.handleMaxAge= this.handleMaxAge.bind(this)
     }
 
-  componentDidMount(){
-      this.checkAccess(); 
-      this.getMembers();
-    }
+    componentDidMount(){
+        this.checkAccess();
+        this.getMembers();
+      }
   
     checkAccess = () => {
       // Checks to make sure the user has access to the 
@@ -74,9 +74,9 @@ class Members extends Component {
         })
     }
 
-    selectMember = (firstName, lastName) => {
+    selectParticipant = (participantID) => {
       // Switches to the member page
-      const url = '/member?firstName='+firstName+'&lastName='+lastName;
+      const url = '/participant?id=' + participantID;
       this.props.history.push(url);
     }
 
@@ -93,11 +93,14 @@ class Members extends Component {
       //   terms are applied as an AND condition
       this.setState({loading: true});
       // Construct the URL parameters
-      let url = '/service/members?limit='+LIMIT;
+      let url = '/service/participants?limit='+LIMIT;
       url += '&page='+page;
       url += '&q='+searchTerms.join(' ');
       url += '&sort='+sortCol;
       url += '&order='+sortOrder;
+      if(sessionStorage.getItem('demoMode')==='true'){
+        url += '&fake_data=true';
+      }
       if(this.state.minAge){
         url += '&min_age='+this.state.minAge;
       }
@@ -315,10 +318,7 @@ class Members extends Component {
                     <tr 
                       className='table-row' 
                       key={index}
-                      onClick={()=>this.selectMember(
-                        member.first_name,
-                        member.last_name
-                      )}
+                      onClick={()=>this.selectParticipant(member.participant_id)}
                     >
                       <th>{member.first_name != null
                           ? member.first_name : '--'}</th>

@@ -2,69 +2,39 @@ import datetime
 
 import pytest 
 
-import shir_connect.configuration as conf
 from shir_connect.services.app import app
 import shir_connect.services.reports as rep
-from shir_connect.database.user_management import UserManagement
 import shir_connect.services.utils as utils
+from .utils import run_url_tests
 
 CLIENT = app.test_client()
 
-def run_url_tests(url):
-    user_management = UserManagement()
-    user_management.delete_user(conf.TEST_USER)
-    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
-
-    # User must be authenticated
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-
-    response = CLIENT.post('/service/user/authenticate', json=dict(
-        username=conf.TEST_USER,
-        password=conf.TEST_PASSWORD
-    ))
-    assert response.status_code == 200
-    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
-
-    # The user must have access to the reports module
-    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
-    assert response.status_code == 403
-    user_management.update_access(conf.TEST_USER, ['report'])
-    
-    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
-    assert response.status_code == 200
-
-    url = '/service/user/logout'
-    response = CLIENT.post(url)
-    assert response.status_code == 200
-
-    user_management.delete_user(conf.TEST_USER)
-    user = user_management.get_user(conf.TEST_USER)
-    assert not user
+def run_report_tests(url):
+    run_url_tests(url, client=CLIENT, access=['report'])
 
 def test_report_event_count():
-    run_url_tests('/service/report/events/count')
+    run_report_tests('/service/report/events/count')
 
 def test_member_demographics():
-    run_url_tests('/service/report/members/demographics')
+    run_report_tests('/service/report/members/demographics')
 
 def test_new_member_demographics():
-    run_url_tests('/service/report/members/demographics?only=new_members')
+    run_report_tests('/service/report/members/demographics?only=new_members')
 
 def test_member_locations():
-    run_url_tests('/service/report/members/locations')
+    run_report_tests('/service/report/members/locations')
 
 def test_new_members_cont():
-    run_url_tests('/service/report/members/new/count')
+    run_report_tests('/service/report/members/new/count')
 
 def test_member_locations():
-    run_url_tests('/service/report/members/new?limit=30')
+    run_report_tests('/service/report/members/new?limit=30')
 
 def test_households_by_year():
-    run_url_tests('/service/report/members/households/count?years=5')
+    run_report_tests('/service/report/members/households/count?years=5')
 
 def test_households_by_type():
-    run_url_tests('/service/report/members/households/type')
+    run_report_tests('/service/report/members/households/type')
 
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)

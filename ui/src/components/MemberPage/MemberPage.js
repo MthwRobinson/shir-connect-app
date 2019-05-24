@@ -51,12 +51,13 @@ class MemberPage extends Component {
     let params = {}
     for(let i=0; i<searchTerms.length; i++){
       const term = searchTerms[i].split('=');
-      params[term[0]] = term[1]
+      params[term[0]] = term[1];
     }
 
-    let url = '/service/member?';
-    url += 'firstName=' + params.firstName;
-    url += '&lastName=' + params.lastName;
+    let url = '/service/participant/' + params.id;
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '?fake_data=true';
+    }
     axios.get(url)
       .then(res => {
         res.data.name = res.data.first_name 

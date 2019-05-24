@@ -67,13 +67,13 @@ class Trends:
             group_by = 'event_year'
         elif group == 'month':
             group_by = 'event_month'
-        event_table = EVENT_TABLE.format(schema=self.database.schema)
+        event_table = EVENT_TABLE.format(prefix='', schema=self.database.schema)
         age_groups = build_age_groups()
         sql = """
             SELECT
                 {age_groups},
                 {group},
-                COUNT(DISTINCT member_name) as distinct_attendees
+                COUNT(DISTINCT participant_id) as distinct_attendees
             FROM( {event_table} ) x
             GROUP BY {group}, age_group
             ORDER BY {group} ASC, age_group DESC
@@ -93,9 +93,10 @@ class Trends:
             response[age_group]['count'].append(row['distinct_attendees'])
         return response
 
-    def get_participation(self, age_group, top='member', limit=25):
+    def get_participation(self, age_group, top='participant', limit=25, fake=False):
         """ Pulls the top events or attendees by age group """
-        event_table = EVENT_TABLE.format(schema=self.database.schema)
+        prefix = 'fake_' if fake else ''
+        event_table = EVENT_TABLE.format(prefix=prefix, schema=self.database.schema)
         age_groups = build_age_groups()
         sql = """
             SELECT
@@ -107,8 +108,8 @@ class Trends:
                     {age_groups},
                     event_name,
                     event_id,
-                    member_name,
-                    member_id
+                    participant_name,
+                    participant_id
                 FROM( {event_table} ) x
             ) y
             WHERE age_group='{age_group}'
@@ -128,20 +129,22 @@ class Trends:
 EVENT_TABLE = """
     SELECT DISTINCT
         event_id,
-        c.name as event_name,
-        b.id as member_id,
-        INITCAP(a.name) as member_name,
+        d.participant_id,
+        c.{prefix}name as event_name,
+        CONCAT(INITCAP(d.{prefix}first_name), ' ',
+               INITCAP(d.{prefix}last_name)) as participant_name,
         a.id as attendee_id,
         concat(
             date_part('year', start_datetime),
             '-', date_part('month', start_datetime)
         ) as event_month,
         date_part('year', start_datetime) as event_year,
-        DATE_PART('year', AGE(start_datetime, birth_date)) as age
+        age
     FROM {schema}.attendees a
-    INNER JOIN {schema}.members_view b
-    ON (LOWER(a.first_name)=LOWER(b.first_name)
-    AND LOWER(a.last_name)=LOWER(b.last_name))
+    INNER JOIN {schema}.attendee_to_participant b
+    ON b.id = a.id
+    INNER JOIN {schema}.participants d
+    ON d.participant_id = b.participant_id
     INNER JOIN {schema}.event_aggregates c
     ON a.event_id = c.id
 """

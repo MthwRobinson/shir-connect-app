@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS {schema}.events (
   organizer_id text,
   start_datetime timestamp,
   status text,
+  fake_name text,
+  fake_description text,
   url text,
   vanity_url text,
   venue_id text,

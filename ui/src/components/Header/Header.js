@@ -3,7 +3,9 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { Navbar } from 'react-bootstrap';
+import ReactToolTip from 'react-tooltip';
 import SlidingPane from 'react-sliding-pane';
+import Toggle from 'react-bootstrap-toggle';
 import Modal from 'react-modal';
 import axios from 'axios';
 
@@ -19,14 +21,18 @@ class Header extends Component {
     this.state = {
       paneOpen: false,
       userRole: 'standard',
-      modules: []
+      modules: [],
+      demoMode: false
     }
+
+    this.onToggle = this.onToggle.bind(this);
   }
   
   componentDidMount() {
     // The modal element is the popout menu
     Modal.setAppElement(this.el);
     this.checkAccess();
+    this.checkDemoMode();
   }
 
   checkAccess() {
@@ -46,6 +52,22 @@ class Header extends Component {
           }
         })
     }
+  }
+
+  checkDemoMode(){
+    // Checks to see if the app is currently in demo mode
+    const demoMode = sessionStorage.getItem('demoMode');
+    if(demoMode==='true'){
+      this.setState({demoMode: true});
+    }
+  }
+
+  onToggle () {
+    // Toggles demo mode on and off and writes the results
+    // to session storage for use around the app
+    const demoMode = !this.state.demoMode;
+    sessionStorage.setItem('demoMode', demoMode);
+    this.setState({ demoMode: demoMode });
   }
 
   renderMenu = () => {
@@ -94,6 +116,9 @@ class Header extends Component {
     if(this.props.history.location.pathname==='/login'){
       return null
     } else {
+      let toolTip = 'Click to toggle between using real data for ';
+      toolTip +=    '<br/>for live use  and fake data for demos. ';
+      toolTip +=     '<br/>Refresh the page after toggling. ';
       return (
         <div ref={ref => this.el = ref}>
           <SlidingPane
@@ -101,6 +126,22 @@ class Header extends Component {
             isOpen={ this.state.paneOpen }
             from='left'
             onRequestClose={this.toggleMenu}
+            title={
+              <div>
+                <Toggle
+                onClick={this.onToggle}
+                on={<span className='toggle-span'>Demo</span>}
+                off={<span className='toggle-span'>Live</span>}
+                size="xs"
+                offstyle="primary"
+                onstyle="danger"
+                active={this.state.demoMode}
+                data-tip={toolTip}
+                data-html={true}
+              />
+              <ReactToolTip />
+              </div>
+            }
           >
             {availablePages}
             <div className="menu-content panel-nav-options">

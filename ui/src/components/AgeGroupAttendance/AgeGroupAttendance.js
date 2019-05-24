@@ -62,11 +62,9 @@ class AgeGroupAttendance extends Component {
     this.getTopParticipants(ageGroup, topCategory);
   }
 
-  selectMember = (name) => {
-    // Switches to the member page
-    const firstName = name.split(' ')[0];
-    const lastName = name.split(' ')[1];
-    const url = '/member?firstName='+firstName+'&lastName='+lastName;
+  selectParticipant = (participantID) => {
+    // Switches to the participant page
+    const url = '/participant?id=' + participantID;
     this.props.history.push(url);
   }
 
@@ -132,6 +130,11 @@ class AgeGroupAttendance extends Component {
     let url = '/service/trends/participation/' + ageGroup;
     if(topCategory==='Events'){
       url += '?top=event';
+    } else {
+      url += '?top=participant';
+    }
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '&fake_data=true';
     }
     axios.get(url)
       .then(res => {
@@ -171,7 +174,7 @@ class AgeGroupAttendance extends Component {
   }
 
   renderTable = () => {
-    // Creates the table with member information
+    // Creates the table with participant information
     if(this.state.topLoading){
       return <Loading />
     } else {
@@ -179,7 +182,7 @@ class AgeGroupAttendance extends Component {
       if(this.state.topCategory==='Events'){
         selectItem = (item) => this.selectEvent(item.id);
       } else {
-        selectItem = (item) => this.selectMember(item.name);
+        selectItem = (item) => this.selectParticipant(item.id);
       }
 
       return(

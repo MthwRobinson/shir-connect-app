@@ -42,7 +42,7 @@ class Events extends Component {
         sortOrder: 'desc',
         defaultEventLocation: null,
         startDate: null,
-        endDate: new Date() 
+        endDate: new Date()
       }
 
       // Bindings for search bar
@@ -100,6 +100,9 @@ class Events extends Component {
       url += '&q='+searchTerms.join(' ');
       url += '&order='+sortOrder;
       url += '&sort='+sortCol;
+      if(sessionStorage.getItem('demoMode')==='true'){
+        url += '&fake_data=true'
+      }
       if(this.state.startDate){
         const filterStart = moment(this.state.startDate).format('YYYY-MM-DD')
         url += '&start_date='+filterStart;

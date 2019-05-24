@@ -110,6 +110,9 @@ class EventMap extends Component {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
     let url = '/service/events/locations';
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '?fake_data=true';
+    }
     let response = axios.get(url)
       .then(res => {
         let features = res.data.results;

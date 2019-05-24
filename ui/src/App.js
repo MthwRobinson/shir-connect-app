@@ -19,6 +19,7 @@ import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import '../node_modules/font-awesome/css/font-awesome.min.css';
 import 'react-sliding-pane/dist/react-sliding-pane.css';
+import '../node_modules/react-bootstrap-toggle/dist/bootstrap2-toggle.css';
 
 class App extends Component {
   render() {
@@ -32,8 +33,8 @@ class App extends Component {
             <Route path="/event" component={EventPage} />
             <Route path="/forbidden" component={Forbidden} />
             <Route path="/manage-users" component={ManageUsers} />
-            <Route path="/member" component={MemberPage} />
-            <Route path="/members" component={Members} />
+            <Route path="/participant" component={MemberPage} />
+            <Route path="/participants" component={Members} />
             <Route path="/report" component={Report} />
             <Route path="/trends" component={Trends} />
             <Route path="/map" component={EventMap} />

@@ -15,7 +15,7 @@
       "View and sort participants.",
       "Upload an Excel file with membership data into the database."
     ],
-    "link": "/members",
+    "link": "/participants",
     "accessGroup": "members"
   },
   "trends": {

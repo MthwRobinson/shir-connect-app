@@ -89,11 +89,13 @@ def participation(age_group):
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
 
-    top = request.args.get('top')
-    if not top:
-        top = 'member'
     limit = request.args.get('limit')
-    if not limit:
-        limit = 25
-    response = trends.get_participation(age_group, top, limit)
+    top = request.args.get('top')
+    fake_data = request.args.get('fake_data')
+    
+    limit = 25 if not limit else int(limit)
+    top = 'participant' if not top else top
+    fake_data = fake_data is not None and fake_data == 'true'
+
+    response = trends.get_participation(age_group, top, limit, fake=fake_data)
     return jsonify(response)

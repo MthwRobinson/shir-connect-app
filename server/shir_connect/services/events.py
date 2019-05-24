@@ -33,7 +33,7 @@ def get_event(event_id):
         return jsonify(response), 403
 
     fake_data = request.args.get('fake_data')
-    fake_data = fake_data is not None and fake_data == 'yes'
+    fake_data = fake_data is not None and fake_data == 'true'
     event = event_manager.get_event(event_id, fake=fake_data)
     if event:
         return jsonify(event)
@@ -100,7 +100,7 @@ def get_event_locations():
         return jsonify(response), 403
     
     fake_data = request.args.get('fake_data')
-    fake_data = fake_data is not None and fake_data == 'yes'
+    fake_data = fake_data is not None and fake_data == 'true'
     response = event_manager.get_event_locations(fake=fake_data)
     return jsonify(response)
 

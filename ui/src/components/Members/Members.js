@@ -51,10 +51,10 @@ class Members extends Component {
       this.handleMaxAge= this.handleMaxAge.bind(this)
     }
 
-  componentDidMount(){
-      this.checkAccess(); 
-      this.getMembers();
-    }
+    componentDidMount(){
+        this.checkAccess();
+        this.getMembers();
+      }
   
     checkAccess = () => {
       // Checks to make sure the user has access to the 
@@ -98,6 +98,9 @@ class Members extends Component {
       url += '&q='+searchTerms.join(' ');
       url += '&sort='+sortCol;
       url += '&order='+sortOrder;
+      if(sessionStorage.getItem('demoMode')==='true'){
+        url += '&fake_data=true';
+      }
       if(this.state.minAge){
         url += '&min_age='+this.state.minAge;
       }

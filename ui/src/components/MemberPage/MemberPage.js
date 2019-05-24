@@ -55,6 +55,9 @@ class MemberPage extends Component {
     }
 
     let url = '/service/participant/' + params.id;
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '?fake_data=true';
+    }
     axios.get(url)
       .then(res => {
         res.data.name = res.data.first_name 

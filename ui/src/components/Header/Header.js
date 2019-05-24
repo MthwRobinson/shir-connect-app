@@ -116,8 +116,9 @@ class Header extends Component {
     if(this.props.history.location.pathname==='/login'){
       return null
     } else {
-      let toolTip = 'Click to toggle between using real data for';
+      let toolTip = 'Click to toggle between using real data for ';
       toolTip +=    '<br/>for live use  and fake data for demos. ';
+      toolTip +=     '<br/>Refresh the page after toggling. ';
       return (
         <div ref={ref => this.el = ref}>
           <SlidingPane

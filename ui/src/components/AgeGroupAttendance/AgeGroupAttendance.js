@@ -130,6 +130,11 @@ class AgeGroupAttendance extends Component {
     let url = '/service/trends/participation/' + ageGroup;
     if(topCategory==='Events'){
       url += '?top=event';
+    } else {
+      url += '?top=participant';
+    }
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '&fake_data=true';
     }
     axios.get(url)
       .then(res => {

@@ -34,6 +34,9 @@ class EventPage extends Component {
     this.setState({loading: true});
     const eventId = this.props.location.search.split('=')[1];
     let url = '/service/event/' + eventId;
+    if(sessionStorage.getItem('demoMode')==='true'){
+      url += '?fake_data=true';
+    }
     axios.get(url)
       .then(res => {
         this.setState({

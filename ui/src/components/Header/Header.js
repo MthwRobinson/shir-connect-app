@@ -32,6 +32,7 @@ class Header extends Component {
     // The modal element is the popout menu
     Modal.setAppElement(this.el);
     this.checkAccess();
+    this.checkDemoMode();
   }
 
   checkAccess() {
@@ -53,8 +54,20 @@ class Header extends Component {
     }
   }
 
+  checkDemoMode(){
+    // Checks to see if the app is currently in demo mode
+    const demoMode = sessionStorage.getItem('demoMode');
+    if(demoMode==='true'){
+      this.setState({demoMode: true});
+    }
+  }
+
   onToggle () {
-    this.setState({ demoMode: !this.state.demoMode });
+    // Toggles demo mode on and off and writes the results
+    // to session storage for use around the app
+    const demoMode = !this.state.demoMode;
+    sessionStorage.setItem('demoMode', demoMode);
+    this.setState({ demoMode: demoMode });
   }
 
   renderMenu = () => {
@@ -103,8 +116,8 @@ class Header extends Component {
     if(this.props.history.location.pathname==='/login'){
       return null
     } else {
-      let toolTip = 'Toggle between using real data for live use ';
-      toolTip += '<br/> and fake data for demos. ';
+      let toolTip = 'Click to toggle between using real data for';
+      toolTip +=    '<br/>for live use  and fake data for demos. ';
       return (
         <div ref={ref => this.el = ref}>
           <SlidingPane

@@ -99,7 +99,7 @@ def get_event_locations():
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
     
-    fake_data = requst.args.get('fake_data')
+    fake_data = request.args.get('fake_data')
     fake_data = fake_data is not None and fake_data == 'yes'
     response = event_manager.get_event_locations(fake=fake_data)
     return jsonify(response)

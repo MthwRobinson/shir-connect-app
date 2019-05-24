@@ -50,6 +50,7 @@ class Events:
             if fake:
                 event['name'] = event['fake_name']
                 event['venue_name'] = event['fake_venue_name']
+                event['description'] = event['fake_description']
             # Peform type conversions on the columns
             col_to_string = ['duration', 'start_datetime', 'end_datetime']
             for column in event.keys():

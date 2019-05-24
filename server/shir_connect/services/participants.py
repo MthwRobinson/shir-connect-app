@@ -27,7 +27,9 @@ def get_participant(participant_id):
         response = {'message': '%s does not have access to participants'%(jwt_user)}
         return jsonify(response), 403
 
-    participant = participant_manager.get_participant(participant_id)
+    fake_data = request.args.get('fake_data')
+    fake_data = fake_data is not None and fake_data == 'true'
+    participant = participant_manager.get_participant(participant_id, fake=fake_data)
     if participant:
         return jsonify(participant)
     else:
@@ -53,11 +55,13 @@ def get_participants():
     order = request.args.get('order')
     sort = request.args.get('sort')
     q = request.args.get('q')
+    fake_data = request.args.get('fake_data')
     
     limit = 25 if not limit else int(limit)
     page = 1 if not page else int(page)
     order = 'asc' if not order else order
     sort = 'last_name' if not sort else sort
+    fake_data = fake_data is not None and fake_data == 'true'
 
     where = []
     max_age = request.args.get('max_age')
@@ -72,5 +76,6 @@ def get_participants():
 
     response = participant_manager.get_participants(limit=limit, page=page,
                                                     order=order, sort=sort,
-                                                    q=q, where=where)
+                                                    q=q, where=where,
+                                                    fake=fake_data)
     return jsonify(response)

@@ -32,7 +32,9 @@ def get_event(event_id):
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
-    event = event_manager.get_event(event_id)
+    fake_data = requst.args.get('fake_data')
+    fake_data = fake_data is not None and fake_data == 'yes'
+    event = event_manager.get_event(event_id, fake=fake_data)
     if event:
         return jsonify(event)
     else:
@@ -52,23 +54,19 @@ def get_events():
     if conf.EVENT_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
-
+    
     limit = request.args.get('limit')
-    if not limit:
-        limit = 25
-    else:
-        limit = int(limit)
     page = request.args.get('page')
-    if not page:
-        page = 1
-    else:
-        page = int(page)
     order = request.args.get('order')
-    if not order:
-        order = 'desc'
     sort = request.args.get('sort')
-    if not sort:
-        sort = 'start_datetime'
+    q = request.args.get('q')
+    fake_data = request.args.get('fake_data')
+    
+    limit = 25 if not limit else int(limit)
+    page = 1 if not page else int(page)
+    order = 'desc' if not order else order
+    sort = 'start_datetime' if not sort else sort
+    fake_data = fake_data is not None and fake_data == 'true'
 
     where = []
     start_date = request.args.get('start_date')
@@ -83,14 +81,10 @@ def get_events():
 
     q = request.args.get('q')
 
-    response = event_manager.get_events(
-        limit=limit,
-        page=page,
-        order=order,
-        sort=sort,
-        q=q,
-        where=where
-    )
+    response = event_manager.get_events(limit=limit, page=page,
+                                        order=order, sort=sort,
+                                        q=q, where=where,
+                                        fake=fake_data)
     return jsonify(response)
 
 @events.route('/service/events/locations', methods=['GET'])
@@ -104,7 +98,10 @@ def get_event_locations():
     if conf.MAP_GROUP not in user['modules']:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
-    response = event_manager.get_event_locations()
+    
+    fake_data = requst.args.get('fake_data')
+    fake_data = fake_data is not None and fake_data == 'yes'
+    response = event_manager.get_event_locations(fake=fake_data)
     return jsonify(response)
 
 @events.route('/service/events/cities', methods=['GET'])

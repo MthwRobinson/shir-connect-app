@@ -32,7 +32,7 @@ def get_event(event_id):
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
-    fake_data = requst.args.get('fake_data')
+    fake_data = request.args.get('fake_data')
     fake_data = fake_data is not None and fake_data == 'yes'
     event = event_manager.get_event(event_id, fake=fake_data)
     if event:

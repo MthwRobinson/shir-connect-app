@@ -64,3 +64,8 @@
 .panel-nav-options {
   padding-bottom: 25px;
 }
+
+.toggle-span {
+  width: 100%;
+  text-align: center;
+}

@@ -51,6 +51,7 @@ class Events:
                 event['name'] = event['fake_name']
                 event['venue_name'] = event['fake_venue_name']
                 event['description'] = event['fake_description']
+                event['address_1'] = '123 Fake Street'
             # Peform type conversions on the columns
             col_to_string = ['duration', 'start_datetime', 'end_datetime']
             for column in event.keys():

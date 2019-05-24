@@ -4,9 +4,11 @@ from shir_connect.database.participants import Participants
 
 participants = Participants()
 sql = """
-    SELECT id
-    FROM {schema}.participant_match
-    WHERE member_id IS NULL
+    SELECT a.id
+    FROM {schema}.participant_match a
+    INNER JOIN {schema}.attendee_to_participant b
+    ON a.id = b.participant_id
+    WHERE member_id IS NOT NULL
     LIMIT 1
 """.format(schema=participants.database.schema)
 df = pd.read_sql(sql, participants.database.connection)

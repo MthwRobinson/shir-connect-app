@@ -191,7 +191,7 @@ class Members:
     # File upload methods
     ########################
 
-    def upload_file(self, request):
+    def upload_file(self, request, file_type='members'):
         """ Reads the file and uploads it to the database """
         # Check the filetype
         file_ = request.files['file']
@@ -204,7 +204,14 @@ class Members:
             df = pd.read_csv(file_, encoding='latin-1')
         else:
             df = pd.read_excel(file_)
-        return self.member_loader.load(df)
+
+        if file_type == 'members':
+            good_upload = self.member_loader.load(df)
+        elif file_type == 'resignations':
+            good_upload = self.member_loader.load_resignations(df)
+        else:
+            good_upload = False
+        return good_upload
 
     def valid_extension(self, filename):
         """ Checks to make sure the filename has a valid extension """

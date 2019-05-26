@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from shir_connect.etl.mm2000 import MM2000
 from shir_connect.database.database import Database
 
 class MemberLoader:
@@ -25,7 +26,9 @@ class MemberLoader:
         filename = self.path + '/member_columns.yml'
         with open(filename, 'r') as f:
             self.column_mapping = yaml.safe_load(f)
+
         self.database = database if database else Database()
+        self.mm2000 = MM2000(database=self.database)
 
     def load(self, df, source='MM2000'):
         """ Loads the data in to the member database """
@@ -54,6 +57,15 @@ class MemberLoader:
             return False
 
         return True
+
+    def load_resignations(self, df, source='MM2000'):
+        """Loads resignation data into the database."""
+        if source=='MM2000':
+            try:
+                self.mm2000.load_resignations(df)
+                return True
+            except ValueError:
+                return False
 
     def parse_mm2000(self, df):
         """ Converts the MM2000 export into a list of rows """

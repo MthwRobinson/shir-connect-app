@@ -24,6 +24,9 @@ class FakeDatabase:
     def load_item(self, *args):
         pass
 
+    def update_column(self, *args, **kwargs):
+        pass
+
     def refresh_view(self, view):
         pass
 
@@ -98,3 +101,16 @@ def test_parse_mm2000_active():
     item = {'member_type': 'STAFF'}
     assert ml._check_mm2000_active(item) == {'member_type': 'STAFF',
                                            'active_member': True}
+
+def test_load_resignations():
+    member_loader = MemberLoader(database=FakeDatabase())
+
+    df = pd.DataFrame({'Camels': [1, 2],
+                       'Resign Date': ['2018-01-01', '2019-01-01']})
+    good_upload = member_loader.load_resignations(df)
+    assert good_upload == False
+
+    df = pd.DataFrame({'Member ID': [1, 2],
+                       'Resign Date': ['2018-01-01', '2019-01-01']})
+    good_upload = member_loader.load_resignations(df)
+    assert good_upload == True

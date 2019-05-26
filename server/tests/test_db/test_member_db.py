@@ -64,3 +64,45 @@ def test_clean_location_name():
     assert _clean_location_name('Moo City') == 'Moo'
     assert _clean_location_name('Growl County') == 'Growl'
     assert _clean_location_name('District Of Columbia') == 'DC'
+
+
+def test_upload_file(monkeypatch):
+    fake_response = pd.DataFrame({'count': [200]})
+    monkeypatch.setattr('pandas.read_csv', lambda *args, **kwargs: True)
+    monkeypatch.setattr('pandas.read_excel', lambda *args, **kwargs: True)
+
+    class FakeFile:
+        def __init__(self, filename):
+            self.filename = filename
+
+    class FakeRequest:
+        def __init__(self, extension):
+            self.files = {'file': FakeFile('camels_rock' + extension)}
+
+    class FakeMemberLoader:
+        def __init__(self):
+            pass
+
+        def load(self, df):
+            return True
+
+        def load_resignations(self, df):
+            return True
+
+    members = Members()
+    members.member_loader = FakeMemberLoader()
+
+    good_upload = members.upload_file(FakeRequest('.csv'), 'members')
+    assert good_upload == True
+    
+    good_upload = members.upload_file(FakeRequest('.xlsx'), 'resignations')
+    assert good_upload == True
+    
+    good_upload = members.upload_file(FakeRequest('.xls'), 'resignations')
+    assert good_upload == True
+    
+    good_upload = members.upload_file(FakeRequest('.txt'), 'resignations')
+    assert good_upload == False
+
+    good_upload = members.upload_file(FakeRequest('.csv'), 'penguins')
+    assert good_upload == False

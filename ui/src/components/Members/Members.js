@@ -393,7 +393,6 @@ class Members extends Component {
 
     renderPopup = () => {
       // Renders the popup with the upload form
-      let showHideClassName = null;
       if(this.state.showUpload===true){
         showHideClassName = "popup popup-display-block";
       } else {

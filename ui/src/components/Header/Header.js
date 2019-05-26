@@ -22,7 +22,8 @@ class Header extends Component {
       paneOpen: false,
       userRole: 'standard',
       modules: [],
-      demoMode: false
+      demoMode: false,
+      initialDemo: null
     }
 
     this.onToggle = this.onToggle.bind(this);
@@ -58,7 +59,9 @@ class Header extends Component {
     // Checks to see if the app is currently in demo mode
     const demoMode = sessionStorage.getItem('demoMode');
     if(demoMode==='true'){
-      this.setState({demoMode: true});
+      this.setState({demoMode: true, initialDemo: true});
+    } else {
+      this.setState({demoMode: false, initialDemo: false});
     }
   }
 
@@ -118,7 +121,6 @@ class Header extends Component {
     } else {
       let toolTip = 'Click to toggle between using real data for ';
       toolTip +=    '<br/>for live use  and fake data for demos. ';
-      toolTip +=     '<br/>Refresh the page after toggling. ';
       return (
         <div ref={ref => this.el = ref}>
           <SlidingPane
@@ -163,6 +165,15 @@ class Header extends Component {
     event.preventDefault();
     const currentState = this.state.paneOpen;
     this.setState({paneOpen: !currentState})
+
+    // If the demo mode toggle has change, refresh the page
+    if(this.state.paneOpen===true){
+      if(this.state.initialDemo!==null){
+        if(this.state.demoMode!==this.state.initialDemo){
+          window.location.reload();
+        }
+      }
+    }
   }
 
   logout = () => {

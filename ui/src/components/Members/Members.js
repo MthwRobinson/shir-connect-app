@@ -13,6 +13,7 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
+import Modal from 'react-responsive-modal';
 
 import {
   getCSRFToken,
@@ -441,15 +442,19 @@ class Members extends Component {
       }
 
       return(
-        <div className={showHideClassName}>
-          <section className="popup-main">
+        <div>
+          <Modal
+            open={this.state.showUpload}
+            showCloseIcon={false}
+            center
+          >
             <h4>Upload Member Data
               <i className="fa fa-times pull-right event-icons"
                  onClick={()=>this.hideUpload()}
               ></i>
             </h4><hr/>
             {body}
-          </section>
+          </Modal>
         </div>
       )
     }

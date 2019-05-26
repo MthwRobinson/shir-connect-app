@@ -26,3 +26,7 @@ MM2000:
       S DOB: birth_date
       S Sex: gender
       S Email: email
+
+MM2000 Resignations:
+  Member ID: id
+  Resign Date: resignation_date

@@ -40,7 +40,10 @@ def upload_members():
         response = {'message': 'only admins can upload files'}
         return jsonify(response), 403
 
-    good_upload = member_manager.upload_file(request)
+    file_type = request.args.get('file_type')
+    file_type = 'members' if not file_type else file_type
+
+    good_upload = member_manager.upload_file(request, file_type=file_type)
     if good_upload:
         response = {'message': 'success'}
         return jsonify(response)

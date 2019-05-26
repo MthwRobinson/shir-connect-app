@@ -4,6 +4,8 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import {
   Button,
+  ControlLabel,
+  Col,
   Form,
   FormControl,
   FormGroup,
@@ -42,14 +44,16 @@ class Members extends Component {
         uploadFailed: false,
         userRole: 'standard',
         minAge: null,
-        maxAge: null
+        maxAge: null,
+        fileType: 'members'
       }
 
       // Binding for the file upload in the popup
-      this.uploadFile = this.uploadFile.bind(this)
-      this.handleQuery = this.handleQuery.bind(this)
-      this.handleMinAge = this.handleMinAge.bind(this)
-      this.handleMaxAge= this.handleMaxAge.bind(this)
+      this.uploadFile = this.uploadFile.bind(this);
+      this.handleQuery = this.handleQuery.bind(this);
+      this.handleMinAge = this.handleMinAge.bind(this);
+      this.handleMaxAge= this.handleMaxAge.bind(this);
+      this.handleFileType = this.handleFileType.bind(this);
     }
 
     componentDidMount(){
@@ -217,6 +221,11 @@ class Members extends Component {
     handleMaxAge(event){
       // Updates the max age value in the state
       this.setState({maxAge: event.target.value});
+    }
+
+    handleFileType(event){
+      // Updates the file type
+      this.setState({ fileType: event.target.value });
     }
 
     renderPageCount = () => {
@@ -418,7 +427,14 @@ class Members extends Component {
                 Columns and data types will be validated prior to uploading.
               </p>
               <Form onSubmit={this.uploadFile}>
-                <FormGroup horizontal>
+                <FormGroup>
+                  <ControlLabel>File Type</ControlLabel>
+                  <FormControl componentClass="select"
+                               value={this.state.fileType}
+                               onChange={this.handleFileType}>
+                    <option value="members">Members</option>
+                    <option value="resignations">Resignations</option>
+                  </FormControl>
                   <FormControl 
                     className="upload-file"
                     type="file"

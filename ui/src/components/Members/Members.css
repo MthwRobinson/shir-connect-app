@@ -31,9 +31,11 @@
 .upload-file {
   font-family: 'Source Sans Serif', sans-serif;
   margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .upload-body {
   margin-left: 12px;
   margin-right: 12px;
+  display-block: inline;
 }

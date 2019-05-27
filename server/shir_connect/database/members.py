@@ -29,7 +29,7 @@ class Members:
     def get_demographics(self, new_members=False):
         """Pulls the current demographics for the community based on the 
         age groups in the configuration file. """
-        where = " WHERE active_member = true "
+        where = " WHERE active_member = true AND resignation_date IS NULL "
         if new_members:
             year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
             year_ago_str = str(year_ago)[:10]
@@ -39,8 +39,7 @@ class Members:
         sql = """
             SELECT COUNT(*) AS total, {age_groups}
             FROM (
-                SELECT first_name, 
-                       last_name,
+                SELECT id, 
                        DATE_PART('year', AGE(now(), birth_date)) as age
                 FROM {schema}.members
                 {where}
@@ -63,6 +62,7 @@ class Members:
             SELECT INITCAP({level}) as location, COUNT(*) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            AND resignation_date IS NULL
             {conditions}
             GROUP BY {level} 
             ORDER BY total DESC
@@ -148,14 +148,16 @@ class Members:
         results: dict
         """
         results = []
-        for i in range(start, end):
+        for i in range(start, end+1):
             year = i+1
-            date = "'{}-01-01'".format(year)
             sql = """
                 SELECT COUNT(DISTINCT household_id) as total
                 FROM {schema}.members_view
                 WHERE active_member = true
-                AND membership_date <= '{year}-01-01'
+                AND membership_date IS NOT NULL
+                AND membership_date <= '{year}-12-31'
+                AND (resignation_date > '{year}-01-01'
+                     OR resignation_date IS NULL)
             """.format(schema=self.database.schema, year=year)
             df = pd.read_sql(sql, self.database.connection)
             count = df.loc[0]['total']
@@ -171,6 +173,8 @@ class Members:
                    COUNT(DISTINCT household_id) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            AND membership_date IS NOT NULL
+            AND resignation_date IS NULL
             {conditions}
             GROUP BY member_type
         """.format(schema=self.database.schema, conditions=conditions)
@@ -239,7 +243,7 @@ def _clean_location_name(name):
     return name.strip()
 
 def _build_member_date_range(start, end):
-    """Builds a where condition that can be added to a querty
+    """Builds a where condition that can be added to a query
     to restrict the membership date range (ie for new members)
 
     Parameters

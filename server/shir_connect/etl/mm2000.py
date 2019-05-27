@@ -34,14 +34,21 @@ class MM2000:
         _validate_resignation_data(df)
         # Map the file column names to the databse column names
         df = df.rename(columns=self.column_mapping['MM2000 Resignations'])
+        # Drop any rows where the resignation date is null
         df = df.dropna(axis=0, how='any', subset=['resignation_date'])
         for i in df.index:
             member = dict(df.loc[i])
             resignation_date = str(member['resignation_date'])[:10]
-            self.database.update_column(table='members',
-                                        item_id=member['id'],
-                                        column='resignation_date',
-                                        value="'{}'".format(resignation_date))
+            sql = """
+                UPDATE {schema}.members
+                SET resignation_date = '{resignation_date}'
+                WHERE (household_id = '{member_id}'
+                       OR id = '{member_id}')
+            """.format(schema=self.database.schema,
+                       resignation_date=resignation_date,
+                       member_id=member['id'])
+            self.database.run_query(sql)
+        self.database.refresh_views()
         
 
 def _validate_resignation_data(df):

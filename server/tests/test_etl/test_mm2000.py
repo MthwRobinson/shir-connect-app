@@ -10,6 +10,12 @@ class FakeDatabase:
     def update_column(self, *args, **kwargs):
         pass
 
+    def refresh_views(self, *args, **kwargs):
+        pass
+
+    def run_query(self, *args, **kwargs):
+        pass
+
 def test_error_raises_with_bad_resign_columns():
     mm2000 = MM2000(database=FakeDatabase())
 

@@ -34,12 +34,14 @@ class MM2000:
         _validate_resignation_data(df)
         # Map the file column names to the databse column names
         df = df.rename(columns=self.column_mapping['MM2000 Resignations'])
+        df = df.dropna(axis=0, how='any', subset=['resignation_date'])
         for i in df.index:
             member = dict(df.loc[i])
+            resignation_date = str(member['resignation_date'])[:10]
             self.database.update_column(table='members',
                                         item_id=member['id'],
                                         column='resignation_date',
-                                        value=member['resignation_date'])
+                                        value="'{}'".format(resignation_date))
         
 
 def _validate_resignation_data(df):

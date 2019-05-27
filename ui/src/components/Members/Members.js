@@ -366,7 +366,7 @@ class Members extends Component {
 
       // Post the data
       const csrfToken = getCSRFToken();
-      const url = '/service/members/upload';
+      const url = '/service/members/upload?file_type=' + this.state.fileType;
       axios.post(url, data, {
           headers: {
             'X-CSRF-TOKEN': csrfToken,

@@ -244,11 +244,17 @@ def get_households_by_year():
     years = request.args.get('years')
     years = int(years) if years else 10
 
+    tally = request.args.get('tally')
+    tally = 'households' if not tally else tally
+
     now = datetime.datetime.now()
     end = now.year
     start = end - years
 
-    response = members.get_households_by_year(start, end)
+    if tally == 'resignations':
+        response = members.get_resignations_by_year(start, end)
+    else:
+        response = members.get_households_by_year(start, end)
     return jsonify(response)
 
 @reports.route('/service/report/members/households/type', methods=['GET'])

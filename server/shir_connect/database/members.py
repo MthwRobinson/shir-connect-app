@@ -108,6 +108,27 @@ class Members:
                                          where=[('membership_date', 
                                                  {'>=': start, '<': end})])
         return count
+    
+    def count_new_resignations(self, start, end):
+        """Counts the number of new resignations in the given range.
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+
+        Returns
+        -------
+        count: int
+        """
+        start = "'{}'".format(start)
+        end = "'{}'".format(end)
+        count = self.database.count_rows('members_view',
+                                         where=[('resignation_date', 
+                                                 {'>=': start, '<': end})])
+        return count
 
     def count_new_households(self, start, end):
         """Counts the number of new members joining in the given range.
@@ -190,6 +211,28 @@ class Members:
         type_counts.append({'member_type': 'All', 'total': total})
         type_counts = sort_results(type_counts, 'member_type')
         return type_counts
+
+    def get_resignations_by_year(self, start, end):
+        """Counts the number of resignations by year.
+
+        Parameters
+        ----------
+        start: int
+            the starting year
+        end: int
+            the ending year
+
+        Returns
+        -------
+        results: dict
+        """
+        results = []
+        for i in range(start, end+1):
+            year = i
+            count = self.count_new_resignations(start='{}-01-01'.format(year),
+                                                end='{}-01-01'.format(year+1))
+            results.append({'year': str(year), 'count': str(count)})
+        return results
 
     ########################
     # File upload methods

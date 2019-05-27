@@ -10,7 +10,7 @@ PATH = os.path.dirname(os.path.realpath(__file__))
 
 class FakeDatabase:
     def __init__(self):
-        pass
+        self.schema = 'fake_schema'
 
     def get_columns(self, table):
         return ['parrots', 'dogs']
@@ -30,7 +30,13 @@ class FakeDatabase:
     def refresh_view(self, view):
         pass
 
+    def refresh_views(self, *args, **kwargs):
+        pass
+
     def revert_table(self, table):
+        pass
+
+    def run_query(self, *args, **kwargs):
         pass
 
 class OtherFakeDB(FakeDatabase):

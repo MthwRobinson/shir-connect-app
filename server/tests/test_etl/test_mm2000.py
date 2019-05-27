@@ -5,7 +5,7 @@ from shir_connect.etl.mm2000 import MM2000
 
 class FakeDatabase:
     def __init__(self):
-        pass
+        self.schema = 'fake_schema'
 
     def update_column(self, *args, **kwargs):
         pass

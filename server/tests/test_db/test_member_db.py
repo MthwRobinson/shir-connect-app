@@ -41,7 +41,8 @@ def test_get_households_by_year(monkeypatch):
     demographics = members.get_households_by_year(2014, 2017)
     assert demographics == [{'year': '2014', 'count': '5000'},
                             {'year': '2015', 'count': '5000'},
-                            {'year': '2016', 'count': '5000'}]
+                            {'year': '2016', 'count': '5000'},
+                            {'year': '2017', 'count': '5000'}]
 
 def test_get_households_types(monkeypatch):
     fake_response = pd.DataFrame({'member_type': ['Family', 'Individual'],

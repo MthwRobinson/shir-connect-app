@@ -48,6 +48,18 @@ class MM2000:
                        resignation_date=resignation_date,
                        member_id=member['id'])
             self.database.run_query(sql)
+
+            reason = _find_resignation_reason(member['resignation_reason'])
+            sql = """
+                UPDATE {schema}.members
+                SET resignation_reason = '{reason}'
+                WHERE (household_id = '{member_id}'
+                       OR id = '{member_id}')
+            """.format(schema=self.database.schema,
+                       reason=reason,
+                       member_id=member['id'])
+            self.database.run_query(sql)
+
         self.database.refresh_views()
         
 
@@ -59,3 +71,22 @@ def _validate_resignation_data(df):
         raise ValueError('Member ID is missing from the resignation file.')
     if 'Resign Date' not in df.columns:
         raise ValueError('Resign Date is missing from the resignation file.')
+
+def _find_resignation_reason(reason):
+    """Converts the resignation reason string to a category.
+    TODO: if there is another client that uses MM2000 we may need
+    to refactor this"""
+    reason = str(reason).lower()
+    if 'moving' in reason or 'move' in reason:
+        category = 'Moved'
+    elif 'too far' in reason:
+        category = 'Too Far'
+    elif 'come' in reason:
+        category = 'Inactive'
+    elif 'deceased' in reason:
+        category = 'Deceased'
+    elif 'mitzvah' in reason:
+        category = 'Post Bar/Bat Mitzvah'
+    else:
+        category = 'Other'
+    return category

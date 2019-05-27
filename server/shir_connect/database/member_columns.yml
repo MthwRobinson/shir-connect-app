@@ -30,3 +30,4 @@ MM2000:
 MM2000 Resignations:
   Member ID: id
   Resign Date: resignation_date
+  Resignation Reason: resignation_reason

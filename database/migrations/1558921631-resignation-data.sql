@@ -13,18 +13,6 @@ COMMIT;
 
 BEGIN;
 
-COMMIT;
-
-
-BEGIN;
-
-
-COMMIT;
-
--- ==== DOWN ====
-
-BEGIN;
-
 ALTER TABLE shir_connect.members
 DROP COLUMN IF EXISTS resignation_date;
 

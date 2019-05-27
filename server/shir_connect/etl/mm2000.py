@@ -83,7 +83,7 @@ def _find_resignation_reason(reason):
         category = 'Too Far'
     elif 'come' in reason or 'inactive' in reason:
         category = 'Inactive'
-    elif 'deceased' in reason:
+    elif 'deceased' in reason or 'died' in reason:
         category = 'Deceased'
     elif 'mitzvah' in reason:
         category = 'Post Bar/Bat Mitzvah'

@@ -60,11 +60,15 @@ class MemberReport extends Component {
     }]
 
     const householdTypeList = this.renderHouseholdTypeList(key);
+    let plotTitle = 'Household Types';
+    if(key==='new_households'){
+      plotTitle = 'New Household Types';
+    }
     if(this.props.householdType[key].length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Types</h4>
+          <h4>{plotTitle}</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -85,7 +89,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Types</h4>
+          <h4>{plotTitle}</h4>
           <div className='quick-facts-list'>
             {householdTypeList}
           </div>

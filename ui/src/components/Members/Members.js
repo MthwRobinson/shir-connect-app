@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import {
   Button,
   ControlLabel,
-  Col,
   Form,
   FormControl,
   FormGroup,

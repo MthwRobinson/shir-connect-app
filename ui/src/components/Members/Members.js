@@ -564,11 +564,12 @@ class Members extends Component {
       let uploadButton = null
       if(this.state.userRole==='admin'){
         uploadButton = (
-            <i 
-              className="fa fa-upload pull-right event-icons"
-              onClick={()=>this.showUpload()}
-              data-tip="Upload member information."
-            ></i>
+          <span>
+            <i className="fa fa-upload pull-right event-icons"
+                onClick={()=>this.showUpload()}
+                data-tip="Upload member information."></i>
+            <ReactToolTip />
+          </span>
         )
       }
 

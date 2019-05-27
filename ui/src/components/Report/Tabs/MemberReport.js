@@ -516,12 +516,26 @@ class MemberReport extends Component {
     }
   }
   
-  renderHouseholdCount= () => {
-    // Creates a bar chart with the number of households by year
-    const newMemberCount= this.props.householdCount
+  renderHouseholdCount= (tally='households') => {
+    // Creates a bar chart with the counts of households by year
+    // Parameters
+    // ----------
+    // tally: str
+    //     tallies a total count of household if tally==='households'
+    //     tallies a total count of resignations if tally==='resignations'
+    let memberCount = [];
+    let plotTitle = null;
+    if(tally==='households'){
+      memberCount = this.props.householdCount;
+      plotTitle = 'Household Count';
+    } else if(tally==='resignations'){
+      memberCount = this.props.resignationCount;
+      plotTitle = 'Resignation Count';
+    }
+  
     let values = [];
     let labels = [];
-    for(let group of newMemberCount){
+    for(let group of memberCount){
       labels.push(group.year);
       values.push(group.count);
     }
@@ -537,7 +551,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Count</h4>
+          <h4>{plotTitle}</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -562,7 +576,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Count</h4>
+          <h4>{plotTitle}</h4>
           <div className='quick-facts-plot-area'> 
             <Plot
             data={data}
@@ -587,6 +601,7 @@ class MemberReport extends Component {
     const householdCount = this.renderHouseholdCount();
     const householdType = this.renderHouseholdTypes('all_households');
     const newHouseholdType = this.renderHouseholdTypes('new_households');
+    const resignationCount = this.renderHouseholdCount('resignations');
     let reportInfo = 'The membership report contains information about active ';
     reportInfo += 'members.<br/> It does not include information about attendees who ';
     reportInfo += 'are not members.'
@@ -616,7 +631,11 @@ class MemberReport extends Component {
         <Row>
           {newMemberCount}
           {newHouseholdType}
-        </Row>
+        </Row><hr/>
+        <h3>Resignations</h3>
+        <Row>
+          {resignationCount}
+        </Row><hr/>
         <h4>Where Members Live</h4><br/>
         {locationsTable}
       </div>

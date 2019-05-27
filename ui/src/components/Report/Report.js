@@ -20,6 +20,7 @@ class Report extends Component {
     newMembersCount: {},
     newMemberDemographics: [],
     householdCount: [],
+    resignationCount: [],
     householdType: {all_households: [], new_households: []}
   }
   
@@ -33,6 +34,7 @@ class Report extends Component {
     this.getNewMemberDemographics();
     this.getHouseholdCount();
     this.getHouseholdType();
+    this.getResignationCount();
   }
 
   getDemographics = () => {
@@ -57,6 +59,16 @@ class Report extends Component {
     axios.get(url)
       .then(res => {
         this.setState({householdCount: res.data});
+      })
+  }
+
+  getResignationCount = () => {
+    // Counts the number of resignations by year
+    let url = '/service/report/members/households/count';
+    url += '?years=25&tally=resignations';
+    axios.get(url)
+      .then(res => {
+        this.setState({resignationCount: res.data});
       })
   }
   
@@ -119,7 +131,8 @@ class Report extends Component {
                             newMemberCount={this.state.newMemberCount}
                             newMemberDemographics={this.state.newMemberDemographics}
                             householdCount={this.state.householdCount}
-                            householdType={this.state.householdType}/>);
+                            householdType={this.state.householdType}
+                            resignationCount={this.state.resignationCount} />);
     }
   }
 

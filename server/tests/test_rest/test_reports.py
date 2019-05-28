@@ -39,6 +39,9 @@ def test_resignations_by_year():
 def test_households_by_type():
     run_report_tests('/service/report/members/households/type')
 
+def test_resignations_by_type():
+    run_report_tests('/service/report/members/resignations/type')
+
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)
     class patched_datetime(datetime.datetime): pass

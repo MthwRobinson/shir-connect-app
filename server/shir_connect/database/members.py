@@ -234,6 +234,26 @@ class Members:
             results.append({'year': str(year), 'count': str(count)})
         return results
 
+    def get_resignation_types(self):
+        """Breaks down resignations over the past year by type."""
+        year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+        year_ago_str = str(year_ago)[:10]
+
+        sql = """
+            SELECT COUNT(DISTINCT household_id) as total,
+                   resignation_reason
+            FROM {schema}.members_view
+            WHERE resignation_date >= '{year_ago}'
+            GROUP BY resignation_reason
+        """.format(schema=self.database.schema, year_ago=year_ago_str)
+        df = pd.read_sql(sql, self.database.connection)
+        
+        type_counts = self.database.to_json(df)
+        total = sum([x['total'] for x in type_counts])
+        type_counts.append({'resignation_reason': 'All', 'total': total})
+        type_counts = sort_results(type_counts, 'resignation_reason')
+        return type_counts
+
     ########################
     # File upload methods
     ########################

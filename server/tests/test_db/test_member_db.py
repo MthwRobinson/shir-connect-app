@@ -64,6 +64,16 @@ def test_get_households_types(monkeypatch):
                             {'member_type': 'Family', 'total': 200},
                             {'member_type': 'Individual', 'total': 300}]
 
+def test_get_resignation_types(monkeypatch):
+    fake_response = pd.DataFrame({'resignation_reason': ['Too Far', 'Inactive'],
+                                  'total': [200, 300]})
+    monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)
+    members = Members()
+    demographics = members.get_resignation_types()
+    assert demographics == [{'resignation_reason': 'All', 'total': 500},
+                            {'resignation_reason': 'Inactive', 'total': 300},
+                            {'resignation_reason': 'Too Far', 'total': 200}]
+
 def test_count_new_households(monkeypatch):
     fake_response = pd.DataFrame({'count': [200]})
     monkeypatch.setattr('pandas.read_sql', lambda *args, **kwargs: fake_response)

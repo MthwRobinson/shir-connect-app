@@ -37,7 +37,8 @@ def test_resignations_load():
     df = pd.DataFrame({'Member ID': [867, 6309],
                        'Resign Date': ['2018-01-01', '2019-01-01'],
                        'Resignation Reason': ['Too many bears', 'Not enough birds'],
-                       'Comment2': ['rejoined', 'Angry bird!']})
+                       'Comment1': ['Not enough camels', 'Too many lizards!'],
+                       'Comment2': ['Rejoined', 'Angry bird!']})
     mm2000.load_resignations(df)
 
 def test_resignation_reason():

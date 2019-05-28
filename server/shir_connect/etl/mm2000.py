@@ -44,6 +44,9 @@ class MM2000:
             # TODO: This logic is specific to TRS because that's how they
             # track people who rejoined the congregation. We may have to
             # update this if another client uses MM2000
+            if 'Comment1' in member:
+                if 'rejoin' in str(member['Comment1']).lower():
+                    resignation_date = 'NULL'
             if 'Comment2' in member:
                 if 'rejoin' in str(member['Comment2']).lower():
                     resignation_date = 'NULL'
@@ -58,16 +61,17 @@ class MM2000:
                        member_id=member['id'])
             self.database.run_query(sql)
 
-            reason = _find_resignation_reason(member['resignation_reason'])
-            sql = """
-                UPDATE {schema}.members
-                SET resignation_reason = '{reason}'
-                WHERE (household_id = '{member_id}'
-                       OR id = '{member_id}')
-            """.format(schema=self.database.schema,
-                       reason=reason,
-                       member_id=member['id'])
-            self.database.run_query(sql)
+            if resignation_date != 'NULL':
+                reason = _find_resignation_reason(member['resignation_reason'])
+                sql = """
+                    UPDATE {schema}.members
+                    SET resignation_reason = '{reason}'
+                    WHERE (household_id = '{member_id}'
+                        OR id = '{member_id}')
+                """.format(schema=self.database.schema,
+                        reason=reason,
+                        member_id=member['id'])
+                self.database.run_query(sql)
 
         self.database.refresh_views()
         

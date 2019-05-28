@@ -295,6 +295,92 @@ class MemberReport extends Component {
     }
   }
   
+  renderResignationTypeList = () => {
+    // Shows the count for each resignation type
+    const reasons = this.props.resignationType;
+    let resignationTypes = [];
+    for(let reason of reasons){
+      resignationTypes.push(<li><b>{reason.resignation_reason}:
+                                </b> {reason.total}</li>);
+    }
+    return(
+      <div>
+        <ul className='quick-facts-bullets'>
+          {resignationTypes}
+        </ul>
+      </div>
+    )
+  }
+  
+  renderResignationTypes = () => {
+    // Creates a donut chart showing the count of
+    // each resignation reason in the past year
+    
+    // Generate the data for the plot
+    const reasons = this.props.resignationType;
+    let values = [];
+    let labels = [];
+    for(let reason of reasons){
+      if(reason.resignation_reason !== 'All'){
+        labels.push(reason.resignation_reason);
+        values.push(reason.total);
+      }
+    }
+    const data = [{
+      values: values,
+      labels: labels,
+      type: 'pie',
+      hole: .4,
+      textinfo: 'label',
+      textfont: {color: 'white'},
+      hoverinfo: 'label+percent',
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
+    }]
+
+    const resignationList = this.renderResignationTypeList();
+    if(this.props.demographics.length === 0 || !this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Resignations (Past Year)</h4>
+          <div className='event-loading'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('age-group-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Resignations (Past Year)</h4>
+          <div className='quick-facts-list'>
+            {resignationList}
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
+    }
+  }
+  
   renderLocationList = (key) => {
     // Shows the count for each location
     const memberLocations = this.props.memberLocations[key];
@@ -602,6 +688,8 @@ class MemberReport extends Component {
     const householdType = this.renderHouseholdTypes('all_households');
     const newHouseholdType = this.renderHouseholdTypes('new_households');
     const resignationCount = this.renderHouseholdCount('resignations');
+    const resignationTypes = this.renderResignationTypes();
+
     let reportInfo = 'The membership report contains information about active ';
     reportInfo += 'members.<br/> It does not include information about attendees who ';
     reportInfo += 'are not members.'
@@ -635,8 +723,9 @@ class MemberReport extends Component {
         <h3>Resignations</h3>
         <Row>
           {resignationCount}
+          {resignationTypes}
         </Row><hr/>
-        <h4>Where Members Live</h4><br/>
+        <h4>Where Members Live</h4>
         {locationsTable}
       </div>
     )

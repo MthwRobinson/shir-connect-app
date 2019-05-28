@@ -21,7 +21,8 @@ class Report extends Component {
     newMemberDemographics: [],
     householdCount: [],
     resignationCount: [],
-    householdType: {all_households: [], new_households: []}
+    householdType: {all_households: [], new_households: []},
+    resignationType: []
   }
   
   componentDidMount(){
@@ -35,6 +36,7 @@ class Report extends Component {
     this.getHouseholdCount();
     this.getHouseholdType();
     this.getResignationCount();
+    this.getResignationType();
   }
 
   getDemographics = () => {
@@ -78,6 +80,16 @@ class Report extends Component {
     axios.get(url)
       .then(res => {
         this.setState({householdType: res.data});
+      })
+  }
+
+  getResignationType = () => {
+    // Pulls the resignation reasons for all 
+    // resignations that occured within the past year
+    const url = '/service/report/members/resignations/type';
+    axios.get(url)
+      .then(res => {
+        this.setState({resignationType: res.data});
       })
   }
   
@@ -132,7 +144,8 @@ class Report extends Component {
                             newMemberDemographics={this.state.newMemberDemographics}
                             householdCount={this.state.householdCount}
                             householdType={this.state.householdType}
-                            resignationCount={this.state.resignationCount} />);
+                            resignationCount={this.state.resignationCount} 
+                            resignationType={this.state.resignationType} />);
     }
   }
 

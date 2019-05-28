@@ -38,10 +38,19 @@ class MM2000:
         df = df.dropna(axis=0, how='any', subset=['resignation_date'])
         for i in df.index:
             member = dict(df.loc[i])
+            
             resignation_date = str(member['resignation_date'])[:10]
+            resignation_date = "'{}'".format(resignation_date)
+            # TODO: This logic is specific to TRS because that's how they
+            # track people who rejoined the congregation. We may have to
+            # update this if another client uses MM2000
+            if 'Comment2' in member:
+                if 'rejoin' in str(member['Comment2']).lower():
+                    resignation_date = 'NULL'
+
             sql = """
                 UPDATE {schema}.members
-                SET resignation_date = '{resignation_date}'
+                SET resignation_date = {resignation_date}
                 WHERE (household_id = '{member_id}'
                        OR id = '{member_id}')
             """.format(schema=self.database.schema,

@@ -178,7 +178,8 @@ def _group_mm2000(df, column_map):
 def _parse_mm2000_date(item, column):
     """Removes invalid birthdays and membership dates."""
     if item[column]:
-        if item[column].startswith('0'):
+        date = str(item[column])
+        if date.startswith('0') or date == 'NaT':
             item[column] = None
     return item
 

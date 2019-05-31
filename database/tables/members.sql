@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS {schema}.members (
   nickname text,
   birth_date timestamp,
   membership_date timestamp,
+  resignation_date timestamp,
   member_religion text,
   postal_code text,
   member_family text,

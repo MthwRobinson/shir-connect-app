@@ -29,7 +29,7 @@ class Members:
     def get_demographics(self, new_members=False):
         """Pulls the current demographics for the community based on the 
         age groups in the configuration file. """
-        where = " WHERE active_member = true "
+        where = " WHERE active_member = true AND resignation_date IS NULL "
         if new_members:
             year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
             year_ago_str = str(year_ago)[:10]
@@ -39,8 +39,7 @@ class Members:
         sql = """
             SELECT COUNT(*) AS total, {age_groups}
             FROM (
-                SELECT first_name, 
-                       last_name,
+                SELECT id, 
                        DATE_PART('year', AGE(now(), birth_date)) as age
                 FROM {schema}.members
                 {where}
@@ -63,6 +62,7 @@ class Members:
             SELECT INITCAP({level}) as location, COUNT(*) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            AND resignation_date IS NULL
             {conditions}
             GROUP BY {level} 
             ORDER BY total DESC
@@ -108,6 +108,27 @@ class Members:
                                          where=[('membership_date', 
                                                  {'>=': start, '<': end})])
         return count
+    
+    def count_new_resignations(self, start, end):
+        """Counts the number of new resignations in the given range.
+
+        Parameters
+        ----------
+        start: str
+            a start date in 'YYYY-MM-DD' format
+        end: str
+            an end date in 'YYYY-MM-DD' format
+
+        Returns
+        -------
+        count: int
+        """
+        start = "'{}'".format(start)
+        end = "'{}'".format(end)
+        count = self.database.count_rows('members_view',
+                                         where=[('resignation_date', 
+                                                 {'>=': start, '<': end})])
+        return count
 
     def count_new_households(self, start, end):
         """Counts the number of new members joining in the given range.
@@ -148,14 +169,16 @@ class Members:
         results: dict
         """
         results = []
-        for i in range(start, end):
+        for i in range(start, end+1):
             year = i+1
-            date = "'{}-01-01'".format(year)
             sql = """
                 SELECT COUNT(DISTINCT household_id) as total
                 FROM {schema}.members_view
                 WHERE active_member = true
-                AND membership_date <= '{year}-01-01'
+                AND membership_date IS NOT NULL
+                AND membership_date <= '{year}-12-31'
+                AND (resignation_date > '{year}-01-01'
+                     OR resignation_date IS NULL)
             """.format(schema=self.database.schema, year=year)
             df = pd.read_sql(sql, self.database.connection)
             count = df.loc[0]['total']
@@ -171,6 +194,8 @@ class Members:
                    COUNT(DISTINCT household_id) AS total
             FROM {schema}.members_view
             WHERE active_member = true
+            AND membership_date IS NOT NULL
+            AND resignation_date IS NULL
             {conditions}
             GROUP BY member_type
         """.format(schema=self.database.schema, conditions=conditions)
@@ -187,11 +212,53 @@ class Members:
         type_counts = sort_results(type_counts, 'member_type')
         return type_counts
 
+    def get_resignations_by_year(self, start, end):
+        """Counts the number of resignations by year.
+
+        Parameters
+        ----------
+        start: int
+            the starting year
+        end: int
+            the ending year
+
+        Returns
+        -------
+        results: dict
+        """
+        results = []
+        for i in range(start, end+1):
+            year = i
+            count = self.count_new_resignations(start='{}-01-01'.format(year),
+                                                end='{}-01-01'.format(year+1))
+            results.append({'year': str(year), 'count': str(count)})
+        return results
+
+    def get_resignation_types(self):
+        """Breaks down resignations over the past year by type."""
+        year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+        year_ago_str = str(year_ago)[:10]
+
+        sql = """
+            SELECT COUNT(DISTINCT household_id) as total,
+                   resignation_reason
+            FROM {schema}.members_view
+            WHERE resignation_date >= '{year_ago}'
+            GROUP BY resignation_reason
+        """.format(schema=self.database.schema, year_ago=year_ago_str)
+        df = pd.read_sql(sql, self.database.connection)
+        
+        type_counts = self.database.to_json(df)
+        total = sum([x['total'] for x in type_counts])
+        type_counts.append({'resignation_reason': 'All', 'total': total})
+        type_counts = sort_results(type_counts, 'resignation_reason')
+        return type_counts
+
     ########################
     # File upload methods
     ########################
 
-    def upload_file(self, request):
+    def upload_file(self, request, file_type='members'):
         """ Reads the file and uploads it to the database """
         # Check the filetype
         file_ = request.files['file']
@@ -204,7 +271,14 @@ class Members:
             df = pd.read_csv(file_, encoding='latin-1')
         else:
             df = pd.read_excel(file_)
-        return self.member_loader.load(df)
+
+        if file_type == 'members':
+            good_upload = self.member_loader.load(df)
+        elif file_type == 'resignations':
+            good_upload = self.member_loader.load_resignations(df)
+        else:
+            good_upload = False
+        return good_upload
 
     def valid_extension(self, filename):
         """ Checks to make sure the filename has a valid extension """
@@ -232,7 +306,7 @@ def _clean_location_name(name):
     return name.strip()
 
 def _build_member_date_range(start, end):
-    """Builds a where condition that can be added to a querty
+    """Builds a where condition that can be added to a query
     to restrict the membership date range (ie for new members)
 
     Parameters

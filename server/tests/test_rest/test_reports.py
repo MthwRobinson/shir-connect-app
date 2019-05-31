@@ -33,8 +33,14 @@ def test_member_locations():
 def test_households_by_year():
     run_report_tests('/service/report/members/households/count?years=5')
 
+def test_resignations_by_year():
+    run_report_tests('/service/report/members/households/count?tally=resignations')
+
 def test_households_by_type():
     run_report_tests('/service/report/members/households/type')
+
+def test_resignations_by_type():
+    run_report_tests('/service/report/members/resignations/type')
 
 def test_get_quarters(monkeypatch):
     fake_date = datetime.datetime(2019,4,2)

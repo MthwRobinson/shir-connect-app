@@ -20,7 +20,9 @@ class Report extends Component {
     newMembersCount: {},
     newMemberDemographics: [],
     householdCount: [],
-    householdType: {all_households: [], new_households: []}
+    resignationCount: [],
+    householdType: {all_households: [], new_households: []},
+    resignationType: []
   }
   
   componentDidMount(){
@@ -33,6 +35,8 @@ class Report extends Component {
     this.getNewMemberDemographics();
     this.getHouseholdCount();
     this.getHouseholdType();
+    this.getResignationCount();
+    this.getResignationType();
   }
 
   getDemographics = () => {
@@ -59,6 +63,16 @@ class Report extends Component {
         this.setState({householdCount: res.data});
       })
   }
+
+  getResignationCount = () => {
+    // Counts the number of resignations by year
+    let url = '/service/report/members/households/count';
+    url += '?years=25&tally=resignations';
+    axios.get(url)
+      .then(res => {
+        this.setState({resignationCount: res.data});
+      })
+  }
   
   getHouseholdType = () => {
     // Pulls the current community demographics
@@ -66,6 +80,16 @@ class Report extends Component {
     axios.get(url)
       .then(res => {
         this.setState({householdType: res.data});
+      })
+  }
+
+  getResignationType = () => {
+    // Pulls the resignation reasons for all 
+    // resignations that occured within the past year
+    const url = '/service/report/members/resignations/type';
+    axios.get(url)
+      .then(res => {
+        this.setState({resignationType: res.data});
       })
   }
   
@@ -119,7 +143,9 @@ class Report extends Component {
                             newMemberCount={this.state.newMemberCount}
                             newMemberDemographics={this.state.newMemberDemographics}
                             householdCount={this.state.householdCount}
-                            householdType={this.state.householdType}/>);
+                            householdType={this.state.householdType}
+                            resignationCount={this.state.resignationCount} 
+                            resignationType={this.state.resignationType} />);
     }
   }
 

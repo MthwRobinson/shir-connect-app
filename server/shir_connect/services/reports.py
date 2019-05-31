@@ -244,11 +244,17 @@ def get_households_by_year():
     years = request.args.get('years')
     years = int(years) if years else 10
 
+    tally = request.args.get('tally')
+    tally = 'households' if not tally else tally
+
     now = datetime.datetime.now()
     end = now.year
     start = end - years
 
-    response = members.get_households_by_year(start, end)
+    if tally == 'resignations':
+        response = members.get_resignations_by_year(start, end)
+    else:
+        response = members.get_households_by_year(start, end)
     return jsonify(response)
 
 @reports.route('/service/report/members/households/type', methods=['GET'])
@@ -279,3 +285,18 @@ def get_household_types():
     response['new_households'] = new_households
 
     return jsonify(response)
+
+@reports.route('/service/report/members/resignations/type', methods=['GET'])
+@jwt_required
+def get_resignation_types():
+    """Breaks down resignations over hte past year by type."""
+    members = Members()
+    jwt_user = get_jwt_identity()
+    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
+
+    if not has_access:
+        response = {'message': '{} does not have access to reports.'.format(jwt_user)}
+        return jsonify(response), 403
+
+    resignation_types = members.get_resignation_types()
+    return jsonify(resignation_types)

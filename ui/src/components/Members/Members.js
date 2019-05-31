@@ -4,6 +4,7 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import {
   Button,
+  ControlLabel,
   Form,
   FormControl,
   FormGroup,
@@ -13,6 +14,7 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
+import Modal from 'react-responsive-modal';
 
 import {
   getCSRFToken,
@@ -41,14 +43,16 @@ class Members extends Component {
         uploadFailed: false,
         userRole: 'standard',
         minAge: null,
-        maxAge: null
+        maxAge: null,
+        fileType: 'members'
       }
 
       // Binding for the file upload in the popup
-      this.uploadFile = this.uploadFile.bind(this)
-      this.handleQuery = this.handleQuery.bind(this)
-      this.handleMinAge = this.handleMinAge.bind(this)
-      this.handleMaxAge= this.handleMaxAge.bind(this)
+      this.uploadFile = this.uploadFile.bind(this);
+      this.handleQuery = this.handleQuery.bind(this);
+      this.handleMinAge = this.handleMinAge.bind(this);
+      this.handleMaxAge= this.handleMaxAge.bind(this);
+      this.handleFileType = this.handleFileType.bind(this);
     }
 
     componentDidMount(){
@@ -218,6 +222,11 @@ class Members extends Component {
       this.setState({maxAge: event.target.value});
     }
 
+    handleFileType(event){
+      // Updates the file type
+      this.setState({ fileType: event.target.value });
+    }
+
     renderPageCount = () => {
       // Renders the page count at the top of the table
       let leftCaret = null
@@ -356,7 +365,7 @@ class Members extends Component {
 
       // Post the data
       const csrfToken = getCSRFToken();
-      const url = '/service/members/upload';
+      const url = '/service/members/upload?file_type=' + this.state.fileType;
       axios.post(url, data, {
           headers: {
             'X-CSRF-TOKEN': csrfToken,
@@ -392,13 +401,6 @@ class Members extends Component {
 
     renderPopup = () => {
       // Renders the popup with the upload form
-      let showHideClassName = null;
-      if(this.state.showUpload===true){
-        showHideClassName = "popup popup-display-block";
-      } else {
-        showHideClassName = "popup popup-display-none";  
-      }
-
       let body = null;
       if(this.state.uploadLoading===true){
          body = <Loading />
@@ -424,7 +426,14 @@ class Members extends Component {
                 Columns and data types will be validated prior to uploading.
               </p>
               <Form onSubmit={this.uploadFile}>
-                <FormGroup horizontal>
+                <FormGroup>
+                  <ControlLabel>File Type</ControlLabel>
+                  <FormControl componentClass="select"
+                               value={this.state.fileType}
+                               onChange={this.handleFileType}>
+                    <option value="members">Members</option>
+                    <option value="resignations">Resignations</option>
+                  </FormControl>
                   <FormControl 
                     className="upload-file"
                     type="file"
@@ -441,15 +450,19 @@ class Members extends Component {
       }
 
       return(
-        <div className={showHideClassName}>
-          <section className="popup-main">
+        <div>
+          <Modal
+            open={this.state.showUpload}
+            showCloseIcon={false}
+            center
+          >
             <h4>Upload Member Data
               <i className="fa fa-times pull-right event-icons"
                  onClick={()=>this.hideUpload()}
               ></i>
             </h4><hr/>
             {body}
-          </section>
+          </Modal>
         </div>
       )
     }
@@ -550,11 +563,12 @@ class Members extends Component {
       let uploadButton = null
       if(this.state.userRole==='admin'){
         uploadButton = (
-            <i 
-              className="fa fa-upload pull-right event-icons"
-              onClick={()=>this.showUpload()}
-              data-tip="Upload member information."
-            ></i>
+          <span>
+            <i className="fa fa-upload pull-right event-icons"
+                onClick={()=>this.showUpload()}
+                data-tip="Upload member information."></i>
+            <ReactToolTip />
+          </span>
         )
       }
 

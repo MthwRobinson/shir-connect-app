@@ -27,10 +27,10 @@ from shir_connect.database.database import Database
 
 class FakeNews:
     """A class for generating and uploading fake Shir Connect data."""
-    def __init__(self):
+    def __init__(self, database=None):
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
-        self.database = Database()
+        self.database = Database() if not database else database
         self.faker = Faker()
 
     def build_fake_data(self):

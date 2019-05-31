@@ -60,11 +60,15 @@ class MemberReport extends Component {
     }]
 
     const householdTypeList = this.renderHouseholdTypeList(key);
+    let plotTitle = 'Household Types';
+    if(key==='new_households'){
+      plotTitle = 'New Household Types';
+    }
     if(this.props.householdType[key].length === 0 || !this.state.mounted){
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Types</h4>
+          <h4>{plotTitle}</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -85,7 +89,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Types</h4>
+          <h4>{plotTitle}</h4>
           <div className='quick-facts-list'>
             {householdTypeList}
           </div>
@@ -276,6 +280,92 @@ class MemberReport extends Component {
           <h4>New Members</h4>
           <div className='quick-facts-list'>
             {ageGroupList}
+          </div>
+          <div className='quick-facts-plot-area'> 
+            <Plot
+            data={data}
+            layout={layout}
+            style={{display: 'inline-block'}}
+            config={{displayModeBar: false}}
+            />
+          </div>
+        </div>
+        </Col>
+      )
+    }
+  }
+  
+  renderResignationTypeList = () => {
+    // Shows the count for each resignation type
+    const reasons = this.props.resignationType;
+    let resignationTypes = [];
+    for(let reason of reasons){
+      resignationTypes.push(<li><b>{reason.resignation_reason}:
+                                </b> {reason.total}</li>);
+    }
+    return(
+      <div>
+        <ul className='quick-facts-bullets'>
+          {resignationTypes}
+        </ul>
+      </div>
+    )
+  }
+  
+  renderResignationTypes = () => {
+    // Creates a donut chart showing the count of
+    // each resignation reason in the past year
+    
+    // Generate the data for the plot
+    const reasons = this.props.resignationType;
+    let values = [];
+    let labels = [];
+    for(let reason of reasons){
+      if(reason.resignation_reason !== 'All'){
+        labels.push(reason.resignation_reason);
+        values.push(reason.total);
+      }
+    }
+    const data = [{
+      values: values,
+      labels: labels,
+      type: 'pie',
+      hole: .4,
+      textinfo: 'label',
+      textfont: {color: 'white'},
+      hoverinfo: 'label+percent',
+      marker: {colors: DONUT_PLOT_COLORS, color: 'white'}
+    }]
+
+    const resignationList = this.renderResignationTypeList();
+    if(this.props.demographics.length === 0 || !this.state.mounted){
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Resignations (Past Year)</h4>
+          <div className='event-loading'>
+            <Loading />
+          </div>
+        </div>
+        </Col>
+      )
+    } else {
+      // Determine the size of the plot based on the size of the container
+      const elem = document.getElementById('age-group-plot');
+      const width = elem.clientWidth;
+      const size = .5*width
+      const layout = {
+        height: size,
+        width: size, 
+        showlegend: false,
+        margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
+      }
+      return(
+        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <div className='quick-facts-plot-container'>
+          <h4>Resignations (Past Year)</h4>
+          <div className='quick-facts-list'>
+            {resignationList}
           </div>
           <div className='quick-facts-plot-area'> 
             <Plot
@@ -512,12 +602,26 @@ class MemberReport extends Component {
     }
   }
   
-  renderHouseholdCount= () => {
-    // Creates a bar chart with the number of households by year
-    const newMemberCount= this.props.householdCount
+  renderHouseholdCount= (tally='households') => {
+    // Creates a bar chart with the counts of households by year
+    // Parameters
+    // ----------
+    // tally: str
+    //     tallies a total count of household if tally==='households'
+    //     tallies a total count of resignations if tally==='resignations'
+    let memberCount = [];
+    let plotTitle = null;
+    if(tally==='households'){
+      memberCount = this.props.householdCount;
+      plotTitle = 'Household Count';
+    } else if(tally==='resignations'){
+      memberCount = this.props.resignationCount;
+      plotTitle = 'Resignation Count';
+    }
+  
     let values = [];
     let labels = [];
-    for(let group of newMemberCount){
+    for(let group of memberCount){
       labels.push(group.year);
       values.push(group.count);
     }
@@ -533,7 +637,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Count</h4>
+          <h4>{plotTitle}</h4>
           <div className='event-loading'>
             <Loading />
           </div>
@@ -558,7 +662,7 @@ class MemberReport extends Component {
       return(
         <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
-          <h4>Household Count</h4>
+          <h4>{plotTitle}</h4>
           <div className='quick-facts-plot-area'> 
             <Plot
             data={data}
@@ -583,6 +687,9 @@ class MemberReport extends Component {
     const householdCount = this.renderHouseholdCount();
     const householdType = this.renderHouseholdTypes('all_households');
     const newHouseholdType = this.renderHouseholdTypes('new_households');
+    const resignationCount = this.renderHouseholdCount('resignations');
+    const resignationTypes = this.renderResignationTypes();
+
     let reportInfo = 'The membership report contains information about active ';
     reportInfo += 'members.<br/> It does not include information about attendees who ';
     reportInfo += 'are not members.'
@@ -612,8 +719,13 @@ class MemberReport extends Component {
         <Row>
           {newMemberCount}
           {newHouseholdType}
-        </Row>
-        <h4>Where Members Live</h4><br/>
+        </Row><hr/>
+        <h3>Resignations</h3>
+        <Row>
+          {resignationCount}
+          {resignationTypes}
+        </Row><hr/>
+        <h4>Where Members Live</h4>
         {locationsTable}
       </div>
     )

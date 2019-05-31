@@ -4,6 +4,7 @@ reqs = [
     'arrow',
     'click',
     'daiquiri',
+    'Faker',
     'flask',
     'flask_jwt_extended',
     'gunicorn',
@@ -21,7 +22,6 @@ reqs = [
 ]
 
 test_reqs = [
-    'Faker',
     'ipython',
     'pytest',
     'pytest-cov',

@@ -3,9 +3,6 @@ import logging
 import os
 
 import daiquiri
-import numpy as np
-import pandas as pd
-import yaml
 
 from shir_connect.etl.mm2000 import MM2000
 from shir_connect.database.database import Database

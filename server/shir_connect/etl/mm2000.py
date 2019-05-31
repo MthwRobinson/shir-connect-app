@@ -12,6 +12,7 @@ import pandas as pd
 import yaml
 
 from shir_connect.database.database import Database
+from shir_connect.database.fake_news import FakeNews
 
 class MM2000:
     def __init__(self, database=None):
@@ -23,7 +24,9 @@ class MM2000:
         filename = self.path + '/member_columns.yml'
         with open(filename, 'r') as f:
             self.column_mapping = yaml.safe_load(f)
+
         self.database = Database() if not database else database
+        self.fake_news = FakeNews(database=self.database)
 
     #####################################
     # Methods for loading MM2000 members
@@ -45,6 +48,8 @@ class MM2000:
         self.logger.info('Checking updated columns.')
         good_columns = self.check_columns()
         if good_columns:
+            self.logger.info('Generating demo data')
+            self.fake_news.fake_names()
             self.logger.info('Refreshing materialized views.')
             self.database.refresh_view('members_view')
             self.database.refresh_view('participants')

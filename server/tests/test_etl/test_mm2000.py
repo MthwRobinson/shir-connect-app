@@ -45,6 +45,13 @@ class OtherFakeDB(FakeDatabase):
         else:
             return ['parrots', 'dogs']
 
+class FakerNews:
+    def __init__(self):
+        pass
+
+    def fake_names(self):
+        pass
+
 def test_error_raises_with_bad_resign_columns():
     mm2000 = m.MM2000(database=FakeDatabase())
 
@@ -139,6 +146,7 @@ def test_parse_mm2000_active():
 
 def test_mm2000_load():
     mm2000 = m.MM2000(database=FakeDatabase())
+    mm2000.fake_news = FakerNews()
     mm2000.parse_mm2000 = lambda *args, **kwargs: ['item1', 'item2']
     
     mm2000.check_columns = lambda *args, **kwargs: True

@@ -80,6 +80,8 @@ class ChangePassword extends Component {
         .catch(err => {
           if(err.response.status===401){
             this.props.history.push('/login')
+          } else if(err.response.status===500){
+            this.props.history.push('/server-error')
           } else {
             this.setState({attempted: true});
             if(this.state.newPassword!==this.state.newPassword2){

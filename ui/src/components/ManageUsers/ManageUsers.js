@@ -109,11 +109,13 @@ class ManageUsers extends Component {
             loading: false
           });
         })
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
           } else if(err.response.status===403){
             this.navigate('/forbidden');
+          } else {
+            this.navigate('/server-error');
           }
         })
     }
@@ -153,12 +155,14 @@ class ManageUsers extends Component {
           this.getUsers();
           this.setState({password: res.data.password})
         })
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
           } else if(err.response.status===400){
             this.getUsers();
             this.setState({addUserError: true})
+          } else {
+            this.navigate('/server-error');
           }
         })
     }
@@ -174,9 +178,11 @@ class ManageUsers extends Component {
           this.getUsers();
           this.setState({ deleteUsername: '' });
         })
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
+          } else {
+            this.navigate('/server-error')
           }
         })
     }
@@ -212,9 +218,11 @@ class ManageUsers extends Component {
       const updateAccess = axios.post('/service/user/update-access',
         data,
         {headers: {'X-CSRF-TOKEN': csrfToken}})
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
+          } else {
+            this.navigate('/sever-error');
           }
         })
 
@@ -226,9 +234,11 @@ class ManageUsers extends Component {
       const updateRole = axios.post('/service/user/update-role',
         roleData,
         {headers: {'X-CSRF-TOKEN': csrfToken}})
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
+          } else {
+            this.navigate('/server-error');
           }
         })
 
@@ -254,6 +264,8 @@ class ManageUsers extends Component {
         .catch( err => {
           if(err.response.status===401){
             this.navigate('/login');
+          } else {
+            this.navigate('/server-error');
           }
         })
     }

@@ -40,9 +40,11 @@ class Home extends Component {
           // Refresh the token to keep the session active
           refreshAccessToken();
         })
-        .catch( err => {
+        .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
+          } else {
+            this.navigate('/server-error');
           }
         })
     }

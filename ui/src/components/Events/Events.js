@@ -52,10 +52,18 @@ class Events extends Component {
     }
   
     componentDidMount(){
-      getDefaultLocation().then(res => {
-        this.setState({defaultEventLocation: res.data.name});
-        this.getEvents();
-      })
+      getDefaultLocation()
+        .then(res => {
+          this.setState({defaultEventLocation: res.data.name});
+          this.getEvents();
+        })
+        .catch(err => {
+          if(err.response.status===401){
+            this.props.history.push('/login');
+          } else {
+            this.props.history.push('/server-error');
+          }
+        })
       refreshAccessToken();
     }
 
@@ -74,11 +82,6 @@ class Events extends Component {
           const today = moment().format('YYYYMMDD');
           filename += '_'+ today + '.csv';
           FileDownload(res.data, filename);
-        })
-        .catch(err => {
-          if(err.response.status===401){
-            this.props.history.push('/login');
-          }
         })
     }
 
@@ -142,6 +145,8 @@ class Events extends Component {
             this.props.history.push('/login');
           } else if(err.response.status===403){
             this.props.history.push('/forbidden');
+          } else {
+            this.props.history.push('/server-error');
           }
         })
     }

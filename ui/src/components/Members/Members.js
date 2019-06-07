@@ -74,6 +74,8 @@ class Members extends Component {
         .catch(err => {
           if(err.response.status===403){
             this.props.history.push('/forbidden');
+          } else {
+            this.props.history.push('/server-error');
           }
         })
     }
@@ -140,6 +142,8 @@ class Members extends Component {
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
+        } else {
+          this.props.history.push('/server-error');
         }
       })
     }

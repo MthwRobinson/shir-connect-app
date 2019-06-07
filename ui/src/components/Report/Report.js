@@ -51,6 +51,8 @@ class Report extends Component {
           this.props.history.push('/login');
         } else if(err.response.status===403){
           this.props.history.push('/forbidden');
+        } else {
+          this.props.history.push('/server-error');
         }
       })
   }

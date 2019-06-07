@@ -33,6 +33,15 @@ class MemberPage extends Component {
         this.setState({lng: res.data.longitude, lat: res.data.latitude});
         this.getMember();
       })
+      .catch(err => {
+        if(err.response.status===401){
+          this.props.history.push('/login');
+        } else if(err.response.status===403){
+          this.props.history.push('/forbidden');
+        } else {
+          this.props.history.push('/server-error');
+        }
+      })
   }
 
   switchTab = (tab) => {
@@ -84,8 +93,10 @@ class MemberPage extends Component {
       .catch(err => {
         if(err.response.status===401){
           this.props.history.push('/login');
-        } else if(err.response.status===403){
-          this.props.history.push('/forbidden');
+        } else if(err.response.status===404){
+          this.props.history.push('/not-found');
+        } else {
+          this.props.history.push('/server-error');
         }
       })
   }

@@ -6,15 +6,15 @@ import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';
 import EventMap from './components/EventMap/EventMap';
 import EventPage from './components/EventPage/EventPage';
-import Forbidden from './components/Forbidden/Forbidden';
+import Forbidden from './components/ErrorPages/Forbidden';
 import Home from './components/Home/Home';
 import Login from './components/Login/Login';
 import ManageUsers from './components/ManageUsers/ManageUsers';
 import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
-import NotFound from './components/Forbidden/NotFound';
+import NotFound from './components/ErrorPages/NotFound';
 import Report from './components/Report/Report';
-import ServerError from './components/Forbidden/ServerError';
+import ServerError from './components/ErrorPages/ServerError';
 import Trends from './components/Trends/Trends';
 
 import './App.css';

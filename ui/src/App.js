@@ -1,6 +1,6 @@
 // Main app component. Includes routing logic
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import ChangePassword from './components/ChangePassword/ChangePassword';
 import Events from './components/Events/Events';
@@ -12,7 +12,9 @@ import Login from './components/Login/Login';
 import ManageUsers from './components/ManageUsers/ManageUsers';
 import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
+import NotFound from './components/Forbidden/NotFound';
 import Report from './components/Report/Report';
+import ServerError from './components/Forbidden/ServerError';
 import Trends from './components/Trends/Trends';
 
 import './App.css';
@@ -27,10 +29,12 @@ class App extends Component {
       <div className="App">
         <Router>
           <div>
+        <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/change-password" component={ChangePassword} />
             <Route path="/events" component={Events} />
             <Route path="/event" component={EventPage} />
+            <Route path="/server-error" component={ServerError} />
             <Route path="/forbidden" component={Forbidden} />
             <Route path="/manage-users" component={ManageUsers} />
             <Route path="/participant" component={MemberPage} />
@@ -39,6 +43,8 @@ class App extends Component {
             <Route path="/trends" component={Trends} />
             <Route path="/map" component={EventMap} />
             <Route path="/login" component={Login} />
+            <Route component={NotFound} /> 
+        </Switch>
           </div>
         </Router>
       </div>

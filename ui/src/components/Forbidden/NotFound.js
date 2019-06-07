@@ -1,4 +1,4 @@
-// Renders the component for the Forbidden screen
+// Renders the component for the NotFound screen
 // On login, the component will retrieve a JWT
 //  from the server and store it in local storage
 import React, { Component } from 'react';
@@ -8,21 +8,20 @@ import Header from './../Header/Header';
 
 import './ErrorPage.css';
 
-class Forbidden extends Component {
+class NotFound extends Component {
     render() {
       return (
         <div>
           <Header />
           <div className="ErrorPage">
             <h1>
-              <u>403: Forbidden</u>
+              <u>404: Not Found</u>
             </h1>
-            <h4>You don't have access to this page.</h4>
-            <h4>Please contact your system administrator.</h4>
+            <h4>The requested page does not exist.</h4>
             <h4>Click to return to the previous page.
               <i
-              className="fa fa-reply return-home-icon event-icons"
-              onClick={()=>this.props.history.go(-2)}
+              className="fa fa-home return-home-icon event-icons"
+              onClick={()=>this.props.history.push('/')}
              ></i>
             </h4>
           </div>
@@ -31,4 +30,4 @@ class Forbidden extends Component {
     }
 }
 
-export default withRouter(Forbidden);
+export default withRouter(NotFound);

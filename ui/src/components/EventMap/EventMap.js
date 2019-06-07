@@ -287,7 +287,14 @@ class EventMap extends Component {
           ref={el => this.mapContainer = el} 
           className="map pull-right"
           id="map" 
-        />
+        >
+          <div className='legend'>
+              <b><span className='legend-title'>Legend</span></b>
+              <div><span className='legend-green'></span><b>Balanced</b></div>
+              <div><span className='legend-blue'></span><b>More Members</b></div>
+              <div><span className='legend-yellow'></span><b>More Events</b></div>
+          </div>
+        </div>
       )
     }
 

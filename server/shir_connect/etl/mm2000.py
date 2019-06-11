@@ -12,6 +12,7 @@ import pandas as pd
 import yaml
 
 from shir_connect.database.database import Database
+import shir_connect.etl.utils as utils
 from shir_connect.database.fake_news import FakeNews
 
 class MM2000:
@@ -88,6 +89,12 @@ class MM2000:
                 # Remove invalid birthdates
                 item = _parse_mm2000_date(item, 'birth_date')
                 item = _parse_mm2000_date(item, 'membership_date')
+
+                # Skip if the member is under the minimum age
+                # that we keep in the database
+                too_young = utils.check_age(item['birth_date'], min_age=18)
+                if too_young:
+                    continue
 
                 # Children only have a full name, not separate
                 # first names and last name

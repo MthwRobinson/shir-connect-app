@@ -12,7 +12,7 @@ import pandas as pd
 import yaml
 
 from shir_connect.database.database import Database
-from shir_connect.etl.utils as utils
+import shir_connect.etl.utils as utils
 from shir_connect.database.fake_news import FakeNews
 
 class MM2000:

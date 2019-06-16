@@ -286,8 +286,6 @@ class AgeGroupAttendance extends Component {
       )
     } else {
       let width = document.getElementById('plot-container').clientWidth;
-      console.log(width);
-      console.log(document.getElementById('plot-container').clientHeight)
       let height = Math.max(300, width/1.7);
       if(width < 675){
         width = Math.min(width, 500);
@@ -312,7 +310,7 @@ class AgeGroupAttendance extends Component {
                 data={this.state.data}
                 layout={ {
                   width: width,
-                  height: Math.max(300, width/1.7),
+                  height: height,
                   title: 'Age Group: ' + ageGroup,
                   titlefont: {family: 'Source Sans Pro'},
                   yaxis: {

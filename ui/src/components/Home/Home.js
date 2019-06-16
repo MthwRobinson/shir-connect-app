@@ -54,58 +54,27 @@ class Home extends Component {
 
       // Check to see if the modules returned by the service
       // appear in the modules.json file
-      let goodModules = [];
+      let availableModules = [];
       for(let module of this.state.modules){
         if(module in MODULES){
-          goodModules.push(module);
+          availableModules.push(module);
         }
       }
-      const rowCount = Math.ceil(goodModules.length/2);
-
-      let i = 0;
+      
       let rows = [];
-      while(i < rowCount){
-        const idx1 = i*2;
-        const idx2 = idx1 + 1;
-        
-        // Render the first module
-        const module1 = goodModules[idx1];
-        const moduleCard1 = (
-            <Col xs={12} sm={12} md={6} lg={6}>
+      for(let i=0; i < availableModules.length; i++){
+        const module = availableModules[i];
+        const moduleCard = (
+          <Col xs={12} sm={12} md={12} lg={6}>
               <ModuleCard 
-                title={MODULES[module1].title}
-                icon={MODULES[module1].icon}
-                bullets={MODULES[module1].bullets}
-                click={()=>this.navigate(MODULES[module1].link)}
+                title={MODULES[module].title}
+                icon={MODULES[module].icon}
+                bullets={MODULES[module].bullets}
+                click={()=>this.navigate(MODULES[module].link)}
               />
-            </Col>
+          </Col>
         )
-        
-        // If the number of modules is odd, render the second module
-        let module2 = null;
-        let moduleCard2 = null;
-        if(idx2 < goodModules.length){
-          module2 = goodModules[idx2];
-          moduleCard2 = (
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <ModuleCard 
-                title={MODULES[module2].title}
-                icon={MODULES[module2].icon}
-                bullets={MODULES[module2].bullets}
-                click={()=>this.navigate(MODULES[module2].link)}
-              />
-            </Col>
-          )
-        }
-
-        const row = (
-          <Row className='module-row'>
-            {moduleCard1}
-            {moduleCard2}
-          </Row>
-        )
-        rows.push(row);
-        i++;
+        rows.push(moduleCard);
       }
       return rows
 
@@ -144,7 +113,11 @@ class Home extends Component {
                 <h2>Welcome, {this.state.name}!</h2><hr/>
                 {message}
               </div>
-              {rows}
+              <div>
+                <Row>
+                  {rows}
+                </Row>
+              </div>
             </div>
           </div>
         );

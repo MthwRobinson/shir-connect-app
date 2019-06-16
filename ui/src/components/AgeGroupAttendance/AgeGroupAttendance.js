@@ -191,7 +191,7 @@ class AgeGroupAttendance extends Component {
 
       return(
         <div>
-          <Row className='event-table'>
+          <Row className='events-table'>
             <Table responsive header hover>
               <thead>
                 <tr>
@@ -285,7 +285,14 @@ class AgeGroupAttendance extends Component {
         </div>
       )
     } else {
-      const width = document.getElementById('plot-container').clientWidth;
+      let width = document.getElementById('plot-container').clientWidth;
+      console.log(width);
+      console.log(document.getElementById('plot-container').clientHeight)
+      let height = Math.max(300, width/1.7);
+      if(width < 675){
+        width = Math.min(width, 500);
+        height = Math.min(300, width/1.5); 
+      }
       const group = this.state.groupBy;
       let format = null;
       if(group==='Month'){
@@ -294,11 +301,9 @@ class AgeGroupAttendance extends Component {
         format = '%Y';
       }
       const ageGroup = this.state.ageGroup;
-      const observations = this.state.allData[ageGroup]['group'].length
-      const nticks = Math.min(observations, 10);
       return (
         <div className='plot-container-half'>
-          <Col xs={7} sm={7} md={7} lg={7}>
+          <Col xs={12} sm={12} md={12} lg={7}>
             <div className='plot-area-half' id="plot-container">
               <div className='plot-dropdown'>
                 {dropdowns}
@@ -320,7 +325,6 @@ class AgeGroupAttendance extends Component {
                     tickangle: 45,
                     type: 'date',
                     tickformat: format,
-                    nticks: nticks
                   }
                 }
                 }

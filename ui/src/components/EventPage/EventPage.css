@@ -15,12 +15,27 @@
   float: right;
 }
 
+@media(max-width: 800px){
+  .event-map {
+    display: none;
+  }
+
+  .event-map-summary-area {
+    width: 100%;
+  }
+}
+
+@media(min-width: 800px){
+  .event-map-summary-area {
+    width: 60%;
+  }
+}
+
 .event-map-summary-area {
   float: left;
   padding-top: 10px;
   padding-right: 15px;
   max-height: 600px;
-  width: 60%;
   overflow-y: hidden;
 }
 

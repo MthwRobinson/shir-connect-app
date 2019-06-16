@@ -1,3 +1,5 @@
+
+/* Standardized menu styling for across the app */
 .menu-content {
   font-family: 'Source Sans Pro', sans-serif;
   color: black;
@@ -118,4 +120,163 @@
 .record-tab > li:hover {
   text-decoration: none;
   cursor: pointer;
+}
+
+/* These styles are used for the map on the
+ * right hand side of the events page and the
+ * members page. The map disappears in iPad
+ * resolution when the device is flipped vertically */
+.event-map {
+  width: 35vw;
+  height: 90%;
+  max-height: 600px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  float: right;
+}
+
+@media(max-width: 800px){
+  .event-map {
+    display: none;
+  }
+
+  .event-map-summary-area {
+    width: 100%;
+  }
+}
+
+@media(min-width: 800px){
+  .event-map-summary-area {
+    width: 60%;
+  }
+}
+
+.event-map-summary-area {
+  float: left;
+  padding-top: 10px;
+  padding-right: 15px;
+  max-height: 600px;
+  overflow-y: hidden;
+}
+
+.event-map-container {
+  width: 100%;
+  height: 70vh;
+  margin: auto;
+}
+
+/* These styles are used for the quick facts style
+ * plots, which can be found on the event page and
+ * in the reports module. */
+.quick-facts-bullets {
+  list-style-type: none;
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.quick-facts-list {
+  float: left;
+  max-height: 70vh;
+  width: 40%;
+  display: inline-block;
+  margin-right: -23px;
+}
+
+.quick-facts-plot-area {
+  width: 50%;
+  float: left;
+  display: inline-block;
+}
+
+.quick-facts-plot-container {
+  width: 100%;
+  max-height: 68vh;
+  margin: auto;
+  float: left;
+}
+
+@media (max-width: 800px) {
+  .quick-facts-buffer {
+    margin-left: 15%;
+    margin-right: 25%
+  }
+}
+
+/* Styles that are used for the tables that
+ * are used in the events and members modules */
+.events-header {
+  margin-bottom: 10px;
+  margin-top: 15px;
+}
+
+.event-icons:hover{
+  cursor: pointer;
+}
+
+.event-table {
+  max-height: 63vh;
+  width: 100%;
+  padding-left: 3%;
+  padding-right: 3%;
+  overflow-y: scroll;
+}
+
+.event-header {
+  padding-bottom: 40px;
+  padding-right: 6%;
+  padding-left: 2%;
+}
+
+.search-button {
+  margin-left: 5px;
+}
+
+.paging {
+  font-size: 24px;
+}
+
+.paging-arrows {
+  margin-left: 5px;
+  margin-right: 3px;
+}
+
+.paging-arrows:hover {
+  cursor: pointer;
+}
+
+.table-row:hover {
+  cursor: pointer;
+}
+
+.table-heading:hover {
+  cursor: pointer;
+}
+
+.event-loading {
+  padding-left: 50%;
+  padding-left: 50%;
+}
+
+/* Styles for success and error messages. */
+.error-msg {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: red;
+}
+
+.success-msg {
+  font-family: 'Source Sans Pro', sans-serif;
+  color: green;
+}
+
+/* Styles used for file uploads. */
+.upload-file {
+  font-family: 'Source Sans Serif', sans-serif;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.upload-body {
+  margin-left: 12px;
+  margin-right: 12px;
+  display-block: inline;
 }

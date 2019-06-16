@@ -6,45 +6,6 @@
   font-size: 17px;
 }
 
-.event-map {
-  width: 35vw;
-  height: 90%;
-  max-height: 600px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  float: right;
-}
-
-@media(max-width: 800px){
-  .event-map {
-    display: none;
-  }
-
-  .event-map-summary-area {
-    width: 100%;
-  }
-}
-
-@media(min-width: 800px){
-  .event-map-summary-area {
-    width: 60%;
-  }
-}
-
-.event-map-summary-area {
-  float: left;
-  padding-top: 10px;
-  padding-right: 15px;
-  max-height: 600px;
-  overflow-y: hidden;
-}
-
-.event-map-container {
-  width: 100%;
-  height: 70vh;
-  margin: auto;
-}
-
 
 .QuickFacts {
   padding-top: 10px;
@@ -57,36 +18,3 @@
   overflow-y: scroll;
 }
 
-.quick-facts-bullets {
-  list-style-type: none;
-  list-style-position: inside;
-  padding-left: 0;
-}
-
-.quick-facts-list {
-  float: left;
-  max-height: 70vh;
-  width: 40%;
-  display: inline-block;
-  margin-right: -23px;
-}
-
-.quick-facts-plot-area {
-  width: 50%;
-  float: left;
-  display: inline-block;
-}
-
-.quick-facts-plot-container {
-  width: 100%;
-  max-height: 68vh;
-  margin: auto;
-  float: left;
-}
-
-@media (max-width: 800px) {
-  .quick-facts-buffer {
-    margin-left: 15%;
-    margin-right: 25%
-  }
-}

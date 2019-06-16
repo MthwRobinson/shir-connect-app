@@ -68,3 +68,10 @@
   margin: auto;
   float: left;
 }
+
+@media (max-width: 800px) {
+  .quick-facts-buffer {
+    margin-left: 15%;
+    margin-right: 25%
+  }
+}

@@ -273,8 +273,8 @@ class Members extends Component {
         <div>
           <Row className='event-table'>
             <Swipe
-                onSwipeRight={()=>this.incrementPage('up')}
-                onSwipeLeft={()=>this.incrementPage('down')}
+                onSwipeRight={()=>this.incrementPage('down')}
+                onSwipeLeft={()=>this.incrementPage('up')}
             >
               <Table responsive header hover>
                 <thead>

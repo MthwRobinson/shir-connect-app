@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 
 import Loading from './../../Loading/Loading';
 import { DONUT_PLOT_COLORS } from './../../../utilities/plots';
@@ -332,9 +333,15 @@ class QuickFacts extends Component {
     const ageGroups = this.renderAgeGroups();
     const members = this.renderMembers();
     const firstEvent = this.renderFirstEvent();
+    const info = "Hover or tap on sections of the plots to view the category.";
     return(
       <div className='QuickFacts'> 
-        <h4>Quick Facts</h4><hr/>
+        <h4>Quick Facts{' '}
+          <sup><i className='fa fa-info-circle'
+                  data-tip={info}></i>
+          </sup> 
+        </h4><hr/>
+        <ReactToolTip html={true} />
         <Row>
           {this.renderCapacity()}
           {ageGroups}

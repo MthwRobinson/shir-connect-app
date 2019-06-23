@@ -692,7 +692,8 @@ class MemberReport extends Component {
 
     let reportInfo = 'The membership report contains information about active ';
     reportInfo += 'members.<br/> It does not include information about attendees who ';
-    reportInfo += 'are not members.'
+    reportInfo += 'are not members. <br/>Hover or tap on sections of the plots to view ';
+    reportInfo += 'the category.';
    return(
       <div className='QuickFacts'>
         <h2>Membership Report{' '}

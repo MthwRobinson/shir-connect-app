@@ -44,7 +44,8 @@ class Events extends Component {
         sortOrder: 'desc',
         defaultEventLocation: null,
         startDate: null,
-        endDate: new Date()
+        endDate: new Date(),
+        showFilter: false
       }
 
       // Bindings for search bar
@@ -187,6 +188,26 @@ class Events extends Component {
       event.preventDefault();
       this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
                      this.state.searchTerms);
+      this.hideFilter();
+    }
+
+    clearFilter = () => {
+      // Clears the filter settings
+      this.setState({ 
+        showFilter: false,
+        startDate: null,
+        endDate: new Date(),
+      })
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
+    }
+
+    showFilter = () => {
+      this.setState({ showFilter: true })
+    }
+  
+   hideFilter = () => {
+      this.setState({ showFilter: false })
     }
 
     handleRemoveTerm = (removeTerm) => {
@@ -261,7 +282,6 @@ class Events extends Component {
             {leftCaret}
             {this.state.page}/{this.state.pages}
             {rightCaret}{' '}
-            <i className='fa fa-filter'></i>
         </div>
       )
     }
@@ -340,34 +360,47 @@ class Events extends Component {
     renderFilter = () => {
       // Renders the filter options
       return(
-        <div className='pull-right filter-form'>
-          <Form onSubmit={this.handleFilter} inline>
-            <FormGroup>
-              <Label className="filter-form-label">Date:</Label>
-              <DatePicker
-                selected={this.state.startDate}
-                onChange={this.handleStartDate}
-                maxDate={this.state.endDate}
-                className="form-control filter-form-date-input"
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label className="filter-form-label">-</Label>
-              <DatePicker
-                selected={this.state.endDate}
-                onChange={this.handleEndDate}
-                minDate={this.state.startDate}
-                className="form-control filter-form-date-input"
-              />
-            </FormGroup>
-            <Button 
-              className='search-button'
-              bsStyle="primary"
-              type="submit"
-              data-tip="Filters the table results."
-            >Filter</Button>
+        <Modal
+          open={this.state.showFilter}
+          showCloseIcon={false}
+          center
+        >
+          <h4>Filter
+            <i className='fa fa-times pull-right event-icons'
+               onClick={()=>this.hideFilter()}
+            ></i>
+          </h4><hr/>
+          <Form onSubmit={this.handleFilter} >
+              <FormGroup>
+                <Label className="filter-form-label">Minimum Date:</Label>
+                <DatePicker
+                  selected={this.state.startDate}
+                  onChange={this.handleStartDate}
+                  maxDate={this.state.endDate}
+                  className="form-control filter-form-date-input"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label className="filter-form-label">Maximum Date:</Label>
+                <DatePicker
+                  selected={this.state.endDate}
+                  onChange={this.handleEndDate}
+                  minDate={this.state.startDate}
+                  className="form-control filter-form-date-input"
+                />
+              </FormGroup>
+              <Button 
+                className='search-button'
+                bsStyle="primary"
+                type="submit"
+              >Apply Filter</Button>
+              <Button 
+                className='search-button'
+                bsStyle="danger"
+                onClick={()=>this.clearFilter()}
+              >Clear Filter</Button>
           </Form>
-        </div>
+        </Modal>
       )
     }
 
@@ -392,7 +425,6 @@ class Events extends Component {
                 data-tip="Returns searchs fesults for the event name."
               >Search</Button>
             </Form>
-            <ReactTooltip html={true} />
           </div>
         </div>
       )
@@ -447,8 +479,13 @@ class Events extends Component {
                   onClick={()=>this.props.history.push('/')}
                 >
                 </i>
+                <i className='fa fa-filter pull-right event-icons'
+                   data-tip="Add a filter to the table."
+                   onClick={()=>this.showFilter()}>
+                </i>
                 <i 
                   className="fa fa-download pull-right event-icons"
+                  data-tip="Download the table of participants"
                   onClick={()=>this.downloadCSV()}
                 ></i>
               </h2><hr/>
@@ -456,7 +493,6 @@ class Events extends Component {
             <div className='event-header'>
               {pageCount}
               {search}
-              {filter}
             </div>
             <div className='search-term-row pull-right'>
               {searchTermPills.length > 0 
@@ -464,8 +500,10 @@ class Events extends Component {
                 : null}
               {searchTermPills}
             </div>
+            {filter}
             {table}
           </div>
+          <ReactTooltip html={true} />
         </div>
       );
     }

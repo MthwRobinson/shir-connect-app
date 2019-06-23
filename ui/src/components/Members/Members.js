@@ -184,6 +184,7 @@ class Members extends Component {
       event.preventDefault();
       this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
                      this.state.searchTerms);
+      this.hideFilter(); 
     }
 
     clearFilter = () => {
@@ -625,7 +626,7 @@ class Members extends Component {
                   onClick={()=>this.props.history.push('/')}
                 ></i>
                 <i className="fa fa-filter pull-right event-icons"
-                  data-tip="Add a filter to participants."
+                  data-tip="Add a filter to the table."
                   onClick={()=>this.showFilter()}
                 ></i>
                 <i className={"fa fa-upload pull-right event-icons " + uploadButton}

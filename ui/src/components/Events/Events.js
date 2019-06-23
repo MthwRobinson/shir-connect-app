@@ -15,6 +15,7 @@ import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
+import Swipe from 'react-easy-swipe';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import { getDefaultLocation } from './../../utilities/map';
@@ -271,6 +272,10 @@ class Events extends Component {
       return(
         <div>
           <Row className='event-table'>
+            <Swipe
+              onSwipeLeft={()=>this.incrementPage('down')}
+              onSwipeRight={()=>this.incrementPage('up')}
+            >
             <Table responsive header hover>
               <thead>
                 <tr>
@@ -324,6 +329,7 @@ class Events extends Component {
                 })}
               </tbody>
             </Table>
+            </Swipe>
           </Row>
         </div>
       )

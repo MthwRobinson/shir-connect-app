@@ -14,6 +14,7 @@ import {
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import ReactToolTip from 'react-tooltip';
+import Swipe from 'react-easy-swipe';
 import Modal from 'react-responsive-modal';
 
 import {
@@ -271,87 +272,92 @@ class Members extends Component {
       return(
         <div>
           <Row className='event-table'>
-            <Table responsive header hover>
-              <thead>
-                <tr>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('first_name')}>
-                    First Name
-                    {this.state.sortColumn === 'first_name'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('last_name')}>
-                    Last Name
-                    {this.state.sortColumn === 'last_name'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('is_member')}>
-                    Member 
-                    {this.state.sortColumn === 'is_member'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('age')}>
-                    Age 
-                    {this.state.sortColumn === 'age'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('events_attended')}>
-                    Events
-                    {this.state.sortColumn === 'events_attended'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('last_event_date')}>
-                    Most Recent
-                    {this.state.sortColumn === 'last_event_date'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('event_name')}>
-                    Event Name
-                    {this.state.sortColumn === 'event_name'
-                    ? <i className={arrowClass}></i>
-                    : null}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.members.map((member, index) => {
-                  return(
-                    <tr 
-                      className='table-row' 
-                      key={index}
-                      onClick={()=>this.selectParticipant(member.participant_id)}
-                    >
-                      <th>{member.first_name != null
-                          ? member.first_name : '--'}</th>
-                      <th>{member.last_name != null
-                          ? member.last_name : '--'}</th>
-                      <th>{member.is_member === true
-                          ? 'Y' : 'N'}</th>
-                      <th>{member.age != null
-                          ? member.age : null}</th>
-                      <th>{member.events_attended != null
-                          ? member.events_attended : 0}</th>
-                      <th>{member.last_event_date != null
-                          ? member.last_event_date : 'None'}</th>
-                      <th>{member.event_name != null
-                          ? member.event_name : 'None'}</th>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
+            <Swipe
+                onSwipeRight={()=>this.incrementPage('up')}
+                onSwipeLeft={()=>this.incrementPage('down')}
+            >
+              <Table responsive header hover>
+                <thead>
+                  <tr>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('first_name')}>
+                      First Name
+                      {this.state.sortColumn === 'first_name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('last_name')}>
+                      Last Name
+                      {this.state.sortColumn === 'last_name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('is_member')}>
+                      Member 
+                      {this.state.sortColumn === 'is_member'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('age')}>
+                      Age 
+                      {this.state.sortColumn === 'age'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('events_attended')}>
+                      Events
+                      {this.state.sortColumn === 'events_attended'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('last_event_date')}>
+                      Most Recent
+                      {this.state.sortColumn === 'last_event_date'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('event_name')}>
+                      Event Name
+                      {this.state.sortColumn === 'event_name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.members.map((member, index) => {
+                    return(
+                      <tr 
+                        className='table-row' 
+                        key={index}
+                        onClick={()=>this.selectParticipant(member.participant_id)}
+                      >
+                        <th>{member.first_name != null
+                            ? member.first_name : '--'}</th>
+                        <th>{member.last_name != null
+                            ? member.last_name : '--'}</th>
+                        <th>{member.is_member === true
+                            ? 'Y' : 'N'}</th>
+                        <th>{member.age != null
+                            ? member.age : null}</th>
+                        <th>{member.events_attended != null
+                            ? member.events_attended : 0}</th>
+                        <th>{member.last_event_date != null
+                            ? member.last_event_date : 'None'}</th>
+                        <th>{member.event_name != null
+                            ? member.event_name : 'None'}</th>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </Table>
+            </Swipe>
           </Row>
         </div>
       )
@@ -486,6 +492,7 @@ class Members extends Component {
             </FormGroup>
             <Button 
               className='search-button'
+              bsStyle="primary"
               type="submit"
               data-tip="Returns search results for last name."
             >Search</Button>
@@ -522,6 +529,7 @@ class Members extends Component {
             </FormGroup>
             <Button
               className='search-button'
+              bsStyle="primary"
               type='submit'
               data-tip='Filters the table results.'>Filter</Button>
           </Form>
@@ -575,6 +583,9 @@ class Members extends Component {
           </span>
         )
       }
+      let info = "There are " + String(this.state.count) + " total participants. <br/>";
+      info += "Click or tap on an event for more information. <br/>";
+      info += "On tablet, swipe right or left to switch pages."
 
       return (
         <div>
@@ -582,7 +593,10 @@ class Members extends Component {
           <div className="Members">
             <div className='events-header'>
               <h2>
-                Participants ({this.state.count} total)
+                Participants{' '}
+                <sup><i className='fa fa-info-circle'
+                        data-tip={info}></i>
+                </sup>
                 <i className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 ></i>

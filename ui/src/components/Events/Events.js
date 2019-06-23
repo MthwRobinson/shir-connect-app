@@ -11,10 +11,10 @@ import {
 } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import { withRouter } from 'react-router-dom';
-import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
+import ReactTooltip from 'react-tooltip';
 import Swipe from 'react-easy-swipe';
 
 import { refreshAccessToken } from './../../utilities/authentication';
@@ -273,62 +273,62 @@ class Events extends Component {
         <div>
           <Row className='event-table'>
             <Swipe
-              onSwipeLeft={()=>this.incrementPage('down')}
-              onSwipeRight={()=>this.incrementPage('up')}
+              onSwipeRight={()=>this.incrementPage('down')}
+              onSwipeLeft={()=>this.incrementPage('up')}
             >
-            <Table responsive header hover>
-              <thead>
-                <tr>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('name')}>
-                    Event
-                    {this.state.sortColumn === 'name'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('start_datetime')}>
-                    Start
-                    {this.state.sortColumn === 'start_datetime'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('venue_name')}>
-                    Venue
-                    {this.state.sortColumn === 'venue_name'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('attendee_count')}>
-                    Attendees
-                    {this.state.sortColumn === 'attendee_count'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.events.map((event, index) => {
-                  return(
-                    <tr 
-                      className='table-row' 
-                      key={index}
-                      onClick={()=> 
-                        this.props.history.push('/event?id='+event.id)}
-                    >
-                      <th>{event.name}</th>
-                      <th>{event.start}</th>
-                      <th>{event.venue_name !== null 
-                          ? event.venue_name : this.state.defaultEventLocation}</th>
-                      <th>{event.attendee_count != null 
-                          ? event.attendee_count : 0}</th>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
+              <Table responsive header hover>
+                <thead>
+                  <tr>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('name')}>
+                      Event
+                      {this.state.sortColumn === 'name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('start_datetime')}>
+                      Start
+                      {this.state.sortColumn === 'start_datetime'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('venue_name')}>
+                      Venue
+                      {this.state.sortColumn === 'venue_name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('attendee_count')}>
+                      Attendees
+                      {this.state.sortColumn === 'attendee_count'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.events.map((event, index) => {
+                    return(
+                      <tr 
+                        className='table-row' 
+                        key={index}
+                        onClick={()=> 
+                          this.props.history.push('/event?id='+event.id)}
+                      >
+                        <th>{event.name}</th>
+                        <th>{event.start}</th>
+                        <th>{event.venue_name !== null 
+                            ? event.venue_name : this.state.defaultEventLocation}</th>
+                        <th>{event.attendee_count != null 
+                            ? event.attendee_count : 0}</th>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </Table>
             </Swipe>
           </Row>
         </div>
@@ -360,6 +360,7 @@ class Events extends Component {
             </FormGroup>
             <Button 
               className='search-button'
+              bsStyle="primary"
               type="submit"
               data-tip="Filters the table results."
             >Filter</Button>
@@ -383,12 +384,13 @@ class Events extends Component {
                 />
               </FormGroup>
               <Button 
+                bsStyle="primary"
                 className='search-button'
                 type="submit"
                 data-tip="Returns searchs fesults for the event name."
               >Search</Button>
             </Form>
-            <ReactToolTip />
+            <ReactTooltip html={true} />
           </div>
         </div>
       )
@@ -425,14 +427,19 @@ class Events extends Component {
       let search = this.renderSearch();
       let filter = this.renderFilter();
       let searchTermPills = this.renderSearchTermPills();
-
+      let info = "There are " + String(this.state.count) + " total events. <br/>";
+      info += "Click or tap on an event for more information. <br/>";
+      info += "On tablet, swipe right or left to switch pages.";
       return (
         <div>
           <Header />
           <div className="Events">
             <div className='events-header'>
               <h2>
-                Events ({this.state.count} total)
+                Events{' '}
+                <sup><i className='fa fa-info-circle'
+                        data-tip={info}></i>
+                </sup>
                 <i 
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}

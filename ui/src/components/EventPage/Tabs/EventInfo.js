@@ -92,7 +92,7 @@ class EventInfo extends Component {
     let mapArea = (
       <div 
         ref={el => this.mapContainer = el} 
-        className="event-map pull-right"
+        className="event-map pull-right hidden-md"
         id="event-map" 
       />
     )

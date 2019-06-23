@@ -66,7 +66,7 @@ class MemberReport extends Component {
     }
     if(this.props.householdType[key].length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>{plotTitle}</h4>
           <div className='event-loading'>
@@ -78,7 +78,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -87,7 +87,7 @@ class MemberReport extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>{plotTitle}</h4>
           <div className='quick-facts-list'>
@@ -160,7 +160,7 @@ class MemberReport extends Component {
     const ageGroupList = this.renderAgeGroupList();
     if(this.props.demographics.length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Age Groups</h4>
           <div className='event-loading'>
@@ -172,7 +172,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -181,7 +181,7 @@ class MemberReport extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Age Groups</h4>
           <div className='quick-facts-list'>
@@ -254,7 +254,7 @@ class MemberReport extends Component {
     const ageGroupList = this.renderNewMemberAgeGroupList();
     if(this.props.demographics.length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>New Members</h4>
           <div className='event-loading'>
@@ -266,7 +266,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -275,7 +275,7 @@ class MemberReport extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>New Members</h4>
           <div className='quick-facts-list'>
@@ -340,7 +340,7 @@ class MemberReport extends Component {
     const resignationList = this.renderResignationTypeList();
     if(this.props.demographics.length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Resignations (Past Year)</h4>
           <div className='event-loading'>
@@ -352,7 +352,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -361,7 +361,7 @@ class MemberReport extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Resignations (Past Year)</h4>
           <div className='quick-facts-list'>
@@ -429,7 +429,7 @@ class MemberReport extends Component {
     const locationList = this.renderLocationList(key);
     if(this.props.memberLocations[key].length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Locations</h4>
           <div className='event-loading'>
@@ -441,7 +441,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -450,7 +450,7 @@ class MemberReport extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Locations</h4>
           <div className='quick-facts-list'>
@@ -475,7 +475,7 @@ class MemberReport extends Component {
     const notReady = this.props.memberLocations.all_members.length === 0;
     if(notReady || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <div className='event-loading'>
             <Loading />
@@ -560,7 +560,7 @@ class MemberReport extends Component {
 
     if(this.props.newMembers.length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>New Household Count</h4>
           <div className='event-loading'>
@@ -572,7 +572,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const layout = {
         height: .55*width,
         width: .9*width,
@@ -585,10 +585,10 @@ class MemberReport extends Component {
         margin: {l: 50, r: 35, b: 70, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>New Household Count</h4>
-          <div className='quick-facts-plot-area'> 
+          <div className='quick-facts-plot-area quick-facts-buffer'> 
             <Plot
             data={data}
             layout={layout}
@@ -635,7 +635,7 @@ class MemberReport extends Component {
 
     if(this.props.householdCount.length === 0 || !this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>{plotTitle}</h4>
           <div className='event-loading'>
@@ -647,7 +647,7 @@ class MemberReport extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const layout = {
         height: .55*width,
         width: .9*width,
@@ -660,10 +660,10 @@ class MemberReport extends Component {
         margin: {l: 50, r: 35, b: 70, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>{plotTitle}</h4>
-          <div className='quick-facts-plot-area'> 
+          <div className='quick-facts-plot-area quick-facts-buffer'> 
             <Plot
             data={data}
             layout={layout}
@@ -692,7 +692,8 @@ class MemberReport extends Component {
 
     let reportInfo = 'The membership report contains information about active ';
     reportInfo += 'members.<br/> It does not include information about attendees who ';
-    reportInfo += 'are not members.'
+    reportInfo += 'are not members. <br/>Hover or tap on sections of the plots to view ';
+    reportInfo += 'the category.';
    return(
       <div className='QuickFacts'>
         <h2>Membership Report{' '}

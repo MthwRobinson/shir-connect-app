@@ -3,17 +3,17 @@ import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import moment from 'moment';
 import React, { Component } from 'react';
-import CalendarHeatmap from 'react-calendar-heatmap';
+import { Nav } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import { getDefaultLocation } from './../../utilities/map';
+import EventHeatmap from './Tabs/EventHeatmap';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
+import MemberEvents from './Tabs/MemberEvents';
 
 import './MemberPage.css';
-import 'react-calendar-heatmap/dist/styles.css';
 
 
 class MemberPage extends Component {
@@ -24,7 +24,7 @@ class MemberPage extends Component {
     zoom: 10,
     map: null,
     member: {},
-    activeTab: 'memberInfo'
+    activeTab: 'eventList'
   }
 
   componentDidMount(){
@@ -101,66 +101,8 @@ class MemberPage extends Component {
       })
   }
 
-  renderHeatmap = () => {
-      // Renders the calendar heat map
-      const member = this.state.member;
-      if(member&&member.events){
-        
-        let values = {};
-        for(let i=0; i<member.events.length; i++){
-          const event = member.events[i];
-          const year = moment(event.start_datetime).format('YYYY');
-          const start = moment(event.start_datetime).format('YYYY-MM-DD');
-          const value = {
-            date: start,
-            eventId: event.event_id,
-            name: event.name
-          }
-          if(year in values){
-            values[year].push(value);
-          } else {
-            values[year] = [value];
-          }
-        }
-
-        return (
-          <div>
-            <h4><b>Events</b></h4>
-            {Object.keys(values).reverse().map((year, index) => {
-              const startDate = moment(new Date(year + '-01-01'))
-                .add(-1, 'days');
-              const endDate = moment(startDate)
-                .add(1, 'years')
-                .format('YYYY-MM-DD');
-              return(
-                <div>
-                  <h4>{year}</h4>
-                  <CalendarHeatmap
-                    startDate={startDate}
-                    endDate={endDate}
-                    values={values[year]}
-                    onClick={(value) => this.selectEvent(value.eventId)}
-
-                    tooltipDataAttrs={value => {
-                      if(value.name){
-                        return {
-                          'data-tip': `Attended ${value.name} on ${value.date}`
-                        };
-                      }
-                    }}
-                  />
-                  <ReactTooltip />
-                </div>
-              )
-            })}
-          </div> 
-        )
-      }
-    }
-
   renderMemberInfo = () => {
     if(this.state.member&&this.state.member.events){
-      if(this.state.activeTab==='memberInfo'){
         const member = this.state.member;
         let membershipDate = null;
         if(this.state.member.membership_date !== 'None'){
@@ -168,12 +110,16 @@ class MemberPage extends Component {
             .format('MM/DD/YY');
         }
 
-        let events = null;
-        if(member.events.length>0){
-          events = this.renderHeatmap();
-        } else {
+      let events = null;
+      if(member.events.length===0){
           events = 'Member has not attended any events.'
+      } else {
+        if(this.state.activeTab==='heatmap'){
+          events = <EventHeatmap member={member} />
+        } else if(this.state.activeTab==='eventList'){
+          events = <MemberEvents member={member} />
         }
+      }
 
       let age = null;
       if(member.age){
@@ -198,10 +144,10 @@ class MemberPage extends Component {
       return(
         <div className='event-table'>
           {info}
+          <h4><b>Events</b></h4>
           {events}
         </div> 
       )
-      } 
     } else {
       return(
         <div className='event-loading'>
@@ -306,8 +252,8 @@ class MemberPage extends Component {
       )
     } else {
       let tabStyle = {
-        'memberInfo': 'record-tab',
-        'attendees': 'record-tab'
+        'heatmap': 'record-tab',
+        'eventList': 'record-tab'
       };
       const activeTab = this.state.activeTab;
       tabStyle[activeTab] = tabStyle[activeTab] + ' record-tab-selected';
@@ -328,6 +274,16 @@ class MemberPage extends Component {
                 ></i>
               </h2><hr/>
             </div>
+            <Nav bsStyle="tabs" className="record-tabs">
+              <li eventKey="eventList"
+                  className={tabStyle['eventList']}
+                  onClick={()=>this.switchTab('eventList')}
+              >Event List</li>
+              <li eventKey="heatmap"
+                  className={tabStyle['heatmap']}
+                  onClick={()=>this.switchTab('heatmap')}
+              >Event Heatmap</li>
+            </Nav>
             <div className='event-map-container'>
               <div className='event-map-summary-area'>
                 {memberInfo}

@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { Col, Row } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 
 import Loading from './../../Loading/Loading';
 import { DONUT_PLOT_COLORS } from './../../../utilities/plots';
@@ -69,7 +70,7 @@ class QuickFacts extends Component {
     const ageGroupList = this.renderAgeGroupList();
     if(!this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Age Groups</h4>
           <div className='quick-facts-list'>
@@ -84,7 +85,7 @@ class QuickFacts extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('age-group-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -93,7 +94,7 @@ class QuickFacts extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='age-group-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='age-group-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Age Groups</h4>
           <div className='quick-facts-list'>
@@ -134,7 +135,7 @@ class QuickFacts extends Component {
 
     if(!this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='members-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='members-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Membership</h4>
           <div className='quick-facts-list'>
@@ -153,7 +154,7 @@ class QuickFacts extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('first-event-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -163,7 +164,7 @@ class QuickFacts extends Component {
       }
 
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='members-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='members-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Membership</h4>
           <div className='quick-facts-list'>
@@ -207,7 +208,7 @@ class QuickFacts extends Component {
 
     if(!this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='capacity-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Capacity ({event.attendee_count}/{event.capacity})</h4>
           <div className='quick-facts-list'>
@@ -225,7 +226,7 @@ class QuickFacts extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('capacity-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -234,7 +235,7 @@ class QuickFacts extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id='capacity-plot'>
+        <Col xs={12} sm={12} md={12} lg={6} id='capacity-plot'>
         <div className='quick-facts-plot-container'>
           <h4>Capacity ({event.attendee_count}/{event.capacity})</h4>
           <div className='quick-facts-list'>
@@ -278,7 +279,7 @@ class QuickFacts extends Component {
 
     if(!this.state.mounted){
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id="first-event-plot">
+        <Col xs={12} sm={12} md={12} lg={6} id="first-event-plot">
         <div className='quick-facts-plot-container'>
           <h4>First Event</h4>
           <div className='quick-facts-list'>
@@ -296,7 +297,7 @@ class QuickFacts extends Component {
     } else {
       // Determine the size of the plot based on the size of the container
       const elem = document.getElementById('first-event-plot');
-      const width = elem.clientWidth;
+      const width = Math.min(500, elem.clientWidth);
       const size = .5*width
       const layout = {
         height: size,
@@ -305,7 +306,7 @@ class QuickFacts extends Component {
         margin: {l: 0, r: 0, b: 13, t: 0, pad: 0}
       }
       return(
-        <Col xs={6} sm={6} md={6} lg={6} id="first-event-plot">
+        <Col xs={12} sm={12} md={12} lg={6} id="first-event-plot">
         <div className='quick-facts-plot-container'>
           <h4>First Event</h4>
           <div className='quick-facts-list'>
@@ -332,9 +333,15 @@ class QuickFacts extends Component {
     const ageGroups = this.renderAgeGroups();
     const members = this.renderMembers();
     const firstEvent = this.renderFirstEvent();
+    const info = "Hover or tap on sections of the plots to view the category.";
     return(
       <div className='QuickFacts'> 
-        <h4>Quick Facts</h4><hr/>
+        <h4>Quick Facts{' '}
+          <sup><i className='fa fa-info-circle'
+                  data-tip={info}></i>
+          </sup> 
+        </h4><hr/>
+        <ReactToolTip html={true} />
         <Row>
           {this.renderCapacity()}
           {ageGroups}

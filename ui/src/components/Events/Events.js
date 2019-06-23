@@ -11,10 +11,12 @@ import {
 } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import { withRouter } from 'react-router-dom';
-import ReactToolTip from 'react-tooltip';
 import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
+import ReactTooltip from 'react-tooltip';
+import Modal from 'react-responsive-modal';
+import Swipe from 'react-easy-swipe';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import { getDefaultLocation } from './../../utilities/map';
@@ -42,7 +44,8 @@ class Events extends Component {
         sortOrder: 'desc',
         defaultEventLocation: null,
         startDate: null,
-        endDate: new Date()
+        endDate: new Date(),
+        showFilter: false
       }
 
       // Bindings for search bar
@@ -185,6 +188,26 @@ class Events extends Component {
       event.preventDefault();
       this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
                      this.state.searchTerms);
+      this.hideFilter();
+    }
+
+    clearFilter = () => {
+      // Clears the filter settings
+      this.setState({ 
+        showFilter: false,
+        startDate: null,
+        endDate: new Date(),
+      })
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
+    }
+
+    showFilter = () => {
+      this.setState({ showFilter: true })
+    }
+  
+   hideFilter = () => {
+      this.setState({ showFilter: false })
     }
 
     handleRemoveTerm = (removeTerm) => {
@@ -271,59 +294,64 @@ class Events extends Component {
       return(
         <div>
           <Row className='event-table'>
-            <Table responsive header hover>
-              <thead>
-                <tr>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('name')}>
-                    Event
-                    {this.state.sortColumn === 'name'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('start_datetime')}>
-                    Start
-                    {this.state.sortColumn === 'start_datetime'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('venue_name')}>
-                    Venue
-                    {this.state.sortColumn === 'venue_name'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                  <th className='table-heading'
-                      onClick={()=>this.handleSort('attendee_count')}>
-                    Attendees
-                    {this.state.sortColumn === 'attendee_count'
-                     ? <i className={arrowClass}></i>
-                     : null}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.events.map((event, index) => {
-                  return(
-                    <tr 
-                      className='table-row' 
-                      key={index}
-                      onClick={()=> 
-                        this.props.history.push('/event?id='+event.id)}
-                    >
-                      <th>{event.name}</th>
-                      <th>{event.start}</th>
-                      <th>{event.venue_name !== null 
-                          ? event.venue_name : this.state.defaultEventLocation}</th>
-                      <th>{event.attendee_count != null 
-                          ? event.attendee_count : 0}</th>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </Table>
+            <Swipe
+              onSwipeRight={()=>this.incrementPage('down')}
+              onSwipeLeft={()=>this.incrementPage('up')}
+            >
+              <Table responsive header hover>
+                <thead>
+                  <tr>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('name')}>
+                      Event
+                      {this.state.sortColumn === 'name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('start_datetime')}>
+                      Start
+                      {this.state.sortColumn === 'start_datetime'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('venue_name')}>
+                      Venue
+                      {this.state.sortColumn === 'venue_name'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                    <th className='table-heading'
+                        onClick={()=>this.handleSort('attendee_count')}>
+                      Attendees
+                      {this.state.sortColumn === 'attendee_count'
+                      ? <i className={arrowClass}></i>
+                      : null}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.events.map((event, index) => {
+                    return(
+                      <tr 
+                        className='table-row' 
+                        key={index}
+                        onClick={()=> 
+                          this.props.history.push('/event?id='+event.id)}
+                      >
+                        <th>{event.name}</th>
+                        <th>{event.start}</th>
+                        <th>{event.venue_name !== null 
+                            ? event.venue_name : this.state.defaultEventLocation}</th>
+                        <th>{event.attendee_count != null 
+                            ? event.attendee_count : 0}</th>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </Table>
+            </Swipe>
           </Row>
         </div>
       )
@@ -332,33 +360,47 @@ class Events extends Component {
     renderFilter = () => {
       // Renders the filter options
       return(
-        <div className='pull-right filter-form'>
-          <Form onSubmit={this.handleFilter} inline>
-            <FormGroup>
-              <Label className="filter-form-label">Date:</Label>
-              <DatePicker
-                selected={this.state.startDate}
-                onChange={this.handleStartDate}
-                maxDate={this.state.endDate}
-                className="form-control filter-form-date-input"
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label className="filter-form-label">-</Label>
-              <DatePicker
-                selected={this.state.endDate}
-                onChange={this.handleEndDate}
-                minDate={this.state.startDate}
-                className="form-control filter-form-date-input"
-              />
-            </FormGroup>
-            <Button 
-              className='search-button'
-              type="submit"
-              data-tip="Filters the table results."
-            >Filter</Button>
+        <Modal
+          open={this.state.showFilter}
+          showCloseIcon={false}
+          center
+        >
+          <h4>Filter
+            <i className='fa fa-times pull-right event-icons'
+               onClick={()=>this.hideFilter()}
+            ></i>
+          </h4><hr/>
+          <Form onSubmit={this.handleFilter} >
+              <FormGroup>
+                <Label className="filter-form-label">Minimum Date:</Label>
+                <DatePicker
+                  selected={this.state.startDate}
+                  onChange={this.handleStartDate}
+                  maxDate={this.state.endDate}
+                  className="form-control filter-form-date-input"
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label className="filter-form-label">Maximum Date:</Label>
+                <DatePicker
+                  selected={this.state.endDate}
+                  onChange={this.handleEndDate}
+                  minDate={this.state.startDate}
+                  className="form-control filter-form-date-input"
+                />
+              </FormGroup>
+              <Button 
+                className='search-button'
+                bsStyle="primary"
+                type="submit"
+              >Apply Filter</Button>
+              <Button 
+                className='search-button'
+                bsStyle="danger"
+                onClick={()=>this.clearFilter()}
+              >Clear Filter</Button>
           </Form>
-        </div>
+        </Modal>
       )
     }
 
@@ -377,12 +419,12 @@ class Events extends Component {
                 />
               </FormGroup>
               <Button 
+                bsStyle="primary"
                 className='search-button'
                 type="submit"
                 data-tip="Returns searchs fesults for the event name."
               >Search</Button>
             </Form>
-            <ReactToolTip />
           </div>
         </div>
       )
@@ -419,21 +461,31 @@ class Events extends Component {
       let search = this.renderSearch();
       let filter = this.renderFilter();
       let searchTermPills = this.renderSearchTermPills();
-
+      let info = "There are " + String(this.state.count) + " total events. <br/>";
+      info += "Click or tap on an event for more information. <br/>";
+      info += "On tablet, swipe right or left to switch pages.";
       return (
         <div>
           <Header />
           <div className="Events">
             <div className='events-header'>
               <h2>
-                Events ({this.state.count} total)
+                Events{' '}
+                <sup><i className='fa fa-info-circle'
+                        data-tip={info}></i>
+                </sup>
                 <i 
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 >
                 </i>
+                <i className='fa fa-filter pull-right event-icons'
+                   data-tip="Add a filter to the table."
+                   onClick={()=>this.showFilter()}>
+                </i>
                 <i 
                   className="fa fa-download pull-right event-icons"
+                  data-tip="Download the table of participants"
                   onClick={()=>this.downloadCSV()}
                 ></i>
               </h2><hr/>
@@ -441,7 +493,6 @@ class Events extends Component {
             <div className='event-header'>
               {pageCount}
               {search}
-              {filter}
             </div>
             <div className='search-term-row pull-right'>
               {searchTermPills.length > 0 
@@ -449,8 +500,10 @@ class Events extends Component {
                 : null}
               {searchTermPills}
             </div>
+            {filter}
             {table}
           </div>
+          <ReactTooltip html={true} />
         </div>
       );
     }

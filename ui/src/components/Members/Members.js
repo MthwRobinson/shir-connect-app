@@ -13,7 +13,7 @@ import {
   Table
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
-import ReactToolTip from 'react-tooltip';
+import ReactTooltip from 'react-tooltip';
 import Swipe from 'react-easy-swipe';
 import Modal from 'react-responsive-modal';
 
@@ -45,7 +45,8 @@ class Members extends Component {
         userRole: 'standard',
         minAge: null,
         maxAge: null,
-        fileType: 'members'
+        fileType: 'members',
+        showFilter: false
       }
 
       // Binding for the file upload in the popup
@@ -181,6 +182,17 @@ class Members extends Component {
     handleFilter = (event) => {
       // Handles filtering
       event.preventDefault();
+      this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
+                     this.state.searchTerms);
+    }
+
+    clearFilter = () => {
+        // Clears the filters for participants
+        this.setState({
+          minAge: null,
+          maxAge: null,
+          showFilter: false
+        })
       this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
                      this.state.searchTerms);
     }
@@ -409,6 +421,16 @@ class Members extends Component {
       this.setState({ showUpload: false });
     }
 
+    showFilter = () => {
+      // Toggles the filter modal
+      this.setState({ showFilter: true});
+    }
+  
+    hideFilter = () => {
+      // Toggles the filter modal
+      this.setState({ showFilter: false });
+    }
+
     renderPopup = () => {
       // Renders the popup with the upload form
       let body = null;
@@ -496,7 +518,6 @@ class Members extends Component {
               type="submit"
               data-tip="Returns search results for last name."
             >Search</Button>
-            <ReactToolTip />
           </Form>
         </div>
       )
@@ -505,35 +526,45 @@ class Members extends Component {
     renderFilter = () => {
       // Renders the filter option
       return(
-        <div className='pull-right filter-form'>
-          <Form onSubmit={this.handleFilter} inline>
-            <FormGroup>
-              <Label className='filter-form-label'>Age:</Label>
-              <FormControl
-                className='filter-form-age-input'
-                value={this.state.minAge}
-                onChange={this.handleMinAge}
-                max={this.state.maxAge}
-                type="number" 
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label className='filter-form-label'>-</Label>
-              <FormControl
-                className='filter-form-age-input'
-                value={this.state.maxAge}
-                onChange={this.handleMaxAge}
-                min={this.state.minAge}
-                type="number" 
-              />
-            </FormGroup>
-            <Button
-              className='search-button'
-              bsStyle="primary"
-              type='submit'
-              data-tip='Filters the table results.'>Filter</Button>
+        <Modal
+          open={this.state.showFilter}
+          showCloseIcon={false}
+          center
+        >
+          <h4>Filter
+            <i className="fa fa-times pull-right event-icons"
+                onClick={()=>this.hideFilter()}
+            ></i>
+          </h4><hr/>
+          <Form onSubmit={this.handleFilter} >
+              <FormGroup>
+                <Label>Minimum Age:</Label>
+                <FormControl
+                  value={this.state.minAge}
+                  onChange={this.handleMinAge}
+                  max={this.state.maxAge}
+                  type="number" 
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Maximum Age:</Label>
+                <FormControl
+                  value={this.state.maxAge}
+                  onChange={this.handleMaxAge}
+                  min={this.state.minAge}
+                  type="number" 
+                />
+              </FormGroup>
+              <Button
+                className='search-button'
+                bsStyle="primary"
+                type='submit'>Apply Filter</Button>
+              <Button
+                className='search-button'
+                bsStyle="danger"
+                onClick={()=>this.clearFilter()}>Clear Filter</Button>
           </Form>
-        </div>
+        </Modal>
       )
     }
 
@@ -555,6 +586,7 @@ class Members extends Component {
 
     render() {
       const popup = this.renderPopup();
+      const filter = this.renderFilter();
 
       let table = null
       if(this.state.loading){
@@ -570,18 +602,10 @@ class Members extends Component {
       let pageCount = this.renderPageCount();
       let searchTermPills = this.renderSearchTermPills();
       let search = this.renderSearch();
-      let filter = this.renderFilter();
 
-      let uploadButton = null
+      let uploadButton = 'hidden'
       if(this.state.userRole==='admin'){
-        uploadButton = (
-          <span>
-            <i className="fa fa-upload pull-right event-icons"
-                onClick={()=>this.showUpload()}
-                data-tip="Upload member information."></i>
-            <ReactToolTip />
-          </span>
-        )
+        uploadButton = ''
       }
       let info = "There are " + String(this.state.count) + " total participants. <br/>";
       info += "Click or tap on an event for more information. <br/>";
@@ -600,14 +624,20 @@ class Members extends Component {
                 <i className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 ></i>
-                {uploadButton}
+                <i className="fa fa-filter pull-right event-icons"
+                  data-tip="Add a filter to participants."
+                  onClick={()=>this.showFilter()}
+                ></i>
+                <i className={"fa fa-upload pull-right event-icons " + uploadButton}
+                    onClick={()=>this.showUpload()}
+                    data-tip="Upload member information."></i>
               </h2><hr/>
             </div>
             {popup}
+            {filter}
             <div className='event-header'>
               {pageCount}
               {search}
-              {filter}
             </div>
             <div className='search-term-row pull-right'>
               {searchTermPills.length >0 
@@ -617,6 +647,7 @@ class Members extends Component {
             </div>
             {table}
           </div>
+          <ReactTooltip html={true} />
         </div>
       );
     }

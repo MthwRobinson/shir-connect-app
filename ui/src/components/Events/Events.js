@@ -15,6 +15,7 @@ import axios from 'axios';
 import moment from 'moment';
 import FileDownload from 'js-file-download';
 import ReactTooltip from 'react-tooltip';
+import Modal from 'react-responsive-modal';
 import Swipe from 'react-easy-swipe';
 
 import { refreshAccessToken } from './../../utilities/authentication';
@@ -260,6 +261,7 @@ class Events extends Component {
             {leftCaret}
             {this.state.page}/{this.state.pages}
             {rightCaret}{' '}
+            <i className='fa fa-filter'></i>
         </div>
       )
     }

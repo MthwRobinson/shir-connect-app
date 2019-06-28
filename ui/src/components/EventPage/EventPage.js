@@ -17,7 +17,7 @@ class EventPage extends Component {
   state = {
     loading: true,
     event: null,
-    activeTab: 'attendees'
+    activeTab: 'eventInfo'
   }
 
   componentDidMount(){

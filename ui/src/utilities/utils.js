@@ -16,6 +16,14 @@ function sortByKey(arr, key, ascending=true) {
   function keySorter(obj1, obj2) {
     let a = obj1[key];
     let b = obj2[key];
+    // strip whitespace because it's annoying for sorting
+    if(typeof a === 'string'){
+      a = a.trim();
+    }
+    if(typeof b === 'string'){
+      b = b.trim();
+    }
+
     // equal items sort equally
     if (a === b) {
       return 0;

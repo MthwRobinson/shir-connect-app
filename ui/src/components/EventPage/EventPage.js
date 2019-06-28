@@ -9,6 +9,7 @@ import EventInfo from './Tabs/EventInfo';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 import QuickFacts from './Tabs/QuickFacts';
+import { sortByKey } from './../../utilities/utils';
 
 import './EventPage.css';
 
@@ -16,7 +17,7 @@ class EventPage extends Component {
   state = {
     loading: true,
     event: null,
-    activeTab: 'eventInfo'
+    activeTab: 'attendees'
   }
 
   componentDidMount(){
@@ -28,6 +29,26 @@ class EventPage extends Component {
   switchTab = (tab) => {
     // Toggles between event info and attendees
     this.setState({activeTab: tab});
+  }
+
+  sortAttendees = (key, ascending=true) => {
+    // Sorts attendees based on the specified key
+    // all null values float to the bottom
+    //
+    // Parameters
+    // ----------
+    // key: string, the key to sory on
+    // ascending: boolean, sorts ascending if true, descending if false
+    //
+    // Returns
+    // -------
+    // sorts the array on this.state.event.attendees
+    //
+    if(this.state.event){
+      let event = this.state.event;
+      event.attendees = sortByKey(event.attendees, key, ascending);
+      this.setState({event: event});
+    }
   }
 
   getEvent = () => {
@@ -60,7 +81,8 @@ class EventPage extends Component {
       if(this.state.activeTab==='eventInfo'){
         return <EventInfo event={this.state.event} />;
       } else if(this.state.activeTab==='attendees') {
-        return <Attendees event={this.state.event} />;
+        return <Attendees event={this.state.event} 
+                          sortAttendees={this.sortAttendees} />;
       } else if(this.state.activeTab==='quickFacts'){
         return <QuickFacts event={this.state.event} />;
       }

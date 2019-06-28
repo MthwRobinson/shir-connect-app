@@ -12,6 +12,7 @@ import EventHeatmap from './Tabs/EventHeatmap';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 import MemberEvents from './Tabs/MemberEvents';
+import { sortByKey } from './../../utilities/utils';
 
 import './MemberPage.css';
 
@@ -47,6 +48,26 @@ class MemberPage extends Component {
   switchTab = (tab) => {
     // Toggles between event info and attendees
     this.setState({activeTab: tab});
+  }
+  
+  sortEvents = (key, ascending=true) => {
+    // Sorts events based on the specified key
+    // all null values float to the bottom
+    //
+    // Parameters
+    // ----------
+    // key: string, the key to sory on
+    // ascending: boolean, sorts ascending if true, descending if false
+    //
+    // Returns
+    // -------
+    // sorts the array on this.state.event.attendees
+    //
+    if(this.state.member){
+      let member = this.state.member;
+      member.events = sortByKey(member.events, key, ascending);
+      this.setState({member: member});
+    }
   }
 
   selectEvent = (eventId) => {
@@ -117,7 +138,8 @@ class MemberPage extends Component {
         if(this.state.activeTab==='heatmap'){
           events = <EventHeatmap member={member} />
         } else if(this.state.activeTab==='eventList'){
-          events = <MemberEvents member={member} />
+          events = <MemberEvents member={member} 
+                                 sortEvents={this.sortEvents} />
         }
       }
 

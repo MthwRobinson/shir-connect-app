@@ -15,7 +15,7 @@ test:
     - . test_environment/bin/activate
   script:
     - echo $SHIR_CONNECT_ENV
-    - echo "13.58.50.14:5432:*:postgres:${POSTGRES_PASSWORD}" >> ~/.pgpass
+    - echo "${POSTGRES_HOST}:5432:*:master:${POSTGRES_PASSWORD}" >> ~/.pgpass
     - chmod 0600 ~/.pgpass
     - cd server
     - pip install -e .[test]

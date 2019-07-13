@@ -7,14 +7,6 @@
     subdomain: "{{ host }}"
     project_dir: "{{ project_dir }}"
   tasks:
-    - name: Add PostgreSQL apt key
-      apt_key:
-        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-        state: present
-
-    - name: Add PostgreSQL apt repo
-      shell: sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
-
     - name: Download NGINX key
       apt_key: 
         url: http://nginx.org/keys/nginx_signing.key
@@ -33,7 +25,6 @@
         state: present
       vars:
         packages:
-          - postgresql-10
           - nginx
           - python-pip
           - python3-venv
@@ -59,10 +50,6 @@
     - name: Install PM2 and node serve
       become_user: ubuntu
       shell: export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && npm install -g serve pm2
-
-    - name: Update PostgreSQL password
-      become_user: postgres
-      shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
 
     - name: Move GitLab private key
       become_user: ubuntu
@@ -102,7 +89,7 @@
 
     - name: Setup .pgpass file
       become_user: ubuntu
-      shell: echo "localhost:5432:*:postgres:{{ password }}" > $HOME/.pgpass
+      shell: echo "{{ fiddler_rds }}:5432:*:master:{{ password }}" > $HOME/.pgpass
 
     - name: Set permissions on .pgpass file
       become_user: ubuntu

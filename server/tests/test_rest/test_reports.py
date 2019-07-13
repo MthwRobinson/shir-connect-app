@@ -47,7 +47,7 @@ def test_get_quarters(monkeypatch):
     class patched_datetime(datetime.datetime): pass
     monkeypatch.setattr(patched_datetime, "now", lambda: fake_date)
     quarters = rep.get_quarters()
-    assert quarters == [(2018, 3), (2018, 4), (2019, 1), (2019, 2)]
+    assert quarters == [(2018, 4), (2019, 1), (2019, 2), (2019, 3)]
 
 def test_get_quarterly_events():
     class FakeEvents:

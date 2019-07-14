@@ -25,7 +25,7 @@ JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'LOCAL'
 JWT_COOKIE_CSRF_PROTECT = True
 
 # Database configurations and secrets
-FIDDLER_RDS = 'fiddler-analytics.ccxoug9crfml.us-east-2.rds.amazonaws.com'
+FIDDLER_RDS = 'shir-connect.ccoaub1btbjl.us-east-1.rds.amazonaws.com'
 PG_USER = 'master'
 PG_HOST = 'localhost' if SHIR_CONNECT_ENV == 'DEV' else FIDDLER_RDS
 PG_DATABASE = 'dev'

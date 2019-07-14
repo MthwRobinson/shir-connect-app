@@ -37,7 +37,7 @@ deploy_dev:
     - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
     - chmod 0600 $HOME/.ssh/id_rsa.pub
     - ssh-agent bash -s
-    - ssh-keyscan -H 13.58.50.14 >> $HOME/.ssh/known_hosts
+    - ssh-keyscan -H 3.221.129.51 >> $HOME/.ssh/known_hosts
 
     # Install NVM and NPM
     - sudo apt-get update && sudo apt-get -y install curl
@@ -54,13 +54,13 @@ deploy_dev:
     - sudo apt-add-repository --yes --update ppa:ansible/ansible
     - sudo apt-get -y install ansible
     - echo "[dev]" >> $HOME/hosts
-    - echo "ubuntu@13.58.50.14" >> $HOME/hosts
+    - echo "ubuntu@3.221.129.51" >> $HOME/hosts
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev
 
 deploy_test:
   stage: deploy_test

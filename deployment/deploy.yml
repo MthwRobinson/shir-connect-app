@@ -4,7 +4,7 @@
   vars:
     path: "$HOME"
     node_version: "{{ node_version }}"
-    shir_connect: "{{ path }}/shir-connect"
+    shir_connect: "{{ path }}/{{ subdomain }}/shir-connect"
     project_dir: "{{ project_dir }}"
   tasks:
     - name: Stopping all running PM2 processes

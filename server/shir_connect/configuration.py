@@ -30,8 +30,8 @@ JWT_COOKIE_CSRF_PROTECT = True
 # Database configurations and secrets
 FIDDLER_RDS = 'shir-connect.ccoaub1btbjl.us-east-1.rds.amazonaws.com'
 PG_USER = 'master'
-PG_HOST = 'localhost' if SHIR_CONNECT_ENV == 'DEV' else FIDDLER_RDS
-PG_DATABASE = 'dev' if SHIR_CONNECT_ENV == 'DEV' else SUBDOMAIN
+PG_HOST = FIDDLER_RDS
+PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN
 PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',

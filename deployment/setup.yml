@@ -1,0 +1,80 @@
+---
+- hosts: "{{ host }}"
+  become: yes
+  vars:
+    shir_connect: "$HOME/{{ subdomain }}/shir_connect"
+    project_dir: "{{ project_dir }}"
+    venv: "$HOME/venv/{{ subdomain }}/bin"
+  tasks:
+    - name: Pull the latest shir connect code
+      become_user: ubuntu
+      git:
+        repo: git@gitlab.com:fiddler-analytics/shir-connect.git
+        version: "{{ branch }}"
+        dest: "{{ shir_connect }}"
+        update: yes
+
+    - name: Create directory for virtual environments
+      become_user: ubuntu
+      file:
+        path: $HOME/venv
+        state: directory
+
+    - name: Create a virtual environment for Shir Connect
+      become_user: ubuntu
+      shell: "/usr/bin/python3 -m venv {{ subdomain }}"
+      args:
+        chdir: $HOME/venv
+
+    - name: Installed the Shir Connect backend application
+      become_user: ubuntu
+      shell: "{{ venv }}/pip install -e ."
+      args:
+        chdir: "{{ shir_connect }}/server"
+
+    - name: Build the database tables
+      become_user: ubuntu
+      shell: "{{ venv }}/shir_connect initialize"
+
+    - name: Run all database migrations
+      become_user: ubuntu
+      shell: "shmig -t postgresql -d {{ subdomain }} up"
+      args:
+        chdir: "{{ shir_connect }}/database"
+
+    - name: Update materialized views
+      become_user: ubuntu
+      shell: "{{ venv }}/shir_connect initialize --drop_views"
+
+    - name: Set up Let's Encrypt certs
+      shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
+
+    - name: Setup NGINX config
+      template:
+        src: "templates/{{ subdomain }}.conf"
+        dest: "/etc/nginx/conf.d/{{ subdomain }}.conf"
+
+    - name: Set shir connect environmental variables
+      become_user: ubuntu
+      shell: echo "export JWT_SECRET_KEY={{ jwt }}" >> $HOME/.bashrc
+
+    - name: Transfer ui build
+      become_user: ubuntu
+      copy:
+        src: "{{ project_dir }}/ui/build"
+        dest: "{{ shir_connect }}/ui/"
+
+    - name: Start rest platform on pm2
+      become_user: ubuntu
+      shell: ". {{ venv }}/activate && bash -ic 'pm2 start \"gunicorn -b 0.0.0.0:{{ backend_port }} app:app\" --name {{ subdomain }}_rest'"
+      args:
+        chdir: "{{ shir_connect }}/server/shir_connect/services"
+
+    - name: Start the Front End on PM2
+      become_user: ubuntu
+      shell: "bash -ic 'PORT={{ frontend_port }} pm2 start \"serve -s build\" --name {{ subdomain }}_ui'"
+      args:
+        chdir: "{{ shir_connect }}/ui"
+
+    - name: Restart nginx
+      shell: systemctl restart nginx

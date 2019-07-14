@@ -5,16 +5,7 @@
     shir_connect: $HOME/shir-connect
     local_user: "{{ local_user }}"
     subdomain: "{{ host }}"
-    project_dir: "{{ project_dir }}"
   tasks:
-    - name: Add PostgreSQL apt key
-      apt_key:
-        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-        state: present
-
-    - name: Add PostgreSQL apt repo
-      shell: sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
-
     - name: Download NGINX key
       apt_key: 
         url: http://nginx.org/keys/nginx_signing.key
@@ -33,12 +24,12 @@
         state: present
       vars:
         packages:
-          - postgresql-10
           - nginx
           - python-pip
           - python3-venv
           - software-properties-common
           - python-certbot-nginx
+          - postgresql-client
 
     - name: Install NVM
       become_user: ubuntu
@@ -59,10 +50,6 @@
     - name: Install PM2 and node serve
       become_user: ubuntu
       shell: export NVM_DIR="/home/ubuntu/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . $NVM_DIR/nvm.sh && npm install -g serve pm2
-
-    - name: Update PostgreSQL password
-      become_user: postgres
-      shell: psql -U postgres -d postgres -c "alter user postgres with password '{{ password }}';"
 
     - name: Move GitLab private key
       become_user: ubuntu
@@ -102,90 +89,8 @@
 
     - name: Setup .pgpass file
       become_user: ubuntu
-      shell: echo "localhost:5432:*:postgres:{{ password }}" > $HOME/.pgpass
+      shell: echo "{{ fiddler_rds }}:5432:*:master:{{ password }}" > $HOME/.pgpass
 
     - name: Set permissions on .pgpass file
       become_user: ubuntu
       shell: chmod 0600 $HOME/.pgpass
-
-    - name: Pull the latest shir connect code
-      become_user: ubuntu
-      git:
-        repo: git@gitlab.com:fiddler-analytics/shir-connect.git
-        version: master
-        dest: "{{ shir_connect }}"
-        update: yes
-
-    - name: Create directory for virtual environments
-      become_user: ubuntu
-      file:
-        path: $HOME/venv
-        state: directory
-
-    - name: Create a virtual environment for Shir Connect
-      become_user: ubuntu
-      shell: /usr/bin/python3 -m venv shir_connect
-      args:
-        chdir: $HOME/venv
-
-    - name: Installed the Shir Connect backend application
-      become_user: ubuntu
-      shell: $HOME/venv/shir_connect/bin/pip install -e .
-      args:
-        chdir: "{{ shir_connect }}/server"
-
-    - name: Build the database tables
-      become_user: ubuntu
-      shell: $HOME/venv/shir_connect/bin/shir_connect initialize 
-
-    - name: Run all database migrations
-      become_user: ubuntu
-      shell: "shmig -t postgresql -d postgres up"
-      args:
-        chdir: "{{ shir_connect }}/database"
-
-    - name: Update materialized views
-      become_user: ubuntu
-      shell: $HOME/venv/shir_connect/bin/shir_connect initialize --drop_views
-
-    - name: Set up Let's Encrypt certs
-      shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
-
-    - name: Setup NGINX config
-      template:
-        src: templates/server.conf
-        dest: "/etc/nginx/conf.d/server.conf"
-
-    - name: Setup cron schedule for database load
-      become_user: ubuntu
-      cron:
-        name: eventbrite dataload
-        minute: 0
-        hour: 4
-        weekday: "*"
-        job: /bin/sh $HOME/shir-connect/scripts/load_eventbrite.sh >> $HOME/logs/eventbrite_load.log 2>&1
-
-    - name: Set shir connect environmental variables
-      become_user: ubuntu
-      shell: echo "export EVENTBRITE_OAUTH={{ eventbrite }}" >> $HOME/.bashrc && echo "export JWT_SECRET_KEY={{ jwt }}" >> $HOME/.bashrc
-
-    - name: Transfer ui build
-      become_user: ubuntu
-      copy:
-        src: "{{ project_dir }}/ui/build"
-        dest: $HOME/shir-connect/ui/
-
-    - name: Start rest platform on pm2
-      become_user: ubuntu
-      shell: . $HOME/venv/shir_connect/bin/activate && bash -ic 'pm2 start "gunicorn -b 0.0.0.0:5000 app:app"'
-      args:
-        chdir: $HOME/shir-connect/server/shir_connect/services
-
-    - name: Start the Front End on PM2
-      become_user: ubuntu
-      shell: bash -ic 'PORT=3000 pm2 start "serve -s build"'
-      args:
-        chdir: $HOME/shir-connect/ui
-
-    - name: Restart nginx
-      shell: systemctl restart nginx

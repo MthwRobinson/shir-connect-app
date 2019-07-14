@@ -10,7 +10,7 @@
       become_user: ubuntu
       git:
         repo: git@gitlab.com:fiddler-analytics/shir-connect.git
-        version: fiddler-aws-account
+        version: "{{ branch }}"
         dest: "{{ shir_connect }}"
         update: yes
 
@@ -62,7 +62,7 @@
       become_user: ubuntu
       copy:
         src: "{{ project_dir }}/ui/build"
-        dest: $HOME/shir-connect/ui/
+        dest: "{{ shir_connect }}/ui/"
 
     - name: Start rest platform on pm2
       become_user: ubuntu

@@ -46,8 +46,8 @@
       become_user: ubuntu
       shell: "{{ venv }}/shir_connect initialize --drop_views"
 
-    # - name: Set up Let's Encrypt certs
-    #   shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
+    - name: Set up Let's Encrypt certs
+      shell: "certbot --nginx -n -d {{ subdomain }}.shirconnect.com --agree-tos --email info@shirconnect.com"
 
     - name: Setup NGINX config
       template:

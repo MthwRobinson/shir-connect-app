@@ -29,8 +29,6 @@ deploy_dev:
   when: manual
   before_script:
     - sh scripts/ci_deploy_setup.sh
-    - sudo apt-get update && sudo apt-get -y install curl
-    - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
     - export NVM_DIR="/root/.nvm"
     - source $HOME/.nvm/nvm.sh
     - nvm install node
@@ -51,6 +49,11 @@ deploy_test:
     - master
   before_script:
     - sh scripts/ci_deploy_setup.sh
+    - export NVM_DIR="/root/.nvm"
+    - source $HOME/.nvm/nvm.sh
+    - nvm install node
+    - nvm install 11.0.0
+    - nvm use 11.0.0
   script:
     - cd ui
     - npm install
@@ -66,6 +69,11 @@ deploy_trs:
   when: manual
   before_script:
     - sh scripts/ci_deploy_setup.sh
+    - export NVM_DIR="/root/.nvm"
+    - source $HOME/.nvm/nvm.sh
+    - nvm install node
+    - nvm install 11.0.0
+    - nvm use 11.0.0
   script:
     - cd ui
     - npm install

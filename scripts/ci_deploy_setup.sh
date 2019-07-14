@@ -17,10 +17,8 @@ ssh-agent bash -s
 ssh-keyscan -H 3.221.129.51 >> $HOME/.ssh/known_hosts
 
 # Install NVM and NPM
-# sudo apt-get update && sudo apt-get -y install curl
-# curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
-# nvm install node
-# nvm install 11.0.0
+sudo apt-get update && sudo apt-get -y install curl
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
 
 # Install Ansible
 sudo apt-get update

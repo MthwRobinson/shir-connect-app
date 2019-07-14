@@ -2,7 +2,7 @@ stages:
   - test
   - deploy_dev
   - deploy_test
-  - deploy_prod
+  - deploy_trs
 
 test:
   image: python:3.6
@@ -28,39 +28,13 @@ deploy_dev:
   image: ubuntu:latest
   when: manual
   before_script:
-    # Install open ssh and add remote server to known hosts
-    - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
-    - apt-get update && sudo apt-get install -y openssh-server
-    - mkdir -p $HOME/.ssh
-    - echo "$SSH_PRIVATE" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 0600 $HOME/.ssh/id_rsa
-    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
-    - chmod 0600 $HOME/.ssh/id_rsa.pub
-    - ssh-agent bash -s
-    - ssh-keyscan -H 3.221.129.51 >> $HOME/.ssh/known_hosts
-
-    # Install NVM and NPM
-    - sudo apt-get update && sudo apt-get -y install curl
-    - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
-    - export NVM_DIR="/root/.nvm"
-    - source $HOME/.nvm/nvm.sh
-    - nvm install node
-    - nvm install 11.0.0
-    - nvm use 11.0.0
-
-    # Install Ansible
-    - sudo apt-get update
-    - sudo apt-get -y install software-properties-common
-    - sudo apt-add-repository --yes --update ppa:ansible/ansible
-    - sudo apt-get -y install ansible
-    - echo "[dev]" >> $HOME/hosts
-    - echo "ubuntu@3.221.129.51" >> $HOME/hosts
+    - sh scripts/ci_deploy_setup.sh
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=dev -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev
 
 deploy_test:
   stage: deploy_test
@@ -69,79 +43,25 @@ deploy_test:
   only:
     - master
   before_script:
-    # Install open ssh and add remote server to known hosts
-    - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
-    - apt-get update && sudo apt-get install -y openssh-server
-    - mkdir -p $HOME/.ssh
-    - echo "$SSH_PRIVATE" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 0600 $HOME/.ssh/id_rsa
-    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
-    - chmod 0600 $HOME/.ssh/id_rsa.pub
-    - ssh-agent bash -s
-    - ssh-keyscan -H 3.18.177.11 >> $HOME/.ssh/known_hosts
-
-    # Install NVM and NPM
-    - sudo apt-get update && sudo apt-get -y install curl
-    - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
-    - export NVM_DIR="/root/.nvm"
-    - source $HOME/.nvm/nvm.sh
-    - nvm install node
-    - nvm install 11.0.0
-    - nvm use 11.0.0
-
-    # Install Ansible
-    - sudo apt-get update
-    - sudo apt-get -y install software-properties-common
-    - sudo apt-add-repository --yes --update ppa:ansible/ansible
-    - sudo apt-get -y install ansible
-    - echo "[test]" >> $HOME/hosts
-    - echo "ubuntu@3.18.177.11" >> $HOME/hosts
+    - sh scripts/ci_deploy_setup.sh
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=test -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test
 
-deploy_prod:
-  stage: deploy_prod
+deploy_trs:
+  stage: deploy_trs
   image: ubuntu:latest
   only: 
     - tags
   when: manual
   before_script:
-    # Install open ssh and add remote server to known hosts
-    - apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
-    - apt-get update && sudo apt-get install -y openssh-server
-    - mkdir -p $HOME/.ssh
-    - echo "$SSH_PRIVATE" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 0600 $HOME/.ssh/id_rsa
-    - echo $SSH_PUBLIC >> $HOME/.ssh/id_rsa.pub
-    - chmod 0600 $HOME/.ssh/id_rsa.pub
-    - ssh-agent bash -s
-    - ssh-keyscan -H 52.14.35.159 >> $HOME/.ssh/known_hosts
-    #- ssh-keyscan -H 3.18.71.140 >> $HOME/.ssh/known_hosts
-
-    # Install NVM and NPM
-    - sudo apt-get update && sudo apt-get -y install curl
-    - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
-    - export NVM_DIR="/root/.nvm"
-    - source $HOME/.nvm/nvm.sh
-    - nvm install node
-    - nvm install 11.0.0
-    - nvm use 11.0.0
-
-    # Install Ansible
-    - sudo apt-get update
-    - sudo apt-get -y install software-properties-common
-    - sudo apt-add-repository --yes --update ppa:ansible/ansible
-    - sudo apt-get -y install ansible
-    - echo "[prod]" >> $HOME/hosts
-    - echo "ubuntu@52.14.35.159" >> $HOME/hosts
-    #- echo "ubuntu@3.18.71.140" >> $HOME/hosts
+    - sh scripts/ci_deploy_setup.sh
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=prod -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR -e subdomain=trs

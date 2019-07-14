@@ -7,8 +7,11 @@
     project_dir: "{{ project_dir }}"
     venv: "$HOME/venv/{{ subdomain }}/bin"
   tasks:
-    - name: Stopping all running PM2 processes
-      shell: 'bash -ic "pm2 stop all"'
+    - name: Stopping all running PM2 backend processes
+      shell: 'bash -ic "pm2 stop {{ subdomain }}_rest"'
+    
+    - name: Stopping all running PM2 frontend processes
+      shell: 'bash -ic "pm2 stop {{ subdomain }}_ui"'
     
     - name: Remove current UI build
       file:
@@ -40,6 +43,8 @@
     - name: Update materialized views
       shell: "{{ venv }}/shir_connect initialize --drop_views"
 
-
-    - name: Restarting all PM2 processes
-      shell: 'bash -ic "pm2 start all"'
+    - name: Starting PM2 backend processes
+      shell: 'bash -ic "pm2 start {{ subdomain }}_rest"'
+    
+    - name: Starting PM2 frontend processes
+      shell: 'bash -ic "pm2 start {{ subdomain }}_ui"'

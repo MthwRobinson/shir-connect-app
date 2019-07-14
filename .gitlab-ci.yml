@@ -29,6 +29,9 @@ deploy_dev:
   when: manual
   before_script:
     - sh scripts/ci_deploy_setup.sh
+    - export NVM_DIR="/root/.nvm"
+    - source $HOME/.nvm/nvm.sh
+    - nvm use 11.0.0
   script:
     - cd ui
     - npm install

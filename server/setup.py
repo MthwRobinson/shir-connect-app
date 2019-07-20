@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 
 reqs = [
     'arrow',
+    'apache-airflow',
     'click',
     'daiquiri',
     'Faker',

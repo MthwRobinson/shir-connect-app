@@ -39,11 +39,11 @@ def test_eventbrite_venue():
 ######################################
 
 def test_eventbrite_data_loader():
-    eventbrite_loader = EventbriteLoader()
+    eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.run(test=True)
 
 def test_eventbrite_load_event():
-    eventbrite_loader = EventbriteLoader()
+    eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('events', 'test_event')
     event = eventbrite_loader.eventbrite.get_event(1059379633)
     event['id'] = 'test_event'
@@ -59,7 +59,7 @@ def test_eventbrite_load_event():
     assert test_event == None
 
 def test_eventbrite_load_attendee():
-    eventbrite_loader = EventbriteLoader()
+    eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('attendees', 'test_attendee')
     attendees = eventbrite_loader.eventbrite.get_attendees(1059379633)
     attendee = attendees['attendees'][0]
@@ -74,7 +74,7 @@ def test_eventbrite_load_attendee():
     assert test_attendee == None
 
 def test_eventbrite_load_order():
-    eventbrite_loader = EventbriteLoader()
+    eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('orders', 'test_order')
     order = eventbrite_loader.eventbrite.get_order(23271451)
     order['id'] = 'test_order'

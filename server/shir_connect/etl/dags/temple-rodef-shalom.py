@@ -16,6 +16,8 @@ from shir_connect.database.database import Database
 # Python functions that wrap the ETL tasks for Temple Rodef Shalom
 ####################################################################
 
+EVENTBRITE_ORG = 1358538665
+
 def load_eventbrite_data():
     """Pulls event data from Eventbrite starting at the date of the
     most recently edited event and loads them into the events table

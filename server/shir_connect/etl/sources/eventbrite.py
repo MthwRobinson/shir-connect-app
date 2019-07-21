@@ -131,13 +131,13 @@ class Eventbrite(object):
 
 class EventbriteLoader(object):
     """Loads data from Eventbrite into Postgres """
-    def __init__(self):
+    def __init__(self, eventbrite_org):
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
 
         self.database = Database()
         self.eventbrite = Eventbrite()
-        self.eventbrite_org = conf.IDENTIFIERS['eventbrite_org']
+        self.eventbrite_org = eventbrite_org
 
     def run(self, test=False):
         """ Runs the data load process """

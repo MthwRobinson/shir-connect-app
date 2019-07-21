@@ -1,15 +1,15 @@
 from setuptools import setup, find_packages
 
 reqs = [
-    'arrow',
     'apache-airflow[password]',
+    'arrow',
     'click',
     'daiquiri',
     'Faker',
-    'flask',
+    'flask==1.0.2',
     'flask_jwt_extended',
     'gunicorn',
-    'jinja2>=2.10.1',
+    'jinja2==2.10.1',
     'kml2geojson',
     'matplotlib',
     'networkx',
@@ -19,7 +19,7 @@ reqs = [
     'requests',
     'uszipcode',
     'uuid',
-    'werkzeug>=0.15',
+    'werkzeug==0.15.5',
     'xkcdpass',
     'xlrd'
 ]

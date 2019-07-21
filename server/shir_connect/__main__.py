@@ -10,7 +10,6 @@ from gunicorn.app.wsgiapp import WSGIApplication
 
 from shir_connect.analytics.entity_resolution import NameResolver
 from shir_connect.database.database import Database
-from shir_connect.etl.data_loader import DataLoader
 from shir_connect.etl.geometries import Geometries
 from shir_connect.etl.participant_matcher import ParticipantMatcher
 from shir_connect.services.app import app
@@ -46,17 +45,6 @@ def refresh_views():
     LOGGER.info('Refreshing materialized views ...')
     database.refresh_views()
 main.add_command(refresh_views)
-
-@click.command('load_eventbrite', help='Loads data from Eventbrite')
-def load_eventbrite():
-    """ Loads Eventbrite data into postgres """
-    start = datetime.datetime.now()
-    LOGGER.info('Starting Eventbrite dataload at %s'%(start))
-    data_loader = DataLoader()
-    data_loader.run()
-    end = datetime.datetime.now()
-    LOGGER.info('Finished Eventbrite dataload at %s'%(end))
-main.add_command(load_eventbrite)
 
 @click.command('update_geometries', help='Updates the zip code geometries')
 def update_geometries():

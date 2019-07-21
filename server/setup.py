@@ -9,6 +9,7 @@ reqs = [
     'flask',
     'flask_jwt_extended',
     'gunicorn',
+    'jinja2>=2.10.1',
     'kml2geojson',
     'matplotlib',
     'networkx',

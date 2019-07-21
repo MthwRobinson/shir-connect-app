@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 reqs = [
-    'apache-airflow[password]',
+    'apache-airflow[password]==1.10.3',
     'arrow',
     'click',
     'daiquiri',

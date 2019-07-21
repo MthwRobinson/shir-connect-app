@@ -45,7 +45,7 @@ class Eventbrite(object):
             param_dict['start_date.range_start'] = date
         params = urllib.parse.urlencode(param_dict)
         url += '?' + params
-        
+
         # Make and parse the request
         response = requests.get(url)
         if response.status_code != 200:
@@ -55,12 +55,12 @@ class Eventbrite(object):
             return None
         else:
             events = json.loads(response.text)
-            return events 
+            return events
 
     def get_event(self, event_id, page=1):
         """ Returns an event based on an id """
         params = urllib.parse.urlencode({
-            'token': self.token, 
+            'token': self.token,
             'page': page
         })
         url = self.url + '/events/%s'%(event_id)
@@ -74,11 +74,11 @@ class Eventbrite(object):
         else:
             event = json.loads(response.text)
             return event
-    
+
     def get_attendees(self, event_id, page=1):
         """ Returns the attendees of an event based on an id """
         params = urllib.parse.urlencode({
-            'token': self.token, 
+            'token': self.token,
             'page': page
         })
         url = self.url + '/events/%s/attendees'%(event_id)
@@ -96,7 +96,7 @@ class Eventbrite(object):
     def get_order(self, order_id, page=1):
         """ Returns metadata about an order """
         params = urllib.parse.urlencode({
-            'token': self.token, 
+            'token': self.token,
             'page': page
         })
         url = self.url + '/orders/%s'%(order_id)
@@ -114,7 +114,7 @@ class Eventbrite(object):
     def get_venue(self, venue_id, page=1):
         """ Returns the metadata for a venue """
         params = urllib.parse.urlencode({
-            'token': self.token, 
+            'token': self.token,
             'page': page
         })
         url = self.url + '/venues/%s'%(venue_id)
@@ -219,16 +219,13 @@ class EventbriteLoader(object):
                 self.logger.info(msg)
                 events = self.get_events(start, page)
 
-        # Refresh the materialized views with the new data
-        self.database.refresh_views()
-
     def get_events(self, start, page=1):
-        """ 
+        """
         Pulls events from eventbrite and sleeps if the rate limit
         has been exceeded
         """
         org_id = self.eventbrite_org
-        events = self.eventbrite.get_events(org_id=org_id, start=start, 
+        events = self.eventbrite.get_events(org_id=org_id, start=start,
                                             page=page)
         if not events:
             # Sleep until eventbrite resets
@@ -244,7 +241,7 @@ class EventbriteLoader(object):
         """
         attendees = self.eventbrite.get_attendees(event_id, page)
         if not attendees:
-            # If events comes back as none, sleep until the 
+            # If events comes back as none, sleep until the
             # Eventbrite rate limit resets
             self.logger.info('Rate limit exceed. Sleeping 30 mins')
             time.sleep(3600)

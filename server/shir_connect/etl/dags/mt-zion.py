@@ -1,5 +1,5 @@
 """
-DAG processing file for TRS ETL processes
+DAG processing file for Mt Zion ETL processes
 Note, this file only defines the structure for the DAG. The actual code to
 run tasks and process data are defined elsewhere.
 """
@@ -13,27 +13,23 @@ from shir_connect.etl.sources.eventbrite import EventbriteLoader
 from shir_connect.database.database import Database
 
 ####################################################################
-# Python functions that wrap the ETL tasks for Temple Rodef Shalom
+# Python functions that wrap the ETL tasks for Mt Zion
 ####################################################################
 
-EVENTBRITE_ORG = 1358538665
-
-def load_eventbrite_data():
+def test_email_on_failure():
     """Pulls event data from Eventbrite starting at the date of the
     most recently edited event and loads them into the events table
     in the RDS database."""
-    data_loader = EventbriteLoader(eventbrite_org=EVENTBRITE_ORG,
-                                   database='trs')
-    data_loader.run()
+    raise ValueError('Oh no! The Mt Zion ETL processes failed!')
 
 def refresh_materialized_views():
     """Refreshes the materialized views for Shir Connect."""
-    database = Database(database='trs')
+    database = Database()
     database.refresh_views()
     print('Materialized views have been refreshed!')
 
 ##########################################################################
-# Airflow code to define the DAG for Temple Rodef Shalom's ETL processes
+# Airflow code to define the DAG for Mt Zion's ETL processes
 #########################################################################
 
 default_args = {
@@ -44,21 +40,22 @@ default_args = {
               'ryan@fiddleranalytics.com',
               'nathan@fiddleranalytics.com'],
     'email_on_failure': True,
+    'email_on_retry': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
 
-dag = DAG('temple-rodef-shalom',
+dag = DAG('mt-zion',
           default_args=default_args,
-          schedule_interval='0 4 * * *')
+          schedule_interval='30 4 * * *')
 
-trs_eventbrite_load = PythonOperator(task_id='trs-eventbrite-load',
-                                     python_callable=load_eventbrite_data,
-                                     dag=dag)
+test_email = PythonOperator(task_id='test-email-on-failure',
+                            python_callable=test_email_on_failure,
+                            dag=dag)
 
-trs_refresh_views = PythonOperator(task_id='trs-refresh-materialized-views',
-                                   python_callable=refresh_materialized_views,
-                                   dag=dag)
+refresh_views = PythonOperator(task_id='refresh-materialized-views',
+                               python_callable=refresh_materialized_views,
+                               dag=dag)
 
 # Sets the order of operations for the DAG
-trs_eventbrite_load >> trs_refresh_views
+test_email >> refresh_views

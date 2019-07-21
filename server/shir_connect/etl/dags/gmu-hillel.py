@@ -37,9 +37,11 @@ def refresh_materialized_views():
 default_args = {
     'owner': 'fiddler-analytics',
     'depends_on_past': False,
-    'start_date': datetime(2019, 7, 20),
-    'email': ['info@fiddleranalytics.com'],
-    'email_on_failure': False,
+    'start_date': datetime(2019, 7, 22),
+    'email': ['matt@fiddleranalytics.com',
+              'nathan@fiddleranalytics.com',
+              'ryan@fiddleranalytics.com'],
+    'email_on_failure': True,
     'email_on_retry': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=5)

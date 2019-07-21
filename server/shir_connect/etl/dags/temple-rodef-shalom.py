@@ -39,7 +39,7 @@ def refresh_materialized_views():
 default_args = {
     'owner': 'fiddler-analytics',
     'depends_on_past': False,
-    'start_date': datetime(2019, 7, 20),
+    'start_date': datetime(2019, 7, 22),
     'email': ['matt@fiddleranalytics.com',
               'ryan@fiddleranalytics.com',
               'nathan@fiddleranalytics.com'],

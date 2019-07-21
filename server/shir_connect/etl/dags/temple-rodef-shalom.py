@@ -22,7 +22,7 @@ def load_eventbrite_data():
     """Pulls event data from Eventbrite starting at the date of the
     most recently edited event and loads them into the events table
     in the RDS database."""
-    data_loader = EventbriteLoader()
+    data_loader = EventbriteLoader(eventbrite_org=EVENTBRITE_ORG)
     data_loader.run()
 
 def refresh_materialized_views():

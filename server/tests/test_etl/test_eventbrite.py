@@ -51,7 +51,7 @@ def test_eventbrite_load_event():
     eventbrite_loader.load_event(event)
     test_event = eventbrite_loader.database.get_item('events', 'test_event')
     assert test_event['id'] == 'test_event'
-    last_event_date = eventbrite_loader.database.last_event_date()
+    last_event_date = eventbrite_loader.database.last_event_load_date()
     assert isinstance(last_event_date, datetime.datetime)
 
     eventbrite_loader.database.delete_item('events', 'test_event')

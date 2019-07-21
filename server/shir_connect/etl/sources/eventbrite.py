@@ -34,8 +34,8 @@ class Eventbrite(object):
         response = requests.get(url)
         return response
 
-    def get_events(self, org_id, start=None, page=1):
-        """ Pulls a list of events basd on id """
+    def get_events(self, org_id, start=None, last_modified=None, page=1):
+        """ Pulls a list of events based on id """
         url = self.url + '/organizers/%s/events/'%(org_id)
 
         # Add the query parameters
@@ -43,6 +43,9 @@ class Eventbrite(object):
         if start:
             date = start + 'T0:00:00'
             param_dict['start_date.range_start'] = date
+        if last_modified:
+            date = last_modified + 'T0:00:00'
+            param_dict['date_modified.range_start'] = date
         params = urllib.parse.urlencode(param_dict)
         url += '?' + params
 
@@ -141,10 +144,10 @@ class EventbriteLoader(object):
 
     def run(self, test=False):
         """ Runs the data load process """
-        last_event_date = self.database.last_event_date()
-        if last_event_date:
-            look_back = datetime.datetime.now() - datetime.timedelta(days=60)
-            first_event = min(look_back, last_event_date)
+        last_load_date = self.database.last_event_load_date()
+        if last_load_date:
+            look_back = datetime.datetime.now() - datetime.timedelta(days=1)
+            first_event = min(look_back, last_load_date)
             start = str(first_event)[:10]
             self.logger.info('Loading events starting at %s'%(start))
         else:

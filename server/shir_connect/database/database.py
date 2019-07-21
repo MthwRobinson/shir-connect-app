@@ -12,8 +12,8 @@ from psycopg2.extras import execute_values
 import shir_connect.configuration as conf
 
 class Database(object):
-    """ 
-    Connects to the Postgres database 
+    """
+    Connects to the Postgres database
     Connection settings appear in configuration.py
     Secrets must be stored in a .pgpass file
     """
@@ -21,7 +21,7 @@ class Database(object):
         # Configure the logger
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
-        
+
         # Find the path to the file
         self.path = os.path.dirname(os.path.realpath(__file__))
         self.database_path = os.path.join(self.path,'..','..','..','database')
@@ -46,7 +46,7 @@ class Database(object):
         self.initialize_tables('tables')
         self.logger.info('Initializing views')
         self.initialize_tables('views', drop_views=drop_views)
-        
+
     def run_query(self, sql, commit=True):
         """ Runs a query against the postgres database """
         with self.connection.cursor() as cursor:
@@ -109,7 +109,7 @@ class Database(object):
                     else:
                         sql = f.read().format(schema=self.schema)
                 self.run_query(sql)
-    
+
     def refresh_view(self, view):
         """ Refreshes a materialized view """
         sql = "REFRESH MATERIALIZED VIEW %s.%s"%(self.schema, view)
@@ -176,7 +176,7 @@ class Database(object):
         for key in item:
             if key not in columns:
                 del item_[key]
-        
+
         # Construct the insert statement
         n = len(item_)
         row = "(" + ', '.join(['%s' for i in range(n)]) + ")"
@@ -195,7 +195,7 @@ class Database(object):
         self.connection.commit()
 
     def load_items(self, items, table):
-        """ 
+        """
         Loads a list of items into the database
         This is faster than running load_item in a loop
         because it reduces the number of server calls
@@ -220,7 +220,7 @@ class Database(object):
             VALUES
             %s
         """.format(schema=self.schema, table=table, cols=cols)
-        
+
         # Insert the data
         all_values = []
         for item in items:
@@ -270,14 +270,14 @@ class Database(object):
             UPDATE {schema}.{table}
             SET {column} = {value}
             WHERE id = '{item_id}'
-        """.format(schema=self.schema, table=table, column=column, 
+        """.format(schema=self.schema, table=table, column=column,
                    value=value, item_id=item_id)
         self.run_query(sql)
 
-    def last_event_date(self):
+    def last_event_load_date(self):
         """ Pulls the most recent event start date from the database """
         sql = """
-            SELECT max(start_datetime) as max_start 
+            SELECT max(load_datetime) as max_start
             FROM {schema}.events
             WHERE start_datetime IS NOT NULL
         """.format(schema=self.schema)
@@ -290,10 +290,10 @@ class Database(object):
             else:
                 return None
 
-    def read_table(self, table, columns=None, sort=None, order='desc', 
+    def read_table(self, table, columns=None, sort=None, order='desc',
         limit=None, page=None, query=[], where=[], count=False):
         """ Reads a table into a dataframe.
-        
+
         Parameters
         ----------
             table: string, the name of table in the database
@@ -310,7 +310,7 @@ class Database(object):
                 the condition applies to and the second element
                 is the condition. the condtions have the form
                 options for the condition are '<=', '<', '=',
-                '>', '>=' 
+                '>', '>='
                 (ex. [('start_datetime, {'leq': '2018-01-01'})])
             count: bool, if true, returns the count of the query
                 rather than a results table
@@ -318,7 +318,7 @@ class Database(object):
         Returns
         -------
             a dataframe with the results of the query
-        
+
         """
         if not columns:
             cols = '*'
@@ -349,7 +349,7 @@ class Database(object):
         else:
             df = pd.read_sql(sql, self.connection)
             return df
-    
+
     def count_rows(self, table, **kwargs):
         """ Returns the number of rows, given a query. """
         count = self.read_table(table=table, count=True, **kwargs)
@@ -377,7 +377,7 @@ def _build_query_clauses(query=None):
 
     Returns
     -------
-        list, a list of SQL clauses 
+        list, a list of SQL clauses
     """
     clauses = []
     # Add the conditions from the search term
@@ -387,7 +387,7 @@ def _build_query_clauses(query=None):
         search_terms = query[1].split()
         for term in search_terms:
             search = " lower(%s) like lower('%s%s%s') "%(
-                field, 
+                field,
                 '%', term, '%'
             )
             query_conditions.append(search)
@@ -404,7 +404,7 @@ def _build_where_conditions(where):
             the condition applies to and the second element
             is the condition. the condtions have the form
             options for the condition are '<=', '<', '=',
-            '>', '>=' 
+            '>', '>='
             (ex. [('start_datetime, {'leq': '2018-01-01'})])
 
     Returns

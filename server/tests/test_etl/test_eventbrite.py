@@ -1,6 +1,6 @@
 import datetime
 
-from shir_connect.etl.eventbrite import Eventbrite, EventbriteLoader
+from shir_connect.etl.sources.eventbrite import Eventbrite, EventbriteLoader
 
 def test_eventbrite_token():
     eventbrite = Eventbrite()

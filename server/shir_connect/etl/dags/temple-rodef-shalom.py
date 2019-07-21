@@ -9,7 +9,7 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
 
-from shir_connect.etl.data_loader import DataLoader
+from shir_connect.etl.sources.eventbrite import EventbriteLoader
 from shir_connect.database.database import Database
 
 ####################################################################
@@ -20,7 +20,7 @@ def load_eventbrite_data():
     """Pulls event data from Eventbrite starting at the date of the
     most recently edited event and loads them into the events table
     in the RDS database."""
-    data_loader = DataLoader()
+    data_loader = EventbriteLoader()
     data_loader.run()
 
 def refresh_materialized_views():

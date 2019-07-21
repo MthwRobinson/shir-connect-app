@@ -19,6 +19,7 @@ reqs = [
     'requests',
     'uszipcode',
     'uuid',
+    'werkzeug>=0.15',
     'xkcdpass',
     'xlrd'
 ]

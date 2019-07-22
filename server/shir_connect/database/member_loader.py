@@ -4,7 +4,7 @@ import os
 
 import daiquiri
 
-from shir_connect.etl.mm2000 import MM2000
+from shir_connect.etl.sources.mm2000 import MM2000
 from shir_connect.database.database import Database
 
 class MemberLoader:
@@ -27,8 +27,8 @@ class MemberLoader:
                 load_status = self.mm2000.load(df)
             except ValueError:
                 load_status = False
-        
-        return load_status 
+
+        return load_status
 
     def load_resignations(self, df, source='MM2000'):
         """Loads resignation data into the database."""

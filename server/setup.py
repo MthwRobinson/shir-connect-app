@@ -38,7 +38,8 @@ setup(
     version='0.1.1',
     install_requires=reqs,
     extras_require={
-        'test': test_reqs
+        'test': test_reqs,
+        'etl': ['apache-airflow']
     },
     entry_points = {
         'console_scripts':'shir_connect=shir_connect.__main__:main'

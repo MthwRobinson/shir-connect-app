@@ -12,7 +12,7 @@ PROJPATH = os.path.join(PATH, '..', '..')
 # server, each instance has its own namespace
 SUBDOMAIN = PATH.split('/')[-4]
 
-# Application environmental variables 
+# Application environmental variables
 mode = os.getenv('SHIR_CONNECT_MODE')
 DEMO_MODE = mode == 'DEMO' or False
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
@@ -20,7 +20,7 @@ SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')
 
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-JWT_ACCESS_TOKEN_EXPIRES = 30*60 # Expire access tokens after 30 mins 
+JWT_ACCESS_TOKEN_EXPIRES = 30*60 # Expire access tokens after 30 mins
 JWT_REFRESH_TOKEN_EXPIRES = 8*60*60 # Expire refresh tokens after 8 hours
 JWT_TOKEN_LOCATION = ['cookies']
 # Disable HTTPS only for local development because localhost uses HTTP
@@ -60,7 +60,7 @@ MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'
 MAP_GROUP = 'map'
 REPORT_GROUP = 'report'
-ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP, 
+ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP,
                  MAP_GROUP, REPORT_GROUP]
 
 # Custom Configurations
@@ -68,6 +68,5 @@ config = get_config(PROJPATH, HOMEPATH)
 EVENT_GROUPS = config['event_groups']
 AGE_GROUPS = config['age_groups']
 DEFAULT_LOCATION = config['location']
-IDENTIFIERS = config['identifiers']
 AVAILABLE_MODULES = config['modules']
 MEMBER_TYPES = config['member_types']

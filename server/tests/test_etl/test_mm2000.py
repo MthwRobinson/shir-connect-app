@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pytest
 
-import shir_connect.etl.mm2000 as m
+import shir_connect.etl.sources.mm2000 as m
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -60,7 +60,7 @@ def test_error_raises_with_bad_resign_columns():
                        'Resignation Reason': ['Too many bears', 'Not enough birds']})
     with pytest.raises(ValueError):
         mm2000.load_resignations(df)
-    
+
     df = pd.DataFrame({'Member ID': [1,2],
                        'Caravan Date': ['2018-01-01', '2019-01-01'],
                        'Resignation Reason': ['Too many bears', 'Not enough birds']})
@@ -69,7 +69,7 @@ def test_error_raises_with_bad_resign_columns():
 
 def test_resignations_load():
     mm2000 = m.MM2000(database=FakeDatabase())
-    
+
     df = pd.DataFrame({'Member ID': [867, 6309],
                        'Resign Date': ['2018-01-01', '2019-01-01'],
                        'Resignation Reason': ['Too many bears', 'Not enough birds'],
@@ -83,7 +83,7 @@ def test_resignation_reason():
 
     category = m._find_resignation_reason("Shul is too far")
     assert category == 'Too Far'
-    
+
     category = m._find_resignation_reason("Don't ever come")
     assert category == 'Inactive'
 
@@ -123,7 +123,7 @@ def test_add_postal_code():
 def test_parse_mm2000_date():
     item = {'birth_date': '0000-01-01'}
     assert m._parse_mm2000_date(item, 'birth_date') == {'birth_date': None}
-    
+
     item = {'birth_date': '1999-01-01'}
     assert m._parse_mm2000_date(item, 'birth_date') == {'birth_date': '1999-01-01'}
 
@@ -131,15 +131,15 @@ def test_parse_mm2000_active():
     item = {'member_type': None}
     assert m._check_mm2000_active(item) == {'member_type': None,
                                            'active_member': False}
- 
+
     item = {'member_type': 'MEMFAM'}
     assert m._check_mm2000_active(item) == {'member_type': 'MEMFAM',
                                            'active_member': True}
- 
+
     item = {'member_type': 'Bird'}
     assert m._check_mm2000_active(item) == {'member_type': 'Bird',
                                            'active_member': False}
-    
+
     item = {'member_type': 'STAFF'}
     assert m._check_mm2000_active(item) == {'member_type': 'STAFF',
                                            'active_member': True}
@@ -148,7 +148,7 @@ def test_mm2000_load():
     mm2000 = m.MM2000(database=FakeDatabase())
     mm2000.fake_news = FakerNews()
     mm2000.parse_mm2000 = lambda *args, **kwargs: ['item1', 'item2']
-    
+
     mm2000.check_columns = lambda *args, **kwargs: True
     df = pd.DataFrame({'MemberID': [1,2], 'Name': ['Carl', 'Carla']})
     load_status = mm2000.load(df)

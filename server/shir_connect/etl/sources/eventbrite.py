@@ -1,32 +1,153 @@
-""" ETL process for loading data into Postgres """
+"""
+Objects for pulling and loading data from Postgres. Includes:
+    1. Eventbrite: The class for making calls to the Eventbrite API
+    2. EventbriteLoader: The class for making Eventbrite calls, transforming
+        it appropriately and loading it into the Postgres database
+"""
 from copy import deepcopy
 import datetime
+import json
 import logging
 import time
+import urllib
 
 import arrow
 import daiquiri
+import requests
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
-from shir_connect.etl.eventbrite import Eventbrite
 
-class DataLoader(object):
-    """ Loads data from multiple sources into Postgres """
+class Eventbrite(object):
+    """ Makes Eventbrite REST calls using an OAUTH token """
     def __init__(self):
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
 
-        self.database = Database()
+        self.token = conf.EVENTBRITE_OAUTH
+        self.url = 'https://www.eventbriteapi.com/v3'
+
+    def get_token_info(self):
+        """ Returns metadata about the account associated with the token """
+        params = urllib.parse.urlencode({'token': self.token})
+        url = self.url + '/users/me/?' + params
+        response = requests.get(url)
+        return response
+
+    def get_events(self, org_id, start=None, last_modified=None, page=1):
+        """ Pulls a list of events based on id """
+        url = self.url + '/organizers/%s/events/'%(org_id)
+
+        # Add the query parameters
+        param_dict = {'token': self.token, 'page': page}
+        if start:
+            date = start + 'T0:00:00'
+            param_dict['start_date.range_start'] = date
+        if last_modified:
+            date = last_modified + 'T0:00:00'
+            param_dict['date_modified.range_start'] = date
+        params = urllib.parse.urlencode(param_dict)
+        url += '?' + params
+
+        # Make and parse the request
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            events = json.loads(response.text)
+            return events
+
+    def get_event(self, event_id, page=1):
+        """ Returns an event based on an id """
+        params = urllib.parse.urlencode({
+            'token': self.token,
+            'page': page
+        })
+        url = self.url + '/events/%s'%(event_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            event = json.loads(response.text)
+            return event
+
+    def get_attendees(self, event_id, page=1):
+        """ Returns the attendees of an event based on an id """
+        params = urllib.parse.urlencode({
+            'token': self.token,
+            'page': page
+        })
+        url = self.url + '/events/%s/attendees'%(event_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            attendees = json.loads(response.text)
+            return attendees
+
+    def get_order(self, order_id, page=1):
+        """ Returns metadata about an order """
+        params = urllib.parse.urlencode({
+            'token': self.token,
+            'page': page
+        })
+        url = self.url + '/orders/%s'%(order_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            order = json.loads(response.text)
+            return order
+
+    def get_venue(self, venue_id, page=1):
+        """ Returns the metadata for a venue """
+        params = urllib.parse.urlencode({
+            'token': self.token,
+            'page': page
+        })
+        url = self.url + '/venues/%s'%(venue_id)
+        url += '?' + params
+        response = requests.get(url)
+        if response.status_code != 200:
+            code = response.status_code
+            msg = 'Response had status code: %s'%(code)
+            self.logger.warning(msg)
+            return None
+        else:
+            venue = json.loads(response.text)
+            return venue
+
+class EventbriteLoader(object):
+    """Loads data from Eventbrite into Postgres """
+    def __init__(self, eventbrite_org, database=None):
+        daiquiri.setup(level=logging.INFO)
+        self.logger = daiquiri.getLogger(__name__)
+
+        self.database = Database(database=database)
         self.eventbrite = Eventbrite()
-        self.eventbrite_org = conf.IDENTIFIERS['eventbrite_org']
+        self.eventbrite_org = eventbrite_org
 
     def run(self, test=False):
         """ Runs the data load process """
-        last_event_date = self.database.last_event_date()
-        if last_event_date:
-            look_back = datetime.datetime.now() - datetime.timedelta(days=60)
-            first_event = min(look_back, last_event_date)
+        last_load_date = self.database.last_event_load_date()
+        if last_load_date:
+            look_back = datetime.datetime.now() - datetime.timedelta(days=1)
+            first_event = min(look_back, last_load_date)
             start = str(first_event)[:10]
             self.logger.info('Loading events starting at %s'%(start))
         else:
@@ -101,16 +222,13 @@ class DataLoader(object):
                 self.logger.info(msg)
                 events = self.get_events(start, page)
 
-        # Refresh the materialized views with the new data
-        self.database.refresh_views()
-
     def get_events(self, start, page=1):
-        """ 
+        """
         Pulls events from eventbrite and sleeps if the rate limit
         has been exceeded
         """
         org_id = self.eventbrite_org
-        events = self.eventbrite.get_events(org_id=org_id, start=start, 
+        events = self.eventbrite.get_events(org_id=org_id, start=start,
                                             page=page)
         if not events:
             # Sleep until eventbrite resets
@@ -126,7 +244,7 @@ class DataLoader(object):
         """
         attendees = self.eventbrite.get_attendees(event_id, page)
         if not attendees:
-            # If events comes back as none, sleep until the 
+            # If events comes back as none, sleep until the
             # Eventbrite rate limit resets
             self.logger.info('Rate limit exceed. Sleeping 30 mins')
             time.sleep(3600)
@@ -205,6 +323,3 @@ class DataLoader(object):
         venue_['latitude'] = float(venue_['latitude'])
         venue_['longitude'] = float(venue_['longitude'])
         self.database.load_item(venue_, 'venues')
-
-
-

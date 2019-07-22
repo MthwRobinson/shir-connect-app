@@ -1,8 +1,5 @@
 name: Temple Rodef Shalom
 
-identifiers:
-  eventbrite_org: 1358538665
-
 modules:
   - events
   - members

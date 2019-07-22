@@ -34,7 +34,7 @@ class Database(object):
         self.database = conf.PG_DATABASE if not database else database
         self.connection = psycopg2.connect(
             user = conf.PG_USER,
-            dbname = conf.PG_DATABASE,
+            dbname = self.database,
             host = conf.PG_HOST
         )
 

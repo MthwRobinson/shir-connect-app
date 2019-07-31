@@ -69,7 +69,8 @@ def initialize_log_table():
         scheme text,
         url text,
         url_root text,
-        user_agent text
+        user_agent text,
+        load_datetime timestamp
     )
     """
     LOGGER.info('Creating the shir_connect_logs table ...')

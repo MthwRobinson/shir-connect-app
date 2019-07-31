@@ -28,7 +28,7 @@ JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'DEV'
 JWT_COOKIE_CSRF_PROTECT = True
 
 # Database configurations and secrets
-FIDDLER_RDS = 'shir-connect.ccoaub1btbjl.us-east-1.rds.amazonaws.com'
+FIDDLER_RDS = os.getenv('FIDDLER_RDS')
 PG_USER = 'master'
 PG_HOST = FIDDLER_RDS
 PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN
@@ -42,7 +42,7 @@ MATERIALIZED_VIEWS = [
 
 # Test configs
 TEST_USER = 'unittestuser'
-TEST_PASSWORD = 'YBjQOlzzzI!4jX'
+TEST_PASSWORD = os.getenv('UNIT_TEST_PW')
 
 # Service configurations
 ALLOWED_EXTENSIONS = ['.csv', '.xls', '.xlsx']

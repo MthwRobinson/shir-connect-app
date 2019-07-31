@@ -197,7 +197,7 @@ def log_request(request, user, authorized, database=None):
         database = Database(database='postgres', schema='application_logs')
 
     # Don't write logs to the table during unit tests or development
-    if conf.SHIR_CONNECT_ENV in ['TEST']:
+    if conf.SHIR_CONNECT_ENV in ['DEV', 'TEST']:
         return None
     else:
         item = {

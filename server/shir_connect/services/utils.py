@@ -4,8 +4,10 @@ REST calls. """
 import re
 
 from flask import jsonify, request
+import uuid
 
 import shir_connect.configuration as conf
+from shir_connect.database.database import Database
 
 def demo_mode(fields, demo=False):
     """ If the SHIR_CONNECT_MODE environmental variable is set
@@ -169,3 +171,48 @@ def check_access(user, module, database):
     """Checks to see if the user has access to the specified module. """
     user = database.get_item('users', user)
     return module in user['modules']
+
+def log_request(request, user, authorized, database=None):
+    """Logs the API request to the database for security monitoring
+    and analyzing user metrics
+
+    Parameters
+    ----------
+    request : request
+        The flask request object for the API call
+    user : str
+        The user who made the API call. Pulled from the JWT.
+    authorized : boolean
+        Indicates whether of not the user was authorized to
+        access the end point.
+    database : shir_connect.database.database
+        A Shir Connect database object. Primarily used for testing
+
+    Returns
+    -------
+    Logs information about the request to the Postgres database.
+    """
+    if not database:
+        database = Database(database='postgres', schema='application_logs')
+
+    # Don't write logs to the table during unit tests or development
+    if conf.SHIR_CONNECT_ENV in ['TEST']:
+        return None
+    else:
+        item = {
+            'id': uuid.uuid4().hex,
+            'application_user': user,
+            'authorized': authorized,
+            'base_url': request.base_url,
+            'endpoint': request.endpoint,
+            'host': request.host,
+            'host_url': request.host_url,
+            'query_string': request.query_string.decode('utf-8'),
+            'referrer': request.referrer,
+            'remote_addr': request.remote_addr,
+            'scheme': request.scheme,
+            'url': request.url,
+            'url_root': request.url_root,
+            'user_agent': str(request.user_agent)
+        }
+        database.load_item(item, 'shir_connect_logs')

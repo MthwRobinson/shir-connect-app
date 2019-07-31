@@ -1,6 +1,4 @@
-from flask import jsonify
-
-import shir_connect.services.utils as utils 
+import shir_connect.services.utils as utils
 from shir_connect.services.app import app
 
 CLIENT = app.test_client()
@@ -29,6 +27,23 @@ class FakeDatabase:
             modules = ['events']
         return {'modules': modules}
 
+    def load_item(self, item, table):
+        pass
+
+class FakeRequest:
+    def __init__(self):
+        self.base_url = 'https://parrot.shirconnect.com'
+        self.endpoint = 'parrots.squawk'
+        self.host = 'parrot.shirconnect'
+        self.host_url = 'https://parrot.shirconnect'
+        self.query_string = b"?q=parrot"
+        self.referrer = 'https://parrot.shirconnect.com'
+        self.remote_addr = '1.2.3.4'
+        self.scheme = 'https'
+        self.url = 'https://parrot.shirconnect.com/parrots'
+        self.url_root = 'parrots'
+        self.user_agent = 'parrot browser'
+
 def test_demo_mode():
     response = kangaroo()
     assert response['first_name'] != 'Matt'
@@ -43,67 +58,67 @@ def test_validate_inputs():
     url = '/service/test/test'
     response = CLIENT.get(url)
     assert response.status_code == 422
-    
+
     url = '/service/test/101'
     response = CLIENT.get(url)
     assert response.status_code == 422
-    
+
     url = '/service/test/100'
     response = CLIENT.get(url)
     assert response.status_code == 200
-    
+
     response = CLIENT.get(url + '?limit=25')
     assert response.status_code == 200
     response = CLIENT.get(url + '?limit=26')
     assert response.status_code == 422
     response = CLIENT.get(url + '?limit=carl')
     assert response.status_code == 422
-    
+
     response = CLIENT.get(url + '?page=25')
     assert response.status_code == 200
     response = CLIENT.get(url + '?page=carl')
     assert response.status_code == 422
-    
+
     response = CLIENT.get(url + '?order=desc')
     assert response.status_code == 200
     response = CLIENT.get(url + '?order=asc')
     assert response.status_code == 200
     response = CLIENT.get(url + '?order=carl')
     assert response.status_code == 422
-    
+
     response = CLIENT.get(url + '?sort=blah')
     assert response.status_code == 200
     sort = 'carl!!' * 5
     response = CLIENT.get(url + '?sort=' + sort)
-    assert response.status_code == 422 
-    
+    assert response.status_code == 422
+
     response = CLIENT.get(url + '?q=blah')
     assert response.status_code == 200
-    q = 'carl!!' * 10 
+    q = 'carl!!' * 10
     response = CLIENT.get(url + '?q=' + q)
-    assert response.status_code == 422 
-    
+    assert response.status_code == 422
+
     response = CLIENT.get(url + '?name=carl')
     assert response.status_code == 200
     response = CLIENT.get(url + '?name=carlaaaaa')
-    assert response.status_code == 422 
-    
+    assert response.status_code == 422
+
     response = CLIENT.get(url + '?count=carl')
     assert response.status_code == 422
     response = CLIENT.get(url + '?count=22')
     assert response.status_code == 422
     response = CLIENT.get(url + '?name=20')
-    assert response.status_code == 200 
+    assert response.status_code == 200
 
 def test_validate_int():
     value = 9
     valid = utils.validate_int(value, max_value=8)
-    assert not valid 
+    assert not valid
     valid = utils.validate_int(value, max_value=10)
     assert valid
     valid = utils.validate_int(value)
     assert valid
-    
+
     value = 'koala'
     valid = utils.validate_int(value)
     assert not valid
@@ -117,7 +132,7 @@ def test_validate_date():
 
     value ='2018-01-01-conure'
     assert not utils.validate_date(value)
-    
+
     value ='2018-01-0177'
     assert not utils.validate_date(value)
 
@@ -125,3 +140,9 @@ def test_check_access():
     fake_database = FakeDatabase()
     assert utils.check_access('Jabber', 'members', fake_database) == True
     assert utils.check_access('Chester', 'members', fake_database) == False
+
+def test_log_request():
+    fake_database = FakeDatabase()
+    fake_request = FakeRequest()
+
+    utils.log_request(fake_request, 'jabber', False, fake_database)

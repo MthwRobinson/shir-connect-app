@@ -15,7 +15,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from shir_connect.database.database import Database
 from shir_connect.database.events import Events
 import shir_connect.configuration as conf
-from shir_connect.services.utils import validate_inputs
+from shir_connect.services.utils import validate_inputs, log_request
 
 events = Blueprint('events', __name__)
 
@@ -28,7 +28,11 @@ def get_event(event_id):
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if conf.EVENT_GROUP not in user['modules']:
+
+    authorized = conf.EVENT_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
@@ -51,17 +55,21 @@ def get_events():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if conf.EVENT_GROUP not in user['modules']:
+
+    authorized = conf.EVENT_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
-    
+
     limit = request.args.get('limit')
     page = request.args.get('page')
     order = request.args.get('order')
     sort = request.args.get('sort')
     q = request.args.get('q')
     fake_data = request.args.get('fake_data')
-    
+
     limit = 25 if not limit else int(limit)
     page = 1 if not page else int(page)
     order = 'desc' if not order else order
@@ -95,10 +103,14 @@ def get_event_locations():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
-    
+
     fake_data = request.args.get('fake_data')
     fake_data = fake_data is not None and fake_data == 'true'
     response = event_manager.get_event_locations(fake=fake_data)
@@ -112,9 +124,14 @@ def get_event_cities():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = event_manager.database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
+
     response = event_manager.get_event_cities()
     return jsonify(response)
 
@@ -126,15 +143,16 @@ def export_event_aggregates():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if conf.EVENT_GROUP not in user['modules']:
+
+    authorized = conf.EVENT_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have acccess to events'%(jwt_user)}
         return jsonify(response), 403
 
     q = request.args.get('q')
-    if q:
-        query = ('name', q)
-    else:
-        query = None
+    query = ('name', q) if q else None
 
     database = Database()
     df = database.read_table('event_aggregates', query=query)

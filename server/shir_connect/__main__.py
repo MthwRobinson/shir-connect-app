@@ -40,11 +40,41 @@ main.add_command(initialize)
 
 @click.command('refresh_views', help='Refreshes materialized views')
 def refresh_views():
-    """ Refrshes the materialized views for the dashboard """
+    """Refreshes the materialized views for the dashboard """
     database = Database()
     LOGGER.info('Refreshing materialized views ...')
     database.refresh_views()
 main.add_command(refresh_views)
+
+@click.command('initialize_log_table', help='Builds the table for storing logs')
+def initialize_log_table():
+    """Builds the table in the postgres database that is used for storing
+    application logs."""
+    database = Database(database='postgres')
+    LOGGER.info('Creating the application_logs schema ...')
+    schema_sql = "CREATE SCHEMA IF NOT EXISTS application_logs"
+    database.run_query(schema_sql)
+    table_sql = """
+    CREATE TABLE IF NOT EXISTS application_logs.shir_connect_logs (
+        id text,
+        application_user text,
+        authorized boolean,
+        base_url text,
+        endpoint text,
+        host text,
+        host_url text,
+        query_string text,
+        referrer text,
+        remote_addr text,
+        scheme text,
+        url text,
+        url_root text,
+        user_agent text
+    )
+    """
+    LOGGER.info('Creating the shir_connect_logs table ...')
+    database.run_query(table_sql)
+main.add_command(initialize_log_table)
 
 @click.command('update_geometries', help='Updates the zip code geometries')
 def update_geometries():

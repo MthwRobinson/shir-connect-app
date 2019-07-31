@@ -1,6 +1,7 @@
 """ Utilities for user for use with the Shir Connect REST services.
 Most are deocrators that modify the functions that define the
 REST calls. """
+import datetime
 import re
 
 from flask import jsonify, request
@@ -213,6 +214,7 @@ def log_request(request, user, authorized, database=None):
             'scheme': request.scheme,
             'url': request.url,
             'url_root': request.url_root,
-            'user_agent': str(request.user_agent)
+            'user_agent': str(request.user_agent),
+            'load_datetime': datetime.datetime.now()
         }
         database.load_item(item, 'shir_connect_logs')

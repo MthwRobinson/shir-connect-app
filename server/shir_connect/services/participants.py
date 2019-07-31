@@ -11,7 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.participants import Participants
-from shir_connect.services.utils import validate_inputs
+from shir_connect.services.utils import validate_inputs, log_request
 
 participants = Blueprint('participants', __name__)
 
@@ -23,7 +23,11 @@ def get_participant(participant_id):
     participant_manager = Participants()
     jwt_user = get_jwt_identity()
     user = participant_manager.database.get_item('users', jwt_user)
-    if conf.MEMBER_GROUP not in user['modules']:
+
+    authorized = conf.MEMBER_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to participants'%(jwt_user)}
         return jsonify(response), 403
 
@@ -45,7 +49,11 @@ def get_participants():
     participant_manager = Participants()
     jwt_user = get_jwt_identity()
     user = participant_manager.database.get_item('users', jwt_user)
-    if conf.MEMBER_GROUP not in user['modules']:
+
+    authorized = conf.MEMBER_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         msg = "{} does not have access to participants."
         response = {'message': msg.format(jwt_user)}
         return jsonify(response), 403
@@ -56,7 +64,7 @@ def get_participants():
     sort = request.args.get('sort')
     q = request.args.get('q')
     fake_data = request.args.get('fake_data')
-    
+
     limit = 25 if not limit else int(limit)
     page = 1 if not page else int(page)
     order = 'asc' if not order else order

@@ -5,13 +5,13 @@ Includes:
     1. Flask route with /map path
     2. MapGeometries class for database calls
 """
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from shir_connect.database.database import Database
 from shir_connect.database.map_geometries import MapGeometries
 import shir_connect.configuration as conf
-from shir_connect.services.utils import validate_inputs
+from shir_connect.services.utils import validate_inputs, log_request
 
 map_geometries = Blueprint('map_geometries', __name__)
 
@@ -22,7 +22,11 @@ def map_authorize():
     database = Database()
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access the map'%(jwt_user)}
         return jsonify(response), 403
     else:
@@ -38,9 +42,14 @@ def geometry(zipcode):
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
+
     layer = map_geometries.get_geometry(zipcode)
     return jsonify(layer)
 
@@ -52,9 +61,14 @@ def geometries():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
+
     layers = map_geometries.get_geometries()
     return jsonify(layers)
 
@@ -66,9 +80,14 @@ def map_zip_codes():
     # Make sure the user has access to the module
     jwt_user = get_jwt_identity()
     user = map_geometries.database.get_item('users', jwt_user)
-    if conf.MAP_GROUP not in user['modules']:
+
+    authorized = conf.MAP_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
+
     zip_codes = map_geometries.get_zip_codes()
     return jsonify(zip_codes)
 

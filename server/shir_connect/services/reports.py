@@ -7,7 +7,7 @@ Includes:
 from copy import deepcopy
 import datetime
 
-from flask import Blueprint, jsonify, request 
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 
@@ -128,9 +128,12 @@ def get_report_event_count():
     """Pulls the event counts for the current report."""
     event_manager = Events()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP,
                                     event_manager.database)
-    if not has_access:
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
@@ -145,9 +148,12 @@ def get_new_member_count():
     """Pulls the new event counts by quarter."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP,
                                     members.database)
-    if not has_access:
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
@@ -162,13 +168,15 @@ def get_member_demographics():
     """Pulls the current membership demographics."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
-                                    members.database)
 
-    if not has_access:
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP,
+                                    members.database)
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
-    
+
     only = request.args.get('only')
     new_members = only == 'new_members'
 
@@ -181,13 +189,15 @@ def get_member_locations():
     """Pulls in the current breakdown of member location."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP,
+
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP,
                                     members.database)
-    
-    if not has_access:
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
-    
+
     level = request.args.get('level')
     level = level if level else 'city'
 
@@ -216,9 +226,11 @@ def get_new_members():
     """Pulls in a list of the most recent members of the Congregation."""
     database = Database()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, database)
 
-    if not has_access:
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP, database)
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
@@ -235,9 +247,11 @@ def get_households_by_year():
     """Pulls in a list of the most recent members of the Congregation."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
 
-    if not has_access:
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
@@ -263,9 +277,11 @@ def get_household_types():
     """Pulls in a list of the most recent members of the Congregation."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
 
-    if not has_access:
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 
@@ -274,7 +290,7 @@ def get_household_types():
     for item in all_households:
         item['total'] = str(item['total'])
     response['all_households'] = all_households
-    
+
     now = datetime.datetime.now()
     year_ago = now - datetime.timedelta(days=365)
     new_start = str(year_ago)[:10]
@@ -292,9 +308,11 @@ def get_resignation_types():
     """Breaks down resignations over hte past year by type."""
     members = Members()
     jwt_user = get_jwt_identity()
-    has_access = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
 
-    if not has_access:
+    authorized = utils.check_access(jwt_user, conf.REPORT_GROUP, members.database)
+    utils.log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '{} does not have access to reports.'.format(jwt_user)}
         return jsonify(response), 403
 

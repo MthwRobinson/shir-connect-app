@@ -19,6 +19,7 @@ from flask_jwt_extended import (
 
 import shir_connect.configuration as conf
 from shir_connect.database.user_management import UserManagement
+from shir_connect.services.utils import log_request
 
 user_management = Blueprint('user_management', __name__)
 
@@ -30,7 +31,11 @@ def user_register():
     # Only and admin can create a new user
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can add users'}
         return jsonify(response), 403
 
@@ -78,9 +83,14 @@ def delete_user(username):
     user_management = UserManagement()
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can delete users'}
         return jsonify(response), 403
+
     user_management.delete_user(username)
     response = {'message': 'user %s has been removed'%(username)}
     return jsonify(response), 204
@@ -109,6 +119,8 @@ def user_authenticate():
         username=username,
         password=password
     )
+    log_request(request, username, authorized)
+
     if authorized:
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
@@ -186,6 +198,7 @@ def change_password():
             username=username,
             password=old_password
         )
+        log_request(request, username, authorized)
         if not authorized:
             response = {'message': 'old password was incorrect'}
             return jsonify(response), 400
@@ -213,7 +226,11 @@ def update_role():
     user_management = UserManagement()
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can update roles'}
         return jsonify(response), 403
     else:
@@ -238,7 +255,11 @@ def update_access():
     user_management = UserManagement()
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can update accesses'}
         return jsonify(response), 403
     else:
@@ -258,12 +279,16 @@ def update_access():
 @user_management.route('/service/user/reset-password', methods=['POST'])
 @jwt_required
 def reset_password():
-    """ Resets the password for the user in the post body """
+    """Resets the password for the user in the post body """
     user_management = UserManagement()
     # Only and admin can reset a password
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can reset password'}
         return jsonify(response), 403
     else:
@@ -289,7 +314,11 @@ def list_users():
     user_management = UserManagement()
     jwt_user = get_jwt_identity()
     admin_user = user_management.get_user(jwt_user)
-    if admin_user['role'] != 'admin':
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can reset password'}
         return jsonify(response), 403
     else:

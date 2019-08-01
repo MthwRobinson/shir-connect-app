@@ -11,7 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from shir_connect.database.database import Database
 from shir_connect.database.trends import Trends
 import shir_connect.configuration as conf
-from shir_connect.services.utils import validate_inputs
+from shir_connect.services.utils import validate_inputs, log_request
 
 trends = Blueprint('trends', __name__)
 
@@ -22,7 +22,11 @@ def member_authorize():
     database = Database()
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if conf.TRENDS_GROUP not in user['modules']:
+
+    authorized = conf.TRENDS_GROUP in user['modules']
+    log_request(request, authorized, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to trends'%(jwt_user)}
         return jsonify(response), 403
     else:
@@ -34,12 +38,16 @@ def member_authorize():
 def month_revenue():
     """ Finds event revenue aggregated by month """
     trends = Trends()
-    # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if conf.TRENDS_GROUP not in user['modules']:
+
+    authorized = conf.TRENDS_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
+
     response = trends.get_monthly_revenue()
     return jsonify(response)
 
@@ -48,10 +56,13 @@ def month_revenue():
 def average_attendance():
     """ Finds the avg event attendace by day of week """
     trends = Trends()
-    # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if conf.TRENDS_GROUP not in user['modules']:
+
+    authorized = conf.TRENDS_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
     response = trends.get_average_attendance()
@@ -63,10 +74,13 @@ def average_attendance():
 def age_group_attendees():
     """ Finds a distinct count of attendees by age group and year """
     trends = Trends()
-    # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if conf.TRENDS_GROUP not in user['modules']:
+
+    authorized = conf.TRENDS_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
 
@@ -82,17 +96,20 @@ def age_group_attendees():
 def participation(age_group):
     """ Finds the top events or participants by age group """
     trends = Trends()
-    # Make sure user has access to the trends page
     jwt_user = get_jwt_identity()
     user = trends.database.get_item('users', jwt_user)
-    if conf.TRENDS_GROUP not in user['modules']:
+
+    authorized = conf.TRENDS_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
 
     limit = request.args.get('limit')
     top = request.args.get('top')
     fake_data = request.args.get('fake_data')
-    
+
     limit = 25 if not limit else int(limit)
     top = 'participant' if not top else top
     fake_data = fake_data is not None and fake_data == 'true'

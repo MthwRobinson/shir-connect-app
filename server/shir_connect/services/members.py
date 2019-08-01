@@ -11,7 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.database.members import Members
-from shir_connect.services.utils import validate_inputs
+from shir_connect.services.utils import validate_inputs, log_request
 
 members = Blueprint('members', __name__)
 
@@ -22,7 +22,11 @@ def member_authorize():
     database = Database()
     jwt_user = get_jwt_identity()
     user = database.get_item('users', jwt_user)
-    if conf.MEMBER_GROUP not in user['modules']:
+
+    authorized = conf.MEMBER_GROUP in user['modules']
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': '%s does not have access to members'%(jwt_user)}
         return jsonify(response), 403
     else:
@@ -36,7 +40,11 @@ def upload_members():
     member_manager = Members()
     jwt_user = get_jwt_identity()
     user = member_manager.database.get_item('users', jwt_user)
-    if user['role'] != conf.ADMIN_ROLE:
+
+    authorized = user['role'] == conf.ADMIN_ROLE
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
         response = {'message': 'only admins can upload files'}
         return jsonify(response), 403
 

@@ -6,18 +6,19 @@ import pandas as pd
 from shir_connect.services.app import app
 from shir_connect.database.user_management import UserManagement
 import shir_connect.services.utils as utils
+import shir_connect.configuration as conf
 
 CLIENT = app.test_client()
 
 def test_monthly_revenue():
     user_management = UserManagement()
-    user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.delete_user(conf.TEST_USER)
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
     url = '/service/trends/monthly-revenue'
-    
+
     response = CLIENT.post('/service/user/authenticate', json=dict(
-        username='unittestuser',
-        password='testPassword!'
+        username=conf.TEST_USER,
+        password=conf.TEST_PASSWORD
     ))
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
@@ -25,7 +26,7 @@ def test_monthly_revenue():
     # User must have access to trends
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['trends'])
+    user_management.update_access(conf.TEST_USER, ['trends'])
 
     # Success!
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
@@ -39,28 +40,28 @@ def test_monthly_revenue():
     url = '/service/user/logout'
     response = CLIENT.post(url)
     assert response.status_code == 200
-    
-    user_management.delete_user('unittestuser')
-    user = user_management.get_user('unittestuser')
+
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
     assert user == None
 
 def test_avg_attendance():
     user_management = UserManagement()
-    user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.delete_user(conf.TEST_USER)
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
     url = '/service/trends/avg-attendance'
-    
+
     response = CLIENT.post('/service/user/authenticate', json=dict(
-        username='unittestuser',
-        password='testPassword!'
+        username=conf.TEST_USER,
+        password=conf.TEST_PASSWORD
     ))
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
-   
+
     # User must have access to trends
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['trends'])
+    user_management.update_access(conf.TEST_USER, ['trends'])
 
     # Success!
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
@@ -70,32 +71,32 @@ def test_avg_attendance():
         assert 'day_of_week' in result
         assert 'day_order' in result
         assert 'avg_attendance' in result
-    
+
     url = '/service/user/logout'
     response = CLIENT.post(url)
     assert response.status_code == 200
-    
-    user_management.delete_user('unittestuser')
-    user = user_management.get_user('unittestuser')
+
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
     assert user == None
 
 def test_year_group_attendees():
     user_management = UserManagement()
-    user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.delete_user(conf.TEST_USER)
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
     url = '/service/trends/age-group-attendance'
-    
+
     response = CLIENT.post('/service/user/authenticate', json=dict(
-        username='unittestuser',
-        password='testPassword!'
+        username=conf.TEST_USER,
+        password=conf.TEST_PASSWORD
     ))
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
-    
+
     # User must have access to trends
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['trends'])
+    user_management.update_access(conf.TEST_USER, ['trends'])
 
     # Success!
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
@@ -112,32 +113,32 @@ def test_year_group_attendees():
     for key in response.json:
         assert 'group' in response.json[key]
         assert 'count' in response.json[key]
-    
+
     url = '/service/user/logout'
     response = CLIENT.post(url)
     assert response.status_code == 200
 
-    user_management.delete_user('unittestuser')
-    user = user_management.get_user('unittestuser')
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
     assert user == None
 
 def test_participation():
     user_management = UserManagement()
-    user_management.delete_user('unittestuser')
-    user_management.add_user('unittestuser', 'testPassword!')
+    user_management.delete_user(conf.TEST_USER)
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
     url = '/service/trends/participation/Young Professional'
-    
+
     response = CLIENT.post('/service/user/authenticate', json=dict(
-        username='unittestuser',
-        password='testPassword!'
+        username=conf.TEST_USER,
+        password=conf.TEST_PASSWORD
     ))
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
-    
-    # User must have access to the trends page 
+
+    # User must have access to the trends page
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 403
-    user_management.update_access('unittestuser', ['trends'])
+    user_management.update_access(conf.TEST_USER, ['trends'])
 
     response = CLIENT.get(url, headers={'Authorization': 'access_token_cookies=%s'%(jwt)})
     assert response.status_code == 200
@@ -154,12 +155,12 @@ def test_participation():
         assert 'id' in item
         assert 'name' in item
         assert 'total' in item
-    
+
     url = '/service/user/logout'
     response = CLIENT.post(url)
     assert response.status_code == 200
 
-    
-    user_management.delete_user('unittestuser')
-    user = user_management.get_user('unittestuser')
+
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
     assert user == None

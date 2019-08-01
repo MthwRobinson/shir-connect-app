@@ -17,7 +17,7 @@ class Database(object):
     Connection settings appear in configuration.py
     Secrets must be stored in a .pgpass file
     """
-    def __init__(self, database=None):
+    def __init__(self, database=None, schema=None):
         # Configure the logger
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
@@ -30,7 +30,7 @@ class Database(object):
         self.materialized_views = conf.MATERIALIZED_VIEWS
         self.zip_code = conf.DEFAULT_LOCATION['postal_code']
         self.columns = {}
-        self.schema = conf.PG_SCHEMA
+        self.schema = conf.PG_SCHEMA if not schema else schema
         self.database = conf.PG_DATABASE if not database else database
         self.connection = psycopg2.connect(
             user = conf.PG_USER,

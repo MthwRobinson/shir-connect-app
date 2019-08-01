@@ -24,7 +24,7 @@ def member_authorize():
     user = database.get_item('users', jwt_user)
 
     authorized = conf.TRENDS_GROUP in user['modules']
-    log_request(request, authorized, authorized)
+    log_request(request, jwt_user, authorized)
 
     if not authorized:
         response = {'message': '%s does not have access to trends'%(jwt_user)}

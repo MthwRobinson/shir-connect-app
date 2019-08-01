@@ -193,13 +193,19 @@ def log_request(request, user, authorized, database=None):
     -------
     Logs information about the request to the Postgres database.
     """
-    if not database:
-        database = Database(database='postgres', schema='application_logs')
-
     # Don't write logs to the table during unit tests or development
     if conf.SHIR_CONNECT_ENV in ['DEV', 'TEST']:
         return None
     else:
+        if not database:
+            database = Database(database='postgres', schema='application_logs')
+
+        # By default, the remote_addr attribute on the Flask request object
+        # if the IP address of the referrer, which in our case is NGINX. We
+        # configure NGINX for put the real remote_addr in the header so we're
+        # able to track it.
+        remote_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+
         item = {
             'id': uuid.uuid4().hex,
             'application_user': user,
@@ -210,7 +216,7 @@ def log_request(request, user, authorized, database=None):
             'host_url': request.host_url,
             'query_string': request.query_string.decode('utf-8'),
             'referrer': request.referrer,
-            'remote_addr': request.remote_addr,
+            'remote_addr': remote_addr,
             'scheme': request.scheme,
             'url': request.url,
             'url_root': request.url_root,

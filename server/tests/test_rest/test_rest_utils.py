@@ -38,11 +38,23 @@ class FakeRequest:
         self.host_url = 'https://parrot.shirconnect'
         self.query_string = b"?q=parrot"
         self.referrer = 'https://parrot.shirconnect.com'
-        self.remote_addr = '1.2.3.4'
+        self.remote_addr = 'localhost'
         self.scheme = 'https'
         self.url = 'https://parrot.shirconnect.com/parrots'
         self.url_root = 'parrots'
         self.user_agent = 'parrot browser'
+
+        self.environment = FakeRequestEnviron()
+
+class FakeRequestEnviron:
+    def __init__(self):
+        pass
+
+    def get(self, key, default):
+        if key == 'HTTP_X_FORWARDED_FOR':
+            return '1.2.3.4'
+        else:
+            return default
 
 def test_demo_mode():
     response = kangaroo()

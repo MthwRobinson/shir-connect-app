@@ -21,9 +21,11 @@ class Events:
     def get_events(self, limit=None, page=None, order=None,
                    sort=None, q=None, where=[], fake=False):
         """ Fetches the most recent events from the database """
+        name = 'fake_name' if fake else 'name'
+        venue = 'fake_venue_name' if fake else 'venue_name'
+        query = ([name, venue], q) if q else None
+
         limit = 25 if not limit else limit
-        name_col = 'fake_name' if fake else 'name'
-        query = (name_col, q) if q else None
         df = self.database.read_table('event_aggregates', limit=limit,
                                       page=page, order=order, sort=sort,
                                       query=query, where=where)
@@ -312,7 +314,7 @@ class Events:
         if query:
             query = ('name', query)
         count = self.database.count_rows('event_aggregates', query=query,
-                                         where=[('start_datetime', {'>=': start, 
+                                         where=[('start_datetime', {'>=': start,
                                                                     '<': end})])
         return count
 

@@ -401,7 +401,7 @@ def _build_query_clauses(query=None):
                                                              '%', term, '%')
                 term_search_list.append(search)
             term_search = " OR ".join(term_search_list)
-            query_conditions.append(search)
+            query_conditions.append("({})".format(term_search))
 
         # And then apply and AND condition to ALL of the terms
         query_clause = " AND ".join(query_conditions)

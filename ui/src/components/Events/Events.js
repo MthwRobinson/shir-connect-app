@@ -53,7 +53,7 @@ class Events extends Component {
       this.handleStartDate = this.handleStartDate.bind(this)
       this.handleEndDate = this.handleEndDate.bind(this)
     }
-  
+
     componentDidMount(){
       getDefaultLocation()
         .then(res => {
@@ -88,7 +88,7 @@ class Events extends Component {
         })
     }
 
-    getEvents = (page=1, sortCol='start_datetime', 
+    getEvents = (page=1, sortCol='start_datetime',
                  sortOrder='desc', searchTerms=[]) => {
       // Pulls events to display in a table
       // Params
@@ -97,7 +97,7 @@ class Events extends Component {
       //   sortCol: the column to sort on. must
       //     be a valid column in the events table
       //   sortOrder: the order of sort. must be asc or desc
-      //   searchTerm: an array of search terms to apply. all search 
+      //   searchTerm: an array of search terms to apply. all search
       //   terms are applied as an AND condition
       this.setState({loading: true});
       // Construct the URL parameters
@@ -117,7 +117,7 @@ class Events extends Component {
         const filterEnd = moment(this.state.endDate).format('YYYY-MM-DD')
         url += '&end_date='+filterEnd;
       }
-      
+
       axios.get(url)
         .then(res => {
           let events = [];
@@ -179,33 +179,33 @@ class Events extends Component {
       let searchTerms = [...this.state.searchTerms];
       searchTerms.push(this.state.query);
       this.setState({page: 1, searchTerms: searchTerms, query: ''});
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder,
                      searchTerms);
     }
 
     handleFilter = (event) => {
       // Handles filtering
       event.preventDefault();
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder,
                      this.state.searchTerms);
       this.hideFilter();
     }
 
     clearFilter = () => {
       // Clears the filter settings
-      this.setState({ 
+      this.setState({
         showFilter: false,
         startDate: null,
         endDate: new Date(),
       })
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder,
                      this.state.searchTerms);
     }
 
     showFilter = () => {
       this.setState({ showFilter: true })
     }
-  
+
    hideFilter = () => {
       this.setState({ showFilter: false })
     }
@@ -220,7 +220,7 @@ class Events extends Component {
         }
       }
       this.setState({page: 1, searchTerms: updatedTerms, query: ''});
-      this.getEvents(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getEvents(1, this.state.sortColumn, this.state.sortOrder,
                      updatedTerms);
     }
 
@@ -247,7 +247,7 @@ class Events extends Component {
       console.log(moment(event).format('YYYY-MM-DD'));
       this.setState({startDate: event});
     }
-  
+
     handleEndDate(event){
       // Updates the start date in the state
       this.setState({endDate: event});
@@ -258,7 +258,7 @@ class Events extends Component {
       let leftCaret = null
       if (this.state.page>1){
         leftCaret = (
-          <i 
+          <i
             className='fa fa-caret-left paging-arrows'
             onClick={()=>this.incrementPage('down')}
           >
@@ -268,7 +268,7 @@ class Events extends Component {
       let rightCaret = null
       if (this.state.page<this.state.pages){
         rightCaret = (
-          <i 
+          <i
             className='fa fa-caret-right paging-arrows'
             onClick={()=>this.incrementPage('up')}
           >
@@ -290,10 +290,10 @@ class Events extends Component {
       // Creates the table with event information
       let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
       const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
-    
+
       return(
         <div>
-          <Row className='event-table'>
+          <Row className='table-responsive event-table'>
             <Swipe
               onSwipeRight={()=>this.incrementPage('down')}
               onSwipeLeft={()=>this.incrementPage('up')}
@@ -334,17 +334,17 @@ class Events extends Component {
                 <tbody>
                   {this.state.events.map((event, index) => {
                     return(
-                      <tr 
-                        className='table-row' 
+                      <tr
+                        className='table-row'
                         key={index}
-                        onClick={()=> 
+                        onClick={()=>
                           this.props.history.push('/event?id='+event.id)}
                       >
                         <th>{event.name}</th>
                         <th>{event.start}</th>
-                        <th>{event.venue_name !== null 
+                        <th>{event.venue_name !== null
                             ? event.venue_name : this.state.defaultEventLocation}</th>
-                        <th>{event.attendee_count != null 
+                        <th>{event.attendee_count != null
                             ? event.attendee_count : 0}</th>
                       </tr>
                     )
@@ -389,12 +389,12 @@ class Events extends Component {
                   className="form-control filter-form-date-input"
                 />
               </FormGroup>
-              <Button 
+              <Button
                 className='search-button'
                 bsStyle="primary"
                 type="submit"
               >Apply Filter</Button>
-              <Button 
+              <Button
                 className='search-button'
                 bsStyle="danger"
                 onClick={()=>this.clearFilter()}
@@ -415,10 +415,10 @@ class Events extends Component {
                   className='search-box'
                   value={this.state.query}
                   onChange={this.handleQuery}
-                  type="text" 
+                  type="text"
                 />
               </FormGroup>
-              <Button 
+              <Button
                 bsStyle="primary"
                 className='search-button'
                 type="submit"
@@ -436,7 +436,7 @@ class Events extends Component {
       for(let searchTerm of this.state.searchTerms){
         searchTermPills.push(<div className='pull-right search-term-pill'>
           <b>{searchTerm}</b>
-          <i 
+          <i
             className="fa fa-times pull-right event-icons search-term-times"
             onClick={()=>this.handleRemoveTerm(searchTerm)}>
           </i>
@@ -474,7 +474,7 @@ class Events extends Component {
                 <sup><i className='fa fa-info-circle'
                         data-tip={info}></i>
                 </sup>
-                <i 
+                <i
                   className="fa fa-times pull-right event-icons"
                   onClick={()=>this.props.history.push('/')}
                 >
@@ -483,7 +483,7 @@ class Events extends Component {
                    data-tip="Add a filter to the table."
                    onClick={()=>this.showFilter()}>
                 </i>
-                <i 
+                <i
                   className="fa fa-download pull-right event-icons"
                   data-tip="Download the table of participants"
                   onClick={()=>this.downloadCSV()}
@@ -495,8 +495,8 @@ class Events extends Component {
               {search}
             </div>
             <div className='search-term-row pull-right'>
-              {searchTermPills.length > 0 
-                ? <span id='search-term-list'><b>Search Terms:</b></span> 
+              {searchTermPills.length > 0
+                ? <span id='search-term-list'><b>Search Terms:</b></span>
                 : null}
               {searchTermPills}
             </div>

@@ -20,7 +20,7 @@ import Modal from 'react-responsive-modal';
 import {
   getCSRFToken,
   refreshAccessToken
-} from './../../utilities/authentication'; 
+} from './../../utilities/authentication';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -61,16 +61,16 @@ class Members extends Component {
         this.checkAccess();
         this.getMembers();
       }
-  
+
     checkAccess = () => {
-      // Checks to make sure the user has access to the 
+      // Checks to make sure the user has access to the
       // member access group
       const url = '/service/member/authorize';
       axios.get(url)
         .then(res => {
           this.setState({userRole: res.data.role});
           // Refresh the token to keep the session active
-          refreshAccessToken(); 
+          refreshAccessToken();
 
         })
         .catch(err => {
@@ -88,16 +88,16 @@ class Members extends Component {
       this.props.history.push(url);
     }
 
-    getMembers = (page=1, sortCol='events_attended', 
+    getMembers = (page=1, sortCol='events_attended',
                   sortOrder='desc', searchTerms=[]) => {
-      // Pulls members to display in the table 
-      // Params 
+      // Pulls members to display in the table
+      // Params
       // ------
       //   page: int
       //   sortCol: the column to sort on. must
       //     be a valid column in the members table
       //   sortOrder: the order of sort. must be asc or desc
-      //   searchTerm: an array of search terms to apply. all search 
+      //   searchTerm: an array of search terms to apply. all search
       //   terms are applied as an AND condition
       this.setState({loading: true});
       // Construct the URL parameters
@@ -149,21 +149,21 @@ class Members extends Component {
         }
       })
     }
-  
+
     incrementPage = (direction) => {
       // Increments the page number
       if (direction==='up'){
         if(this.state.page<this.state.pages){
           const page = this.state.page + 1;
           this.setState({page:page});
-          this.getMembers(page, this.state.sortColumn, 
+          this.getMembers(page, this.state.sortColumn,
                           this.state.sortOrder, this.state.searchTerms);
         }
       } else if(direction==='down') {
         if(this.state.page>1){
           const page = this.state.page - 1;
           this.setState({page:page});
-          this.getMembers(page, this.state.sortColumn, 
+          this.getMembers(page, this.state.sortColumn,
                           this.state.sortOrder, this.state.searchTerms);
         }
       }
@@ -175,16 +175,16 @@ class Members extends Component {
       let searchTerms = [...this.state.searchTerms];
       searchTerms.push(this.state.query);
       this.setState({page: 1, searchTerms: searchTerms, query: ''});
-      this.getMembers(1, this.state.sortColumn, 
+      this.getMembers(1, this.state.sortColumn,
                       this.state.sortOrder, searchTerms);
     }
 
     handleFilter = (event) => {
       // Handles filtering
       event.preventDefault();
-      this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getMembers(1, this.state.sortColumn, this.state.sortOrder,
                      this.state.searchTerms);
-      this.hideFilter(); 
+      this.hideFilter();
     }
 
     clearFilter = () => {
@@ -194,7 +194,7 @@ class Members extends Component {
           maxAge: null,
           showFilter: false
         })
-      this.getMembers(1, this.state.sortColumn, this.state.sortOrder, 
+      this.getMembers(1, this.state.sortColumn, this.state.sortOrder,
                      this.state.searchTerms);
     }
 
@@ -229,12 +229,12 @@ class Members extends Component {
       // Updates the query value in the state
       this.setState({query: event.target.value});
     }
-  
+
     handleMinAge(event){
       // Updates the min age value in the state
       this.setState({minAge: event.target.value});
     }
-  
+
     handleMaxAge(event){
       // Updates the max age value in the state
       this.setState({maxAge: event.target.value});
@@ -250,7 +250,7 @@ class Members extends Component {
       let leftCaret = null
       if (this.state.page>1){
         leftCaret = (
-          <i 
+          <i
             className='fa fa-caret-left paging-arrows'
             onClick={()=>this.incrementPage('down')}
           >
@@ -260,7 +260,7 @@ class Members extends Component {
       let rightCaret = null
       if (this.state.page<this.state.pages){
         rightCaret = (
-          <i 
+          <i
             className='fa fa-caret-right paging-arrows'
             onClick={()=>this.incrementPage('up')}
           >
@@ -284,7 +284,7 @@ class Members extends Component {
 
       return(
         <div>
-          <Row className='event-table'>
+          <Row className='table-responsive event-table'>
             <Swipe
                 onSwipeRight={()=>this.incrementPage('down')}
                 onSwipeLeft={()=>this.incrementPage('up')}
@@ -308,14 +308,14 @@ class Members extends Component {
                     </th>
                     <th className='table-heading'
                         onClick={()=>this.handleSort('is_member')}>
-                      Member 
+                      Member
                       {this.state.sortColumn === 'is_member'
                       ? <i className={arrowClass}></i>
                       : null}
                     </th>
                     <th className='table-heading'
                         onClick={()=>this.handleSort('age')}>
-                      Age 
+                      Age
                       {this.state.sortColumn === 'age'
                       ? <i className={arrowClass}></i>
                       : null}
@@ -346,8 +346,8 @@ class Members extends Component {
                 <tbody>
                   {this.state.members.map((member, index) => {
                     return(
-                      <tr 
-                        className='table-row' 
+                      <tr
+                        className='table-row'
                         key={index}
                         onClick={()=>this.selectParticipant(member.participant_id)}
                       >
@@ -426,7 +426,7 @@ class Members extends Component {
       // Toggles the filter modal
       this.setState({ showFilter: true});
     }
-  
+
     hideFilter = () => {
       // Toggles the filter modal
       this.setState({ showFilter: false });
@@ -467,7 +467,7 @@ class Members extends Component {
                     <option value="members">Members</option>
                     <option value="resignations">Resignations</option>
                   </FormControl>
-                  <FormControl 
+                  <FormControl
                     className="upload-file"
                     type="file"
                     inputRef={(ref) => this.uploadInput = ref}
@@ -510,10 +510,10 @@ class Members extends Component {
                 className="search-box"
                 value={this.state.query}
                 onChange={this.handleQuery}
-                type="text" 
+                type="text"
               />
             </FormGroup>
-            <Button 
+            <Button
               className='search-button'
               bsStyle="primary"
               type="submit"
@@ -544,7 +544,7 @@ class Members extends Component {
                   value={this.state.minAge}
                   onChange={this.handleMinAge}
                   max={this.state.maxAge}
-                  type="number" 
+                  type="number"
                 />
               </FormGroup>
               <FormGroup>
@@ -553,7 +553,7 @@ class Members extends Component {
                   value={this.state.maxAge}
                   onChange={this.handleMaxAge}
                   min={this.state.minAge}
-                  type="number" 
+                  type="number"
                 />
               </FormGroup>
               <Button
@@ -575,7 +575,7 @@ class Members extends Component {
       for(let searchTerm of this.state.searchTerms){
         searchTermPills.push(<div className='pull-right search-term-pill'>
           <b>{searchTerm}</b>
-          <i 
+          <i
             className="fa fa-times pull-right event-icons search-term-times"
             onClick={()=>this.handleRemoveTerm(searchTerm)}>
           </i>
@@ -583,7 +583,7 @@ class Members extends Component {
       }
       return searchTermPills
     }
-  
+
 
     render() {
       const popup = this.renderPopup();
@@ -641,7 +641,7 @@ class Members extends Component {
               {search}
             </div>
             <div className='search-term-row pull-right'>
-              {searchTermPills.length >0 
+              {searchTermPills.length >0
                 ? <span id='search-term-list'><b>Search Terms:</b></span>
                 : null}
               {searchTermPills}

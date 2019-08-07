@@ -373,7 +373,9 @@ def _build_query_clauses(query=None):
     ----------
         query: list of tuples, the first element in the tuple
             is the field to search over and the second element
-            is the search term
+            is the search term. If the first elements is a list
+            of fields instead of a single field, the query will
+            search across all of the fields in the list.
 
     Returns
     -------
@@ -383,14 +385,25 @@ def _build_query_clauses(query=None):
     # Add the conditions from the search term
     if query:
         query_conditions = []
-        field = query[0]
+
+        # The first part of the tuple is the search field, which
+        # can be a string of a list. The second is the list of search terms
+        fields = query[0]
+        if isinstance(fields, str):
+            fields = [fields]
         search_terms = query[1].split()
+
         for term in search_terms:
-            search = " lower(%s) like lower('%s%s%s') "%(
-                field,
-                '%', term, '%'
-            )
-            query_conditions.append(search)
+            # For each term, apply an or condition across all of the fields
+            term_search_list = []
+            for field in fields:
+                search = " lower(%s) like lower('%s%s%s') "%(field,
+                                                             '%', term, '%')
+                term_search_list.append(search)
+            term_search = " OR ".join(term_search_list)
+            query_conditions.append("({})".format(term_search))
+
+        # And then apply and AND condition to ALL of the terms
         query_clause = " AND ".join(query_conditions)
         clauses.append("({})".format(query_clause))
     return clauses

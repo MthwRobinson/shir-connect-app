@@ -54,7 +54,7 @@ class Participants:
             return result
         else:
             return None
-    
+
     def get_participants(self, limit=None, page=None, order=None, sort=None,
                          q=None, where=[], fake=False):
         """Pulls a list of members from the database
@@ -73,10 +73,12 @@ class Participants:
         -------
         dict
         """
-        query_term = 'last_name' if not fake else 'fake_last_name'
-        query = (query_term, q) if q else None
+        last_name = 'last_name' if not fake else 'fake_last_name'
+        first_name = 'first_name' if not fake else 'fake_first_name'
+        query = ([last_name, first_name], q) if q else None
+
         df = self.database.read_table('participants', limit=limit, page=page,
-                                      order=order, sort=sort, query=query, 
+                                      order=order, sort=sort, query=query,
                                       where=where)
         count = self.database.count_rows('participants', query=query,
                                          where=where)
@@ -118,7 +120,7 @@ class Participants:
         """.format(prefix=prefix, schema=self.database.schema)
         params = {'participant_id': participant_id}
         df = self.database.fetch_df(sql, params)
-        
+
         events = []
         if len(df) > 0:
             for i in df.index:

@@ -1,4 +1,4 @@
-""" 
+"""
 Function for downloading and zip code KML files
 and converting them to GeoJSON
 """
@@ -14,8 +14,8 @@ from shir_connect.database.database import Database
 
 class Geometries(object):
     """ Class for parsing and loading geojson files """
-    def __init__(self):
-        self.database = Database()
+    def __init__(self, database=None):
+        self.database = Database() if not database else database
         self.path = os.path.dirname(os.path.realpath(__file__))
         self.url = 'https://www.zip-codes.com/cache/kml-zip/'
         self.search = SearchEngine(simple_zipcode=True)
@@ -59,7 +59,7 @@ class Geometries(object):
         filename = self.path + '/temp/%s.kml'%(zip_code)
         with open(filename, 'w') as f:
             f.write(kml)
-        
+
         # Convert the KML file to GeoJSON
         kml2geojson.main.convert(filename, self.path+'/temp')
 
@@ -87,13 +87,13 @@ class Geometries(object):
                 county = "'{}'".format(data['county'].replace("'", ""))
                 self.database.update_column('geometries', item_id=zip_code,
                                             column='county', value=county)
-                
+
                 state = "'{}'".format(data['state'])
                 self.database.update_column('geometries', item_id=zip_code,
                                             column='region', value=state)
 
     def missing_locations(self):
-        """Pulls a list of zip codes for which we don't have 
+        """Pulls a list of zip codes for which we don't have
         a city and county name."""
         sql = """
             SELECT DISTINCT id

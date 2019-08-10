@@ -41,14 +41,16 @@ def refresh_materialized_views():
 
 def match_participants():
     """Runs the fuzzy matching algorithm to match up attendees and members."""
-    participant_matcher = ParticipantMatcher()
+    database = Database(database='trs')
+    participant_matcher = ParticipantMatcher(database=database)
     participant_matcher.run()
     participant_matcher.estimate_unknown_ages()
 
 def load_zip_code_geometries():
     """Loads maps geometries for any zipcodes that are not currently
     in the database."""
-    geo = Geometries()
+    database = Database(database='trs')
+    geo = Geometries(database=database)
     zip_codes = geo.missing_zip_codes()
     for code in zip_codes:
         try:

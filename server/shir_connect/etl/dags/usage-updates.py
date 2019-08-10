@@ -23,7 +23,8 @@ def build_email_content():
         SELECT COUNT(*) as total, application_user,
                remote_addr, host, user_agent
         FROM application_logs.shir_connect_logs
-        WHERE load_datetime >= NOW() - INTERVAL '7 DAYS'
+        WHERE load_datetime >= '2018-08-01'
+        AND application_user <> 'true'
         GROUP BY application_user, host, remote_addr, user_agent
         ORDER BY application_user ASC
     """
@@ -34,7 +35,7 @@ def build_email_content():
         SELECT COUNT(*) as total, application_user,
                remote_addr, host, user_agent
         FROM application_logs.shir_connect_logs
-        WHERE load_datetime >= '2018-08-01'
+        WHERE load_datetime >= NOW() - INTERVAL '7 DAYS'
         GROUP BY application_user, host, remote_addr, user_agent
         ORDER BY application_user ASC
     """
@@ -48,7 +49,7 @@ def build_email_content():
         {all_time_html}
         <h4>Weekly Usage</h4>
         {weekly_html}
-    """.format(all_time_html, weekly_html)
+    """.format(all_time_html=all_time_html, weekly_html=weekly_html)
     return html
 
 ##########################################################################
@@ -58,7 +59,7 @@ def build_email_content():
 default_args = {
     'owner': 'fiddler-analytics',
     'depends_on_past': False,
-    'start_date': datetime(2019, 8, 18),
+    'start_date': datetime(2019, 8, 8),
     'email': ['matt@fiddleranalytics.com',
               'nathan@fiddleranalytics.com',
               'ryan@fiddleranalytics.com'],
@@ -77,5 +78,5 @@ send_email = EmailOperator(task_id='usage-statistics-email',
                                'nathan@fiddleranalytics.com',
                                'ryan@fiddleranalytics.com'],
                            subject='Shir Connect Usage Statistics',
-                           html_content=build_html_content(),
+                           html_content=build_email_content(),
                            dag=dag)

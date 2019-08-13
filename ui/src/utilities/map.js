@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 function getMapBoxToken() {
-  return 'pk.eyJ1IjoibXRod3JvYmluc29uIiwiYSI6ImNqNXUxcXcwaTAyamcyd3J4NzBoN283b3AifQ.JIfgHM7LDVb34sWhN4L8aA';
+  return 'pk.eyJ1IjoiZmlkZGxlcmFuYWx5dGljcyIsImEiOiJjano5Nnp1cjEwOXA4M2NsbzZnano1dTg2In0.g9G0rlFVKBMu9OqBvys7YA';
 }
 export { getMapBoxToken }
 

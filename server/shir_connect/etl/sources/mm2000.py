@@ -32,7 +32,7 @@ class MM2000:
     #####################################
     # Methods for loading MM2000 members
     #####################################
-    
+
     def load(self, df):
         """ Loads the data in to the member database """
         self.logger.info('Parsing MM2000 data.')
@@ -54,7 +54,6 @@ class MM2000:
             self.logger.info('Refreshing materialized views.')
             self.database.refresh_view('members_view')
             self.database.refresh_view('participants')
-            self.database.refresh_view('shape_colors')
         else:
             self.logger.warning('Column mismatch in upload')
             self.database.revert_table('members')
@@ -69,7 +68,7 @@ class MM2000:
         for group in column_mapping:
             column_map = column_mapping[group]['columns']
             df_group = _group_mm2000(df, column_map)
-            
+
             if 'id_extension' in column_mapping[group]:
                 id_extension = column_mapping[group]['id_extension']
             else:
@@ -130,7 +129,7 @@ class MM2000:
         df = df.dropna(axis=0, how='any', subset=['resignation_date'])
         for i in df.index:
             member = dict(df.loc[i])
-            
+
             resignation_date = str(member['resignation_date'])[:10]
             resignation_date = "'{}'".format(resignation_date)
             # TODO: This logic is specific to TRS because that's how they
@@ -166,7 +165,7 @@ class MM2000:
                 self.database.run_query(sql)
 
         self.database.refresh_views()
-        
+
 
 def _group_mm2000(df, column_map):
     """Creates a dataframe for the specified MM2000 group

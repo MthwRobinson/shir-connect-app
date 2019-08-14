@@ -36,8 +36,7 @@ PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',
     'members_view.sql',
-    'participants.sql',
-    'shape_colors.sql'
+    'participants.sql'
 ]
 
 # Test configs

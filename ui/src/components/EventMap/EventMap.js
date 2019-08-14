@@ -29,6 +29,7 @@ class EventMap extends Component {
         defaultLocationName: null,
         features: [],
         zipLayer: {},
+        zipCodes: {},
         mapLoading: true,
         eventsLoading: true,
         events: {
@@ -177,10 +178,13 @@ class EventMap extends Component {
     let response = axios.get(url)
       .then(res => {
         const zipCodes = res.data;
-        for(let i=0; i<zipCodes.length; i++){
-          const zipCode = parseInt(zipCodes[i], 10);
+        for(let code in zipCodes){
+          const zipCode = parseInt(code, 10);
           if(zipCode in this.state.zipLayers){
             this.addZipGeometry(this.state.map, zipCode);
+            const red = zipCodes[code].members.color;
+            const blue = zipCodes[code].events.color;
+            this.changeLayerColor(this.state.map, code, red, blue);
           }
         }
       })

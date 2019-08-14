@@ -105,7 +105,7 @@ def test_zip_codes():
     # Success!
     response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
     assert response.status_code == 200
-    assert type(response.json) == list
+    assert type(response.json) == dict
 
     url = '/service/user/logout'
     response = CLIENT.post(url)

@@ -1,12 +1,12 @@
-// Renders the component 
+// Renders the component
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import { refreshAccessToken } from './../../utilities/authentication';
-import { 
-  getMapBoxToken, 
+import {
+  getMapBoxToken,
   getDefaultLocation
 } from './../../utilities/map';
 
@@ -49,18 +49,17 @@ class EventMap extends Component {
         const locationPromise = this.getEventLocations();
         const zipPromise = this.getZipCodeGeometries();
         const mapPromise = locationPromise
-          // Only build the map after the locations have been loaded
           .then(() =>{
+            // The locations need to be loaded before the map because
+            // plotting the map locations depends on the locations.
             this.setState({map: this.buildMap()});
           })
         Promise.all([mapPromise, zipPromise])
           .then(() => {
-            // First add the zip codes and then add the event
-            // locaitons so the event locations will be on top
+            // The map needs to be loaded AND the zip code geometries
+            // need to be loaded prior to adding the layers, otherwise
+            // there will not be anything to add.
             this.addAllZipGeometries()
-            .then(() => {
-              this.addEventLocations();
-            })
           })
       })
       .catch(err => {
@@ -75,7 +74,7 @@ class EventMap extends Component {
   }
 
   checkAccess = () => {
-    // Checks to make sure the user has access to the 
+    // Checks to make sure the user has access to the
     // map access group
     const url = '/service/map/authorize';
     let response = axios.get(url)
@@ -111,7 +110,7 @@ class EventMap extends Component {
       })
     return response
   }
-  
+
   getEventLocations = () => {
     // Pulls event locations from the database and renders the map
     this.setState({loading: true});
@@ -158,7 +157,7 @@ class EventMap extends Component {
             "type": "geojson",
             "data": {
                 "type": "FeatureCollection",
-                "features": this.state.features 
+                "features": this.state.features
               }
           },
           "layout": {
@@ -197,14 +196,34 @@ class EventMap extends Component {
 
   addZipGeometry = (map, zipCode) => {
     // Adds the geometry for a zip code to the map
+    // To preserve the intended look of the map, the
     const layer = this.state.zipLayers[zipCode];
-    map.addLayer(layer);
+    map.addLayer(layer, 'points');
     map.on('click', layer.id, (e) =>{
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML(e.features[0].properties.description)
         .addTo(map)
     })
+  }
+
+  changeLayerColor = (map, layerID, red, blue) => {
+    // Changes the color of the specified layer. The value for
+    // green remains fixed. Red an blue change with the number
+    // of members and events in a particular zipcode.
+    //
+    // Parameters
+    // ----------
+    // map: a mapbox map, usually the map at this.state.map
+    // layerID: string, the name of the layer to change
+    // red: int, an integer value between 0 and 256
+    // blue: int, an integer value between 0 and 256
+    //
+    // Returns
+    // -------
+    // Updates the color of the layer on the map
+    const color = 'rgb(' + red.toString() + ', 256, ' + blue.toString() + ')';
+    map.setPaintProperty(layerID, 'fill-color', color);
   }
 
   buildMap = () => {
@@ -221,6 +240,10 @@ class EventMap extends Component {
       style: 'mapbox://styles/mapbox/light-v9',
       center: [lng, lat],
       zoom
+    });
+
+    map.on('load', () => {
+        this.addEventLocations();
     });
 
     map.on('move', () => {
@@ -258,7 +281,7 @@ class EventMap extends Component {
         map.getCanvas().style.cursor = '';
         popup.remove();
     });
-    
+
     return map
   }
 
@@ -283,10 +306,10 @@ class EventMap extends Component {
       )
     } else {
       mapArea = (
-        <div 
-          ref={el => this.mapContainer = el} 
+        <div
+          ref={el => this.mapContainer = el}
           className="map pull-right"
-          id="map" 
+          id="map"
         >
           <div className='legend'>
               <b><span className='legend-title'>Legend</span></b>
@@ -317,7 +340,7 @@ class EventMap extends Component {
         </div>
       </div>
     );
-  }  
+  }
 
 }
 

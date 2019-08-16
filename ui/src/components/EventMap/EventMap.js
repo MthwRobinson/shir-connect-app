@@ -143,25 +143,26 @@ class EventMap extends Component {
   }
 
   addEventLocations = () => {
-      // Adds event locations to the map
-      this.state.map.addLayer({
-          "id": "points",
-          "type": "symbol",
-          "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": this.state.features
-              }
-          },
-          "layout": {
-              "icon-image": "{icon}-15",
-              "text-field": "{title}",
-              "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
-              "text-offset": [0, 0.6],
-              "text-anchor": "top"
-          }
-      });
+    // Adds event locations to the map. The event locations are
+    // a single layer on the map.
+    this.state.map.addLayer({
+        "id": "points",
+        "type": "symbol",
+        "source": {
+          "type": "geojson",
+          "data": {
+              "type": "FeatureCollection",
+              "features": this.state.features
+            }
+        },
+        "layout": {
+            "icon-image": "{icon}-15",
+            "text-field": "{title}",
+            "text-font": ["Open Sans Semibold", "Open Sans Semibold"],
+            "text-offset": [0, 0.6],
+            "text-anchor": "top"
+        }
+    });
   }
 
   addAllZipGeometries = () => {
@@ -172,13 +173,7 @@ class EventMap extends Component {
       .then(res => {
         const zipCodes = res.data;
         for(let code in zipCodes){
-          const zipCode = parseInt(code, 10);
-          if(zipCode in this.state.zipLayers){
-            this.addZipGeometry(this.state.map, zipCode);
-            const red = zipCodes[code].members.color;
-            const blue = zipCodes[code].events.color;
-            this.changeLayerColor(this.state.map, code, red, blue);
-          }
+          this.addZipGeometry(zipCodes, code);
         }
       })
       .catch(err=>{
@@ -191,17 +186,70 @@ class EventMap extends Component {
       return response
   }
 
-  addZipGeometry = (map, zipCode) => {
-    // Adds the geometry for a zip code to the map
-    // To preserve the intended look of the map, the
-    const layer = this.state.zipLayers[zipCode];
-    map.addLayer(layer, 'points');
-    map.on('click', layer.id, (e) =>{
-      new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(e.features[0].properties.description)
-        .addTo(map)
-    })
+  formatHoverHTML = (zipCodes, code) => {
+    // Formats the HTML that is displayed when you click on
+    // a zipcode on the map.
+    //
+    // Parameters:
+    // -----------
+    // zipCodes: object, an object that countains count and color
+    //  information for each zip code
+    // code: string, the zip code to format
+    //
+    // Returns:
+    // --------
+    // html: the formatted html for the hover
+    let memberCount = zipCodes[code].members.count;
+    let eventCount = zipCodes[code].events.count;
+    const html = `
+      <strong>Zip Code: ${code}</strong><br/>
+      Members: ${memberCount}<br/>
+      Events: ${eventCount}
+    `
+    return html
+  }
+
+  addZipGeometry = (zipCodes, code) => {
+    // Adds the geometry for a zip code to the map. If the layer already
+    // exists, we update the properties so that we don't need to make a
+    // second service call.
+    //
+    // Parameters:
+    // -----------
+    // zipCodes: object, an object that countains count and color
+    //  information for each zip code
+    // code: string, the zip code to format
+    //
+    // Returns:
+    // --------
+    // Adds a layer to the map if it doesn't exist. Updates it if
+    // it does exist.
+    const zipCode = parseInt(code, 10);
+    if(zipCode in this.state.zipLayers){
+      // If the layer already exists, then we want to remove
+      // it and add it again so that the color/properties update.
+      if(this.state.map.getLayer(code)){
+        this.state.map.removeLayer(code);
+      }
+
+      // Add the layer to the map
+      this.state.map.addLayer(this.state.zipLayers[zipCode], 'points');
+
+      // Format the hover HTML for the layer and set the map
+      // to display the HTML on hover.
+      const html = this.formatHoverHTML(zipCodes, code);
+      this.state.map.on('click', code, (e) =>{
+        new mapboxgl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(html)
+          .addTo(this.state.map)
+      })
+
+      // Update the color of the tile
+      const red = zipCodes[code].members.color;
+      const blue = zipCodes[code].events.color;
+      this.changeLayerColor(this.state.map, code, red, blue);
+    }
   }
 
   changeLayerColor = (map, layerID, red, blue) => {

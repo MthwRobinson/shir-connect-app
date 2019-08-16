@@ -43,24 +43,17 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
+    const zipPromise = this.getZipCodeGeometries();
+    const locationPromise = this.getEventLocations();
     getDefaultLocation()
       .then(res => {
         this.setState({lng: res.data.longitude, lat: res.data.latitude,
                        defaultLocationName: res.data.name})
-        const locationPromise = this.getEventLocations();
-        const zipPromise = this.getZipCodeGeometries();
         const mapPromise = locationPromise
           .then(() =>{
             // The locations need to be loaded before the map because
             // plotting the map locations depends on the locations.
             this.setState({map: this.buildMap()});
-          })
-        Promise.all([mapPromise, zipPromise])
-          .then(() => {
-            // The map needs to be loaded AND the zip code geometries
-            // need to be loaded prior to adding the layers, otherwise
-            // there will not be anything to add.
-            this.addAllZipGeometries()
           })
       })
       .catch(err => {
@@ -247,7 +240,8 @@ class EventMap extends Component {
     });
 
     map.on('load', () => {
-        this.addEventLocations();
+      this.addEventLocations();
+      this.addAllZipGeometries();
     });
 
     map.on('move', () => {

@@ -19,8 +19,24 @@ class MapGeometries:
     def get_geometries(self):
         """ Returns all of the geometries with their colors """
         sql = """
-            SELECT id as postal_code, geometry
+            SELECT a.id as postal_code, geometry
             FROM {schema}.geometries a
+            INNER JOIN (
+                SELECT postal_code
+                FROM(
+                    SELECT COUNT(*) as total,  postal_code
+                    FROM (
+                        SELECT id, postal_code
+                        FROM {schema}.members_view
+                        UNION ALL
+                        SELECT id, postal_code
+                        FROM {schema}.event_aggregates
+                    ) events
+                    GROUP BY postal_code
+                ) places
+                WHERE total > 10
+            ) b
+            ON a.id = b.postal_code
             WHERE id IS NOT NULL
         """.format(schema=self.database.schema)
         df = pd.read_sql(sql, self.database.connection)
@@ -163,7 +179,7 @@ def build_layer(geometry):
         'paint': {
             'fill-color': 'rgb(0, 0, 0)',
             'fill-opacity': 0.6,
-            'fill-outline-color': 'rgb(0, 0, 0)'
+            'fill-outline-color': 'rgb(256, 256, 256)'
         }
     }
     return layer

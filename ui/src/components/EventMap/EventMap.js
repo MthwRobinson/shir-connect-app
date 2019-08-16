@@ -43,13 +43,13 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
-    const zipPromise = this.getZipCodeGeometries();
+    this.getZipCodeGeometries();
     const locationPromise = this.getEventLocations();
     getDefaultLocation()
       .then(res => {
         this.setState({lng: res.data.longitude, lat: res.data.latitude,
                        defaultLocationName: res.data.name})
-        const mapPromise = locationPromise
+        locationPromise
           .then(() =>{
             // The locations need to be loaded before the map because
             // plotting the map locations depends on the locations.

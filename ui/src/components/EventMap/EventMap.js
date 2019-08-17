@@ -28,7 +28,7 @@ class EventMap extends Component {
         zoom: 10.3,
         defaultLocationName: null,
         features: [],
-        zipLayer: {},
+        zipLayers: {},
         zipCodes: {},
         mapLoading: true,
         eventsLoading: true,
@@ -252,13 +252,13 @@ class EventMap extends Component {
       })
 
       // Update the color of the tile
-      const red = zipCodes[code].members.color;
-      const blue = zipCodes[code].events.color;
-      this.changeLayerColor(this.state.map, code, red, blue);
+      const red = zipCodes[code].events.color;
+      const blue = zipCodes[code].members.color;
+      this.changeLayerColor(this.state.map, code, red, 256, blue);
     }
   }
 
-  changeLayerColor = (map, layerID, red, blue) => {
+  changeLayerColor = (map, layerID, red, green, blue) => {
     // Changes the color of the specified layer. The value for
     // green remains fixed. Red an blue change with the number
     // of members and events in a particular zipcode.
@@ -273,8 +273,9 @@ class EventMap extends Component {
     // Returns
     // -------
     // Updates the color of the layer on the map
-    const color = 'rgb(' + red.toString() + ', 256, ' + blue.toString() + ')';
-    map.setPaintProperty(layerID, 'fill-color', color);
+    const colors = [red.toString(), green.toString(), blue.toString()];
+    const rgb = 'rgb(' + colors.join() + ')';
+    map.setPaintProperty(layerID, 'fill-color', rgb);
   }
 
   buildMap = () => {

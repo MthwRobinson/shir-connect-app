@@ -25,7 +25,7 @@ class MapGeometries:
             INNER JOIN (
                 SELECT postal_code
                 FROM(
-                    SELECT COUNT(*) as total,  postal_code
+                    SELECT COUNT(DISTINCT id) as total,  postal_code
                     FROM (
                         SELECT id, postal_code
                         FROM {schema}.members_view
@@ -35,7 +35,7 @@ class MapGeometries:
                     ) events
                     GROUP BY postal_code
                 ) places
-                WHERE total > 2
+                WHERE total >= 5
             ) b
             ON a.id = b.postal_code
             WHERE id IS NOT NULL

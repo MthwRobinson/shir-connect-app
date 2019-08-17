@@ -1,6 +1,7 @@
 """ Loads the geometries that are used on the event map. """
 import pandas as pd
 import numpy as np
+from scipy import stats
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
@@ -34,7 +35,7 @@ class MapGeometries:
                     ) events
                     GROUP BY postal_code
                 ) places
-                WHERE total > 10
+                WHERE total > 2
             ) b
             ON a.id = b.postal_code
             WHERE id IS NOT NULL
@@ -61,70 +62,97 @@ class MapGeometries:
         one event and at least one member."""
         members = self.get_member_counts()
         events = self.get_event_counts()
+        results = consolidate_results(members, events)
 
-        response = {}
-        zip_codes = set(members.keys()).union(set(events.keys()))
-        for zip_code in zip_codes:
-            if zip_code in events:
-                zip_events = events[zip_code]
-            else:
-                zip_events = {'count': 0.0, 'color': 0.0}
+        return results
 
-            if zip_code in members:
-                zip_members = members[zip_code]
-            else:
-                zip_members = {'count': 0.0, 'color': 0.0}
-
-            response[zip_code] = {'events': zip_events, 'members': zip_members}
-
-        return response
-
-    def get_event_counts(self):
+    def get_event_counts(self, event_category=None):
         """Gets a count of events grouped by zip code."""
+        if event_category:
+            category_condition = " AND lower(a.name) "
+            category_condition += "like '%{}%' ".format(event_category.lower())
+        else:
+            category_condition = ""
+
         sql = """
             SELECT COUNT(DISTINCT a.id) AS total, postal_code
             FROM {schema}.events a
             INNER JOIN {schema}.venues b
             ON a.venue_id = b.id
             WHERE postal_code IS NOT NULL
+            {category_condition}
             GROUP BY postal_code
-        """.format(schema=self.database.schema)
+        """.format(schema=self.database.schema,
+                   category_condition=category_condition)
         df = pd.read_sql(sql, self.database.connection)
-        results = consolidate_results(df)
-        return results
+        return df
 
-    def get_member_counts(self):
+    def get_member_counts(self, event_category=None):
         """Gets a count of members grouped by zip code."""
+        if event_category:
+            category_condition = " AND lower(e.name) "
+            category_condition += "like '%{}%' ".format(event_category.lower())
+        else:
+            category_condition = ""
+
         sql = """
-            SELECT COUNT(DISTINCT id) AS total, postal_code
-            FROM {schema}.members
-            WHERE postal_code IS NOT NULL
+            SELECT COUNT(DISTINCT a.id) AS total, postal_code
+            FROM {schema}.members a
+            INNER JOIN {schema}.participant_match b
+            ON a.id = b.member_id
+            INNER JOIN {schema}.attendee_to_participant c
+            ON c.participant_id = b.id
+            INNER JOIN {schema}.attendees d
+            ON c.id = d.id
+            INNER JOIN {schema}.events e
+            ON e.id = d.event_id
+            WHERE a.postal_code IS NOT NULL
+            {category_condition}
             GROUP BY postal_code
-        """.format(schema=self.database.schema)
+        """.format(schema=self.database.schema,
+                   category_condition=category_condition)
         df = pd.read_sql(sql, self.database.connection)
-        results = consolidate_results(df)
-        return results
+        return df
 
 
-def consolidate_results(df):
+def consolidate_results(members, events):
     """Consolidates the results of the counts queries and finds the min
     and max counts, excluding the default location. The default location
     is excluded by a large number of events take place there."""
+    df = members.merge(events, how='outer', on='postal_code', suffixes=['_members', '_events'])
+    df = df.fillna(0)
+    df_orig = df.copy()
+
     default = str(conf.DEFAULT_LOCATION['postal_code'])
-    df_no_default = df[df['postal_code'] != default]
-    max_count = df_no_default['total'].max()
-    min_count = df_no_default['total'].min()
-    df['color'] = layer_color(df['total'], min_count, max_count)
+    df = df[df['postal_code'] != default]
+
+    df['pct_members'] = df['total_members'] / df['total_members'].sum()
+    df['pct_events'] = df['total_events'] / df['total_events'].sum()
+    df['pct_diff'] = df['pct_members'] - df['pct_events']
+
+    df['percentile'] = [stats.percentileofscore(df['pct_diff'], x, 'strict')
+                        for x in df['pct_diff']]
+    df['color'] = 256 - (2.56 * df['percentile'])
 
     df['color'] = df['color'].astype(float)
-    df['total'] = df['total'].astype(float)
+    df['total_members'] = df['total_members'].astype(float)
+    df['total_events'] = df['total_events'].astype(float)
+
+    df = df.append(df_orig.loc[df_orig['postal_code'] == default])
+    df = df.reset_index()
 
     results = {}
     for i in df.index:
         data = dict(df.loc[i])
+        if data['postal_code'] == default:
+            color = 256
+        else:
+            color = data['color']
+
         results[data['postal_code']] = {
-            'count': data['total'],
-            'color': data['color']
+            'total_members': data['total_members'],
+            'total_events': data['total_events'],
+            'color': color
         }
 
     return results
@@ -160,15 +188,6 @@ def layer_color(count, min_count, max_count):
 def build_layer(geometry):
     """Builds the map layer with the correct colors."""
     geojson = geometry['geometry']
-    geojson['features'][0]['properties'] = {
-        'description': """
-            <strong>Zip Code: {zip_code}</strong>
-            <ul>
-                <li>Members: UPDATE ME</li>
-                <li>Events: UPDATE ME</li>
-            </ul>
-        """.format(zip_code=geometry['id'])
-    }
     layer = {
         'id': geometry['id'],
         'type': 'fill',
@@ -179,7 +198,7 @@ def build_layer(geometry):
         'paint': {
             'fill-color': 'rgb(0, 0, 0)',
             'fill-opacity': 0.6,
-            'fill-outline-color': 'rgb(256, 256, 256)'
+            'fill-outline-color': 'rgb(70, 70, 70)'
         }
     }
     return layer

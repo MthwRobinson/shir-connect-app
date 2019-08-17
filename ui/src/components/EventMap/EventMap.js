@@ -43,6 +43,7 @@ class EventMap extends Component {
 
   componentDidMount() {
     this.checkAccess();
+    this.getZipCodeColors();
     this.getZipCodeGeometries();
     const locationPromise = this.getEventLocations();
     getDefaultLocation()
@@ -165,16 +166,13 @@ class EventMap extends Component {
     });
   }
 
-  addAllZipGeometries = () => {
-    // Adds map geometries for any zip code
-    // with members or events
+  getZipCodeColors = () => {
+    // Fetches the member counts and geometry color for
+    // each zip code from the server
     const url = '/service/map/zipcodes';
     let response = axios.get(url)
       .then(res => {
-        const zipCodes = res.data;
-        for(let code in zipCodes){
-          this.addZipGeometry(zipCodes, code);
-        }
+        this.setState({zipCodes: res.data});
       })
       .catch(err=>{
         if(err.response.status===401){
@@ -184,6 +182,14 @@ class EventMap extends Component {
         }
       })
       return response
+  }
+
+  addAllZipGeometries = () => {
+    // Adds map geometries for any zip code
+    // with members or events
+    for(let code in this.state.zipCodes){
+      this.addZipGeometry(this.state.zipCodes, code);
+    }
   }
 
   formatHoverHTML = (zipCodes, code) => {

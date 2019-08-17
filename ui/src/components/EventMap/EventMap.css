@@ -33,11 +33,11 @@
   right: 6;
   z-index: 1;
 }
- 
+
 .legend h4 {
   margin: 0 0 10px;
 }
- 
+
 .legend div span {
   border-radius: 50%;
   border-style: solid;
@@ -52,14 +52,10 @@
   font-size: 18px;
 }
 
-.legend-green {
-  background-color: #228B22;
+.legend-good {
+  background-color: rgb(0, 256, 0);
 }
 
-.legend-yellow {
-  background-color: #FFFF00;
-}
-
-.legend-blue {
-  background-color: #0000FF;
+.legend-bad {
+  background-color: rgb(256, 0, 256);
 }

@@ -3,6 +3,7 @@ import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import ReactToolTip from 'react-tooltip';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import {
@@ -205,8 +206,8 @@ class EventMap extends Component {
     // Returns:
     // --------
     // html: the formatted html for the hover
-    let memberCount = zipCodes[code].members.count;
-    let eventCount = zipCodes[code].events.count;
+    let memberCount = zipCodes[code].total_members;
+    let eventCount = zipCodes[code].total_events;
     const html = `
       <strong>Zip Code: ${code}</strong><br/>
       Members: ${memberCount}<br/>
@@ -252,9 +253,8 @@ class EventMap extends Component {
       })
 
       // Update the color of the tile
-      const red = zipCodes[code].events.color;
-      const blue = zipCodes[code].members.color;
-      this.changeLayerColor(this.state.map, code, red, 256, blue);
+      const color = zipCodes[code].color;
+      this.changeLayerColor(this.state.map, code, 256-color, color, 256-color);
     }
   }
 
@@ -358,6 +358,11 @@ class EventMap extends Component {
         </div>
       )
     } else {
+      let mapInfo = "The colors on the map are computed by taking the percentage<br/>"
+      mapInfo += "of members living in the area and subtracting the number of events.<br/>"
+      mapInfo += "Green indicates areas where event coverage meets or exceeds<br/>"
+      mapInfo += "the percentage of members in the area. Purple indicates areas where<br/>"
+      mapInfo += "event coverage does not meet the percentage of members in the area.<br/>"
       mapArea = (
         <div
           ref={el => this.mapContainer = el}
@@ -365,11 +370,16 @@ class EventMap extends Component {
           id="map"
         >
           <div className='legend'>
-              <b><span className='legend-title'>Legend</span></b>
-              <div><span className='legend-green'></span><b>Balanced</b></div>
-              <div><span className='legend-blue'></span><b>More Members</b></div>
-              <div><span className='legend-yellow'></span><b>More Events</b></div>
+              <b><span className='legend-title'>Legend{' '}
+                  <sup><i
+                      className='fa fa-info-circle'
+                      data-tip={mapInfo}
+                  ></i></sup>
+              </span></b>
+              <div><span className='legend-good'></span><b>Stronger Event Coverage</b></div>
+              <div><span className='legend-bad'></span><b>Weaker Event Coverage</b></div>
           </div>
+          <ReactToolTip html={true} />
         </div>
       )
     }

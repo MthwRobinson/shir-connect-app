@@ -52,7 +52,7 @@ class Geometries(object):
     def get_all_zip_codes(self):
         """Creates a list of valid zip codes by checking them
         against the US zip code search object."""
-        possible_zip_codes = [str(i).rjust(5, '0') for i in range(20000, 20050)]
+        possible_zip_codes = [str(i).rjust(5, '0') for i in range(99999)]
         valid_zip_codes = []
         for code in possible_zip_codes:
             results = self.get_zipcode_data(code)

@@ -8,7 +8,6 @@ import ReactToolTip from 'react-tooltip';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import {
-  getBoundingBox,
   getMapBoxToken,
   getDefaultLocation
 } from './../../utilities/map';

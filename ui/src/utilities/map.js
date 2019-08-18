@@ -22,7 +22,7 @@ function getBoundingBox (data) {
   // --------
 	// bounds: object, the bounds o fthe geojson object, with xMin, xMax,
 	// 	yMin, and yMax keys
-  var bounds = {}, coords, point, latitude, longitude;
+  var bounds = {}, coords, latitude, longitude;
 
   // We want to use the “features” key of the FeatureCollection (see above)
   data = data.features;

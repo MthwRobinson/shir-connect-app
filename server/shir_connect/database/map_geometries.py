@@ -138,7 +138,7 @@ def consolidate_results(members, events):
     df['total_members'] = df['total_members'].astype(float)
     df['total_events'] = df['total_events'].astype(float)
 
-    df = df.append(df_orig.loc[df_orig['postal_code'] == default])
+    df = df.append(df_orig.loc[df_orig['postal_code'] == default], sort=False)
     df = df.reset_index()
 
     results = {}

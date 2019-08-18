@@ -268,6 +268,10 @@ class Events:
                 ON a.venue_id = b.id
             ) events
             ON max_location.event_id = events.event_id
+            WHERE address_1 IS NOT NULL
+            AND city IS NOT NULL
+            AND events.longitude IS NOT NULL
+            AND events.latitude IS NOT NULL
             ORDER BY start_datetime DESC
         """.format(schema=self.database.schema,
                    category_condition=category_condition,

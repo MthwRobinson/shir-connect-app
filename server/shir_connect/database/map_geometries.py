@@ -157,34 +157,6 @@ def consolidate_results(members, events):
 
     return results
 
-@np.vectorize
-def layer_color(count, min_count, max_count):
-    """Determines the RGB color of the cell based on the count in the cell,
-    the min count and the max count.
-
-    Paramters
-    ---------
-    count: the count value in the area
-    min_count: the minimum count in the data set
-    max_count: the maximum count in the data set
-
-    Returns
-    -------
-    color: float in [0, 256], the RGB value for the tile
-    """
-    if count > max_count:
-        count = max_count
-    adj_min = max(min_count, 1)
-
-    numerator = np.log(count) - np.log(adj_min)
-    denominator = np.log(max_count) - np.log(adj_min)
-
-    if denominator > 0:
-        normalized_color = min(numerator/denominator, 1)
-    else:
-        normalized_color = 1
-    return 256-(256*normalized_color)
-
 def build_layer(geometry):
     """Builds the map layer with the correct colors."""
     geojson = geometry['geometry']

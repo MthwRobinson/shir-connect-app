@@ -107,13 +107,17 @@ def get_event_locations():
     authorized = conf.MAP_GROUP in user['modules']
     log_request(request, jwt_user, authorized)
 
+
     if not authorized:
         response = {'message': '%s does not have acccess to the map'%(jwt_user)}
         return jsonify(response), 403
 
     fake_data = request.args.get('fake_data')
     fake_data = fake_data is not None and fake_data == 'true'
-    response = event_manager.get_event_locations(fake=fake_data)
+    event_category = request.args.get('event_category')
+
+    response = event_manager.get_event_locations(fake=fake_data,
+                                                 event_category=event_category)
     return jsonify(response)
 
 @events.route('/service/events/cities', methods=['GET'])

@@ -223,7 +223,7 @@ class Events:
         }
         return response
 
-    def get_event_locations(self, fake=False, event_category="WoTRS"):
+    def get_event_locations(self, fake=False, event_category=None):
         """ Pulls the latest event at each latitude/longitude """
         prefix = 'fake_' if fake else ''
 

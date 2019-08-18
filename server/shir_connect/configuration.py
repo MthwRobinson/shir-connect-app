@@ -65,6 +65,7 @@ ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP,
 # Custom Configurations
 config = get_config(PROJPATH, HOMEPATH)
 EVENT_GROUPS = config['event_groups']
+MAP_EVENT_OPTIONS = config['map_event_options']
 AGE_GROUPS = config['age_groups']
 DEFAULT_LOCATION = config['location']
 AVAILABLE_MODULES = config['modules']

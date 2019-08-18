@@ -57,11 +57,11 @@ class MapGeometries:
             layers[postal_code] = layer
         return layers
 
-    def get_zip_codes(self):
+    def get_zip_codes(self, event_category=None):
         """Pulls a list of zip codes that have at least
         one event and at least one member."""
-        members = self.get_member_counts()
-        events = self.get_event_counts()
+        members = self.get_member_counts(event_category)
+        events = self.get_event_counts(event_category)
         results = consolidate_results(members, events)
 
         return results

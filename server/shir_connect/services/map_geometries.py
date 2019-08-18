@@ -88,7 +88,8 @@ def map_zip_codes():
         response = {'message': '%s does not have access to the map'%(jwt_user)}
         return jsonify(response), 403
 
-    zip_codes = map_geometries.get_zip_codes()
+    event_category = request.args.get('event_category')
+    zip_codes = map_geometries.get_zip_codes(event_category=event_category)
     return jsonify(zip_codes)
 
 @map_geometries.route('/service/map/default', methods=['GET'])
@@ -102,3 +103,9 @@ def map_default():
         plotted on the map.
     """
     return jsonify(conf.DEFAULT_LOCATION)
+
+@map_geometries.route('/service/map/event_options', methods=['GET'])
+@jwt_required
+def map_event_options():
+    """Returns the event options for filtering on the map."""
+    return jsonify(conf.MAP_EVENT_OPTIONS)

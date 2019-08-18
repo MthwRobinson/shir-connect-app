@@ -31,12 +31,14 @@ event_groups:
   - Lox and Lecture
   - Tot Shabbat
   - TRS Tents
+  - TRSTY
 
 map_event_options:
   - Rodef 2100
   - WoTRS
   - Renaissance
   - TRS Tents
+  - TRSTY
 
 member_types:
   MEMFAM: Family

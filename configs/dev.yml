@@ -37,6 +37,7 @@ map_event_options:
   - WoTRS
   - Renaissance
   - TRS Tents
+  - TRSTY
 
 member_types:
   MEMFAM: Family

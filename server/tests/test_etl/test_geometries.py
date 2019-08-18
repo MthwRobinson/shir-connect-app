@@ -31,25 +31,6 @@ class FakeDatabase:
     def update_column(self, *args, **kwargs):
         pass
 
-def test_load_zip_code():
-    geo = Geometries()
-    geo.load_zip_code(99504)
-    feature = geo.database.get_item('geometries', 99504)
-    assert type(feature['geometry']) == dict
-    geo.database.delete_item('geometries', 99504)
-    feature = geo.database.get_item('geometries', 99504)
-    assert feature == None
-
-def test_missing_zip_codes():
-    geo = Geometries()
-    missing = geo.missing_zip_codes()
-    assert type(missing) == list
-
-def test_missing_locations():
-    geo = Geometries()
-    missing = geo.missing_locations()
-    assert type(missing) == list
-
 def test_get_zipcode_data():
     geo = Geometries()
     geo.search = FakeSearchEngine()
@@ -59,12 +40,3 @@ def test_get_zipcode_data():
                      'state': 'VA'}
     data = geo.get_zipcode_data('bad zip')
     assert not data
-
-def test_load_locations():
-    geo = Geometries()
-    geo.database = FakeDatabase()
-    geo.search = FakeSearchEngine()
-    def fake_missing_locations(*args, **kwargs):
-        return ['12345']
-    geo.missing_locations = fake_missing_locations
-    geo.load_locations()

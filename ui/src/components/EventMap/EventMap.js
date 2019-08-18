@@ -8,6 +8,7 @@ import ReactToolTip from 'react-tooltip';
 
 import { refreshAccessToken } from './../../utilities/authentication';
 import {
+  getBoundingBox,
   getMapBoxToken,
   getDefaultLocation
 } from './../../utilities/map';
@@ -163,8 +164,10 @@ class EventMap extends Component {
 
       let response = axios.get(url)
         .then(res => {
-          let features = res.data.results;
-
+          // The default location (i.e. the location of the congregation)
+          // gets added to the features array first to give it precedence
+          // in plotting on the map. After that, events are added in order
+          // of when they took place.
           const name = this.state.defaultLocationName;
           const DEFAULT_LOCATION = {
             "type": "Feature",
@@ -178,7 +181,8 @@ class EventMap extends Component {
               "description" : "<strong>" + name + "</strong>"
             }
           }
-          features.push(DEFAULT_LOCATION);
+          let features = [DEFAULT_LOCATION].concat(res.data.results);
+
           this.setState({features: features, mapLoading: false});
         })
         .catch(err => {
@@ -201,15 +205,15 @@ class EventMap extends Component {
         this.state.map.removeSource('points');
       }
 
+      const markers = {"type": "FeatureCollection",
+                      "features": this.state.features}
+
       this.state.map.addLayer({
           "id": "points",
           "type": "symbol",
           "source": {
             "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": this.state.features
-              }
+            "data": markers
           },
           "layout": {
               "icon-image": "{icon}-15",
@@ -219,6 +223,7 @@ class EventMap extends Component {
               "text-anchor": "top"
           }
       });
+
     }
 
     getZipCodeColors = (eventGroup) => {

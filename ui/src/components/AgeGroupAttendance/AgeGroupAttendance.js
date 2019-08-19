@@ -2,13 +2,13 @@
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import React, { Component } from 'react';
-import { 
+import {
   Button,
   Col,
   ControlLabel,
   Form,
-  FormControl, 
-  FormGroup, 
+  FormControl,
+  FormGroup,
   Row,
   Table
 } from 'react-bootstrap';
@@ -202,8 +202,8 @@ class AgeGroupAttendance extends Component {
               <tbody>
                 {this.state.top.map((item, index) => {
                   return(
-                    <tr 
-                      className='table-row' 
+                    <tr
+                      className='table-row'
                       key={index}
                       onClick={()=> selectItem(item)}
                     >
@@ -264,8 +264,8 @@ class AgeGroupAttendance extends Component {
               <option value='Month'>Month</option>
               <option value='Year'>Year</option>
             </FormControl>
-            <Button 
-              className="age-group-button"  
+            <Button
+              className="age-group-button"
               type="submit"
             >Submit</Button>
           </FormGroup>
@@ -289,7 +289,7 @@ class AgeGroupAttendance extends Component {
       let height = Math.max(300, width/1.7);
       if(width < 675){
         width = Math.min(width, 500);
-        height = Math.min(300, width/1.5); 
+        height = Math.min(300, width/1.5);
       }
       const group = this.state.groupBy;
       let format = null;
@@ -333,7 +333,7 @@ class AgeGroupAttendance extends Component {
 
           <div className='top-participants'>
             <h4>Top {this.state.topCategory}
-              <i 
+              <i
                 className='fa fa-reply pull-right event-icons'
                 onClick={()=>this.switchTopCategory()}
               ></i>

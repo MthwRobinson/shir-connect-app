@@ -103,11 +103,7 @@ class Database(object):
                 self.logger.info(msg)
                 filename = path + file_
                 with open(filename, 'r') as f:
-                    if table == 'shape_colors':
-                        sql = f.read().format(schema=self.schema,
-                                              zip_code=self.zip_code)
-                    else:
-                        sql = f.read().format(schema=self.schema)
+                    sql = f.read().format(schema=self.schema)
                 self.run_query(sql)
 
     def refresh_view(self, view):

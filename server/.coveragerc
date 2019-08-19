@@ -1,5 +1,5 @@
 [run]
 omit =
     *__*__.py
-    dags/*
-    airflow/*
+    shir_connect/etl/dags/*
+    shir_connect/etl/airflow/*

@@ -1,5 +1,7 @@
 name: Temple Rodef Shalom
 
+subdomain: dev
+
 modules:
   - events
   - members
@@ -29,6 +31,13 @@ event_groups:
   - Lox and Lecture
   - Tot Shabbat
   - TRS Tents
+
+map_event_options:
+  - Renaissance
+  - Rodef 2100
+  - TRS Tents
+  - TRSTY
+  - WoTRS
 
 member_types:
   MEMFAM: Family

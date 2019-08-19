@@ -223,9 +223,16 @@ class Events:
         }
         return response
 
-    def get_event_locations(self, fake=False):
+    def get_event_locations(self, fake=False, event_category=None):
         """ Pulls the latest event at each latitude/longitude """
         prefix = 'fake_' if fake else ''
+
+        if event_category:
+            category_condition = " WHERE lower(a.{}name) ".format(prefix)
+            category_condition += "like '%{}%' ".format(event_category.lower())
+        else:
+            category_condition = ""
+
         sql = """
             SELECT
                 events.event_id as event_id,
@@ -244,6 +251,7 @@ class Events:
                 FROM {schema}.events a
                 INNER JOIN {schema}.venues b
                 ON a.venue_id = b.id
+                {category_condition}
                 GROUP BY latitude, longitude
             ) max_location
             INNER JOIN (
@@ -260,7 +268,14 @@ class Events:
                 ON a.venue_id = b.id
             ) events
             ON max_location.event_id = events.event_id
-        """.format(schema=self.database.schema, prefix=prefix)
+            WHERE address_1 IS NOT NULL
+            AND city IS NOT NULL
+            AND events.longitude IS NOT NULL
+            AND events.latitude IS NOT NULL
+            ORDER BY start_datetime DESC
+        """.format(schema=self.database.schema,
+                   category_condition=category_condition,
+                   prefix=prefix)
         df = pd.read_sql(sql, self.database.connection)
 
         features = []

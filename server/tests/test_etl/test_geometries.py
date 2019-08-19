@@ -22,7 +22,8 @@ class FakeResult:
     def to_dict(self):
         return {'major_city': self.major_city,
                 'county': self.county,
-                'state': self.state}
+                'state': self.state,
+                'zipcode': self.zipcode}
 
 class FakeDatabase:
     def __init__(self):
@@ -31,24 +32,16 @@ class FakeDatabase:
     def update_column(self, *args, **kwargs):
         pass
 
-def test_load_zip_code():
-    geo = Geometries()
-    geo.load_zip_code(99504)
-    feature = geo.database.get_item('geometries', 99504)
-    assert type(feature['geometry']) == dict
-    geo.database.delete_item('geometries', 99504)
-    feature = geo.database.get_item('geometries', 99504)
-    assert feature == None
+    def delete_item(self, *args, **kwargs):
+        pass
 
-def test_missing_zip_codes():
-    geo = Geometries()
-    missing = geo.missing_zip_codes()
-    assert type(missing) == list
+    def load_item(self, *args, **kwargs):
+        pass
 
-def test_missing_locations():
-    geo = Geometries()
-    missing = geo.missing_locations()
-    assert type(missing) == list
+class FakeResponse:
+    def __init__(self):
+        self.status_code = 200
+        self.text = {'species': 'parrot'}
 
 def test_get_zipcode_data():
     geo = Geometries()
@@ -56,15 +49,19 @@ def test_get_zipcode_data():
     data = geo.get_zipcode_data('12345')
     assert data == {'major_city': 'Birdtown',
                     'county': 'Conure County',
-                     'state': 'VA'}
+                     'state': 'VA',
+                     'zipcode': '12345'}
     data = geo.get_zipcode_data('bad zip')
     assert not data
 
-def test_load_locations():
+def test_load_all_zip_codes():
     geo = Geometries()
     geo.database = FakeDatabase()
+    geo.get_all_zip_codes = lambda *args, **kwargs: ['22102']
+    geo.load_all_zip_codes()
+
+def test_get_all_zip_codes():
+    geo = Geometries()
     geo.search = FakeSearchEngine()
-    def fake_missing_locations(*args, **kwargs):
-        return ['12345']
-    geo.missing_locations = fake_missing_locations
-    geo.load_locations()
+    valid_zip_codes = geo.get_all_zip_codes()
+    assert valid_zip_codes == ['12345']

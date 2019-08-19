@@ -328,7 +328,6 @@ class EventMap extends Component {
 
         // Format the hover HTML for the layer and set the map
         // to display the HTML on hover.
-        console.log(layer);
         const city = layer.city;
         const html = this.formatHoverHTML(zipCodes, code, city);
         this.state.map.on('click', code, (e) =>{

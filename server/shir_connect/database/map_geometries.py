@@ -11,12 +11,6 @@ class MapGeometries:
     def __init__(self, database=None):
         self.database = database if database else Database()
 
-    def get_geometry(self, zip_code):
-        """ Constructs the geometry for the specified zip code """
-        geometry = self.database.get_item('geometries', zip_code)
-        layer = build_layer(geo, geometry['city'])
-        return layer
-
     def get_geometries(self):
         """ Returns all of the geometries with their colors """
         sql = """

@@ -33,26 +33,6 @@ def map_authorize():
         response = {'message': '%s is authorized to view the map'%(jwt_user)}
         return jsonify(response), 200
 
-@map_geometries.route('/service/map/geometry/<zipcode>', methods=['GET'])
-@jwt_required
-@validate_inputs(fields={'zipcode': {'type': 'int'}})
-def geometry(zipcode):
-    """ Retrieves a zip code geometry from the database """
-    map_geometries = MapGeometries()
-    # Make sure the user has access to the module
-    jwt_user = get_jwt_identity()
-    user = map_geometries.database.get_item('users', jwt_user)
-
-    authorized = conf.MAP_GROUP in user['modules']
-    log_request(request, jwt_user, authorized)
-
-    if not authorized:
-        response = {'message': '%s does not have access to the map'%(jwt_user)}
-        return jsonify(response), 403
-
-    layer = map_geometries.get_geometry(zipcode)
-    return jsonify(layer)
-
 @map_geometries.route('/service/map/geometries', methods=['GET'])
 @jwt_required
 def geometries():

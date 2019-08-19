@@ -39,46 +39,6 @@ def test_map_authorize():
     user = user_management.get_user(conf.TEST_USER)
     assert user == None
 
-def test_zip_geometry():
-    user_management = UserManagement()
-    user_management.delete_user(conf.TEST_USER)
-    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
-    url = '/service/map/geometry/22102'
-
-    # User must be authenticated
-    response = CLIENT.get(url)
-    assert response.status_code == 401
-
-    response = CLIENT.post('/service/user/authenticate', json=dict(
-        username=conf.TEST_USER,
-        password=conf.TEST_PASSWORD
-    ))
-    assert response.status_code == 200
-    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
-
-    # The user must have access to the map module
-    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
-    assert response.status_code == 403
-    user_management.update_access(conf.TEST_USER, ['map'])
-
-    # Success!
-    response = CLIENT.get(url, headers={'Cookies': 'access_token_cookie=%s'%(jwt)})
-    assert response.status_code == 200
-    assert 'id' in response.json
-    assert 'type' in response.json
-    assert 'source' in response.json
-    assert response.json['source']['type'] == 'geojson'
-    assert type(response.json['source']['data']) == dict
-    assert 'paint' in response.json
-
-    url = '/service/user/logout'
-    response = CLIENT.post(url)
-    assert response.status_code == 200
-
-    user_management.delete_user(conf.TEST_USER)
-    user = user_management.get_user(conf.TEST_USER)
-    assert user == None
-
 def test_zip_codes():
     user_management = UserManagement()
     user_management.delete_user(conf.TEST_USER)

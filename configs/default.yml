@@ -33,11 +33,12 @@ event_groups:
   - TRS Tents
 
 map_event_options:
-  - Rodef 2100
-  - WoTRS
+  - NFTY
   - Renaissance
+  - Rodef 2100
   - TRS Tents
   - TRSTY
+  - WoTRS
 
 member_types:
   MEMFAM: Family

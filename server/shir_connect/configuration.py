@@ -28,7 +28,6 @@ JWT_COOKIE_CSRF_PROTECT = True
 FIDDLER_RDS = os.getenv('FIDDLER_RDS')
 PG_USER = 'master'
 PG_HOST = FIDDLER_RDS
-PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN
 PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',
@@ -70,3 +69,5 @@ MEMBER_TYPES = config['member_types']
 # Controls the subdomain for the client, and also what database
 # gets used for the REST calls
 SUBDOMAIN = config['subdomain']
+# PG Database is down here because it depends on subdomain
+PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN

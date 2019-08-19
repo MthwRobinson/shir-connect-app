@@ -14,7 +14,7 @@ class MapGeometries:
     def get_geometry(self, zip_code):
         """ Constructs the geometry for the specified zip code """
         geometry = self.database.get_item('geometries', zip_code)
-        layer = build_layer(geometry)
+        layer = build_layer(geo, geometry['city'])
         return layer
 
     def get_geometries(self):

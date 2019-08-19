@@ -20,7 +20,7 @@ class MapGeometries:
     def get_geometries(self):
         """ Returns all of the geometries with their colors """
         sql = """
-            SELECT a.id as postal_code, geometry
+            SELECT a.id as postal_code, geometry, city
             FROM {schema}.geometries a
             INNER JOIN (
                 SELECT postal_code
@@ -53,7 +53,7 @@ class MapGeometries:
             # Skip any geometries that don't have features
             if len(geo['geometry']['features']) == 0:
                 continue
-            layer = build_layer(geo)
+            layer = build_layer(geo, geometry['city'])
             layers[postal_code] = layer
         return layers
 
@@ -157,12 +157,13 @@ def consolidate_results(members, events):
 
     return results
 
-def build_layer(geometry):
+def build_layer(geometry, city):
     """Builds the map layer with the correct colors."""
     geojson = geometry['geometry']
     layer = {
         'id': geometry['id'],
         'type': 'fill',
+        'city': city,
         'source' : {
             'type': 'geojson',
             'data': geojson

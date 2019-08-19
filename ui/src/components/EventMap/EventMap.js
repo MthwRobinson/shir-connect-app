@@ -152,13 +152,16 @@ class EventMap extends Component {
       // Pulls event locations from the database and renders the map
       this.setState({loading: true});
       let url = '/service/events/locations';
+      let queryParameters = [];
       if(sessionStorage.getItem('demoMode')==='true'){
-        url += '?fake_data=true';
-      } else {
-        url += '?fake_data=false';
+        queryParameters.push('fake_data=true');
       }
       if(eventGroup!=='All'){
-        url += '&event_category='+eventGroup
+        queryParameters.push('&event_category='+eventGroup);
+      }
+      if(queryParameters.length > 0){
+        const urlParams = queryParameters.join('&');
+        url += '?' + urlParams;
       }
 
       let response = axios.get(url)
@@ -268,7 +271,7 @@ class EventMap extends Component {
       }
     }
 
-    formatHoverHTML = (zipCodes, code) => {
+    formatHoverHTML = (zipCodes, code, city) => {
       // Formats the HTML that is displayed when you click on
       // a zipcode on the map.
       //
@@ -284,7 +287,7 @@ class EventMap extends Component {
       let memberCount = zipCodes[code].total_members;
       let eventCount = zipCodes[code].total_events;
       const html = `
-        <strong>Zip Code: ${code}</strong><br/>
+        <strong>${city} (${code})</strong><br/>
         Members: ${memberCount}<br/>
         Events: ${eventCount}
       `
@@ -320,11 +323,14 @@ class EventMap extends Component {
 
       if(zipCode in this.state.zipCodes){
         // Add the layer to the map
-        this.state.map.addLayer(this.state.zipLayers[zipCode], 'points');
+        const layer = this.state.zipLayers[zipCode];
+        this.state.map.addLayer(layer, 'points');
 
         // Format the hover HTML for the layer and set the map
         // to display the HTML on hover.
-        const html = this.formatHoverHTML(zipCodes, code);
+        console.log(layer);
+        const city = layer.city;
+        const html = this.formatHoverHTML(zipCodes, code, city);
         this.state.map.on('click', code, (e) =>{
           new mapboxgl.Popup()
             .setLngLat(e.lngLat)

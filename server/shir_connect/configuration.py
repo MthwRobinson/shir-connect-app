@@ -8,6 +8,9 @@ from shir_connect.utils import get_config
 PATH = os.path.dirname(os.path.realpath(__file__))
 HOMEPATH = os.path.expanduser('~')
 PROJPATH = os.path.join(PATH, '..', '..')
+# The subdomain is pulled from the path because on the production
+# server, each instance has its own namespace
+SUBDOMAIN = PATH.split('/')[-4]
 
 # Application environmental variables
 mode = os.getenv('SHIR_CONNECT_MODE')
@@ -28,6 +31,7 @@ JWT_COOKIE_CSRF_PROTECT = True
 FIDDLER_RDS = os.getenv('FIDDLER_RDS')
 PG_USER = 'master'
 PG_HOST = FIDDLER_RDS
+PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN
 PG_SCHEMA = 'shir_connect'
 MATERIALIZED_VIEWS = [
     'event_aggregates.sql',
@@ -66,8 +70,3 @@ AGE_GROUPS = config['age_groups']
 DEFAULT_LOCATION = config['location']
 AVAILABLE_MODULES = config['modules']
 MEMBER_TYPES = config['member_types']
-# Controls the subdomain for the client, and also what database
-# gets used for the REST calls
-SUBDOMAIN = config['subdomain']
-# PG Database is down here because it depends on subdomain
-PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN

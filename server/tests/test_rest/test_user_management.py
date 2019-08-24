@@ -208,9 +208,9 @@ def test_change_password():
     # Old password must be correct to change password
     response = CLIENT.post('/service/user/change-password',
         json=dict(
-            old_password='wrongtestPassword!',
-            new_password='updatedtestPassword!',
-            new_password2='updatedtestPassword!'
+            old_password='1wrongtestPassword!',
+            new_password=conf.TEST_PASSWORD + '!1',
+            new_password2=conf.TEST_PASSWORD + '!1'
         ),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -223,8 +223,8 @@ def test_change_password():
     response = CLIENT.post('/service/user/change-password',
         json=dict(
             old_password=conf.TEST_PASSWORD,
-            new_password='wrongupdatedtestPassword!',
-            new_password2='updatedtestPassword!'
+            new_password=conf.TEST_PASSWORD + '!1',
+            new_password2=conf.TEST_PASSWORD + '!2'
         ),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -237,8 +237,8 @@ def test_change_password():
     response = CLIENT.post('/service/user/change-password',
         json=dict(
             old_password=conf.TEST_PASSWORD,
-            new_password='updatedtestPassword!',
-            new_password2='updatedtestPassword!'
+            new_password=conf.TEST_PASSWORD + '!1',
+            new_password2=conf.TEST_PASSWORD + '!1'
         ),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -557,8 +557,10 @@ def test_list_users():
 
 def test_pw_complexity():
     user_management = UserManagement()
-    assert user_management.check_pw_complexity('Hell@') == False
+    assert user_management.check_pw_complexity('H3ll@') == False
     assert user_management.check_pw_complexity('hiphophoooray') == False
     assert user_management.check_pw_complexity('Hiphophoooray') == False
     assert user_management.check_pw_complexity('HIPHOPHOORAY') == False
-    assert user_management.check_pw_complexity('HIPHOPHooR@Y') == True
+    assert user_management.check_pw_complexity('HIPHOPHooR@Y') == False
+    assert user_management.check_pw_complexity('HIPH0PHooRAY') == False
+    assert user_management.check_pw_complexity('HIPH0PHooR@Y') == True

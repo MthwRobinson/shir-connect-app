@@ -2,10 +2,10 @@
 import hashlib
 import logging
 import random
+import string
 
 import daiquiri
 import numpy as np
-import xkcdpass.xkcd_password as xkcd
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
@@ -122,7 +122,7 @@ class UserManagement:
         )
 
     def list_users(self):
-        """ Lists all of the active users """
+        """Lists all of the active users."""
         df = self.database.read_table('users', sort='id', order='asc')
         users = []
         for i in df.index:
@@ -132,7 +132,7 @@ class UserManagement:
         return users
 
     def check_pw_complexity(self, password):
-        """ Checks to ensure a password is sufficiently complex """
+        """Checks to ensure a password is sufficiently complex"""
         if len(password) < 10:
             return False
         elif password.isalnum():
@@ -141,26 +141,21 @@ class UserManagement:
             return False
         elif password.isupper():
             return False
+        elif contains_digit(password) == False:
+            return False
         else:
             return True
 
-    def generate_password(self):
-        """ Creates an XKCD style password """
-        # Choose four random english words and three random integers
-        wordfile = xkcd.locate_wordfile()
-        wordlist = xkcd.generate_wordlist(
-            wordfile=wordfile,
-            min_length=4,
-            max_length=8
-        )
-        words = xkcd.generate_xkcdpassword(wordlist, numwords=4).split()
-        numbers = np.random.randint(low=0, high=9, size=3)
-
-        # Generate the password
-        password = ''
-        for i, word in enumerate(words):
-            password += word.title()
-            if i < 3:
-                password += str(numbers[i])
-        password += random.choice('!@#$%&')
+    def generate_password(self, length=20):
+        """Generates a complex random password that serves as a temporary
+        password for new users or users who reset their pasword."""
+        options = string.ascii_letters + string.digits + '!@#$%&'
+        password = ''.join(random.choice(options) for i in range(length))
+        complex_enough = self.check_pw_complexity(password)
+        if not complex_enough:
+            password = self.generate_password(length=length)
         return password
+
+def contains_digit(pw):
+    """Checks to see if a password contains number."""
+    return max([x.isdigit() for x in pw])

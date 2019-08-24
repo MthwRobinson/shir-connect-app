@@ -3,12 +3,12 @@
 //  from the server and store it in local storage
 import axios from 'axios';
 import React, { Component } from 'react';
-import { 
-  Button, 
-  ControlLabel, 
-  Form, 
-  FormControl, 
-  FormGroup 
+import {
+  Button,
+  ControlLabel,
+  Form,
+  FormControl,
+  FormGroup
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 
@@ -42,7 +42,7 @@ class Login extends Component {
       // Prevents the app from refreshing on submit
       event.preventDefault();
       axios.post('/service/user/authenticate', {
-        username: this.state.userName, 
+        username: this.state.userName,
         password: this.state.password
       })
         .then(res => {
@@ -79,8 +79,21 @@ class Login extends Component {
       }
     }
 
+    renderReset = () => {
+      // If the authentication is not successful, give users the option
+      // to reset their password. We don't display this option by default
+      // because we WANT users to remember their password and try at least once.
+      if(this.state.attempted && !this.state.authenticated){
+        return(<Button
+                  className="search-button"
+                  bsStyle="danger">Reset</Button>);
+      } else {
+        return null;
+      }
+    }
     render() {
       let errorMsg = this.renderError();
+      let resetButton = this.renderReset();
       return (
         <div>
           <Header />
@@ -92,7 +105,7 @@ class Login extends Component {
                 <FormControl
                   value={this.state.userName}
                   onChange={this.handleUserName}
-                  type="text" 
+                  type="text"
                 />
               </FormGroup>
               <FormGroup>
@@ -100,15 +113,16 @@ class Login extends Component {
                 <FormControl
                   value={this.state.password}
                   onChange={this.handlePassword}
-                  type="password" 
+                  type="password"
                 />
               </FormGroup>
               {errorMsg}
-              <Button 
-                className="login-button"  
-                bsStyle="primary" 
+              <Button
+                className="login-button"
+                bsStyle="primary"
                 type="submit"
               >Submit</Button>
+              {resetButton}
             </Form>
           </div>
         </div>

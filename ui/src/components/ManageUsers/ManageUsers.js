@@ -1,7 +1,7 @@
 // Renders the component for the ManageUsers screen
 import axios from 'axios';
 import React, { Component } from 'react';
-import { 
+import {
   Button,
   Checkbox,
   ControlLabel,
@@ -15,7 +15,7 @@ import ReactToolTip from 'react-tooltip';
 import Modal from 'react-responsive-modal';
 import { withRouter } from 'react-router-dom';
 
-import { 
+import {
   getCSRFToken,
   refreshAccessToken
 } from './../../utilities/authentication';
@@ -23,6 +23,7 @@ import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './ManageUsers.css';
+
 
 class ManageUsers extends Component {
     constructor(props){
@@ -55,7 +56,7 @@ class ManageUsers extends Component {
         availableModules: []
       }
     }
-  
+
     componentDidMount(){
       // Pulls the users and the available modules
       this.getUsers();
@@ -86,7 +87,7 @@ class ManageUsers extends Component {
       // Bindings for reset password form
 
     }
-  
+
     //------------------
     // SERVICE CALLS
     //-------------------
@@ -148,7 +149,7 @@ class ManageUsers extends Component {
         username: this.state.username,
         role: this.state.role,
         modules: modules
-      } 
+      }
 
       axios.post('/service/user', data, {headers: {'X-CSRF-TOKEN': csrfToken}})
         .then(res => {
@@ -186,7 +187,7 @@ class ManageUsers extends Component {
           }
         })
     }
-  
+
     modifyUser = () => {
       // Posts updated user roles and modules
       this.setState({loading: true});
@@ -212,7 +213,7 @@ class ManageUsers extends Component {
       const data = {
         username: this.state.modUsername,
         modules: modules
-      } 
+      }
 
       // Update the access for the user
       const updateAccess = axios.post('/service/user/update-access',
@@ -248,12 +249,12 @@ class ManageUsers extends Component {
           this.getUsers();
         })
     }
-  
+
     resetPassword = () => {
       // Resets a user's password
       const csrfToken = getCSRFToken();
       // Build the post body
-      const data = {username: this.state.resetUsername} 
+      const data = {username: this.state.resetUsername}
       // Update the password for the user
       axios.post('/service/user/reset-password',
         data,
@@ -277,7 +278,7 @@ class ManageUsers extends Component {
       // Updates the username in the state
       this.setState({ username: event.target.value });
     }
-  
+
     handleRole(event){
       // Updates the role in the state
       this.setState({ role: event.target.value });
@@ -302,7 +303,7 @@ class ManageUsers extends Component {
       // Updates the map checkbox
       this.setState({ map: event.target.checked });
     }
-  
+
     handleReport(event){
       // Updates the report checkbox
       this.setState({ report: event.target.checked });
@@ -326,7 +327,7 @@ class ManageUsers extends Component {
         addModalOpen: false,
         username: '',
         password: '',
-        role: '',
+        role: 'standard',
         events: false,
         members: false,
         trends: false,
@@ -350,13 +351,7 @@ class ManageUsers extends Component {
               {'\n'}<b>{this.state.password}</b>
             </p>
         )
-        button = (
-          <Button
-            className='login-button'
-            bsStyle='primary'
-            onClick={()=>this.closeAddWindow()}
-          >Done</Button>
-        )
+        button = null;
       } else if(this.state.addUserError){
         msg = (
             <p className='error-msg'>
@@ -368,7 +363,7 @@ class ManageUsers extends Component {
       // The modal that pops up to add a new user
       return(
         <div>
-          <Modal 
+          <Modal
             open={this.state.addModalOpen}
             showCloseIcon={false}
             center
@@ -376,7 +371,7 @@ class ManageUsers extends Component {
             <div className="add-user-container">
               <h3><u>
                 New User
-                <i 
+                <i
                   className='fa fa-times pull-right event-icons'
                   onClick={()=>this.closeAddWindow()}
                 ></i>
@@ -392,7 +387,7 @@ class ManageUsers extends Component {
                 </FormGroup>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
-                  <FormControl 
+                  <FormControl
                     componentClass="select"
                     value={this.state.role}
                     onChange={this.handleRole}
@@ -417,7 +412,7 @@ class ManageUsers extends Component {
     //------------------
     // DELETE USER MODAL
     //-------------------
-    
+
     deleteClick = (username) => {
       // Click handler for the x in the table
       this.setState({
@@ -425,7 +420,7 @@ class ManageUsers extends Component {
         deleteUsername: username
       })
     }
-  
+
     openDeleteWindow = () => {
       // Opens the delete modal window
       this.setState({ deleteModalOpen: true });
@@ -440,7 +435,7 @@ class ManageUsers extends Component {
       // The modal that pops up to add a new user
       return(
         <div>
-          <Modal 
+          <Modal
             open={this.state.deleteModalOpen}
             showCloseIcon={false}
             center
@@ -448,13 +443,13 @@ class ManageUsers extends Component {
             <div className="add-user-container">
               <h3><u>
                 Delete User
-                <i 
+                <i
                   className='fa fa-times pull-right event-icons'
                   onClick={()=>this.closeDeleteWindow()}
                 ></i>
               </u></h3>
               <h4>
-                Are you sure you want to remove 
+                Are you sure you want to remove
                 {' '+this.state.deleteUsername}?
               </h4>
               <Button
@@ -467,7 +462,7 @@ class ManageUsers extends Component {
         </div>
       )
     }
-  
+
     //------------------
     // MODIFY USER MODAL
     //-------------------
@@ -475,7 +470,7 @@ class ManageUsers extends Component {
       // Updates the username in the state
       this.setState({ modUsername: event.target.value });
     }
-  
+
     handleModRole(event){
       // Updates the role in the state
       this.setState({ modRole: event.target.value });
@@ -500,7 +495,7 @@ class ManageUsers extends Component {
       // Updates the map checkbox
       this.setState({ modMap: event.target.checked });
     }
-  
+
     handleModReport(event){
       // Updates the report checkbox
       this.setState({ modReport: event.target.checked });
@@ -522,13 +517,13 @@ class ManageUsers extends Component {
         modTrends: modules.includes('trends'),
         modMap: modules.includes('map'),
         modReport: modules.includes('report'),
-        modModalOpen: true 
+        modModalOpen: true
       });
     }
 
     closeModWindow = () => {
       // Closes the modal window
-      this.setState({ 
+      this.setState({
         modModalOpen: false,
         modRole: 'standard',
         modEvents: false,
@@ -544,7 +539,7 @@ class ManageUsers extends Component {
       let checkBoxes = this.renderCheckBoxes(true);
       return(
         <div>
-          <Modal 
+          <Modal
             open={this.state.modModalOpen}
             showCloseIcon={false}
             center
@@ -552,7 +547,7 @@ class ManageUsers extends Component {
             <div className="add-user-container">
               <h3><u>
                 Update {this.state.modUsername}
-                <i 
+                <i
                   className='fa fa-times pull-right event-icons'
                   onClick={()=>this.closeModWindow()}
                 ></i>
@@ -560,7 +555,7 @@ class ManageUsers extends Component {
               <Form onSubmit={this.handleModSubmit} horizontal>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
-                  <FormControl 
+                  <FormControl
                     componentClass="select"
                     value={this.state.modRole}
                     onChange={this.handleModRole}
@@ -584,11 +579,11 @@ class ManageUsers extends Component {
         </div>
       )
     }
-  
+
     //----------------------
     // RESET PASSWORD MODAL
     //----------------------
-    
+
     resetClick = (username) => {
       // Click handler for the x in the table
       this.setState({
@@ -596,7 +591,7 @@ class ManageUsers extends Component {
         resetUsername: username
       })
     }
-  
+
     openResetWindow = () => {
       // Opens the delete modal window
       this.setState({ resetModalOpen: true });
@@ -604,7 +599,7 @@ class ManageUsers extends Component {
 
     closeResetWindow = () => {
       // Closes the delete modal window
-      this.setState({ 
+      this.setState({
         resetModalOpen: false,
         resetUsername: '',
         resetPassword: ''
@@ -614,7 +609,13 @@ class ManageUsers extends Component {
     renderResetModal = () => {
       // The modal that pops up to add a new user
       let msg = null;
-      let done = null;
+      let button = (
+        <Button
+          className='confirm-delete-button login-button'
+          bsStyle='primary'
+          onClick={()=>this.resetPassword()}
+        >Confirm</Button>
+      )
       if(this.state.resetPassword){
         msg = (
             <p className='success-msg'>
@@ -622,17 +623,11 @@ class ManageUsers extends Component {
               {'\n'}<b>{this.state.resetPassword}</b>
             </p>
         )
-        done = (
-          <Button
-            className='confirm-delete-button login-button'
-            bsStyle='primary'
-            onClick={()=>this.closeResetWindow()}
-          >Done</Button>
-        )
+        button = null;
       }
       return(
         <div>
-          <Modal 
+          <Modal
             open={this.state.resetModalOpen}
             showCloseIcon={false}
             center
@@ -640,22 +635,17 @@ class ManageUsers extends Component {
             <div className="add-user-container">
               <h3><u>
                 Reset Password
-                <i 
+                <i
                   className='fa fa-times pull-right event-icons'
                   onClick={()=>this.closeResetWindow()}
                 ></i>
               </u></h3>
               <h4>
-                Reset password for 
+                Reset password for
                 {' '+this.state.resetUsername}?
               </h4>
               {msg}
-              <Button
-                className='confirm-delete-button login-button'
-                bsStyle='primary'
-                onClick={()=>this.resetPassword()}
-              >Confirm</Button>
-              {done}
+              {button}
             </div>
           </Modal>
         </div>
@@ -672,21 +662,21 @@ class ManageUsers extends Component {
             <th
               onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
             >{user.id}</th>
-            <th 
+            <th
               className='user-management-rows'
               onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
             >{user.role}</th>
-            <th 
+            <th
               className='user-management-rows'
               onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
             >{modules}</th>
             <th>
-              <i 
+              <i
                 className='fa fa-times pull-right event-icons delete-user-icon'
                 onClick={()=>this.deleteClick(user.id)}
                 data-tip="Delete user."
               ></i>
-              <i 
+              <i
                 className='fa fa-key fa-flip-horizontal pull-right event-icons'
                 onClick={()=>this.resetClick(user.id)}
                 data-tip="Reset password."
@@ -696,7 +686,7 @@ class ManageUsers extends Component {
         )
         users.push(userRow);
       }
-      
+
       return (
         <div>
           <Row className='event-table'>
@@ -755,7 +745,7 @@ class ManageUsers extends Component {
     }
     if(this.state.availableModules.indexOf('members') >= 0){
       checkBoxes.push(
-        <Checkbox 
+        <Checkbox
           checked={mod ? this.state.modMembers : this.state.members}
           onChange={mod ? this.handleModMembers : this.handleMembers}
           className='form-check-box'
@@ -770,10 +760,10 @@ class ManageUsers extends Component {
     }
     if(this.state.availableModules.indexOf('trends') >= 0){
       checkBoxes.push(
-        <Checkbox 
+        <Checkbox
           checked={mod ? this.state.modTrends : this.state.trends}
           onChange={mod ? this.handleModTrends : this.handleTrends}
-          className='form-check-box' 
+          className='form-check-box'
         inline>
           {' '}Trends
         </Checkbox>
@@ -786,10 +776,10 @@ class ManageUsers extends Component {
     if(this.state.availableModules.indexOf('map') >= 0){
       const br = i % 2 === 0 ? <br/> : null;
       checkBoxes.push(
-        <Checkbox 
+        <Checkbox
           checked={mod ? this.state.modMap : this.state.map}
           onChange={mod ? this.handleModMap : this.handleMap}
-          className='form-check-box' 
+          className='form-check-box'
         inline>
           {' '}Map
         </Checkbox>
@@ -801,10 +791,10 @@ class ManageUsers extends Component {
     }
     if(this.state.availableModules.indexOf('report') >= 0){
       checkBoxes.push(
-        <Checkbox 
+        <Checkbox
           checked={mod ? this.state.modReport : this.state.report}
           onChange={mod ? this.handleModReport : this.handleReport}
-          className='form-check-box' 
+          className='form-check-box'
         inline>
           {' '}Report
         </Checkbox>

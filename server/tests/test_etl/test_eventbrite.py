@@ -4,13 +4,11 @@ import pytest
 
 from shir_connect.etl.sources.eventbrite import Eventbrite, EventbriteLoader
 
-@pytest.mark.skip
 def test_eventbrite_token():
     eventbrite = Eventbrite()
     response = eventbrite.get_token_info()
     assert response.status_code == 200
 
-@pytest.mark.skip
 def test_eventbrite_events():
     eventbrite = Eventbrite()
     events = eventbrite.get_events(1358538665, start='2018-07-01')
@@ -18,25 +16,21 @@ def test_eventbrite_events():
     event = events['events'][0]
     assert event['start']['local'] >= '2018-07-01'
 
-@pytest.mark.skip
 def test_eventbrite_event():
     eventbrite = Eventbrite()
     event = eventbrite.get_event(40146904472)
     assert event['id'] == '40146904472'
 
-@pytest.mark.skip
 def test_eventbrite_attendees():
     eventbrite = Eventbrite()
     event = eventbrite.get_attendees(1059379633)
     assert len(event['attendees']) > 0
 
-@pytest.mark.skip
 def test_eventbrite_order():
     eventbrite = Eventbrite()
     order = eventbrite.get_order(705451451)
     assert type(order) == dict
 
-@pytest.mark.skip
 def test_eventbrite_venue():
     eventbrite = Eventbrite()
     venue = eventbrite.get_venue(26449992)
@@ -46,12 +40,10 @@ def test_eventbrite_venue():
 # Tests for the Eventbrite dataloader
 ######################################
 
-@pytest.mark.skip
 def test_eventbrite_data_loader():
     eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.run(test=True)
 
-@pytest.mark.skip
 def test_eventbrite_load_event():
     eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('events', 'test_event')
@@ -68,7 +60,6 @@ def test_eventbrite_load_event():
     test_event = eventbrite_loader.database.get_item('events', 'test_event')
     assert test_event == None
 
-@pytest.mark.skip
 def test_eventbrite_load_attendee():
     eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('attendees', 'test_attendee')
@@ -84,7 +75,6 @@ def test_eventbrite_load_attendee():
     test_attendee = eventbrite_loader.database.get_item('attendees', 'test_attendee')
     assert test_attendee == None
 
-@pytest.mark.skip
 def test_eventbrite_load_order():
     eventbrite_loader = EventbriteLoader(eventbrite_org=1358538665)
     eventbrite_loader.database.delete_item('orders', 'test_order')

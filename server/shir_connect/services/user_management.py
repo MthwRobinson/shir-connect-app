@@ -55,16 +55,17 @@ def user_register():
         new_user['role'] = 'standard'
     if 'modules' not in new_user:
         new_user['modules'] = []
+    if 'temporary_password' not in new_user:
+        new_user['temporary_password'] = False
 
     # Generate a password for the user
     new_user['password'] = user_management.generate_password()
 
-    status = user_management.add_user(
-        username=new_user['username'],
-        password=new_user['password'],
-        role=new_user['role'],
-        modules=new_user['modules']
-    )
+    status = user_management.add_user(username=new_user['username'],
+                                      password=new_user['password'],
+                                      email=new_user['email'],
+                                      role=new_user['role'],
+                                      modules=new_user['modules'])
     # Status returns false if user already exists
     if status:
         response = {
@@ -314,8 +315,8 @@ def user_reset_password():
     user_management = UserManagement()
 
     # Check the request body
-    if 'username' not in request.json:
-        response = {'message': 'username required in post body'}
+    if 'username' not in request.json or 'email' not in request.json:
+        response = {'message': 'post body missing required keys'}
         return jsonify(response), 400
 
     # Generate a password and post the update to the datase
@@ -324,13 +325,16 @@ def user_reset_password():
 
     log_request(request, username, True)
 
-    updated = user_management.reset_password(username, email)
+    mode = request.args.get('mode')
+    send = False if mode and mode == 'test' else True
+    updated = user_management.reset_password(username, email, send=send)
+
     if updated:
         response = {'message': 'Password updated for %s'%(username)}
         return jsonify(response), 201
     else:
         response = {'message': 'Password updated failed for %s'%(username)}
-        return jsonify(response), 500
+        return jsonify(response), 401
 
 @user_management.route('/service/users/list', methods=['GET'])
 @jwt_required

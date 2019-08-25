@@ -1,4 +1,5 @@
 """ Class for managing users in the database. """
+import datetime
 import hashlib
 import logging
 import random
@@ -27,7 +28,8 @@ class UserManagement:
         return self.database.get_item('users', username)
 
     def authenticate_user(self, username, password):
-        """Checks the password of the user.
+        """
+        Checks the password of the user
         Returns True if the user is authorized
         """
         user = self.get_user(username)
@@ -37,9 +39,27 @@ class UserManagement:
         pw_hash = self.hash_pw(password)
         return user['password'] == pw_hash
 
-    def add_user(self, username, password,
-                 role='standard', modules=[]):
-        """Adds a new user to the database"""
+    def add_user(self, username, password, email=None, role='standard',
+                 modules=[], temporary_password=False):
+        """Adds a new user to the system. The pw_update_ts for the account
+        is set to the time that the password was updated with this function.
+
+        Parameters
+        ----------
+        username: str, the username for the new user
+        password: str, the password to the new user. must meet password
+            complexity requirements
+        email: str, the email for the user. primarily used for password resets
+        role: str, the role of the new user. 'standard' or 'admin'
+        modules: list, the list of modules the uer should have access to
+        temporary_password: boolean, True if the password is temporary. users
+            who log in with a temporary password should be redirected to
+            the change password screen
+
+        Returns
+        -------
+        True if the password update was successful, False otherwise
+        """
         complex_enough = self.check_pw_complexity(password)
         if not complex_enough:
             return False
@@ -52,8 +72,11 @@ class UserManagement:
             pw_hash = self.hash_pw(password)
             item = {'id': username,
                     'password': pw_hash,
+                    'email': email,
                     'role': role,
-                    'modules': modules}
+                    'modules': modules,
+                    'temporary_password': temporary_password,
+                    'pw_update_ts': datetime.datetime.now()}
             self.database.load_item(item, 'users')
             return True
 

@@ -13,8 +13,7 @@ def test_add_user():
 
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username='unittestadmin',
-        password=conf.TEST_PASSWORD
-    ))
+        password=conf.TEST_PASSWORD))
     assert response.status_code == 200
     jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
     csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
@@ -23,44 +22,40 @@ def test_add_user():
     response = CLIENT.post('/service/user',
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
-            'X-CSRF-TOKEN': csrf['csrf_access_token']
-        }
-    )
+            'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 403
     user_management.update_role('unittestadmin', 'admin')
 
     # JSON body is required to register a user
     response = CLIENT.post('/service/user', headers={
         'Cookies': 'access_token_cookie=%s'%(jwt),
-        'X-CSRF-TOKEN': csrf['csrf_access_token']
-    })
+        'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 400
 
     # Success!
     response = CLIENT.post('/service/user',
-        json=dict(
-            username=conf.TEST_USER,
-            role='standard',
-            modules=['events','map']
-        ),
+        json=dict(username=conf.TEST_USER,
+                  email='jabber@fakeemail.birds',
+                  role='standard',
+                  modules=['events','map']),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
-            'X-CSRF-TOKEN': csrf['csrf_access_token']
-    })
+            'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 201
     assert 'password' in response.json
     user = user_management.get_user(conf.TEST_USER)
     assert 'events' in user['modules']
     assert 'map' in user['modules']
     assert user['role'] == 'standard'
+    assert user['email'] == 'jabber@fakeemail.birds'
 
     # Can't register the same user twice
     response = CLIENT.post('/service/user',
-        json=dict(username=conf.TEST_USER, password=conf.TEST_PASSWORD),
-        headers={
-            'Cookies': 'access_token_cookie=%s'%(jwt),
-            'X-CSRF-TOKEN': csrf['csrf_access_token']
-    })
+        json=dict(username=conf.TEST_USER,
+                  email='jabber@fakeemail.birds',
+                  password=conf.TEST_PASSWORD),
+        headers={'Cookies': 'access_token_cookie=%s'%(jwt),
+                 'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 400
 
     url = '/service/user/logout'
@@ -448,6 +443,35 @@ def test_update_access():
 
     user_management.delete_user('unittestadmin')
     user = user_management.get_user('unittestadmin')
+    assert user == None
+
+def test_user_reset_password():
+    """For the user reset password end point to work, the e-mail
+    in the post body must correspond to the e-mail that is on
+    record for the user's account."""
+    user_management = UserManagement()
+    user_management.delete_user(conf.TEST_USER)
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD,
+                             email='jabber@fakeemail.birds')
+
+    # Both the email and the username must appear in the post body
+    response = CLIENT.post('/service/user/user-reset-password?mode=test',
+        json=dict(username=conf.TEST_USER))
+    assert response.status_code == 400
+
+    # The email address in the post body must match the email address
+    # list for the user trying to reset their password
+    response = CLIENT.post('/service/user/user-reset-password?mode=test',
+        json=dict(username=conf.TEST_USER, email='jibber@jabber.net'))
+    assert response.status_code == 401
+
+    # Success!
+    response = CLIENT.post('/service/user/user-reset-password?mode=test',
+        json=dict(username=conf.TEST_USER, email='jabber@fakeemail.birds'))
+    assert response.status_code == 201
+
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
     assert user == None
 
 def test_reset_password():

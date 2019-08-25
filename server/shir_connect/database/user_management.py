@@ -9,6 +9,7 @@ import numpy as np
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
+from shir_connect.email import Email
 
 class UserManagement:
     """ Class that handles user centric REST operations """
@@ -26,8 +27,7 @@ class UserManagement:
         return self.database.get_item('users', username)
 
     def authenticate_user(self, username, password):
-        """
-        Checks the password of the user
+        """Checks the password of the user.
         Returns True if the user is authorized
         """
         user = self.get_user(username)
@@ -39,7 +39,7 @@ class UserManagement:
 
     def add_user(self, username, password,
                  role='standard', modules=[]):
-        """ Adds a new user to the database """
+        """Adds a new user to the database"""
         complex_enough = self.check_pw_complexity(password)
         if not complex_enough:
             return False
@@ -50,27 +50,63 @@ class UserManagement:
             return False
         else:
             pw_hash = self.hash_pw(password)
-            item = {
-                'id': username,
-                'password': pw_hash,
-                'role': role,
-                'modules': modules
-            }
+            item = {'id': username,
+                    'password': pw_hash,
+                    'role': role,
+                    'modules': modules}
             self.database.load_item(item, 'users')
             return True
 
     def delete_user(self, username):
-        """ Deletes a user from the database """
+        """Deletes a user from the database"""
         self.database.delete_item('users', username)
 
+    def reset_password(self, username, email, send=True):
+        """Creates a new password for the user and then emails
+        a temporary password to the user. Only succeeds if the user
+        knows the email address associated with the account."""
+        user = self.get_user(username)
+        if user['email'] != email:
+            return False
+        else:
+            new_password = self.generate_password()
+            self.update_password(username, new_password)
+            content = """
+            <html>
+                <h3>Password Reset</h3>
+                <p>Hi {username}, </p>
+                <p>We have a received a request to reset the password on your
+                   account at <b>https://{subdomain}.shirconnect.com</b>.
+                   Your temporary credentials are as follows. To ensure the
+                   security of your account, please update your password
+                   immediately after logging in to your account. If you
+                   did not request a password update, contact your site
+                   administrator immediately.
+                </p>
+                <p>Thanks,</p>
+                <p>Shir Connect Development Team
+                <hr/>
+                User: <b>{username}</b><br/>
+                Temporary Password: <b>{password}</b><br/>
+            </html>
+            """.format(username=username, subdomain=conf.SUBDOMAIN,
+                       password=new_password)
+            if send:
+                smtp = Email()
+                smtp.send_email(to_address=email,
+                                subject="Shir Connect Password Reset",
+                                content=content,
+                                text_format='html')
+            return True
+
     def hash_pw(self, password):
-        """ Hashes a password """
+        """Hashes a password"""
         pw = password.encode('utf-8')
         pw_hash = hashlib.sha512(pw).hexdigest()
         return pw_hash
 
     def update_password(self, username, password):
-        """ Updates the password for a user. """
+        """Updates the password for a user."""
         complex_enough = self.check_pw_complexity(password)
         if not complex_enough:
             return False
@@ -84,8 +120,7 @@ class UserManagement:
                 table='users',
                 item_id=username,
                 column='password',
-                value=pw_value
-            )
+                value=pw_value)
             return True
         else:
             return False
@@ -103,13 +138,11 @@ class UserManagement:
                 table='users',
                 item_id=username,
                 column='role',
-                value=value
-            )
+                value=value)
             return True
 
     def update_access(self, username, modules):
-        """
-        Updates the modules thate are available for the user.
+        """Updates the modules thate are available for the user.
         The available types are events, members, trends and map
         """
         mods = [x for x in modules if x in self.access_groups]
@@ -128,6 +161,7 @@ class UserManagement:
         for i in df.index:
             user = dict(df.loc[i])
             del user['password']
+            del user['temporary_password']
             users.append(user)
         return users
 

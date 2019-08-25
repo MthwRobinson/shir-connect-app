@@ -7,6 +7,8 @@ import smtplib
 import daiquiri
 
 import shir_connect.configuration as conf
+import socket
+socket.setdefaulttimeout(30)
 
 class Email:
     """Handles connections to the SMTP server and sends e-mails

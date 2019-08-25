@@ -145,7 +145,7 @@ def user_logout():
 @user_management.route('/service/user/refresh', methods=['GET'])
 @jwt_refresh_token_required
 def user_refresh():
-    """ Creates a refreshed access token for the user """
+    """Creates a refreshed access token for the user"""
     username = get_jwt_identity()
     access_token = create_access_token(identity=username)
     response = jsonify({'refresh': True})
@@ -156,7 +156,7 @@ def user_refresh():
 @user_management.route('/service/user/authorize', methods=['GET'])
 @jwt_required
 def user_authorize():
-    """ Returns user authorization and role metadata """
+    """Returns user authorization and role metadata"""
     username = get_jwt_identity()
     user_management = UserManagement()
     user = user_management.get_user(username)
@@ -169,12 +169,13 @@ def user_authorize():
         modules = [x for x in user['modules'] if x in conf.AVAILABLE_MODULES]
         user['modules'] = modules
         del user['password']
+        del user['temporary_password']
         return jsonify(user), 200
 
 @user_management.route('/service/user/change-password', methods=['POST'])
 @jwt_required
 def change_password():
-    """ Updates the password for the user """
+    """Updates the password for the user"""
     if not request.json:
         response = {'message': 'no post body'}
         return jsonify(response), 400
@@ -306,6 +307,30 @@ def reset_password():
             'password': password
         }
         return jsonify(response), 201
+
+@user_management.route('/service/user/user-reset-password', methods=['POST'])
+def user_reset_password():
+    """Resets the password for the user in the post body """
+    user_management = UserManagement()
+
+    # Check the request body
+    if 'username' not in request.json:
+        response = {'message': 'username required in post body'}
+        return jsonify(response), 400
+
+    # Generate a password and post the update to the datase
+    username = request.json['username']
+    email = request.json['email']
+
+    log_request(request, username, True)
+
+    updated = user_management.reset_password(username, email)
+    if updated:
+        response = {'message': 'Password updated for %s'%(username)}
+        return jsonify(response), 201
+    else:
+        response = {'message': 'Password updated failed for %s'%(username)}
+        return jsonify(response), 500
 
 @user_management.route('/service/users/list', methods=['GET'])
 @jwt_required

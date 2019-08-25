@@ -86,6 +86,7 @@ class Login extends Component {
       if(this.state.attempted && !this.state.authenticated){
         return(<Button
                   className="search-button"
+                  onClick={()=>this.props.history.push('/reset-password')}
                   bsStyle="danger">Reset</Button>);
       } else {
         return null;

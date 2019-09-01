@@ -1,16 +1,16 @@
 // Renders the component for the ChangePassword screen
 import React, { Component } from 'react';
-import { 
-  Button, 
-  ControlLabel, 
-  Form, 
-  FormControl, 
-  FormGroup 
+import {
+  Button,
+  ControlLabel,
+  Form,
+  FormControl,
+  FormGroup
 } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
-import { 
+import {
   refreshAccessToken,
   getCSRFToken
 } from './../../utilities/authentication';
@@ -36,7 +36,7 @@ class ChangePassword extends Component {
       this.handleNewPassword = this.handleNewPassword.bind(this);
       this.handleNewPassword2 = this.handleNewPassword2.bind(this);
     }
-  
+
     componentDidMount(){
       // Pulls the users name and redirects to the Login
       // page if authentication is required
@@ -64,13 +64,13 @@ class ChangePassword extends Component {
       this.setState({updated: false, mismatch: false, attempted: false});
       const csrfToken = getCSRFToken();
       axios.post('/service/user/change-password', {
-          old_password: this.state.oldPassword, 
+          old_password: this.state.oldPassword,
           new_password: this.state.newPassword,
           new_password2: this.state.newPassword2
       }, {headers: { 'X-CSRF-TOKEN': csrfToken }})
         .then(res => {
           this.setState({
-            updated: true, 
+            updated: true,
             attempted: true,
             oldPassword: '',
             newPassword: '',
@@ -95,12 +95,12 @@ class ChangePassword extends Component {
       // Updates the old password in the state
       this.setState({oldPassword: event.target.value});
     }
-  
+
     handleNewPassword(event) {
       // Updates the new password in the state
       this.setState({newPassword: event.target.value});
     }
-  
+
     handleNewPassword2(event) {
       // Updates the second new password in the state
       this.setState({newPassword2: event.target.value});
@@ -130,13 +130,14 @@ class ChangePassword extends Component {
             <div className='error-msg'>
               <p className='error-msg'>
                 Password update failed. Please Ensure:
-                  <ol>
+                  <ul>
                     <li>Your old password is correct.</li>
-                    <li>Your new password has at least 10 characters,
-                      is not all upper case,
-                      is not all lswer case,
-                      and has at least one special character.</li>
-                  </ol>
+                    <li>Your new password has at least 10 characters.</li>
+                    <li>Your new password is not all upper case.</li>
+                    <li>Your new password is not all lower case.</li>
+                    <li>Your new password contains one of the special characters: !@#$%&</li>
+                    <li>Your new password does not contain an special character that is not in the above list.</li>
+                  </ul>
               </p>
             </div>
           );
@@ -159,7 +160,7 @@ class ChangePassword extends Component {
                 <FormControl
                   value={this.state.oldPassword}
                   onChange={this.handleOldPassword}
-                  type="password" 
+                  type="password"
                 />
               </FormGroup>
               <FormGroup>
@@ -167,7 +168,7 @@ class ChangePassword extends Component {
                 <FormControl
                   value={this.state.newPassword}
                   onChange={this.handleNewPassword}
-                  type="password" 
+                  type="password"
                 />
               </FormGroup>
               <FormGroup>
@@ -175,15 +176,15 @@ class ChangePassword extends Component {
                 <FormControl
                   value={this.state.newPassword2}
                   onChange={this.handleNewPassword2}
-                  type="password" 
+                  type="password"
                 />
               </FormGroup>
-              {msg}
-              <Button 
-                className="login-button"  
-                bsStyle="primary" 
+              <Button
+                className="login-button"
+                bsStyle="primary"
                 type="submit"
               >Submit</Button>
+              {msg}
             </Form>
           </div>
         </div>

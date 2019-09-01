@@ -135,6 +135,7 @@ class ChangePassword extends Component {
                     <li>Your new password has at least 10 characters.</li>
                     <li>Your new password is not all upper case.</li>
                     <li>Your new password is not all lower case.</li>
+                    <li>Your new password does not contain white space characters.</li>
                     <li>Your new password contains one of the special characters: !@#$%&</li>
                     <li>Your new password does not contain an special character that is not in the above list.</li>
                   </ul>

@@ -363,6 +363,73 @@ def test_update_role():
     user = user_management.get_user('unittestadmin')
     assert user == None
 
+def test_update_email():
+    user_management = UserManagement()
+    user_management.delete_user(conf.TEST_USER)
+    user_management.delete_user('unittestadmin')
+    user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
+    user_management.add_user('unittestadmin', conf.TEST_PASSWORD)
+
+    response = CLIENT.post('/service/user/authenticate', json=dict(
+        username='unittestadmin',
+        password=conf.TEST_PASSWORD))
+    assert response.status_code == 200
+    jwt = utils._get_cookie_from_response(response, 'access_token_cookie')
+    csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
+
+    # User must be an admin to update email
+    response = CLIENT.post('/service/user/update-email',
+        json=dict(
+            username=conf.TEST_USER,
+            role='admin'
+        ),
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']})
+    assert response.status_code == 403
+
+    user_management.update_role('unittestadmin', 'admin')
+    # Username must be in the post body
+    response = CLIENT.post('/service/user/update-email',
+        json=dict(email='potato@carl.com'),
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        })
+    assert response.status_code == 400
+
+    # Email must be in the post body
+    response = CLIENT.post('/service/user/update-email',
+        json=dict(username=conf.TEST_USER),
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        })
+    assert response.status_code == 400
+
+    # Success!
+    response = CLIENT.post('/service/user/update-email',
+        json=dict(username=conf.TEST_USER, email='carl@twohump.camel'),
+        headers={
+            'Cookies': 'access_token_cookie=%s'%(jwt),
+            'X-CSRF-TOKEN': csrf['csrf_access_token']
+        })
+    assert response.status_code == 201
+    unittestuser = user_management.get_user(conf.TEST_USER)
+    assert unittestuser['email'] == 'carl@twohump.camel'
+
+    url = '/service/user/logout'
+    response = CLIENT.post(url)
+    assert response.status_code == 200
+
+    user_management.delete_user(conf.TEST_USER)
+    user = user_management.get_user(conf.TEST_USER)
+    assert user == None
+
+    user_management.delete_user('unittestadmin')
+    user = user_management.get_user('unittestadmin')
+    assert user == None
+
 def test_update_access():
     user_management = UserManagement()
     user_management.delete_user(conf.TEST_USER)

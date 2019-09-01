@@ -52,6 +52,7 @@ class ManageUsers extends Component {
         modMap: false,
         modReport: false,
         modUsername: '',
+        modEmail: '',
         resetUsername: '',
         resetPassword: '',
         resetModalOpen: false,
@@ -80,6 +81,7 @@ class ManageUsers extends Component {
 
       // Bindings for the modify user form
       this.handleModSubmit = this.handleModSubmit.bind(this);
+      this.handleModEmail = this.handleModEmail.bind(this);
       this.handleModRole = this.handleModRole.bind(this);
       this.handleModEvents = this.handleModEvents.bind(this);
       this.handleModMembers = this.handleModMembers.bind(this);
@@ -216,6 +218,7 @@ class ManageUsers extends Component {
       }
       const data = {
         username: this.state.modUsername,
+        email: this.state.email,
         modules: modules
       }
 
@@ -247,8 +250,26 @@ class ManageUsers extends Component {
           }
         })
 
-      // Update the users in the table
-      Promise.all([updateAccess, updateRole])
+      // Update the email address for the user
+      const emailData = {
+        username: this.state.modUsername,
+        email: this.state.modEmail
+      }
+      const updateEmail = axios.post('/service/user/update-email',
+        emailData,
+        {headers: {'X-CSRF-TOKEN': csrfToken}})
+        .catch(err => {
+          if(err.response.status===401){
+            this.navigate('/login');
+          } else {
+            this.navigate('/server-error');
+          }
+        })
+
+      // Update the users in the table. We need to wait for
+      // all three update operations to execute before we
+      // get the new user data.
+      Promise.all([updateAccess, updateRole, updateEmail])
         .then(() => {
           this.getUsers();
         })
@@ -486,6 +507,11 @@ class ManageUsers extends Component {
       this.setState({ modUsername: event.target.value });
     }
 
+    handleModEmail(event){
+      // Updates the mod email in the state
+      this.setState({ modEmail: event.target.value });
+    }
+
     handleModRole(event){
       // Updates the role in the state
       this.setState({ modRole: event.target.value });
@@ -522,10 +548,11 @@ class ManageUsers extends Component {
       this.modifyUser();
     }
 
-    openModWindow = (username, role, modules) => {
+    openModWindow = (username, email, role, modules) => {
       // Opens the modify user modal window
       this.setState({
         modUsername: username,
+        modEmail: email,
         modRole: role,
         modEvents: modules.includes('events'),
         modMembers: modules.includes('members'),
@@ -545,7 +572,8 @@ class ManageUsers extends Component {
         modMembers: false,
         modTrends: false,
         modMap: false,
-        modUsername: ''
+        modUsername: '',
+        modeEmail: ''
       });
     }
 
@@ -568,6 +596,13 @@ class ManageUsers extends Component {
                 ></i>
               </u></h3>
               <Form onSubmit={this.handleModSubmit} horizontal>
+                <FormGroup className='pullLeft'>
+                  <ControlLabel>E-mail</ControlLabel>
+                  <FormControl
+                    value={this.state.modEmail}
+                    onChange={this.handleModEmail}
+                    type="text" />
+                </FormGroup>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
                   <FormControl
@@ -675,15 +710,15 @@ class ManageUsers extends Component {
         const userRow = (
           <tr className='table-rows'>
             <th
-              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+              onClick={()=>this.openModWindow(user.id, user.email, user.role, user.modules)}
             >{user.id}</th>
             <th
               className='user-management-rows'
-              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+              onClick={()=>this.openModWindow(user.id, user.email, user.role, user.modules)}
             >{user.role}</th>
             <th
               className='user-management-rows'
-              onClick={()=>this.openModWindow(user.id, user.role, user.modules)}
+              onClick={()=>this.openModWindow(user.id, user.email, user.role, user.modules)}
             >{modules}</th>
             <th>
               <i

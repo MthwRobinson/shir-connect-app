@@ -251,6 +251,34 @@ def update_role():
             response = {'message': 'role update for %s'%(username)}
             return jsonify(response), 201
 
+@user_management.route('/service/user/update-email', methods=['POST'])
+@jwt_required
+def update_email():
+    """ Updates the role for the user in the post body """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
+        response = {'message': 'only admins can update emails'}
+        return jsonify(response), 403
+    else:
+        if 'username' not in request.json:
+            response = {'message': 'username required in post body'}
+            return jsonify(response), 400
+        if 'email' not in request.json:
+            response = {'message': 'email required in post body'}
+            return jsonify(response), 400
+
+        username = request.json['username']
+        email = request.json['email']
+        user_management.update_email(username, email)
+        response = {'message': 'email updated for %s'%(username)}
+        return jsonify(response), 201
+
 @user_management.route('/service/user/update-access', methods=['POST'])
 @jwt_required
 def update_access():

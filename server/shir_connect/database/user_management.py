@@ -230,6 +230,13 @@ class UserManagement:
             value=value
         )
 
+    def update_email(self, username, email):
+        """Updates the users email in the database."""
+        self.database.update_column(table='users',
+                                    item_id=username,
+                                    column='email',
+                                    value="'{}'".format(email))
+
     def list_users(self):
         """Lists all of the active users."""
         df = self.database.read_table('users', sort='id', order='asc')

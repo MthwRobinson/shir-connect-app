@@ -61,17 +61,18 @@ def user_register():
     # Generate a password for the user
     new_user['password'] = user_management.generate_password()
 
+    mode = request.args.get('mode')
+    send = False if mode and mode == 'test' else True
     status = user_management.add_user(username=new_user['username'],
                                       password=new_user['password'],
                                       email=new_user['email'],
                                       role=new_user['role'],
-                                      modules=new_user['modules'])
+                                      modules=new_user['modules'],
+                                      send=send)
+
     # Status returns false if user already exists
     if status:
-        response = {
-            'message': 'user %s created'%(new_user['username']),
-            'password': new_user['password']
-        }
+        response = {'message': 'user %s created'%(new_user['username'])},
         return jsonify(response), 201
     else:
         response = {'message': 'bad request'}

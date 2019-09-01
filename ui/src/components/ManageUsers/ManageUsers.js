@@ -32,8 +32,10 @@ class ManageUsers extends Component {
         users: [],
         loading: true,
         addModalOpen: false,
+        addUserAttempt: false,
         addUserError: false,
         username: '',
+        email: '',
         password: '',
         role: 'standard',
         events: false,
@@ -68,6 +70,7 @@ class ManageUsers extends Component {
       // Bindings for the new user form
       this.handleAddSubmit = this.handleAddSubmit.bind(this);
       this.handleUsername = this.handleUsername.bind(this);
+      this.handleEmail= this.handleEmail.bind(this);
       this.handleRole = this.handleRole.bind(this);
       this.handleEvents = this.handleEvents.bind(this);
       this.handleMembers = this.handleMembers.bind(this);
@@ -147,6 +150,7 @@ class ManageUsers extends Component {
       }
       const data = {
         username: this.state.username,
+        email: this.state.email,
         role: this.state.role,
         modules: modules
       }
@@ -154,14 +158,14 @@ class ManageUsers extends Component {
       axios.post('/service/user', data, {headers: {'X-CSRF-TOKEN': csrfToken}})
         .then(res => {
           this.getUsers();
-          this.setState({password: res.data.password})
+          this.setState({password: res.data.password, addUserAttempt: true})
         })
         .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
           } else if(err.response.status===400){
             this.getUsers();
-            this.setState({addUserError: true})
+            this.setState({addUserError: true, addUserAttempt: true})
           } else {
             this.navigate('/server-error');
           }
@@ -279,6 +283,11 @@ class ManageUsers extends Component {
       this.setState({ username: event.target.value });
     }
 
+    handleEmail(event){
+      // Updates the username in the state
+      this.setState({ email: event.target.value });
+    }
+
     handleRole(event){
       // Updates the role in the state
       this.setState({ role: event.target.value });
@@ -324,9 +333,10 @@ class ManageUsers extends Component {
       // Closes the modal window
       this.setState({
         addUserError: false,
+        addUserAttempt: false,
         addModalOpen: false,
         username: '',
-        password: '',
+        email: '',
         role: 'standard',
         events: false,
         members: false,
@@ -344,15 +354,15 @@ class ManageUsers extends Component {
           type='submit'
         >Submit</Button>
       );
-      if(this.state.password&&!this.state.addUserError){
+      if(!this.state.addUserError&&this.state.addUserAttempt){
         msg = (
             <p className='success-msg'>
-              Success! User password is:<br/>
-              {'\n'}<b>{this.state.password}</b>
+              Success! An email with a temporary password has been sent to:<br/>
+              {'\n'}<b>{this.state.email}</b>
             </p>
         )
         button = null;
-      } else if(this.state.addUserError){
+      } else if(this.state.addUserError&&this.state.addUserAttempt){
         msg = (
             <p className='error-msg'>
               Error! User may already exist.
@@ -382,16 +392,21 @@ class ManageUsers extends Component {
                   <FormControl
                     value={this.state.username}
                     onChange={this.handleUsername}
-                    type="text"
-                  />
+                    type="text" />
+                </FormGroup>
+                <FormGroup className='pullLeft'>
+                  <ControlLabel>E-mail</ControlLabel>
+                  <FormControl
+                    value={this.state.email}
+                    onChange={this.handleEmail}
+                    type="text" />
                 </FormGroup>
                 <FormGroup>
                   <ControlLabel>Role</ControlLabel>
                   <FormControl
                     componentClass="select"
                     value={this.state.role}
-                    onChange={this.handleRole}
-                  >
+                    onChange={this.handleRole}>
                     <option value="standard">Standard</option>
                     <option value="admin">Admin</option>
                   </FormControl>

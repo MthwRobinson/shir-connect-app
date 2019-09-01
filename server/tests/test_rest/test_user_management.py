@@ -19,7 +19,7 @@ def test_add_user():
     csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
 
     # Only an admin can register a user
-    response = CLIENT.post('/service/user',
+    response = CLIENT.post('/service/user?mode=test',
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
             'X-CSRF-TOKEN': csrf['csrf_access_token']})
@@ -27,13 +27,13 @@ def test_add_user():
     user_management.update_role('unittestadmin', 'admin')
 
     # JSON body is required to register a user
-    response = CLIENT.post('/service/user', headers={
+    response = CLIENT.post('/service/user?mode=test', headers={
         'Cookies': 'access_token_cookie=%s'%(jwt),
         'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 400
 
     # Success!
-    response = CLIENT.post('/service/user',
+    response = CLIENT.post('/service/user?mode=test',
         json=dict(username=conf.TEST_USER,
                   email='jabber@fakeemail.birds',
                   role='standard',
@@ -42,7 +42,6 @@ def test_add_user():
             'Cookies': 'access_token_cookie=%s'%(jwt),
             'X-CSRF-TOKEN': csrf['csrf_access_token']})
     assert response.status_code == 201
-    assert 'password' in response.json
     user = user_management.get_user(conf.TEST_USER)
     assert 'events' in user['modules']
     assert 'map' in user['modules']
@@ -50,7 +49,7 @@ def test_add_user():
     assert user['email'] == 'jabber@fakeemail.birds'
 
     # Can't register the same user twice
-    response = CLIENT.post('/service/user',
+    response = CLIENT.post('/service/user?mode=test',
         json=dict(username=conf.TEST_USER,
                   email='jabber@fakeemail.birds',
                   password=conf.TEST_PASSWORD),

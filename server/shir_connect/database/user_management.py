@@ -12,6 +12,9 @@ import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 from shir_connect.email import Email
 
+SPECIAL_CHARACTERS = '!@#$%&'
+PW_CHARACTERS = string.ascii_letters + string.digits + SPECIAL_CHARACTERS
+
 class UserManagement:
     """ Class that handles user centric REST operations """
     def __init__(self, database=None):
@@ -40,7 +43,7 @@ class UserManagement:
         return user['password'] == pw_hash
 
     def add_user(self, username, password, email=None, role='standard',
-                 modules=[], temporary_password=False):
+                 modules=[], send=False):
         """Adds a new user to the system. The pw_update_ts for the account
         is set to the time that the password was updated with this function.
 
@@ -75,9 +78,37 @@ class UserManagement:
                     'email': email,
                     'role': role,
                     'modules': modules,
-                    'temporary_password': temporary_password,
+                    'temporary_password': True,
                     'pw_update_ts': datetime.datetime.now()}
             self.database.load_item(item, 'users')
+
+            # Send an email with temporary credentials to the user
+            # The homepage will redirect the user to the change password
+            # screen until they have changed their temporary credentials
+            content = """
+            <html>
+                <h3>New User Account</h3>
+                <p>Hi {username}, </p>
+                <p>Your user account at
+                <b>https://{subdomain}.shirconnect.com</b> is now active.
+                Your temporary credentials are as follows. To ensure the
+                security of your account, please update your password
+                immediately after logging in to your account.
+                </p>
+                <p>Thanks,</p>
+                <p>Shir Connect Development Team
+                <hr/>
+                User: <b>{username}</b><br/>
+                Temporary Password: <b>{password}</b><br/>
+            </html>
+            """.format(username=username, subdomain=conf.SUBDOMAIN,
+                    password=password)
+            if send:
+                smtp = Email()
+                smtp.send_email(to_address=email,
+                                subject="Shir Connect User Account",
+                                content=content,
+                                text_format='html')
             return True
 
     def delete_user(self, username):
@@ -93,7 +124,7 @@ class UserManagement:
             return False
         else:
             new_password = self.generate_password()
-            self.update_password(username, new_password)
+            self.update_password(username, new_password, temporary=True)
             content = """
             <html>
                 <h3>Password Reset</h3>
@@ -128,8 +159,18 @@ class UserManagement:
         pw_hash = hashlib.sha512(pw).hexdigest()
         return pw_hash
 
-    def update_password(self, username, password):
-        """Updates the password for a user."""
+    def update_password(self, username, password, temporary=False):
+        """Updates the password for a user.
+
+        Parameters
+        ----------
+        username: string, the name of the user
+        password: string, the updated password for the user. The password
+            is hashed before being started in the database
+        temporary: boolean, if True, the password is stored as a temporary
+            password. The user will be redirected to the change password
+            screen if their password is listed as temporary in the database
+        """
         complex_enough = self.check_pw_complexity(password)
         if not complex_enough:
             return False
@@ -139,20 +180,32 @@ class UserManagement:
         if user:
             pw_hash = self.hash_pw(password)
             pw_value = "'%s'"%(pw_hash)
+            # Change the password for the user in the database
             self.database.update_column(
                 table='users',
                 item_id=username,
                 column='password',
                 value=pw_value)
+            # Change the update time for the password in the database
+            self.database.update_column(
+                table='users',
+                item_id=username,
+                column='pw_update_ts',
+                value="'{}'".format(datetime.datetime.now()))
+            # Update the temporary_password column to indicate whether
+            # the password is a temporary or permanent password
+            self.database.update_column(
+                table='users',
+                item_id=username,
+                column='temporary_password',
+                value=True)
             return True
         else:
             return False
 
     def update_role(self, username, role):
-        """
-        Updates the role for the user.
-        The two types of users are admin and standard
-        """
+        """ Updates the role for the user.
+        The two types of users are admin and standard."""
         if role not in self.user_roles:
             return False
         else:
@@ -200,14 +253,17 @@ class UserManagement:
             return False
         elif contains_digit(password) == False:
             return False
+        elif valid_characters(password) == False:
+            return False
+        elif password != password.strip():
+            return False
         else:
             return True
 
     def generate_password(self, length=20):
         """Generates a complex random password that serves as a temporary
         password for new users or users who reset their pasword."""
-        options = string.ascii_letters + string.digits + '!@#$%&'
-        password = ''.join(random.choice(options) for i in range(length))
+        password = ''.join(random.choice(PW_CHARACTERS) for i in range(length))
         complex_enough = self.check_pw_complexity(password)
         if not complex_enough:
             password = self.generate_password(length=length)
@@ -216,3 +272,7 @@ class UserManagement:
 def contains_digit(pw):
     """Checks to see if a password contains number."""
     return max([x.isdigit() for x in pw])
+
+def valid_characters(pw):
+    """Checkes to ensure the password only contains valid characters."""
+    return max([x in PW_CHARACTERS for x in pw])

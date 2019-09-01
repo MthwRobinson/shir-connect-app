@@ -13,6 +13,12 @@ class FakeSMTPServer:
         else:
             raise smtplib.SMTPRecipientsRefused([from_address])
 
+    def starttls(self):
+        pass
+
+    def login(self, user, password):
+        pass
+
 def test_plain_email_sends_with_valid_address():
     email = Email()
     email.server = FakeSMTPServer()

@@ -19,8 +19,6 @@ class Email:
 
         self.server = smtplib.SMTP(host=conf.SMTP_HOST,
                                    port=str(conf.SMTP_PORT))
-        self.server.starttls()
-        self.server.login(conf.SMTP_USER, conf.SMTP_PASSWORD)
 
         self.from_address = conf.SMTP_USER
 
@@ -39,6 +37,7 @@ class Email:
         -------
         Sends an e-mail to the appropriate addresses.
         """
+        self._connect()
         msg = MIMEMultipart()
         msg['From'] = self.from_address
         msg['To'] = to_address
@@ -53,3 +52,7 @@ class Email:
             email_sent = False
 
         return email_sent
+
+    def _connect(self):
+        self.server.starttls()
+        self.server.login(conf.SMTP_USER, conf.SMTP_PASSWORD)

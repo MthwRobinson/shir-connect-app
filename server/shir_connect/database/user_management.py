@@ -198,7 +198,7 @@ class UserManagement:
                 table='users',
                 item_id=username,
                 column='temporary_password',
-                value=True)
+                value=temporary)
             return True
         else:
             return False

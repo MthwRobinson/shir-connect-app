@@ -118,13 +118,9 @@ class ChangePassword extends Component {
             </div>
           );
         } else if(this.state.updated) {
-          return(
-            <div className='success-msg'>
-              <p className='success-msg'>
-                Password updated.
-              </p>
-            </div>
-          );
+          // Redirect to the home screen if the password has
+          // been successfully updated
+          this.props.history.push('/');
         } else {
           return(
             <div className='error-msg'>

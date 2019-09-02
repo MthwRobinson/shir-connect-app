@@ -171,7 +171,7 @@ def user_authorize():
         modules = [x for x in user['modules'] if x in conf.AVAILABLE_MODULES]
         user['modules'] = modules
         del user['password']
-        del user['temporary_password']
+        user['temporary_password'] = int(user['temporary_password'])
         return jsonify(user), 200
 
 @user_management.route('/service/user/change-password', methods=['POST'])

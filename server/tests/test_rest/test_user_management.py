@@ -556,7 +556,7 @@ def test_reset_password():
     csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
 
     # User must be an admin to update roles
-    response = CLIENT.post('/service/user/reset-password',
+    response = CLIENT.post('/service/user/reset-password?mode=test',
         json=dict(username=conf.TEST_USER),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -567,7 +567,7 @@ def test_reset_password():
 
     user_management.update_role('unittestadmin', 'admin')
     # Username must be in the post body
-    response = CLIENT.post('/service/user/reset-password',
+    response = CLIENT.post('/service/user/reset-password?mode=test',
         json=dict(password='testPASSWORD@'),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -577,7 +577,7 @@ def test_reset_password():
     assert response.status_code == 400
 
     # Success!
-    response = CLIENT.post('/service/user/reset-password',
+    response = CLIENT.post('/service/user/reset-password?mode=test',
         json=dict(username=conf.TEST_USER),
         headers={
             'Cookies': 'access_token_cookie=%s'%(jwt),
@@ -585,10 +585,6 @@ def test_reset_password():
         }
     )
     assert response.status_code == 201
-    assert 'password' in response.json
-    password = response.json['password']
-    unittestuser = user_management.get_user(conf.TEST_USER)
-    assert unittestuser['password'] == user_management.hash_pw(password)
 
     user_management.delete_user(conf.TEST_USER)
     user = user_management.get_user(conf.TEST_USER)

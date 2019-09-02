@@ -53,9 +53,12 @@ class ManageUsers extends Component {
         modReport: false,
         modUsername: '',
         modEmail: '',
-        resetUsername: '',
-        resetPassword: '',
         resetModalOpen: false,
+        resetUsername: '',
+        resetEmail: '',
+        resetAttempted: false,
+        resetError: false,
+        resetLoading: false,
         availableModules: []
       }
     }
@@ -88,8 +91,6 @@ class ManageUsers extends Component {
       this.handleModTrends = this.handleModTrends.bind(this);
       this.handleModMap = this.handleModMap.bind(this);
       this.handleModReport = this.handleModReport.bind(this);
-
-      // Bindings for reset password form
 
     }
 
@@ -281,13 +282,17 @@ class ManageUsers extends Component {
       // Build the post body
       const data = {username: this.state.resetUsername}
       // Update the password for the user
+      this.setState({resetLoading: true})
       axios.post('/service/user/reset-password',
         data,
         {headers: {'X-CSRF-TOKEN': csrfToken}})
         .then( res => {
-          this.setState({resetPassword: res.data.password})
+          this.setState({resetEmail: res.data.email, resetAttempted: true,
+                         resetLoading: false})
         })
         .catch( err => {
+          this.setState({resetAttempted: true, resetError: true,
+                         resetLoading: false})
           if(err.response.status===401){
             this.navigate('/login');
           } else {
@@ -652,25 +657,40 @@ class ManageUsers extends Component {
       this.setState({
         resetModalOpen: false,
         resetUsername: '',
-        resetPassword: ''
+        resetEmail: '',
+        resetAttempted: false,
+        resetError: false,
+        resetLoading: false
       });
     }
 
     renderResetModal = () => {
       // The modal that pops up to add a new user
       let msg = null;
-      let button = (
-        <Button
-          className='confirm-delete-button login-button'
-          bsStyle='primary'
-          onClick={()=>this.resetPassword()}
-        >Confirm</Button>
-      )
-      if(this.state.resetPassword){
+      let button = null;
+      if(this.state.resetLoading===false){
+        button = (
+          <Button
+            className='confirm-delete-button login-button'
+            bsStyle='primary'
+            onClick={()=>this.resetPassword()}
+          >Confirm</Button>
+        )
+      } else {
+        button = <Loading />
+      }
+      if(this.state.resetAttempted&&!this.state.resetError){
         msg = (
             <p className='success-msg'>
-              Success! New password is:<br/>
-              {'\n'}<b>{this.state.resetPassword}</b>
+              Success! An update password for {this.state.resetUsername}{' '}
+              has been sent to {this.state.resetEmail}
+            </p>
+        )
+        button = null;
+      } else if(this.state.resetAttempted&&this.state.resetError){
+        msg = (
+            <p className='error-msg'>
+              Error: could not update password for {this.state.resetUsername}
             </p>
         )
         button = null;

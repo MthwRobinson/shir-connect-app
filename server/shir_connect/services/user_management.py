@@ -330,12 +330,15 @@ def reset_password():
 
         # Generate a password and post the update to the datase
         username = request.json['username']
-        password = user_management.generate_password()
-        user_management.update_password(username, password)
-        response = {
-            'message': 'role updated for %s'%(username),
-            'password': password
-        }
+        user = user_management.get_user(username)
+        email = user['email']
+
+        mode = request.args.get('mode')
+        send = False if mode and mode == 'test' else True
+
+        user_management.reset_password(username, email, send=send)
+        response = {'message': 'role updated for %s'%(username),
+                    'email': user['email']}
         return jsonify(response), 201
 
 @user_management.route('/service/user/user-reset-password', methods=['POST'])

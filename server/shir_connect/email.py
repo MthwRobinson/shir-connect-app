@@ -7,8 +7,6 @@ import smtplib
 import daiquiri
 
 import shir_connect.configuration as conf
-import socket
-socket.setdefaulttimeout(30)
 
 class Email:
     """Handles connections to the SMTP server and sends e-mails
@@ -18,7 +16,8 @@ class Email:
         self.logger = daiquiri.getLogger(__name__)
 
         self.server = smtplib.SMTP(host=conf.SMTP_HOST,
-                                   port=str(conf.SMTP_PORT))
+                                   port=str(conf.SMTP_PORT),
+                                   timeout=30)
 
         self.from_address = conf.SMTP_USER
 
@@ -38,6 +37,7 @@ class Email:
         Sends an e-mail to the appropriate addresses.
         """
         self._connect()
+
         msg = MIMEMultipart()
         msg['From'] = self.from_address
         msg['To'] = to_address

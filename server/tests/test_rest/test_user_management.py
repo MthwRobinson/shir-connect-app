@@ -1,3 +1,5 @@
+import pytest
+
 from shir_connect.services.app import app
 from shir_connect.database.user_management import UserManagement
 import shir_connect.services.utils as utils
@@ -113,7 +115,7 @@ def test_delete_user():
     user_management.delete_user('unittestadmin')
     user = user_management.get_user('unittestadmin')
 
-def test_user_authenticate():
+def test_user_authenticate(monkeypatch):
     user_management = UserManagement()
     user_management.delete_user(conf.TEST_USER)
     user_management.add_user(conf.TEST_USER, conf.TEST_PASSWORD)
@@ -136,6 +138,8 @@ def test_user_authenticate():
     assert response.status_code == 401
 
     # Success !
+    monkeypatch.setattr('shir_connect.services.utils.count_bad_login_attempts',
+                        lambda *args, **kwargs: 2)
     response = CLIENT.post('/service/user/authenticate', json=dict(
         username=conf.TEST_USER,
         password=conf.TEST_PASSWORD
@@ -145,7 +149,7 @@ def test_user_authenticate():
     refresh_jwt = utils._get_cookie_from_response(response, 'refresh_token_cookie')
     csrf = utils._get_cookie_from_response(response, 'csrf_access_token')
 
-    # Success!
+    # Tests that authenticate is also working with cookies
     response = CLIENT.get('/service/user/authorize', headers={
         'Cookies': 'access_token_cookie=%s'%(jwt),
         'X-CSRF-TOKEN': csrf['csrf_access_token']

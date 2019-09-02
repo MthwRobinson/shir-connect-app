@@ -19,7 +19,7 @@ from flask_jwt_extended import (
 
 import shir_connect.configuration as conf
 from shir_connect.database.user_management import UserManagement
-from shir_connect.services.utils import log_request
+from shir_connect.services.utils import log_request, count_bad_login_attempts
 
 user_management = Blueprint('user_management', __name__)
 
@@ -117,10 +117,21 @@ def user_authenticate():
     password = auth_user['password']
 
     user_management = UserManagement()
-    authorized = user_management.authenticate_user(
-        username=username,
-        password=password
-    )
+    user = user_management.get_user(username)
+    if not user:
+        authorized = False
+    else:
+        authorized = user_management.authenticate_user(username=username,
+                                                    password=password)
+
+    last_reset = str(user['pw_update_ts'])
+    domain = conf.SUBDOMAIN
+    bad_attempts = count_bad_login_attempts(username, 'dev', last_reset)
+    if bad_attempts > 10:
+        msg = 'account locked for user %s'%(auth_user['username'])
+        response = {'message': msg}
+        return jsonify(response), 423
+
     log_request(request, username, authorized)
 
     if authorized:

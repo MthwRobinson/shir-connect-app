@@ -24,7 +24,8 @@ class Login extends Component {
         userName: '',
         password: '',
         authenticated: false,
-        attempted: false
+        attempted: false,
+        locked: false
       }
 
       // Bindings for the login form
@@ -40,6 +41,7 @@ class Login extends Component {
 
     handleSubmit = (event) => {
       // Prevents the app from refreshing on submit
+      this.setState({attempted: false, locked: false})
       event.preventDefault();
       axios.post('/service/user/authenticate', {
         username: this.state.userName,
@@ -50,6 +52,9 @@ class Login extends Component {
           this.props.history.push('/')
         })
         .catch(err => {
+          if(err.response.status===423){
+            this.setState({locked: true})
+          }
           this.setState({attempted: true});
         })
     }
@@ -66,11 +71,21 @@ class Login extends Component {
 
     renderError = () => {
       // Displays an error message if authentication is not successful
-      if(this.state.attempted && !this.state.authenticated){
+      if(this.state.attempted && !this.state.authenticated && !this.state.locked){
         return(
           <div className='error-msg'>
             <p className='error-msg'>
               User name or password is incorrect.
+            </p>
+          </div>
+        );
+      } else if (this.state.attempted && !this.state.authenticated && this.state.locked) {
+        return(
+          <div className='error-msg'>
+            <p className='error-msg'>
+              Your account has been locked due to too many failed logins.
+              Your account will be unlocked in 24 hours.
+              To access your account before then, you need to reset your password.
             </p>
           </div>
         );

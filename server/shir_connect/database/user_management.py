@@ -16,7 +16,7 @@ SPECIAL_CHARACTERS = '!@#$%&'
 PW_CHARACTERS = string.ascii_letters + string.digits + SPECIAL_CHARACTERS
 
 class UserManagement:
-    """ Class that handles user centric REST operations """
+    """Class that handles user centric REST operations """
     def __init__(self, database=None):
         daiquiri.setup(level=logging.INFO)
         self.logger = daiquiri.getLogger(__name__)
@@ -27,14 +27,12 @@ class UserManagement:
         self.user_roles = conf.USER_ROLES
 
     def get_user(self, username):
-        """ Fetches a user from the database """
+        """Fetches a user from the database """
         return self.database.get_item('users', username)
 
     def authenticate_user(self, username, password):
-        """
-        Checks the password of the user
-        Returns True if the user is authorized
-        """
+        """Checks the password of the user
+        Returns True if the user is authorized."""
         user = self.get_user(username)
         if not user:
             return False
@@ -79,7 +77,7 @@ class UserManagement:
                     'role': role,
                     'modules': modules,
                     'temporary_password': True,
-                    'pw_update_ts': datetime.datetime.now()}
+                    'pw_update_ts': datetime.datetime.utcnow()}
             self.database.load_item(item, 'users')
 
             # Send an email with temporary credentials to the user
@@ -191,7 +189,7 @@ class UserManagement:
                 table='users',
                 item_id=username,
                 column='pw_update_ts',
-                value="'{}'".format(datetime.datetime.now()))
+                value="'{}'".format(datetime.datetime.utcnow()))
             # Update the temporary_password column to indicate whether
             # the password is a temporary or permanent password
             self.database.update_column(

@@ -5,6 +5,7 @@ import datetime
 import re
 
 from flask import jsonify, request
+import pandas as pd
 import uuid
 
 import shir_connect.configuration as conf
@@ -224,3 +225,34 @@ def log_request(request, user, authorized, database=None):
             'load_datetime': datetime.datetime.now()
         }
         database.load_item(item, 'shir_connect_logs')
+
+def count_bad_login_attempts(user, domain, reset_date):
+    """Counts the number of bad login attempts the user has made on the
+    specified domain. This is used to put a lock on the acccount if they
+    have made too many bad authentication requests.
+
+    Paramters
+    ---------
+    user: string, the domain of the user
+    domain: string, the prefix for the host url. For https:/dev.shirconnect.com,
+        the domain would be 'dev'
+    reset_date: string, the date when the user last set their password. The bad
+        login count should return to zero after a password reset
+
+    Returns
+    -------
+    count: int, the number of bad login attempts
+    """
+    database = Database(database='postgres', schema='application_logs')
+    sql = """
+        SELECT COUNT(id) AS bad_login_attempts
+        FROM application_logs.shir_connect_logs
+        WHERE application_user = '{user}'
+        AND host = '{domain}.shirconnect.com'
+        AND authorized = FALSE
+        AND load_datetime > NOW() - INTERVAL '1 DAY'
+        AND load_datetime > '{reset_date}'
+    """.format(user=user, domain=domain, reset_date=reset_date)
+    df = pd.read_sql(sql, database.connection)
+    bad_login_attempts = df.loc[0]['bad_login_attempts']
+    return int(bad_login_attempts)

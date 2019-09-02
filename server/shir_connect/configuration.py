@@ -18,6 +18,12 @@ DEMO_MODE = mode == 'DEMO' or False
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')
 
+# SMTP Configuration for E-mails
+SMTP_USER = 'info@fiddleranalytics.com'
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
+SMTP_HOST = 'mail.privateemail.com'
+SMTP_PORT = 587
+
 # Secrets for API connections
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 JWT_ACCESS_TOKEN_EXPIRES = 30*60 # Expire access tokens after 30 mins

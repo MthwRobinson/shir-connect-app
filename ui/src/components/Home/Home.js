@@ -31,6 +31,11 @@ class Home extends Component {
       // page if authentication is required
       axios.get('/service/user/authorize')
         .then(res => {
+          // If the user is using a temporary password, redirect
+          // them to the page to update their password.
+          if(res.data.temporary_password===1){
+            this.props.history.push('/change-password');
+          }
           this.setState({
             name: res.data.id,
             modules: res.data.modules,
@@ -60,13 +65,13 @@ class Home extends Component {
           availableModules.push(module);
         }
       }
-      
+
       let rows = [];
       for(let i=0; i < availableModules.length; i++){
         const module = availableModules[i];
         const moduleCard = (
           <Col xs={12} sm={12} md={12} lg={6}>
-              <ModuleCard 
+              <ModuleCard
                 title={MODULES[module].title}
                 icon={MODULES[module].icon}
                 bullets={MODULES[module].bullets}

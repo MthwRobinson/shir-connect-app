@@ -14,6 +14,7 @@ import Members from './components/Members/Members';
 import MemberPage from './components/MemberPage/MemberPage';
 import NotFound from './components/ErrorPages/NotFound';
 import Report from './components/Report/Report';
+import ResetPassword from './components/ResetPassword/ResetPassword';
 import ServerError from './components/ErrorPages/ServerError';
 import Trends from './components/Trends/Trends';
 
@@ -40,10 +41,11 @@ class App extends Component {
             <Route path="/participant" component={MemberPage} />
             <Route path="/participants" component={Members} />
             <Route path="/report" component={Report} />
+            <Route path="/reset-password" component={ResetPassword} />
             <Route path="/trends" component={Trends} />
             <Route path="/map" component={EventMap} />
             <Route path="/login" component={Login} />
-            <Route component={NotFound} /> 
+            <Route component={NotFound} />
         </Switch>
           </div>
         </Router>

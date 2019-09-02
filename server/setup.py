@@ -18,7 +18,6 @@ reqs = [
     'scipy',
     'uszipcode',
     'uuid',
-    'xkcdpass',
     'xlrd'
 ]
 

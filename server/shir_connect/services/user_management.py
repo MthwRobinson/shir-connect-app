@@ -19,7 +19,7 @@ from flask_jwt_extended import (
 
 import shir_connect.configuration as conf
 from shir_connect.database.user_management import UserManagement
-from shir_connect.services.utils import log_request
+from shir_connect.services.utils import log_request, count_bad_login_attempts
 
 user_management = Blueprint('user_management', __name__)
 
@@ -55,22 +55,24 @@ def user_register():
         new_user['role'] = 'standard'
     if 'modules' not in new_user:
         new_user['modules'] = []
+    if 'temporary_password' not in new_user:
+        new_user['temporary_password'] = False
 
     # Generate a password for the user
     new_user['password'] = user_management.generate_password()
 
-    status = user_management.add_user(
-        username=new_user['username'],
-        password=new_user['password'],
-        role=new_user['role'],
-        modules=new_user['modules']
-    )
+    mode = request.args.get('mode')
+    send = False if mode and mode == 'test' else True
+    status = user_management.add_user(username=new_user['username'],
+                                      password=new_user['password'],
+                                      email=new_user['email'],
+                                      role=new_user['role'],
+                                      modules=new_user['modules'],
+                                      send=send)
+
     # Status returns false if user already exists
     if status:
-        response = {
-            'message': 'user %s created'%(new_user['username']),
-            'password': new_user['password']
-        }
+        response = {'message': 'user %s created'%(new_user['username'])},
         return jsonify(response), 201
     else:
         response = {'message': 'bad request'}
@@ -115,10 +117,21 @@ def user_authenticate():
     password = auth_user['password']
 
     user_management = UserManagement()
-    authorized = user_management.authenticate_user(
-        username=username,
-        password=password
-    )
+    user = user_management.get_user(username)
+    if not user:
+        authorized = False
+    else:
+        authorized = user_management.authenticate_user(username=username,
+                                                    password=password)
+
+    last_reset = str(user['pw_update_ts'])
+    domain = conf.SUBDOMAIN
+    bad_attempts = count_bad_login_attempts(username, 'dev', last_reset)
+    if bad_attempts > 10:
+        msg = 'account locked for user %s'%(auth_user['username'])
+        response = {'message': msg}
+        return jsonify(response), 423
+
     log_request(request, username, authorized)
 
     if authorized:
@@ -145,7 +158,7 @@ def user_logout():
 @user_management.route('/service/user/refresh', methods=['GET'])
 @jwt_refresh_token_required
 def user_refresh():
-    """ Creates a refreshed access token for the user """
+    """Creates a refreshed access token for the user"""
     username = get_jwt_identity()
     access_token = create_access_token(identity=username)
     response = jsonify({'refresh': True})
@@ -156,7 +169,7 @@ def user_refresh():
 @user_management.route('/service/user/authorize', methods=['GET'])
 @jwt_required
 def user_authorize():
-    """ Returns user authorization and role metadata """
+    """Returns user authorization and role metadata"""
     username = get_jwt_identity()
     user_management = UserManagement()
     user = user_management.get_user(username)
@@ -169,12 +182,13 @@ def user_authorize():
         modules = [x for x in user['modules'] if x in conf.AVAILABLE_MODULES]
         user['modules'] = modules
         del user['password']
+        user['temporary_password'] = int(user['temporary_password'])
         return jsonify(user), 200
 
 @user_management.route('/service/user/change-password', methods=['POST'])
 @jwt_required
 def change_password():
-    """ Updates the password for the user """
+    """Updates the password for the user"""
     if not request.json:
         response = {'message': 'no post body'}
         return jsonify(response), 400
@@ -248,6 +262,34 @@ def update_role():
             response = {'message': 'role update for %s'%(username)}
             return jsonify(response), 201
 
+@user_management.route('/service/user/update-email', methods=['POST'])
+@jwt_required
+def update_email():
+    """ Updates the role for the user in the post body """
+    user_management = UserManagement()
+    jwt_user = get_jwt_identity()
+    admin_user = user_management.get_user(jwt_user)
+
+    authorized = admin_user['role'] == 'admin'
+    log_request(request, jwt_user, authorized)
+
+    if not authorized:
+        response = {'message': 'only admins can update emails'}
+        return jsonify(response), 403
+    else:
+        if 'username' not in request.json:
+            response = {'message': 'username required in post body'}
+            return jsonify(response), 400
+        if 'email' not in request.json:
+            response = {'message': 'email required in post body'}
+            return jsonify(response), 400
+
+        username = request.json['username']
+        email = request.json['email']
+        user_management.update_email(username, email)
+        response = {'message': 'email updated for %s'%(username)}
+        return jsonify(response), 201
+
 @user_management.route('/service/user/update-access', methods=['POST'])
 @jwt_required
 def update_access():
@@ -299,13 +341,43 @@ def reset_password():
 
         # Generate a password and post the update to the datase
         username = request.json['username']
-        password = user_management.generate_password()
-        user_management.update_password(username, password)
-        response = {
-            'message': 'role updated for %s'%(username),
-            'password': password
-        }
+        user = user_management.get_user(username)
+        email = user['email']
+
+        mode = request.args.get('mode')
+        send = False if mode and mode == 'test' else True
+
+        user_management.reset_password(username, email, send=send)
+        response = {'message': 'role updated for %s'%(username),
+                    'email': user['email']}
         return jsonify(response), 201
+
+@user_management.route('/service/user/user-reset-password', methods=['POST'])
+def user_reset_password():
+    """Resets the password for the user in the post body """
+    user_management = UserManagement()
+
+    # Check the request body
+    if 'username' not in request.json or 'email' not in request.json:
+        response = {'message': 'post body missing required keys'}
+        return jsonify(response), 400
+
+    # Generate a password and post the update to the datase
+    username = request.json['username']
+    email = request.json['email']
+
+    log_request(request, username, True)
+
+    mode = request.args.get('mode')
+    send = False if mode and mode == 'test' else True
+    updated = user_management.reset_password(username, email, send=send)
+
+    if updated:
+        response = {'message': 'Password updated for %s'%(username)}
+        return jsonify(response), 201
+    else:
+        response = {'message': 'Password updated failed for %s'%(username)}
+        return jsonify(response), 401
 
 @user_management.route('/service/users/list', methods=['GET'])
 @jwt_required

@@ -1,3 +1,5 @@
+import datetime
+
 import shir_connect.services.utils as utils
 from shir_connect.services.app import app
 
@@ -158,3 +160,8 @@ def test_log_request():
     fake_request = FakeRequest()
 
     utils.log_request(fake_request, 'jabber', False, fake_database)
+
+def test_count_bad_login_attempts():
+    reset = datetime.datetime.now() - datetime.timedelta(days=20)
+    count = utils.count_bad_login_attempts('Matt', 'dev', str(reset))
+    assert isinstance(count, int)

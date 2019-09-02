@@ -33,6 +33,7 @@ class ManageUsers extends Component {
         loading: true,
         addModalOpen: false,
         addUserAttempt: false,
+        addUserLoading: false,
         addUserError: false,
         username: '',
         email: '',
@@ -131,7 +132,8 @@ class ManageUsers extends Component {
       // Posts a new user to the database
       this.setState({
         loading: true,
-        addUserError: false
+        addUserError: false,
+        addUserLoading: true
       });
       const csrfToken = getCSRFToken();
       // Build the post body
@@ -161,14 +163,16 @@ class ManageUsers extends Component {
       axios.post('/service/user', data, {headers: {'X-CSRF-TOKEN': csrfToken}})
         .then(res => {
           this.getUsers();
-          this.setState({password: res.data.password, addUserAttempt: true})
+          this.setState({password: res.data.password, addUserAttempt: true,
+                         addUserLoading: false})
         })
         .catch(err => {
           if(err.response.status===401){
             this.navigate('/login');
           } else if(err.response.status===400){
             this.getUsers();
-            this.setState({addUserError: true, addUserAttempt: true})
+            this.setState({addUserError: true, addUserAttempt: true,
+                           addUserLoading: false})
           } else {
             this.navigate('/server-error');
           }
@@ -373,13 +377,18 @@ class ManageUsers extends Component {
 
     renderAddModal = () => {
       let msg = null;
-      let button = (
-        <Button
-          className='login-button add-user-button'
-          bsStyle='primary'
-          type='submit'
-        >Submit</Button>
-      );
+      let button = null
+      if(!this.state.addUserLoading){
+        button = (
+          <Button
+            className='login-button add-user-button'
+            bsStyle='primary'
+            type='submit'
+          >Submit</Button>
+        );
+      } else {
+        button = <Loading />
+      }
       if(!this.state.addUserError&&this.state.addUserAttempt){
         msg = (
             <p className='success-msg'>

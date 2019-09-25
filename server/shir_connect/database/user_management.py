@@ -200,12 +200,17 @@ class UserManagement:
                 item_id=username,
                 column='temporary_password',
                 value=temporary)
-            result = True if not display_error else True, []
-            return result
+            if display_error:
+                return True, []
+            else:
+                return True
         else:
             msg = "User does not exist."
             result = False if not display_error else False, [msg]
-            return result
+            if display_error:
+                return False, [msg]
+            else:
+                return False
 
     def update_role(self, username, role):
         """ Updates the role for the user.

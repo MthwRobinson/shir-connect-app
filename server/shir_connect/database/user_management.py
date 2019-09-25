@@ -246,24 +246,50 @@ class UserManagement:
             users.append(user)
         return users
 
-    def check_pw_complexity(self, password):
-        """Checks to ensure a password is sufficiently complex"""
+    def check_pw_complexity(self, password, display_error=False):
+        """Checks to ensure a password is sufficiently complex.
+
+        Parameters
+        ----------
+        password: str
+            the password whose complexity needs to be checked
+        display_error: bool
+            if true, displays a message indicating why the password is not
+            complex enough
+
+        Returns
+        -------
+        complex_enough, errors: (bool, list)
+        """
+        complex_enough = True
+        errors = []
         if len(password) < 10:
-            return False
-        elif password.isalnum():
-            return False
-        elif password.islower():
-            return False
-        elif password.isupper():
-            return False
-        elif contains_digit(password) == False:
-            return False
-        elif valid_characters(password) == False:
-            return False
-        elif password != password.strip():
-            return False
+            complex_enough = False
+            errors.append("Password needs to have more than 10 characters.")
+        if password.isalnum():
+            complex_enough = False
+            errors.append("Password must include numbers and special characters.")
+        if password.islower():
+            complex_enough = False
+            errors.append("Password cannot be all lower case.")
+        if password.isupper():
+            complex_enough = False
+            errors.append("Password cannot be all upper case.")
+        if contains_digit(password) == False:
+            complex_enough = False
+            errors.append("Password must include at least one number.")
+        if valid_characters(password) == False:
+            complex_enough = False
+            error = "Password may only contain numbers, letters "
+            error += "and the following special characters: {}."
+            errors.append(error.format(SPECIAL_CHARACTERS))
+        if password != password.strip():
+            complex_enough = False
+            errors.append("Password cannot contain white space.")
+        if display_error:
+            return complex_enough, errors
         else:
-            return True
+            return complex_enough
 
     def generate_password(self, length=20):
         """Generates a complex random password that serves as a temporary

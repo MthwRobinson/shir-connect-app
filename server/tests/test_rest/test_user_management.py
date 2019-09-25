@@ -654,3 +654,9 @@ def test_pw_complexity():
     assert user_management.check_pw_complexity('HIPHOPHooR@Y') == False
     assert user_management.check_pw_complexity('HIPH0PHooRAY') == False
     assert user_management.check_pw_complexity('HIPH0PHooR@Y') == True
+
+def test_pw_complexity_returns_error():
+    user_management = UserManagement()
+    complex_enough, errors = user_management.check_pw_complexity('parrot', True)
+    assert complex_enough == False
+    assert len(errors) > 1

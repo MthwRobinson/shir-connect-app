@@ -157,7 +157,8 @@ class UserManagement:
         pw_hash = hashlib.sha512(pw).hexdigest()
         return pw_hash
 
-    def update_password(self, username, password, temporary=False):
+    def update_password(self, username, password,
+                        temporary=False, display_error=False):
         """Updates the password for a user.
 
         Parameters
@@ -168,10 +169,12 @@ class UserManagement:
         temporary: boolean, if True, the password is stored as a temporary
             password. The user will be redirected to the change password
             screen if their password is listed as temporary in the database
+        display_error: boolean, if True, displays a message indicating why
+            the password did not update
         """
-        complex_enough = self.check_pw_complexity(password)
+        complex_enough, errors  = self.check_pw_complexity(password, True)
         if not complex_enough:
-            return False
+            return complex_enough, errors
 
         # Check to see if the user exists
         user = self.get_user(username)
@@ -197,9 +200,12 @@ class UserManagement:
                 item_id=username,
                 column='temporary_password',
                 value=temporary)
-            return True
+            result = True if not display_error else True, []
+            return result
         else:
-            return False
+            msg = "User does not exist."
+            result = False if not display_error else False, [msg]
+            return result
 
     def update_role(self, username, role):
         """ Updates the role for the user.

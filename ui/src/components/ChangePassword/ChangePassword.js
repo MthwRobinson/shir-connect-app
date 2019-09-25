@@ -28,7 +28,7 @@ class ChangePassword extends Component {
         attempted: false,
         mismatch: false,
         updated: false,
-        tooShort: false
+        errors: []
       }
 
       // Bindings for the change password form
@@ -84,6 +84,7 @@ class ChangePassword extends Component {
             this.props.history.push('/server-error')
           } else {
             this.setState({attempted: true});
+            this.setState({errors: err.response.data.errors})
             if(this.state.newPassword!==this.state.newPassword2){
               this.setState({mismatch: true});
             }
@@ -122,19 +123,15 @@ class ChangePassword extends Component {
           // been successfully updated
           this.props.history.push('/');
         } else {
+          let error_msg = [];
+          for(let error of this.state.errors){
+            error_msg.push(<li>{error}</li>);
+          }
           return(
             <div className='error-msg'>
               <p className='error-msg'>
                 Password update failed. Please Ensure:
-                  <ul>
-                    <li>Your old password is correct.</li>
-                    <li>Your new password has at least 10 characters.</li>
-                    <li>Your new password is not all upper case.</li>
-                    <li>Your new password is not all lower case.</li>
-                    <li>Your new password does not contain white space characters.</li>
-                    <li>Your new password contains one of the special characters: !@#$%&</li>
-                    <li>Your new password does not contain an special character that is not in the above list.</li>
-                  </ul>
+                  <ul>{error_msg}</ul>
               </p>
             </div>
           );

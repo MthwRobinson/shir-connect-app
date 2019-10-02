@@ -130,7 +130,7 @@ class ChangePassword extends Component {
           return(
             <div className='error-msg'>
               <p className='error-msg'>
-                Password update failed. Please Ensure:
+                Password update failed. Please ensure:
                   <ul>{error_msg}</ul>
               </p>
             </div>

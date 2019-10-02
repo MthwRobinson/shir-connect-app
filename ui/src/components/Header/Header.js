@@ -28,7 +28,7 @@ class Header extends Component {
 
     this.onToggle = this.onToggle.bind(this);
   }
-  
+
   componentDidMount() {
     // The modal element is the popout menu
     Modal.setAppElement(this.el);
@@ -49,7 +49,7 @@ class Header extends Component {
         })
         .catch( err => {
           if(err.response.status===401){
-            this.navigate('/login');
+            this.props.history.push('/login');
           }
         })
     }
@@ -115,7 +115,7 @@ class Header extends Component {
         {pages}
       </div>
     )
-    
+
     if(this.props.history.location.pathname==='/login'){
       return null
     } else {
@@ -186,7 +186,7 @@ class Header extends Component {
     event.preventDefault();
     this.props.history.push('/');
   }
-  
+
   render() {
     let menu = this.renderMenu();
       return (
@@ -195,7 +195,7 @@ class Header extends Component {
           <Navbar fluid>
             <Navbar.Header>
               <Navbar.Brand>
-                <a 
+                <a
                   href="/"
                   className='pull-left'>
                     <img

@@ -213,24 +213,31 @@ def change_password():
             password=old_password
         )
         log_request(request, username, authorized)
+
         if not authorized:
-            response = {'message': 'old password was incorrect'}
+            msg = 'Current password is incorrect.'
+            response = {'message': msg, 'errors': [msg]}
             return jsonify(response), 400
 
         # Check to make sure the two new passwords match
         new_password = request.json['new_password']
         new_password2 = request.json['new_password2']
         if new_password != new_password2:
-            response = {'message': 'new passwords did not match'}
+            msg = 'New passwords did not match.'
+            response = {'message': msg, 'errors': [msg]}
             return jsonify(response), 400
 
         # Update the user's password
-        updated = user_management.update_password(username, new_password)
+        updated, errors  = user_management.update_password(username,
+                                                           new_password,
+                                                           display_error=True)
         if updated:
-            response = {'message': 'password updated for %s'%(username)}
+            response = {'message': 'password updated for %s'%(username),
+                        'errors': []}
             return jsonify(response), 201
         else:
-            response = {'message': 'password update failed'}
+            response = {'message': 'password update failed',
+                        'errors': errors}
             return jsonify(response), 400
 
 @user_management.route('/service/user/update-role', methods=['POST'])

@@ -97,8 +97,8 @@ class ResetPassword extends Component {
          return( <div className='success-msg'>
             <p className='success-msg'>
               We have sent a temporary password to the e-mail associated with your account.
-              For security purposes <b>please ensure you change your password as soon as
-              you login.</b> Click <Link to="/login">here</Link> to return to the
+              For security purposes, <b>please ensure you change your password as soon as
+              you log in.</b> Click <Link to="/login">here</Link> to return to the
               login page.
             </p>
           </div>)

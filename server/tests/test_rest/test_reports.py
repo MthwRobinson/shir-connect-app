@@ -1,6 +1,6 @@
 import datetime
 
-import pytest 
+import pytest
 
 from shir_connect.services.app import app
 import shir_connect.services.reports as rep
@@ -47,7 +47,7 @@ def test_get_quarters(monkeypatch):
     class patched_datetime(datetime.datetime): pass
     monkeypatch.setattr(patched_datetime, "now", lambda: fake_date)
     quarters = rep.get_quarters()
-    assert quarters == [(2018, 4), (2019, 1), (2019, 2), (2019, 3)]
+    assert quarters == [(2019, 1), (2019, 2), (2019, 3), (2019, 4)]
 
 def test_get_quarterly_events():
     class FakeEvents:
@@ -68,7 +68,7 @@ def test_get_quarterly_new_members():
 
         def count_new_members(self, start, end):
             return 100
-        
+
         def count_new_households(self, start, end):
             return 100
 
@@ -118,7 +118,7 @@ def test_build_locations_pct():
                                 {'location': 'Fishville', 'total': 25},
                                 {'location': 'Portland', 'total': 25},
                                 {'location': 'Other', 'total': 25}]}
-    
+
     percentages = rep.build_locations_pct(response)
     for key in percentages:
         assert set(percentages[key].keys()) == {'Bird Town', 'Fishville',

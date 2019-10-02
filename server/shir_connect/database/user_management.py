@@ -157,7 +157,8 @@ class UserManagement:
         pw_hash = hashlib.sha512(pw).hexdigest()
         return pw_hash
 
-    def update_password(self, username, password, temporary=False):
+    def update_password(self, username, password,
+                        temporary=False, display_error=False):
         """Updates the password for a user.
 
         Parameters
@@ -168,10 +169,12 @@ class UserManagement:
         temporary: boolean, if True, the password is stored as a temporary
             password. The user will be redirected to the change password
             screen if their password is listed as temporary in the database
+        display_error: boolean, if True, displays a message indicating why
+            the password did not update
         """
-        complex_enough = self.check_pw_complexity(password)
+        complex_enough, errors  = self.check_pw_complexity(password, True)
         if not complex_enough:
-            return False
+            return complex_enough, errors
 
         # Check to see if the user exists
         user = self.get_user(username)
@@ -197,9 +200,17 @@ class UserManagement:
                 item_id=username,
                 column='temporary_password',
                 value=temporary)
-            return True
+            if display_error:
+                return True, []
+            else:
+                return True
         else:
-            return False
+            msg = "User does not exist."
+            result = False if not display_error else False, [msg]
+            if display_error:
+                return False, [msg]
+            else:
+                return False
 
     def update_role(self, username, role):
         """ Updates the role for the user.
@@ -246,24 +257,50 @@ class UserManagement:
             users.append(user)
         return users
 
-    def check_pw_complexity(self, password):
-        """Checks to ensure a password is sufficiently complex"""
+    def check_pw_complexity(self, password, display_error=False):
+        """Checks to ensure a password is sufficiently complex.
+
+        Parameters
+        ----------
+        password: str
+            the password whose complexity needs to be checked
+        display_error: bool
+            if true, displays a message indicating why the password is not
+            complex enough
+
+        Returns
+        -------
+        complex_enough, errors: (bool, list)
+        """
+        complex_enough = True
+        errors = []
         if len(password) < 10:
-            return False
-        elif password.isalnum():
-            return False
-        elif password.islower():
-            return False
-        elif password.isupper():
-            return False
-        elif contains_digit(password) == False:
-            return False
-        elif valid_characters(password) == False:
-            return False
-        elif password != password.strip():
-            return False
+            complex_enough = False
+            errors.append("Password needs to have more than 10 characters.")
+        if password.isalnum():
+            complex_enough = False
+            errors.append("Password must include numbers and special characters.")
+        if password.islower():
+            complex_enough = False
+            errors.append("Password cannot be all lower case.")
+        if password.isupper():
+            complex_enough = False
+            errors.append("Password cannot be all upper case.")
+        if contains_digit(password) == False:
+            complex_enough = False
+            errors.append("Password must include at least one number.")
+        if valid_characters(password) == False:
+            complex_enough = False
+            error = "Password may only contain numbers, letters "
+            error += "and the following special characters: {}."
+            errors.append(error.format(SPECIAL_CHARACTERS))
+        if password != password.strip():
+            complex_enough = False
+            errors.append("Password cannot contain white space.")
+        if display_error:
+            return complex_enough, errors
         else:
-            return True
+            return complex_enough
 
     def generate_password(self, length=20):
         """Generates a complex random password that serves as a temporary

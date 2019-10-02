@@ -15,6 +15,10 @@ import './Header.css';
 
 const MODULES = require('./../../data/modules.json');
 
+// Modules that do not require a call to check if the user
+// has authenticated.
+const NO_AUTHORIZE = ['/login', '/reset-password'];
+
 class Header extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +42,7 @@ class Header extends Component {
 
   checkAccess() {
     // Checks to make sure the role of the user
-    if(this.props.history.location.pathname!=='/login'){
+    if(!NO_AUTHORIZE.includes(this.props.history.location.pathname)){
       const url = '/service/user/authorize';
       axios.get(url)
         .then(res => {

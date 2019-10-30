@@ -100,6 +100,33 @@ class LittleGreenLight:
             response = self.get(endpoint, params, return_dict=True)
             return response['items']
 
+    def get_email_addresses(self, constituent_id, limit=25,
+                            offset=0, traverse=True):
+        """Pulls the address for a given constituent id
+
+        Params
+        ------
+        constituent_id : str
+            the id of the constituent whose address we want
+        limit : int
+            the number of addresses to return on each call
+        offset : int
+            the entry to start on
+        traverse : boolean
+            if True, traverses through the paginated results
+
+        Returns
+        -------
+        addresses : list
+        """
+        endpoint = 'constituents/{}/email_addresses'.format(constituent_id)
+        params = {'limit': limit, 'offset': offset}
+        if traverse:
+            return self._traverse_results(endpoint, params)
+        else:
+            response = self.get(endpoint, params, return_dict=True)
+            return response['items']
+
     def _traverse_results(self, endpoint, params=None):
         """Traverses paginated results and collects the items from
         each page into a single list."""

@@ -46,6 +46,20 @@ def test_get_lgl_addresses(monkeypatch):
     constituents = lgl.get_addresses(constituent_id=123, traverse=False)
     assert [x['postal_code'] for x in constituents] == ['60603']
 
+def test_get_lgl_email_addresses(monkeypatch):
+    monkeypatch.setattr('requests.get',
+                        lambda *args, **kwargs: lgl_request(*args, **kwargs))
+
+    lgl = LittleGreenLight()
+
+    constituents = lgl.get_email_addresses(constituent_id=123)
+    assert [x['address'] for x in constituents] == ['carl@camels.com',
+					            'jabber@parrots.com']
+
+    constituents = lgl.get_email_addresses(constituent_id=123, traverse=False)
+    assert [x['address'] for x in constituents] == ['carl@camels.com',
+					    	    'jabber@parrots.com']
+
 
 def lgl_request(url, headers=None):
     """Mocks reponses based on the documentation found at
@@ -73,6 +87,11 @@ def lgl_request(url, headers=None):
                             headers=headers)
     if '/street_addresses' in url:
         return fake_request(text=STREET_ADDRESSES,
+                            status_code=200,
+                            auth_method='header',
+                            headers=headers)
+    if '/email_addresses' in url:
+        return fake_request(text=EMAIL_ADDRESSES,
                             status_code=200,
                             auth_method='header',
                             headers=headers)
@@ -237,6 +256,45 @@ STREET_ADDRESSES = """
       "verified_on": null,
       "created_at": "2014-07-23T16:47:53Z",
       "updated_at": "2018-11-30T18:25:41Z"
+    }
+  ]
+}
+"""
+
+EMAIL_ADDRESSES = """
+{
+  "api_version": "1.0",
+  "items_count": 2,
+  "total_items": 2,
+  "limit": 25,
+  "offset": 0,
+  "item_type": "email_address",
+  "items": [
+    {
+      "id": 281309,
+      "item_id": 952156,
+      "item_type": "Constituent",
+      "address": "carl@camels.com",
+      "email_address_type_id": 1,
+      "email_type_name": "Home",
+      "is_preferred": true,
+      "not_current": false,
+      "parent_id": null,
+      "created_at": "2014-07-23T16:47:53Z",
+      "updated_at": "2017-10-05T21:28:38Z"
+    },
+    {
+      "id": 281533,
+      "item_id": 952156,
+      "item_type": "Constituent",
+      "address": "jabber@parrots.com",
+      "email_address_type_id": 2,
+      "email_type_name": "Work",
+      "is_preferred": false,
+      "not_current": false,
+      "parent_id": null,
+      "created_at": "2018-06-08T18:58:34Z",
+      "updated_at": "2018-06-08T18:58:35Z"
     }
   ]
 }

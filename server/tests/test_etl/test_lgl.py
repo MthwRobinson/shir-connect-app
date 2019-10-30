@@ -34,6 +34,18 @@ def test_get_lgl_constituents(monkeypatch):
     constituents = lgl.get_constituents(traverse=False)
     assert [x['id'] for x in constituents] == [100, 101]
 
+def test_get_lgl_addresses(monkeypatch):
+    monkeypatch.setattr('requests.get',
+                        lambda *args, **kwargs: lgl_request(*args, **kwargs))
+
+    lgl = LittleGreenLight()
+
+    constituents = lgl.get_addresses(constituent_id=123)
+    assert [x['postal_code'] for x in constituents] == ['60603']
+
+    constituents = lgl.get_addresses(constituent_id=123, traverse=False)
+    assert [x['postal_code'] for x in constituents] == ['60603']
+
 
 def lgl_request(url, headers=None):
     """Mocks reponses based on the documentation found at
@@ -56,6 +68,11 @@ def lgl_request(url, headers=None):
                             headers=headers)
     if url == base_url + '/traverse?offset=4':
         return fake_request(text=THIRD_TRAVERSE,
+                            status_code=200,
+                            auth_method='header',
+                            headers=headers)
+    if '/street_addresses' in url:
+        return fake_request(text=STREET_ADDRESSES,
                             status_code=200,
                             auth_method='header',
                             headers=headers)
@@ -181,6 +198,45 @@ CONSTITUENTS = """
       "is_anon": true,
       "created_at": "2014-07-23T16:47:52Z",
       "updated_at": "2019-08-14T18:30:13Z"
+    }
+  ]
+}
+"""
+
+STREET_ADDRESSES = """
+{
+  "api_version": "1.0",
+  "items_count": 1,
+  "total_items": 1,
+  "limit": 25,
+  "offset": 0,
+  "item_type": "street_address",
+  "items": [
+    {
+      "id": 3,
+      "item_id": 952156,
+      "item_type": "Constituent",
+      "street": "711 Calhoun Street",
+      "city": "Chicago",
+      "state": "IL",
+      "country": "US",
+      "postal_code": "60603",
+      "county": null,
+      "street_address_type_id": 1,
+      "street_type_name": "Home",
+      "is_preferred": true,
+      "not_current": false,
+      "parent_id": null,
+      "seasonal_from": "01-01",
+      "seasonal_to": "12-31",
+      "seasonal": null,
+      "lat": null,
+      "lng": null,
+      "zip5": "60603",
+      "verified": false,
+      "verified_on": null,
+      "created_at": "2014-07-23T16:47:53Z",
+      "updated_at": "2018-11-30T18:25:41Z"
     }
   ]
 }

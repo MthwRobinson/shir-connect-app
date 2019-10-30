@@ -22,6 +22,18 @@ def test_lgl_traverse_results(monkeypatch):
     items = lgl._traverse_results('/traverse?offset=0')
     assert items == ['carl', 'carla', 'sheep', 'sleepy_sheep']
 
+def test_get_lgl_constituents(monkeypatch):
+    monkeypatch.setattr('requests.get',
+                        lambda *args, **kwargs: lgl_request(*args, **kwargs))
+
+    lgl = LittleGreenLight()
+
+    constituents = lgl.get_constituents(traverse=True)
+    assert [x['id'] for x in constituents] == [100, 101]
+
+    constituents = lgl.get_constituents(traverse=False)
+    assert [x['id'] for x in constituents] == [100, 101]
+
 
 def lgl_request(url, headers=None):
     """Mocks reponses based on the documentation found at
@@ -32,18 +44,23 @@ def lgl_request(url, headers=None):
                             status_code=200,
                             auth_method='header',
                             headers=headers)
-    if url.startswith(base_url + '/traverse?offset=0'):
+    if url == base_url + '/traverse?offset=0':
         return fake_request(text=FIRST_TRAVERSE,
                             status_code=200,
                             auth_method='header',
                             headers=headers)
-    if url.startswith(base_url + '/traverse?offset=2'):
+    if url == base_url + '/traverse?offset=2':
         return fake_request(text=SECOND_TRAVERSE,
                             status_code=200,
                             auth_method='header',
                             headers=headers)
-    if url.startswith(base_url + '/traverse?offset=4'):
+    if url == base_url + '/traverse?offset=4':
         return fake_request(text=THIRD_TRAVERSE,
+                            status_code=200,
+                            auth_method='header',
+                            headers=headers)
+    if url.startswith(base_url + '/constituents'):
+        return fake_request(text=CONSTITUENTS,
                             status_code=200,
                             auth_method='header',
                             headers=headers)
@@ -82,11 +99,11 @@ CONSTITUENTS = """
   "limit": 2,
   "offset": 0,
   "next_item": 0,
-  "next_link": "http://api.littlegreenlight.net/api/v1/constituents?limit=2&offset=2",
+  "next_link": "",
   "item_type": "constituent",
   "items": [
     {
-      "id": 952262,
+      "id": 100,
       "external_constituent_id": "",
       "is_org": false,
       "constituent_contact_type_id": 1177,
@@ -126,7 +143,7 @@ CONSTITUENTS = """
       "updated_at": "2018-12-18T20:05:25Z"
     },
     {
-      "id": 952155,
+      "id": 101,
       "external_constituent_id": "t00012",
       "is_org": false,
       "constituent_contact_type_id": 1180,

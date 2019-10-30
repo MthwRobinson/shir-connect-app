@@ -45,10 +45,34 @@ class LittleGreenLight:
         if params:
             url += '?' + urllib.parse.urlencode(params)
         response = requests.get(url, headers=headers)
+
         if return_dict:
             return json.loads(response.text)
         else:
             return response
+
+    def get_constituents(self, limit=25, offset=0, traverse=True):
+        """Pulls a list of constituents from the LGL API
+
+        Params
+        ------
+        limit : int
+            the number of constituents to return on each call
+        offset : int
+            the entry to start on
+        traverse : boolean
+            if True, traverses through the paginated results
+
+        Returns
+        -------
+        constituents : list
+        """
+        params = {'limit': limit, 'offset': offset}
+        if traverse:
+            return self._traverse_results('/constituents', params)
+        else:
+            response = self.get('/constituents', params, return_dict=True)
+            return response['items']
 
     def _traverse_results(self, endpoint, params=None):
         """Traverses paginated results and collects the items from

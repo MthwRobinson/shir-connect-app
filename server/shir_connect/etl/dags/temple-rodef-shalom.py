@@ -13,6 +13,7 @@ import daiquiri
 
 from shir_connect.etl.sources.eventbrite import EventbriteLoader
 from shir_connect.database.database import Database
+from shir_connect.database.fake_news import FakeNews
 from shir_connect.etl.participant_matcher import ParticipantMatcher
 
 ####################################################################
@@ -44,6 +45,12 @@ def match_participants():
     participant_matcher = ParticipantMatcher(database=database)
     participant_matcher.run()
     participant_matcher.estimate_unknown_ages()
+
+def add_fake_names():
+    """Adds fake names that can be used in demo mode."""
+    database = Database(database='trs')
+    fake_news = FakeNews(database=database)
+    fake_news.build_fake_data()
 
 ##########################################################################
 # Airflow code to define the DAG for Temple Rodef Shalom's ETL processes

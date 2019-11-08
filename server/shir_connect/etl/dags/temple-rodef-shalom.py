@@ -86,7 +86,7 @@ trs_fuzzy_match = PythonOperator(task_id='trs-fuzzy-match',
 
 trs_add_fake_names = PythonOperator(task_id='trs-add-fake-names',
                                     python_callable=add_fake_names,
-                                    dag=dag=)
+                                    dag=dag)
 
 # Sets the order of operations for the DAG
 trs_eventbrite_load >> trs_refresh_views >> trs_fuzzy_match >> trs_add_fake_names

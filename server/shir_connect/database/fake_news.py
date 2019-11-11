@@ -132,7 +132,7 @@ class FakeNews:
         birthday = self.faker.date_between(start_date=start_date, end_date=end_date)
         return birthday
 
-    def fake_membership_date(self, max_age=15):
+    def fake_membership_date(self, max_age=30):
         """Generates a fake membership date for the database
 
         Parameters
@@ -248,6 +248,8 @@ class FakeNews:
             postal_codes.sort_values('weights', ascending=True, inplace=True)
             postal_codes.reset_index(drop=True, inplace=True)
             postal_codes = postal_codes[:100]
+            postal_codes['weights'] = (postal_codes['weights'].max() -
+                                       postal_codes['weights'])
             postal_codes['weights'] = (postal_codes['weights'] /
                                        postal_codes['weights'].sum())
             self.postal_codes = postal_codes

@@ -10,6 +10,7 @@ from gunicorn.app.wsgiapp import WSGIApplication
 
 from shir_connect.analytics.entity_resolution import NameResolver
 from shir_connect.database.database import Database
+from shir_connect.database.fake_news import FakeNews
 from shir_connect.etl.geometries import Geometries
 from shir_connect.etl.participant_matcher import ParticipantMatcher
 from shir_connect.services.app import app
@@ -121,7 +122,22 @@ def launch_api(prod, debug):
         os.system('sh %s'%(filename))
     else:
         app.run(debug=debug)
-
 main.add_command(launch_api)
+
+@click.command('generate-fake-data')
+@click.option('--sub-domain')
+@click.option('--num-members')
+def generate_fake_data(sub_domain, num_members):
+    """Generates fake data that can be used for demos and testing
+
+    Parameters
+    ----------
+    sub_domain : str
+        the subdomain to generate the fake data for
+    num_members : int
+        the number of members to generate for the database
+    """
+    pass
+main.add_command(generate_fake_data)
 
 main()

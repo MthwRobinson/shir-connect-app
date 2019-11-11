@@ -1,4 +1,4 @@
-name: Temple Rodef Shalom
+name: Fairfax County JCC
 
 subdomain: demo
 
@@ -10,14 +10,14 @@ modules:
   - report
 
 location:
-  name: Temple Rodef Shalom
-  address_1: "2100 Westmoreland Street"
+  name: Fairfax County JCC
+  address_1: "377 Data Analytics Lane"
   address_2: null
   city: Falls Church
   region: VA
   country: US
-  latitude: 38.906111
-  longitude: -77.173588
+  latitude: 38.903586
+  longitude: -77.203564
   postal_code: 22043
 
 event_groups:

@@ -3,14 +3,9 @@ import os
 
 from shir_connect.utils import get_config
 
-
 # Application paths
 PATH = os.path.dirname(os.path.realpath(__file__))
-HOMEPATH = os.path.expanduser('~')
 PROJPATH = os.path.join(PATH, '..', '..')
-# The subdomain is pulled from the path because on the production
-# server, each instance has its own namespace
-SUBDOMAIN = PATH.split('/')[-4]
 
 # Application environmental variables
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
@@ -32,18 +27,6 @@ JWT_TOKEN_LOCATION = ['cookies']
 JWT_COOKIE_SECURE = SHIR_CONNECT_ENV != 'DEV'
 JWT_COOKIE_CSRF_PROTECT = True
 
-# Database configurations and secrets
-FIDDLER_RDS = os.getenv('FIDDLER_RDS')
-PG_USER = 'master'
-PG_HOST = FIDDLER_RDS
-PG_DATABASE = 'dev' if SHIR_CONNECT_ENV in ['TEST', 'DEV'] else SUBDOMAIN
-PG_SCHEMA = 'shir_connect'
-MATERIALIZED_VIEWS = [
-    'event_aggregates.sql',
-    'members_view.sql',
-    'participants.sql'
-]
-
 # Test configs
 TEST_USER = 'unittestuser'
 TEST_PASSWORD = os.getenv('UNIT_TEST_PW')
@@ -57,8 +40,7 @@ ADMIN_ROLE = 'admin'
 STANDARD_ROLE = 'standard'
 USER_ROLES = [ADMIN_ROLE, STANDARD_ROLE]
 
-# Groups for access control
-# Each module has a group
+# Access control groups
 EVENT_GROUP = 'events'
 MEMBER_GROUP = 'members'
 TRENDS_GROUP = 'trends'
@@ -67,11 +49,32 @@ REPORT_GROUP = 'report'
 ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP,
                  MAP_GROUP, REPORT_GROUP]
 
-# Custom Configurations
-config = get_config(PROJPATH, HOMEPATH)
-EVENT_GROUPS = config['event_groups']
-MAP_EVENT_OPTIONS = config['map_event_options']
-AGE_GROUPS = config['age_groups']
+# Read in the appropriate configuration file
+config_file = os.getenv('REACT_APP_SHIR_CONNECT_CONFIG')
+config = get_config(PROJPATH, config_file)
+
+# Front-end configurations
+SUBDOMAIN = config['subdomain'][SHIR_CONNECT_ENV.lower()]
+# Determines the default location that appears on the member
 DEFAULT_LOCATION = config['location']
+# Determines which moduels are available to the client
 AVAILABLE_MODULES = config['modules']
-MEMBER_TYPES = config['member_types']
+# Options that determine the options that appear in the drop downs in the UI
+MEMBER_TYPES = config['member_types'] if 'member_types' in config else []
+EVENT_GROUPS = config['event_groups'] if 'event_groups' in config else []
+MAP_EVENT_OPTIONS = config['map_event_options'] if 'map_event_options' in config else []
+AGE_GROUPS = config['age_groups'] if 'age_groups' in config else []
+
+
+# Database configurations and secrets
+FIDDLER_RDS = os.getenv('FIDDLER_RDS')
+PG_USER = 'master'
+PG_HOST = FIDDLER_RDS
+PG_DATABASE = config['db'][SHIR_CONNECT_ENV.lower()]
+PG_SCHEMA = 'shir_connect'
+MATERIALIZED_VIEWS = [
+    'event_aggregates.sql',
+    'members_view.sql',
+    'participants.sql'
+]
+

@@ -1,6 +1,14 @@
 name: Temple Rodef Shalom
 
-subdomain: trs
+subdomain:
+  dev: dev
+  test: test
+  prod: trs
+
+db:
+  dev: dev
+  test: test
+  prod: trs
 
 modules:
   - events

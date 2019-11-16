@@ -14,7 +14,7 @@ test:
     - python3 -m venv test_environment
     - . test_environment/bin/activate
     - export SHIR_CONNECT_ENV=TEST
-    - export SHIR_CONNECT_CONFIG=demo
+    - export SHIR_CONNECT_CONFIG=trs
   script:
     - echo $SHIR_CONNECT_ENV
     - echo "${POSTGRES_HOST}:5432:*:master:${POSTGRES_PASSWORD}" >> ~/.pgpass

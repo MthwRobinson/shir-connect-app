@@ -50,7 +50,7 @@ ACCESS_GROUPS = [EVENT_GROUP, MEMBER_GROUP, TRENDS_GROUP,
                  MAP_GROUP, REPORT_GROUP]
 
 # Read in the appropriate configuration file
-config_file = os.getenv('SHIR_CONNECT_CONFIG')
+config_file = os.getenv('REACT_APP_SHIR_CONNECT_CONFIG')
 config = get_config(PROJPATH, config_file)
 
 # Front-end configurations

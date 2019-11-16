@@ -1,9 +1,9 @@
 // Utility functions that are used across components
 
 function getConfig() {
-  // Reads in the configuration file name from the SHIR_CONNECT_CONFIG
+  // Reads in the configuration file name from the REACT_APP_SHIR_CONNECT_CONFIG
   // environmental variable
-  return process.env.SHIR_CONNECT_CONFIG
+  return process.env.REACT_APP_SHIR_CONNECT_CONFIG
 }
 export { getConfig }
 

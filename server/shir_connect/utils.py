@@ -9,10 +9,7 @@ def get_config(project_path, config_file):
     name spaces are set up on the prod server). If there is no match,
     the default configuration is used."""
     config_path = os.path.join(project_path, 'configs')
-    config_files = os.listdir(config_path)
     config_file = '{}.yml'.format(config_file)
-    if config_file not in config_files:
-        config_file = 'default.yml'
 
     filename = os.path.join(config_path, config_file)
     with open(filename, 'r') as f:

@@ -1,5 +1,12 @@
 // Utility functions that are used across components
 
+function getConfig() {
+  // Reads in the configuration file name from the SHIR_CONNECT_CONFIG
+  // environmental variable
+  return process.env.SHIR_CONNECT_CONFIG
+}
+export { getConfig }
+
 function sortByKey(arr, key, ascending=true) {
   // Sorts and array of objects by the specified key
   //
@@ -40,11 +47,10 @@ function sortByKey(arr, key, ascending=true) {
       return a < b ? -1 : 1;
     }
     // if descending, highest sorts first
-    else { 
+    else {
       return a < b ? 1 : -1;
     }
   }
   return arr.sort(keySorter);
 }
-
 export { sortByKey };

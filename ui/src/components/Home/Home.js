@@ -11,7 +11,7 @@ import Loading from './../Loading/Loading';
 
 import './Home.css';
 
-const MODULES = require('./../../data/modules.json');
+const MODULES = require('./../../configs/modules.json');
 
 class Home extends Component {
     state = {

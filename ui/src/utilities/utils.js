@@ -1,11 +1,21 @@
 // Utility functions that are used across components
 
-function getConfig() {
+function getConfigName() {
   // Reads in the configuration file name from the REACT_APP_SHIR_CONNECT_CONFIG
   // environmental variable
   return process.env.REACT_APP_SHIR_CONNECT_CONFIG
 }
-export { getConfig }
+export { getConfigName }
+
+function getModules() {
+  // Generates which modules are displayed on the home screen.
+  // All clients see the core modules. Add-ons and client-specific modules must
+  // be specifically added for a client to see them.
+  const configName = getConfigName() ;
+  const modules = require('./../configs/modules.json');
+  return modules
+}
+export { getModules }
 
 function sortByKey(arr, key, ascending=true) {
   // Sorts and array of objects by the specified key

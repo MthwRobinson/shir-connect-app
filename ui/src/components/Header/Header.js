@@ -10,13 +10,13 @@ import Modal from 'react-modal';
 import axios from 'axios';
 
 import { logout } from './../../utilities/authentication';
+import { getModules } from './../../utilities/utils';
 
 import './Header.css';
 
-const MODULES = require('./../../data/modules.json');
+const MODULES = getModules();
 
-// Modules that do not require a call to check if the user
-// has authenticated.
+// Modules that do not require a call to check if the user has authenticated.
 const NO_AUTHORIZE = ['/login', '/reset-password'];
 
 class Header extends Component {

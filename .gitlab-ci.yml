@@ -62,10 +62,30 @@ deploy_test:
     - cd ../deployment
     - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test
 
+deploy_demo:
+  stage: deploy_demo
+  image: ubuntu:latest
+  when: manual
+  only:
+    - master
+  before_script:
+    - sh scripts/ci_deploy_setup.sh
+    - export NVM_DIR="/root/.nvm"
+    - source $HOME/.nvm/nvm.sh
+    - nvm install node
+    - nvm install 11.0.0
+    - nvm use 11.0.0
+  script:
+    - cd ui
+    - npm install
+    - npm run build
+    - cd ../deployment
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=demo
+
 deploy_trs:
   stage: deploy_trs
   image: ubuntu:latest
-  only: 
+  only:
     - tags
   when: manual
   before_script:

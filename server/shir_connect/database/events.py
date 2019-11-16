@@ -43,8 +43,6 @@ class Events:
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
-    @demo_mode(['address_1', 'address_2', 'city',
-                'country', 'region', 'postal_code'])
     def get_event(self, event_id, fake=False):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)

@@ -13,8 +13,6 @@ PROJPATH = os.path.join(PATH, '..', '..')
 SUBDOMAIN = PATH.split('/')[-4]
 
 # Application environmental variables
-mode = os.getenv('SHIR_CONNECT_MODE')
-DEMO_MODE = mode == 'DEMO' or False
 EVENTBRITE_OAUTH = os.getenv('EVENTBRITE_OAUTH')
 LGL_TOKEN = os.getenv('LGL_TOKEN')
 SHIR_CONNECT_ENV = os.getenv('SHIR_CONNECT_ENV')

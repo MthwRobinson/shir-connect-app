@@ -13,7 +13,22 @@ function getModules() {
   // be specifically added for a client to see them.
   const configName = getConfigName() ;
   const modules = require('./../configs/modules.json');
-  return modules
+  let activeModules = {};
+
+  // Every configuration has access to the core modules
+  for(let key in modules["core"]){
+    activeModules[key] = modules["core"][key];
+  }
+
+  // Only add add on modules if the client is in the active
+  // list for that module
+  for(let key in modules["addOns"]){
+    const module = modules["addOns"][key] ;
+    if(module["active"].indexOf(configName) >= 0){
+      activeModules[key] = module ;
+    }
+  }
+  return activeModules
 }
 export { getModules }
 

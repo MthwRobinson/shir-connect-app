@@ -21,12 +21,15 @@ import {
   getCSRFToken,
   refreshAccessToken
 } from './../../utilities/authentication';
+import { getConfigName } from './../../utilities/utils';
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
 import './Members.css';
 
-const LIMIT = 25
+const LIMIT = 25;
+const CONFIG_NAME = getConfigName();
+const COLUMNS = require('./config.json');
 
 class Members extends Component {
     constructor(props){
@@ -277,11 +280,57 @@ class Members extends Component {
       )
     }
 
-    renderTable = () => {
-      // Creates the table with member information
+    buildTableColumns = () => {
+      // Builds the list of columns that are available for the client
       let sortArrow = this.state.sortOrder === 'desc' ? 'down' : 'up';
       const arrowClass = 'fa fa-caret-'+ sortArrow + ' paging-arrows';
+      let columns = [];
+      if(CONFIG_NAME in COLUMNS){
+        columns = COLUMNS[CONFIG_NAME] ;
+      } else {
+        columns = COLUMNS["default"] ;
+      }
 
+      let tableColumns = [];
+      for(let column of columns){
+        tableColumns.push(
+          <th className='table-heading'
+              onClick={()=>this.handleSort(column.column)}>
+            {column.text}
+            {this.state.sortColumn === column.column
+            ? <i className={arrowClass}></i>
+            : null}
+          </th>
+        )
+      }
+      return tableColumns ;
+    }
+
+    buildMemberRow = (member) => {
+      // Construct the appropriate table row entry for the member
+      let columns = [];
+      if(CONFIG_NAME in COLUMNS){
+        columns = COLUMNS[CONFIG_NAME] ;
+      } else {
+        columns = COLUMNS["default"] ;
+      }
+
+      const memberRow = [];
+      for(let column of columns){
+        let row = null;
+        if(column.column === "is_member"){
+          row = <th>{member.is_member === true? 'Y' : 'N'}</th>
+        } else {
+          row = <th>{member[column.column] != null ? member[column.column] : '--'}</th>
+        }
+        memberRow.push(row);
+      }
+      return memberRow ;
+    }
+
+    renderTable = () => {
+      // Creates the table with member information
+      const tableColumns = this.buildTableColumns();
       return(
         <div>
           <Row className='table-responsive event-table'>
@@ -292,55 +341,7 @@ class Members extends Component {
               <Table responsive header hover>
                 <thead>
                   <tr>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('first_name')}>
-                      First Name
-                      {this.state.sortColumn === 'first_name'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('last_name')}>
-                      Last Name
-                      {this.state.sortColumn === 'last_name'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('is_member')}>
-                      Member
-                      {this.state.sortColumn === 'is_member'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('age')}>
-                      Age
-                      {this.state.sortColumn === 'age'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('events_attended')}>
-                      Events
-                      {this.state.sortColumn === 'events_attended'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('last_event_date')}>
-                      Most Recent
-                      {this.state.sortColumn === 'last_event_date'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
-                    <th className='table-heading'
-                        onClick={()=>this.handleSort('event_name')}>
-                      Event Name
-                      {this.state.sortColumn === 'event_name'
-                      ? <i className={arrowClass}></i>
-                      : null}
-                    </th>
+                    {tableColumns}
                   </tr>
                 </thead>
                 <tbody>
@@ -351,20 +352,7 @@ class Members extends Component {
                         key={index}
                         onClick={()=>this.selectParticipant(member.participant_id)}
                       >
-                        <th>{member.first_name != null
-                            ? member.first_name : '--'}</th>
-                        <th>{member.last_name != null
-                            ? member.last_name : '--'}</th>
-                        <th>{member.is_member === true
-                            ? 'Y' : 'N'}</th>
-                        <th>{member.age != null
-                            ? member.age : null}</th>
-                        <th>{member.events_attended != null
-                            ? member.events_attended : 0}</th>
-                        <th>{member.last_event_date != null
-                            ? member.last_event_date : 'None'}</th>
-                        <th>{member.event_name != null
-                            ? member.event_name : 'None'}</th>
+                        {this.buildMemberRow(member)}
                       </tr>
                     )
                   })}

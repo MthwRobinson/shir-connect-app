@@ -9,10 +9,10 @@
   tasks:
     - name: Stopping all running PM2 backend processes
       shell: 'bash -ic "pm2 stop {{ subdomain }}_rest"'
-    
+
     - name: Stopping all running PM2 frontend processes
       shell: 'bash -ic "pm2 stop {{ subdomain }}_ui"'
-    
+
     - name: Remove current UI build
       file:
         path: "{{ shir_connect }}/ui/build"
@@ -29,22 +29,22 @@
         version: "{{ branch }}"
         dest: "{{ shir_connect }}"
         update: yes
-    
+
     - name: Install new Python dependencies
       shell: "{{ venv }}/pip install -e ."
       args:
         chdir: "{{ shir_connect }}/server"
 
-    - name: Run database mirgrations
+    - name: Run database migrations
       shell: "shmig -t postgresql -d {{ subdomain }} up"
       args:
         chdir: "{{ shir_connect }}/database"
 
-    - name: Update materialized views
-      shell: "{{ venv }}/shir_connect initialize --drop_views"
+    # - name: Update materialized views
+    #   shell: "{{ venv }}/shir_connect initialize --drop_views"
 
     - name: Starting PM2 backend processes
       shell: 'bash -ic "pm2 start {{ subdomain }}_rest"'
-    
+
     - name: Starting PM2 frontend processes
       shell: 'bash -ic "pm2 start {{ subdomain }}_ui"'

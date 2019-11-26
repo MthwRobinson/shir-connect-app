@@ -1,13 +1,20 @@
 name: Fairfax County JCC
 
-subdomain: demo
+subdomain:
+  dev: demo
+  test: demo
+  prod: demo
+
+db:
+  dev: demo
+  test: demo
+  prod: demo
 
 modules:
   - events
   - members
   - trends
   - map
-  - report
 
 location:
   name: Fairfax County JCC
@@ -19,32 +26,6 @@ location:
   latitude: 38.903586
   longitude: -77.203564
   postal_code: 22043
-
-event_groups:
-  - Food 4 Thought
-  - TRSNS
-  - Rodef 2100
-  - WoTRS
-  - Parent Workshop
-  - Renaissance
-  - Feed Em Friday
-  - Lox and Lecture
-  - Tot Shabbat
-  - TRS Tents
-
-map_event_options:
-  - Renaissance
-  - Rodef 2100
-  - TRS Tents
-  - TRSTY
-  - WoTRS
-
-member_types:
-  MEMFAM: Family
-  MEMIND: Individual
-  STAFF: Staff
-  MEMYNG: Young Prof.
-  JCCMEM: JCC
 
 age_groups:
   18-22:

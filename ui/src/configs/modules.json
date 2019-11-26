@@ -1,0 +1,57 @@
+{
+  "core": {
+    "events": {
+      "title": "Events",
+      "icon" : "fa fa-calendar",
+      "bullets": [
+        "View upcoming events from Eventbrite.",
+        "Export event information as a .csv file."
+      ],
+      "link": "/events"
+    },
+    "members": {
+      "title": "Participants",
+      "icon" : "fa fa-user",
+      "bullets": [
+        "View and sort participants.",
+        "Upload an Excel file with membership data into the database."
+      ],
+      "link": "/participants",
+      "accessGroup": "members"
+    }
+  },
+  "addOns": {
+    "trends": {
+      "title": "Age Group Trends",
+      "icon" : "fa fa-line-chart",
+      "bullets": [
+        "Evaluate engagement trends over time.",
+        "Export plots to include in presentations."
+      ],
+      "link": "/trends",
+      "active": ["trs"]
+    },
+    "map": {
+      "title": "Event Map",
+      "icon" : "fa fa-globe",
+      "bullets": [
+        "See where your events take place on a heat map.",
+        "Export maps to include in presentations."
+      ],
+      "link": "/map",
+      "accessGroup": "map",
+      "active": ["trs", "demo"]
+    },
+    "report": {
+      "title": "Report",
+      "icon" : "fa fa-book",
+      "bullets": [
+        "Evaluate engagement performance.",
+        "See who's new across different age groups."
+      ],
+      "link": "/report",
+      "accessGroup": "report",
+      "active": ["trs"]
+    }
+  }
+}

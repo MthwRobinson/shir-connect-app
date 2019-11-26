@@ -5,13 +5,14 @@ import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
 import { refreshAccessToken } from './../../utilities/authentication';
+import { getModules } from './../../utilities/utils';
 import Header from './../Header/Header';
 import ModuleCard from './../ModuleCard/ModuleCard';
 import Loading from './../Loading/Loading';
 
 import './Home.css';
 
-const MODULES = require('./../../data/modules.json');
+const MODULES = getModules();
 
 class Home extends Component {
     state = {

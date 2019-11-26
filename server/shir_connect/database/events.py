@@ -8,7 +8,6 @@ import numpy as np
 
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
-from shir_connect.services.utils import demo_mode
 
 class Events:
     """ Class that handles event database calls """
@@ -43,8 +42,6 @@ class Events:
         response = {'results': events, 'count': str(count), 'pages': pages}
         return response
 
-    @demo_mode(['address_1', 'address_2', 'city',
-                'country', 'region', 'postal_code'])
     def get_event(self, event_id, fake=False):
         """ Returns an event from the database """
         event = self.database.get_item('event_aggregates', event_id)
@@ -336,11 +333,6 @@ class Events:
 
 def build_feature(row):
     """ Converts a dataframe row into a geojson feature """
-    # Mask the event name and address if the app is in dev mode
-    if conf.DEMO_MODE:
-        row['address_1'] = 'ADDRESS'
-        row['city'] = 'CITY'
-
     coordinates = [row['longitude'], row['latitude']]
     day = str(row['start_datetime'])[:10]
     address = ''

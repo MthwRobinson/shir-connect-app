@@ -31,6 +31,7 @@ def member_authorize():
         return jsonify(response), 403
     else:
         del user['password']
+        del user['temporary_password']
         return jsonify(user), 200
 
 @trends.route('/service/trends/monthly-revenue', methods=['GET'])

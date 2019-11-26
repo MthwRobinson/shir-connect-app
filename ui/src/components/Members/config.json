@@ -1,0 +1,19 @@
+{
+  "default" : [
+    {"column": "first_name", "text": "First Name"},
+    {"column": "last_name", "text": "Last Name"},
+    {"column": "is_member", "text": "Member"},
+    {"column": "age", "text": "Age"},
+    {"column": "events_attended", "text": "Events"},
+    {"column": "last_event_date", "text": "Most Recent"},
+    {"column": "event_name", "text": "Event Name"}
+  ],
+  "trs" : [
+    {"column": "first_name", "text": "First Name"},
+    {"column": "last_name", "text": "Last Name"},
+    {"column": "is_member", "text": "Member"},
+    {"column": "events_attended", "text": "Events"},
+    {"column": "last_event_date", "text": "Most Recent"},
+    {"column": "event_name", "text": "Event Name"}
+  ]
+}

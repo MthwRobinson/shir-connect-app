@@ -11,33 +11,6 @@ import uuid
 import shir_connect.configuration as conf
 from shir_connect.database.database import Database
 
-def demo_mode(fields, demo=False):
-    """ If the SHIR_CONNECT_MODE environmental variable is set
-    to DEMO, the decorator scrambles the output of a service
-    to avoid exposing sensistive information. """
-    def _scrambler(function):
-        def _service(*args, **kwargs):
-            response = function(*args, **kwargs)
-            if conf.DEMO_MODE or demo:
-                for field in fields:
-                    # Fields that are passed as a string are assumed
-                    # to be a string in the dictionary
-                    if isinstance(field, str):
-                        response[field] = field.upper()
-                    # Fields that are passed as a dictionary are
-                    # assumed to be lists
-                    elif isinstance(field, dict):
-                        name = list(field.keys())[0]
-                        keys = field[name]
-                        for i, item in enumerate(response[name]):
-                            for key in keys:
-                                prefix = name.upper()
-                                postfix = key.upper()
-                                item[key] = '_'.join([prefix, postfix, str(i)])
-            return response
-        return _service
-    return _scrambler
-
 def validate_inputs(fields={}):
     """ Validates the arguments and query parameters for the REST
     service calls to protect against SQL injection attacks.

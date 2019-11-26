@@ -14,6 +14,7 @@ test:
     - python3 -m venv test_environment
     - . test_environment/bin/activate
     - export SHIR_CONNECT_ENV=TEST
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
   script:
     - echo $SHIR_CONNECT_ENV
     - echo "${POSTGRES_HOST}:5432:*:master:${POSTGRES_PASSWORD}" >> ~/.pgpass
@@ -35,12 +36,14 @@ deploy_dev:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=DEV
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev -e config_name=trs
 
 deploy_test:
   stage: deploy_test
@@ -55,17 +58,41 @@ deploy_test:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=TEST
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test -e config_name=trs
+
+deploy_demo:
+  stage: deploy_test
+  image: ubuntu:latest
+  when: manual
+  only:
+    - master
+  before_script:
+    - sh scripts/ci_deploy_setup.sh
+    - export NVM_DIR="/root/.nvm"
+    - source $HOME/.nvm/nvm.sh
+    - nvm install node
+    - nvm install 11.0.0
+    - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=demo
+    - export SHIR_CONNECT_ENV=PROD
+  script:
+    - cd ui
+    - npm install
+    - npm run build
+    - cd ../deployment
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=demo -e config_name=demo
 
 deploy_trs:
   stage: deploy_trs
   image: ubuntu:latest
-  only: 
+  only:
     - tags
   when: manual
   before_script:
@@ -75,9 +102,11 @@ deploy_trs:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=PROD
   script:
     - cd ui
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR -e subdomain=trs
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR -e subdomain=trs -e config_name=trs

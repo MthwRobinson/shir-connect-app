@@ -19,6 +19,7 @@ import {
   getCSRFToken,
   refreshAccessToken
 } from './../../utilities/authentication';
+import { getModules } from './../../utilities/utils' ;
 import Header from './../Header/Header';
 import Loading from './../Loading/Loading';
 
@@ -100,10 +101,18 @@ class ManageUsers extends Component {
     //-------------------
 
     getAvailableModules = () => {
-      // Pulls a list of modules that are available
+      // This is the list of modules that are available in the front end config
+      const availableModules = getModules();
+      const frontendModules = new Set(Object.keys(availableModules)) ;
+
+      // To display the module, it also needs to available in the back end config
       axios.get('/service/user/authorize')
         .then(res => {
-        this.setState({availableModules: res.data.available_modules});
+          const backendModules = new Set(res.data.available_modules) ;
+          // Finds the modules that are in both the front end and the back end configs
+          let intersect = new Set([...frontendModules]
+                                  .filter(i => backendModules.has(i)));
+          this.setState({availableModules: Array.from(intersect)});
       })
     }
 
@@ -735,7 +744,9 @@ class ManageUsers extends Component {
       // Renders the table of current users
       let users = [];
       for(const user of this.state.users){
-        const modules = user.modules.join(', ');
+        let intersect = new Set([...new Set(this.state.availableModules)]
+                                .filter(i => new Set(user.modules).has(i)));
+        const userModules = Array.from(intersect).join(', ');
         const userRow = (
           <tr className='table-rows'>
             <th
@@ -748,7 +759,7 @@ class ManageUsers extends Component {
             <th
               className='user-management-rows'
               onClick={()=>this.openModWindow(user.id, user.email, user.role, user.modules)}
-            >{modules}</th>
+            >{userModules}</th>
             <th>
               <i
                 className='fa fa-times pull-right event-icons delete-user-icon'

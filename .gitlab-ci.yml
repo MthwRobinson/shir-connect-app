@@ -43,7 +43,7 @@ deploy_dev:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=dev -e config_name=trs
 
 deploy_test:
   stage: deploy_test
@@ -65,7 +65,7 @@ deploy_test:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=test -e config_name=trs
 
 deploy_demo:
   stage: deploy_test
@@ -87,7 +87,7 @@ deploy_demo:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=demo
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_SHA -e project_dir=$CI_PROJECT_DIR -e subdomain=demo -e config_name=demo
 
 deploy_trs:
   stage: deploy_trs
@@ -109,4 +109,4 @@ deploy_trs:
     - npm install
     - npm run build
     - cd ../deployment
-    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR -e subdomain=trs
+    - ansible-playbook -i $HOME/hosts deploy.yml -e host=shir_connect -e user=ubuntu -e branch=$CI_COMMIT_TAG -e project_dir=$CI_PROJECT_DIR -e subdomain=trs -e config_name=trs

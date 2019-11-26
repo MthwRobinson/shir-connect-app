@@ -40,8 +40,10 @@
       args:
         chdir: "{{ shir_connect }}/database"
 
-    # - name: Update materialized views
-    #   shell: "{{ venv }}/shir_connect initialize --drop_views"
+    - name: Update materialized views
+      shell: "{{ venv }}/shir_connect initialize --drop_views"
+      environment:
+        REACT_APP_SHIR_CONNECT_CONFIG: "{{ config_name }}"
 
     - name: Starting PM2 backend processes
       shell: 'bash -ic "pm2 start {{ subdomain }}_rest"'

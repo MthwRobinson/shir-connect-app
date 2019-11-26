@@ -36,6 +36,8 @@ deploy_dev:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=DEV
   script:
     - cd ui
     - npm install
@@ -56,6 +58,8 @@ deploy_test:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=TEST
   script:
     - cd ui
     - npm install
@@ -76,6 +80,8 @@ deploy_demo:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=demo
+    - export SHIR_CONNECT_ENV=PROD
   script:
     - cd ui
     - npm install
@@ -96,6 +102,8 @@ deploy_trs:
     - nvm install node
     - nvm install 11.0.0
     - nvm use 11.0.0
+    - export REACT_APP_SHIR_CONNECT_CONFIG=trs
+    - export SHIR_CONNECT_ENV=PROD
   script:
     - cd ui
     - npm install

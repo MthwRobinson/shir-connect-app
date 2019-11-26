@@ -8,7 +8,7 @@
     {"column": "last_event_date", "text": "Most Recent"},
     {"column": "event_name", "text": "Event Name"}
   ],
-  "trs" : [
+  "demo" : [
     {"column": "first_name", "text": "First Name"},
     {"column": "last_name", "text": "Last Name"},
     {"column": "is_member", "text": "Member"},

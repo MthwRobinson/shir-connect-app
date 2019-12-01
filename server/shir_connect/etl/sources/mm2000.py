@@ -129,30 +129,30 @@ class MM2000:
         df = df.dropna(axis=0, how='any', subset=['resignation_date'])
         for i in df.index:
             member = dict(df.loc[i])
-
+            member = _parse_mm2000_date(member, 'resignation_date')
             resignation_date = str(member['resignation_date'])[:10]
-            resignation_date = "'{}'".format(resignation_date)
             # TODO: This logic is specific to TRS because that's how they
             # track people who rejoined the congregation. We may have to
             # update this if another client uses MM2000
             if 'Comment1' in member:
                 if 'rejoin' in str(member['Comment1']).lower():
-                    resignation_date = 'NULL'
+                    resignation_date = None
             if 'Comment2' in member:
                 if 'rejoin' in str(member['Comment2']).lower():
-                    resignation_date = 'NULL'
+                    resignation_date = None
 
-            sql = """
-                UPDATE {schema}.members
-                SET resignation_date = {resignation_date}
-                WHERE (household_id = '{member_id}'
-                       OR id = '{member_id}')
-            """.format(schema=self.database.schema,
-                       resignation_date=resignation_date,
-                       member_id=member['id'])
-            self.database.run_query(sql)
+            if resignation_date:
+                resignation_date = "'{}'".format(resignation_date)
+                sql = """
+                    UPDATE {schema}.members
+                    SET resignation_date = {resignation_date}
+                    WHERE (household_id = '{member_id}'
+                        OR id = '{member_id}')
+                """.format(schema=self.database.schema,
+                        resignation_date=resignation_date,
+                        member_id=member['id'])
+                self.database.run_query(sql)
 
-            if resignation_date != 'NULL':
                 reason = _find_resignation_reason(member['resignation_reason'])
                 sql = """
                     UPDATE {schema}.members
@@ -184,7 +184,8 @@ def _group_mm2000(df, column_map):
 def _parse_mm2000_date(item, column):
     """Removes invalid birthdays and membership dates."""
     if item[column]:
-        date = str(item[column])
+        date = pd.to_datetime(item[column], errors='coerce')
+        date = str(date)
         if date.startswith('0') or date == 'NaT':
             item[column] = None
     return item
